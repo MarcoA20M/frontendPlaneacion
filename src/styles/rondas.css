@@ -1,0 +1,188 @@
+/* ===== RONDAS VINÍLICA ===== */
+.rondas-panel {
+  margin-top: 40px;
+  width: 95%; /* un poco menos que 100% para mover a la izquierda */
+  margin-left: -8%; /* mueve todo a la izquierda */
+}
+
+.rondas-panel h2 {
+  margin-bottom: 15px;
+  font-size: 24px;
+  color: #00c0ff;
+  letter-spacing: 1px;
+}
+
+/* Tabla completa */
+.tabla-rondas {
+  width: 110%;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  
+}
+
+/* Filas */
+.fila-ronda {
+  display: grid;
+  grid-template-columns: 240px repeat(6, 1fr); /* etiqueta más ancha, celdas más grandes */
+  gap: 12px;
+  align-items: center;
+}
+
+/* Header */
+.fila-ronda.header {
+  font-weight: 700;
+  font-size: 16px;
+  color: #00ffcc;
+}
+
+.fila-ronda.header div {
+  text-align: center;
+}
+
+/* Etiqueta izquierda */
+.etiqueta-ronda {
+  font-weight: 700;
+  font-size: 16px;
+  color: #00ffcc;
+  text-align: right;
+  padding-right: 15px;
+}
+
+/* Celdas */
+.celda-ronda {
+  height: 155px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* AGREGAR ESTO: */
+  overflow: visible !important; /* Permite que el badge naranja sobresalga */
+  padding: 0; /* Quitamos padding para que la card maneje su espacio */
+  position: relative; 
+}
+.etiqueta-ronda {
+  display: flex;
+  flex-direction: column; /* Alineación vertical */
+  justify-content: center;
+  align-items: flex-end; /* Alineado a la derecha */
+  padding-right: 20px;
+  border-right: 2px solid rgba(0, 255, 204, 0.3); /* Guía visual */
+}
+
+/* Contenedor Principal de Especiales */
+.contenedor-especiales-premium {
+  margin-top: 190px;
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.1);
+  overflow: hidden;
+  
+}
+
+/* Header del panel */
+.header-especial {
+  padding: 12px 18px;
+  background: rgba(255, 152, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.titulo-especial {
+  display: flex;
+  align-items: center;
+  color: #ff9800;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.alarma-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff4400;
+  border-radius: 50%;
+  margin-right: 12px;
+  animation: pulse-orange 1.5s infinite;
+}
+
+@keyframes pulse-orange {
+  0% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 68, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0); }
+}
+
+.toggle-view-btn {
+  background: #ff9800;
+  color: #000;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle-view-btn:hover { background: #fff; }
+
+/* Grid de Tarjetas */
+.grid-especial-premium {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  background: #0a0a0a;
+}
+
+/* Tarjeta V2 */
+.card-especial-v2 {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px;
+  transition: transform 0.2s;
+}
+
+.card-especial-v2:hover {
+  border-color: #ff9800;
+  transform: translateY(-2px);
+}
+
+.card-header-ex {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.code-badge {
+  background: #ff9800;
+  color: #000;
+  padding: 2px 6px;
+  font-weight: 900;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+.litros-badge {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.card-body-ex {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

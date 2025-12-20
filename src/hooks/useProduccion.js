@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { buscarProducto } from "../services/productoService";
-import { exportarReporte, analizarExcel } from "../services/excelService";
+import { analizarExcel } from "../services/excelService";
 import { OPERARIOS, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../constants/config";
 
 export function useProduccion() {
@@ -13,7 +13,6 @@ export function useProduccion() {
   const [rondas, setRondas] = useState(Array.from({ length: 8 }, () => Array(6).fill(null)));
   const [cargando, setCargando] = useState(false);
 
-  // Auxiliar: Ordenamiento
   const ordenarCargas = (lista) => [...lista].sort((a, b) => {
     const cubA = a.nivelCubriente || 0;
     const cubB = b.nivelCubriente || 0;
@@ -30,7 +29,9 @@ export function useProduccion() {
     try {
       const res = await buscarProducto(codigo.trim());
       if (!res) return alert("Producto no encontrado");
-      if (tipoPintura === "Vinílica" && res.tipoPinturaId !== 2) return alert("No es Vinílica");
+      if (tipoPintura === "Vinílica" && res.tipoPinturaId !== 2) return alert("Este producto no pertenece a Vinílicas");
+      if (tipoPintura === "Esmalte" && res.tipoPinturaId === 2) return alert("Este producto no pertenece a Esmaltes");
+      
       setProducto({ ...res, envasados: res.envasados || [] });
       setCantidades({});
     } catch (e) { alert("Error de red"); }
@@ -50,7 +51,7 @@ export function useProduccion() {
       codigoProducto: producto.codigo,
       descripcion: producto.descripcion,
       litros: totalLitrosActuales,
-      tipoPintura,
+      tipo: tipoPintura,
       nivelCubriente: producto.poderCubriente,
       detallesEnvasado: resumenEnvasados,
       operario: ""
@@ -62,7 +63,6 @@ export function useProduccion() {
       setColaCargas(ordenarCargas([...colaCargas, nuevaCarga]));
     }
     setCantidades({});
-    alert("Carga agregada.");
   };
 
   const handleImportExcel = async (e) => {
@@ -76,13 +76,16 @@ export function useProduccion() {
 
       for (const item of dataRaw) {
         const res = await buscarProducto(item.articulo.trim());
-        if (res && (tipoPintura !== "Vinílica" || res.tipoPinturaId === 2)) {
+        const esVinilicaValida = tipoPintura === "Vinílica" && res?.tipoPinturaId === 2;
+        const esEsmalteValido = tipoPintura === "Esmalte" && res?.tipoPinturaId !== 2;
+
+        if (res && (esVinilicaValida || esEsmalteValido)) {
           const nueva = {
             folio: item.folio || "S/F",
             codigoProducto: res.codigo,
             descripcion: res.descripcion,
             litros: parseFloat(item.litros) || 0,
-            tipoPintura,
+            tipo: tipoPintura,
             nivelCubriente: res.poderCubriente,
             detallesEnvasado: item.hijas.map(h => ({ cantidad: h.cantidad, formato: h.articulo.split('-')[0] })),
             operario: ""
@@ -102,26 +105,48 @@ export function useProduccion() {
     const nuevasEspeciales = [...cargasEspeciales];
 
     cargasAGuardar.forEach((carga) => {
-      if (CODIGOS_EXCLUIDOS.includes(String(carga.codigoProducto))) {
-        nuevasEspeciales.push(carga); return;
-      }
       let asignada = false;
-      for (let col = 0; col < 6 && !asignada; col++) {
-        for (let fila = 0; fila < 8 && !asignada; fila++) {
-          if (nuevasRondas[fila][col]) continue;
-          const numM = 101 + fila;
-          if (numM === 107 && carga.litros > 1600) continue;
-          const esGran = [104, 108].includes(numM);
-          if ((carga.litros > 1600 && esGran) || 
-              (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || 
-              (carga.litros <= 855 && !esGran && numM !== 107)) {
-            carga.operario = OPERARIOS[numM];
-            nuevasRondas[fila][col] = carga; asignada = true;
+
+      // 1. Si es un código excluido manualmente (independiente del tipo), va a especiales
+      if (CODIGOS_EXCLUIDOS.includes(String(carga.codigoProducto))) {
+        nuevasEspeciales.push(carga);
+        return;
+      }
+
+      // 2. Si es ESMALTE, lo guardamos en las rondas en cualquier espacio vacío.
+      // El componente TableroEsmaltes se encargará de mostrarlo filtrado.
+      if (carga.tipo === "Esmalte") {
+        for (let col = 0; col < 6 && !asignada; col++) {
+          for (let fila = 0; fila < 8 && !asignada; fila++) {
+            if (!nuevasRondas[fila][col]) {
+              nuevasRondas[fila][col] = carga;
+              asignada = true;
+            }
+          }
+        }
+      } 
+      // 3. Si es VINÍLICA, aplicamos la lógica de máquinas y litros
+      else {
+        for (let col = 0; col < 6 && !asignada; col++) {
+          for (let fila = 0; fila < 8 && !asignada; fila++) {
+            if (nuevasRondas[fila][col]) continue;
+            const numM = 101 + fila;
+            if (numM === 107 && carga.litros > 1600) continue;
+            const esGran = [104, 108].includes(numM);
+            if ((carga.litros > 1600 && esGran) || 
+                (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || 
+                (carga.litros <= 855 && !esGran && numM !== 107)) {
+              carga.operario = OPERARIOS[numM];
+              nuevasRondas[fila][col] = carga;
+              asignada = true;
+            }
           }
         }
       }
+
       if (!asignada) nuevasEspeciales.push(carga);
     });
+
     setRondas(nuevasRondas);
     setCargasEspeciales(ordenarCargas(nuevasEspeciales));
     setColaCargas([]);

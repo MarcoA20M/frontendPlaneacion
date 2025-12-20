@@ -1,165 +1,116 @@
-import { useState } from "react";
-import { buscarProducto } from "./services/productoService";
+import { useState, useEffect } from "react";
+import { useProduccion } from "./hooks/useProduccion";
+import { exportarReporte } from "./services/excelService";
+import { procesarPdfConRondas } from "./services/pdfService"; 
+import { OPERARIOS, litrosPorEnvasado, litrosATexto } from "./constants/config";
+
+// Componentes UI
 import ModalCargas from "./components/ModalCargas";
 import ModalDetalleCarga from "./components/ModalDetalleCarga";
 import CardCarga from "./components/CardCarga";
+import TableroEsmaltes from "./components/TableroEsmaltes";
+import PanelEspeciales from "./components/PanelEspeciales";
 
-// Importación de constantes y utilidades
-import { API_URL, OPERARIOS, CODIGOS_EXCLUIDOS, litrosPorEnvasado, litrosATexto } from "./constants/config";
-
-// Importación de estilos (Asegúrate de que las rutas sean correctas)
+// Estilos
 import "./styles/styles.css";
 import "./styles/rondas.css";
+import "./styles/esmaltes.css";
 
 function App() {
-  // --- ESTADOS ---
-  const [codigo, setCodigo] = useState("");
-  const [producto, setProducto] = useState(null);
-  const [cantidades, setCantidades] = useState({});
-  const [colaCargas, setColaCargas] = useState([]);
-  const [cargasEspeciales, setCargasEspeciales] = useState([]);
+  const {
+    codigo, setCodigo, producto, cantidades, setCantidades, colaCargas,
+    cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
+    rondas, setRondas, cargando, totalLitrosActuales,
+    consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas
+  } = useProduccion();
+
+  // Estados locales de UI
   const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
   const [cargaSeleccionada, setCargaSeleccionada] = useState(null);
-  const [tipoPintura, setTipoPintura] = useState("Vinílica");
-  const [rondas, setRondas] = useState(Array.from({ length: 8 }, () => Array(6).fill(null)));
-  const [cargando, setCargando] = useState(false);
+  const [procesandoPdf, setProcesandoPdf] = useState(false);
+  const [menuCargasAbierto, setMenuCargasAbierto] = useState(false);
+  
+  // Estado para el porcentaje
+  const [progreso, setProgreso] = useState(0);
 
-  // --- CÁLCULOS ---
-  const totalLitrosActuales = producto 
-    ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
-    : 0;
-
-  const ordenarCargas = (lista) => {
-    return [...lista].sort((a, b) => {
-      const cubA = a.nivelCubriente || 0;
-      const cubB = b.nivelCubriente || 0;
-      if (cubA !== cubB) return cubA - cubB;
-      return String(a.folio).localeCompare(String(b.folio), undefined, { numeric: true });
-    });
+  // --- LÓGICA DE PROGRESO SIMULADO ---
+  const simularProgreso = () => {
+    setProgreso(0);
+    return setInterval(() => {
+      setProgreso((prev) => {
+        if (prev >= 92) return prev; // Se detiene cerca del final hasta que responda el server
+        return prev + Math.floor(Math.random() * 7) + 2; // Incrementos aleatorios para naturalidad
+      });
+    }, 250);
   };
 
-  // --- FUNCIONES DE ACCIÓN ---
-  const consultar = async () => {
-    if (!codigo.trim()) return;
+  // --- HANDLERS ---
+  const handleImportExcelConProgreso = async (e) => {
+    const idIntervalo = simularProgreso();
     try {
-      const res = await buscarProducto(codigo.trim());
-      if (!res) return alert("Producto no encontrado");
-      if (tipoPintura === "Vinílica" && res.tipoPinturaId !== 2) return alert("No es Vinílica");
-      setProducto({ ...res, envasados: res.envasados || [] });
-      setCantidades({});
-    } catch (e) { alert("Error de red"); }
-  };
-
-  const agregarCargaManual = () => {
-    if (!producto || totalLitrosActuales === 0) return alert("Ingresa cantidades");
-    
-    const resumenEnvasados = producto.envasados
-      .filter(env => cantidades[env.id] > 0)
-      .map(env => ({ 
-        cantidad: cantidades[env.id], 
-        formato: `${litrosPorEnvasado(env.id)}`.replace('.', '') 
-      }));
-    
-    const nuevaCarga = {
-      folio: "MANUAL",
-      codigoProducto: producto.codigo,
-      descripcion: producto.descripcion,
-      litros: totalLitrosActuales,
-      tipoPintura,
-      nivelCubriente: producto.poderCubriente,
-      detallesEnvasado: resumenEnvasados,
-      operario: ""
-    };
-
-    if (CODIGOS_EXCLUIDOS.includes(String(producto.codigo))) {
-      setCargasEspeciales(ordenarCargas([...cargasEspeciales, nuevaCarga]));
-    } else {
-      setColaCargas(ordenarCargas([...colaCargas, nuevaCarga]));
+      // Nota: handleImportExcel ya gestiona el estado 'cargando' internamente en tu hook
+      await handleImportExcel(e);
+      setProgreso(100);
+    } catch (error) {
+      alert("Error al importar: " + error.message);
+    } finally {
+      clearInterval(idIntervalo);
+      setTimeout(() => setProgreso(0), 600);
+      setMenuCargasAbierto(false);
     }
-    setCantidades({}); 
-    alert("Carga agregada.");
   };
 
-  const handleImportExcel = async (e) => {
+  const handlePdfClick = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const formData = new FormData();
-    formData.append('excel', file);
-
+    
+    setProcesandoPdf(true);
+    const idIntervalo = simularProgreso();
+    
     try {
-      setCargando(true);
-      const response = await fetch(`${API_URL}/analyze-excel`, { method: 'POST', body: formData });
-      const dataRaw = await response.json(); 
+      const blob = await procesarPdfConRondas(file, rondas, cargasEspeciales);
+      setProgreso(100);
       
-      const nuevasNormales = [];
-      const nuevasEspeciales = [];
-
-      for (const item of dataRaw) {
-        try {
-          const res = await buscarProducto(item.articulo.trim());
-          if (res && (tipoPintura !== "Vinílica" || res.tipoPinturaId === 2)) {
-            const nueva = {
-              folio: item.folio || "S/F",
-              codigoProducto: res.codigo,
-              descripcion: res.descripcion,
-              litros: parseFloat(item.litros) || 0,
-              tipoPintura,
-              nivelCubriente: res.poderCubriente,
-              detallesEnvasado: item.hijas.map(h => ({ cantidad: h.cantidad, formato: h.articulo.split('-')[0] })),
-              operario: ""
-            };
-            if (CODIGOS_EXCLUIDOS.includes(String(res.codigo))) nuevasEspeciales.push(nueva);
-            else nuevasNormales.push(nueva);
-          }
-        } catch (err) { console.error("Error en fila", err); }
-      }
-      setColaCargas(ordenarCargas([...colaCargas, ...nuevasNormales]));
-      setCargasEspeciales(ordenarCargas([...cargasEspeciales, ...nuevasEspeciales]));
-    } catch (err) { alert("Error al procesar Excel"); }
-    finally { setCargando(false); e.target.value = null; }
-  };
-
-  const handleGenerarReporte = async () => {
-    try {
-      const cargasFinales = [];
-      rondas.forEach((fila, fIdx) => {
-        fila.forEach(celda => {
-          if (celda) cargasFinales.push({ ...celda, maquina: `VI-${101 + fIdx}`, operario: OPERARIOS[101 + fIdx] });
-        });
-      });
-      cargasEspeciales.forEach(esp => cargasFinales.push({ ...esp, maquina: "ESPECIAL", operario: "PENDIENTE" }));
-
-      if (cargasFinales.length === 0) return alert("No hay cargas para el reporte.");
-
-      const response = await fetch(`${API_URL}/generate-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cargas: cargasFinales })
-      });
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url; link.download = `Reporte_${new Date().toLocaleDateString().replace(/\//g,'-')}.xlsx`;
-      link.click();
-    } catch (err) { alert("Error al generar el reporte."); }
+      const a = document.body.appendChild(document.createElement('a'));
+      a.href = url;
+      a.download = `Reporte_Produccion_${new Date().getTime()}.pdf`;
+      a.click();
+      a.remove();
+    } catch (error) { 
+      alert("Error en PDF: " + error.message); 
+    } finally { 
+      clearInterval(idIntervalo);
+      setTimeout(() => {
+        setProcesandoPdf(false);
+        setProgreso(0);
+      }, 600);
+      e.target.value = null; 
+    }
   };
 
-  // --- LÓGICA DRAG & DROP ---
-  const handleDragStart = (e, origen) => e.dataTransfer.setData("transferData", JSON.stringify(origen));
-  const onDragOver = (e) => e.preventDefault(); 
+  const handleReporteClick = () => {
+    const cargasFinales = [];
+    rondas.forEach((fila, fIdx) => {
+      fila.forEach(celda => {
+        if (celda) cargasFinales.push({ ...celda, maquina: `VI-${101 + fIdx}`, operario: OPERARIOS[101 + fIdx] });
+      });
+    });
+    cargasEspeciales.forEach(esp => cargasFinales.push({ ...esp, maquina: "ESPECIAL", operario: "PENDIENTE" }));
+    if (cargasFinales.length === 0) return alert("No hay cargas para el reporte.");
+    exportarReporte(cargasFinales);
+  };
 
   const handleDrop = (e, fDestino, cDestino) => {
     e.preventDefault();
     const dataRaw = e.dataTransfer.getData("transferData");
     if (!dataRaw) return;
     const origen = JSON.parse(dataRaw);
-
     let nuevasRondas = [...rondas.map(f => [...f])];
     let nuevasEspeciales = [...cargasEspeciales];
-    let cargaAMover = null;
+    let cargaAMover;
 
     if (origen.tipo === 'ronda') {
       cargaAMover = nuevasRondas[origen.f][origen.c];
@@ -172,168 +123,154 @@ function App() {
       nuevasRondas[fDestino][cDestino] = cargaAMover;
       nuevasEspeciales.splice(origen.index, 1);
     }
-
     if (nuevasRondas[fDestino][cDestino]) nuevasRondas[fDestino][cDestino].operario = OPERARIOS[101 + fDestino];
     setRondas(nuevasRondas);
     setCargasEspeciales(nuevasEspeciales);
   };
 
-  const guardarCargasEnRondas = (cargasAGuardar) => {
-    const nuevasRondas = [...rondas.map(f => [...f])];
-    const nuevasEspeciales = [...cargasEspeciales];
-
-    cargasAGuardar.forEach((carga) => {
-      if (CODIGOS_EXCLUIDOS.includes(String(carga.codigoProducto))) {
-        nuevasEspeciales.push(carga); return;
-      }
-
-      let asignada = false;
-      for (let col = 0; col < 6 && !asignada; col++) {
-        for (let fila = 0; fila < 8 && !asignada; fila++) {
-          if (nuevasRondas[fila][col]) continue;
-          const numM = 101 + fila;
-          if (numM === 107 && carga.litros > 1600) continue;
-          const esGran = [104, 108].includes(numM);
-          
-          if ((carga.litros > 1600 && esGran) || 
-              (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || 
-              (carga.litros <= 855 && !esGran && numM !== 107)) {
-            carga.operario = OPERARIOS[numM];
-            nuevasRondas[fila][col] = carga; asignada = true;
-          }
-        }
-      }
-      if (!asignada) nuevasEspeciales.push(carga);
-    });
-
-    setRondas(nuevasRondas);
-    setCargasEspeciales(ordenarCargas(nuevasEspeciales));
-    setColaCargas([]);
-    setMostrarModal(false);
-  };
-
   return (
     <div className="app">
+      {/* OVERLAY CON PORCENTAJE Y BARRA */}
+      {(cargando || procesandoPdf) && (
+        <div className="loading-overlay">
+          <div className="overlay-content">
+            <div className="spinner-large"></div>
+            <h3>{cargando ? "Analizando Excel..." : "Generando PDF..."}</h3>
+            
+            <div className="progress-container">
+              <div className="progress-bar" style={{ width: `${progreso}%` }}></div>
+            </div>
+            
+            <div className="percentage-display">{progreso}%</div>
+            <p>Procesando datos en el servidor de Python</p>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         {/* HEADER */}
         <div className="header-panel">
           <h1>Gestión de Pinturas</h1>
           <div className="selector-tipo">
-            <button className={tipoPintura === "Vinílica" ? "active" : ""} onClick={() => setTipoPintura("Vinílica")}>Vinílica</button>
-            <button className={tipoPintura === "Esmalte" ? "active" : ""} onClick={() => setTipoPintura("Esmalte")}>Esmalte</button>
+            {["Vinílica", "Esmalte"].map(t => (
+              <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => setTipoPintura(t)}>{t}</button>
+            ))}
           </div>
         </div>
 
-        {/* BÚSQUEDA Y ESPECIALES */}
+        {/* BUSQUEDA Y ESPECIALES */}
         <div className="busqueda-con-descripcion">
           <div className="busqueda">
             <input placeholder="Código" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
             <button onClick={consultar}>Buscar</button>
           </div>
-          
+
           {producto && (
             <div className="descripcion-producto">
-              <div className="info-principal">
-                <div className="nombre-producto">{producto.descripcion}</div>
-                <div className="poder-cubriente">Poder Cubriente: <span>{producto.poderCubriente}</span></div>
-              </div>
+              <div className="nombre-producto">{producto.descripcion}</div>
+              <div className="poder-cubriente">Poder Cubriente: <span>{producto.poderCubriente}</span></div>
             </div>
           )}
 
-          {cargasEspeciales.length > 0 && (
-            <div className="contenedor-especiales-premium">
-              <div className="header-especial" onClick={() => setMostrarEspeciales(!mostrarEspeciales)}>
-                <div className="titulo-especial"><span className="alarma-dot"></span> ESPECIALES PENDIENTES ({cargasEspeciales.length})</div>
-                <button className="toggle-view-btn">{mostrarEspeciales ? 'OCULTAR' : 'VER'}</button>
-              </div>
-              {mostrarEspeciales && (
-                <div className="grid-especial-premium">
-                  {cargasEspeciales.map((c, i) => (
-                    <div key={i} className="card-especial-v2" draggable onDragStart={(e) => handleDragStart(e, { tipo: 'especial', index: i })} 
-                         onClick={() => { setCargaSeleccionada(c); setMostrarDetalle(true); }}>
-                      <div className="card-header-ex">
-                        <span className="code-badge">{c.codigoProducto}</span>
-                        <span className="litros-badge" style={{color: '#0056b3'}}>Lote: {c.folio}</span>
-                      </div>
-                      <div className="card-body-ex">{c.descripcion}</div>
-                      <div className="card-footer-ex">Cubriente: <strong>{c.nivelCubriente}</strong> | {c.litros.toFixed(1)} L</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <PanelEspeciales 
+            cargasEspeciales={cargasEspeciales}
+            mostrarEspeciales={mostrarEspeciales}
+            setMostrarEspeciales={setMostrarEspeciales}
+            handleDragStart={(e, o) => e.dataTransfer.setData("transferData", JSON.stringify(o))}
+            seleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
+          />
         </div>
 
-        {/* PANEL DE PRODUCTO Y BOTONES PRINCIPALES */}
+        {/* PANEL PRINCIPAL */}
         <div className="producto-panel">
           {producto && (
             <>
               <div className="tabla">
-                {[...producto.envasados].sort((a,b)=>litrosPorEnvasado(a.id)-litrosPorEnvasado(b.id)).map(env => (
-                  <div className="fila" key={env.id}>
-                    <span className="litros-text">{litrosATexto(litrosPorEnvasado(env.id))}</span>
-                    <input type="number" value={cantidades[env.id] || 0} onChange={(e) => setCantidades({...cantidades, [env.id]: Number(e.target.value)})} />
-                  </div>
-                ))}
+                {[...producto.envasados]
+                  .sort((a, b) => litrosPorEnvasado(a.id) - litrosPorEnvasado(b.id))
+                  .map(env => (
+                    <div className="fila" key={env.id}>
+                      <span className="litros-text">{litrosATexto(litrosPorEnvasado(env.id))}</span>
+                      <input type="number" value={cantidades[env.id] || 0} onChange={(e) => setCantidades({ ...cantidades, [env.id]: Number(e.target.value) })} />
+                    </div>
+                  ))}
               </div>
               <div className="contador-litros">Total: <span>{totalLitrosActuales.toFixed(2)} L</span></div>
             </>
           )}
 
           <div className="botones-cargas">
-            <button className="agregar-btn" onClick={agregarCargaManual}>Agregar carga</button>
-            <button className="agregar-btn secondary" onClick={() => setMostrarModal(true)}>Lista ({colaCargas.length})</button>
-            <label className="agregar-btn" style={{backgroundColor: '#28a745', cursor: 'pointer', textAlign: 'center'}}>
-               {cargando ? "Procesando..." : "📁 Analizar Excel"}
-               <input type="file" hidden accept=".xlsx, .xls" onChange={handleImportExcel} />
+            <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
+
+            <div className="dropdown-container">
+              <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>
+                📂 Gestión de Cargas ({colaCargas.length}) {menuCargasAbierto ? '▴' : '▾'}
+              </button>
+              {menuCargasAbierto && (
+                <div className="dropdown-menu">
+                  <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>📋 Ver Lista de Espera</button>
+                  <label className="dropdown-item label-input" style={{ cursor: 'pointer' }}>
+                    {cargando ? "⌛ Procesando..." : "📊 Importar Excel"}
+                    <input type="file" hidden accept=".xlsx, .xls" onChange={handleImportExcelConProgreso} disabled={cargando} />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <label className="agregar-btn" style={{ backgroundColor: '#6f42c1', cursor: procesandoPdf ? 'not-allowed' : 'pointer', textAlign: 'center' }}>
+              {procesandoPdf ? "⌛ Procesando..." : "📄 Generar PDF"}
+              <input type="file" hidden accept=".pdf" onChange={handlePdfClick} disabled={procesandoPdf} />
             </label>
-            <button className="agregar-btn" style={{backgroundColor: '#17a2b8'}} onClick={handleGenerarReporte}>📊 Reporte Excel</button>
+
+            <button className="agregar-btn" style={{ backgroundColor: '#17a2b8' }} onClick={handleReporteClick}>📊 Reporte Final</button>
           </div>
         </div>
 
         {/* RONDAS */}
-        <div className="rondas-panel">
-          <h2>RONDAS DE PRODUCCIÓN</h2>
-          <div className="tabla-rondas">
-            <div className="fila-ronda header">
+        {tipoPintura === "Vinílica" ? (
+          <div className="rondas-panel">
+            <h2>RONDAS DE PRODUCCIÓN</h2>
+            <div className="tabla-rondas">
+              <div className="fila-ronda header">
                 <div></div>
                 {[...Array(6)].map((_, i) => <div key={i}>Ronda {i + 1}</div>)}
-            </div>
-            {rondas.map((fila, fIdx) => (
-              <div className="fila-ronda" key={fIdx}>
-                <div className="etiqueta-ronda">
-                  <span className="codigo-maquina">VI-{101+fIdx}</span>
-                  <span className="nombre-operario">{OPERARIOS[101+fIdx]}</span>
-                </div>
-                {fila.map((celda, cIdx) => (
-                  <div className="celda-ronda clickable" key={cIdx} onDragOver={onDragOver} onDrop={(e) => handleDrop(e, fIdx, cIdx)}>
-                    {celda && (
-                      <div draggable onDragStart={(e) => handleDragStart(e, { tipo: 'ronda', f: fIdx, c: cIdx })} 
-                           onClick={() => { setCargaSeleccionada(celda); setMostrarDetalle(true); }} 
-                           style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <CardCarga carga={celda} />
-                      </div>
-                    )}
-                  </div>
-                ))}
               </div>
-            ))}
+              {rondas.map((fila, fIdx) => (
+                <div className="fila-ronda" key={fIdx}>
+                  <div className="etiqueta-ronda">
+                    <span className="codigo-maquina">VI-{101 + fIdx}</span>
+                    <span className="nombre-operario">{OPERARIOS[101 + fIdx]}</span>
+                  </div>
+                  {fila.map((celda, cIdx) => (
+                    <div className="celda-ronda clickable" key={cIdx} onDragOver={(e) => e.preventDefault()} onDrop={(e) => handleDrop(e, fIdx, cIdx)}>
+                      {celda && (
+                        <div draggable onDragStart={(e) => e.dataTransfer.setData("transferData", JSON.stringify({ tipo: 'ronda', f: fIdx, c: cIdx }))} onClick={() => { setCargaSeleccionada(celda); setMostrarDetalle(true); }} style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <CardCarga carga={celda} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : <TableroEsmaltes rondas={rondas} setCargaSeleccionada={setCargaSeleccionada} setMostrarDetalle={setMostrarDetalle} />}
 
-        {/* MODALES */}
-        <ModalCargas visible={mostrarModal} cargas={colaCargas} onClose={() => setMostrarModal(false)} onGuardar={guardarCargasEnRondas} />
-        <ModalDetalleCarga visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)} 
+        <ModalCargas visible={mostrarModal} cargas={colaCargas} onClose={() => setMostrarModal(false)} onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }} />
+        <ModalDetalleCarga
+          visible={mostrarDetalle}
+          carga={cargaSeleccionada}
+          onClose={() => setMostrarDetalle(false)}
           onEliminar={(c) => {
             setRondas(rondas.map(f => f.map(celda => celda === c ? null : celda)));
             setCargasEspeciales(cargasEspeciales.filter(ce => ce !== c));
+            setMostrarDetalle(false);
           }}
           onMoverEspecial={(c) => {
             setRondas(rondas.map(f => f.map(celda => celda === c ? null : celda)));
-            setCargasEspeciales(ordenarCargas([...cargasEspeciales, {...c, operario: ""}]));
+            setCargasEspeciales(ordenarCargas([...cargasEspeciales, { ...c, operario: "" }]));
             setMostrarDetalle(false);
-          }} 
+          }}
         />
       </div>
     </div>

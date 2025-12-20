@@ -320,3 +320,702 @@ body, html {
 .subrayar-btn:hover {
   background-color: #5b4bc4;
 }
+
+
+
+/* Botones Mini Generales */
+.btn-mini {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.btn-mini:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Colores específicos */
+.btn-search { background-color: #4a90e2; color: white; }
+.btn-add { background-color: #34495e; color: white; }
+.btn-list { background-color: #95a5a6; color: white; }
+.btn-excel { background-color: #27ae60; color: white; }
+.btn-pdf { background-color: #e74c3c; color: white; }
+.btn-report { background-color: #16a085; color: white; }
+
+/* Contenedor de botones alineado */
+.botones-cargas-mini {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+/* Inputs pequeños */
+.input-mini {
+    padding: 6px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 120px;
+}
+
+.input-mini-table {
+    width: 50px;
+    padding: 2px 4px;
+    font-size: 12px;
+}
+
+.fila-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.split-button-container {
+    display: flex;
+    position: relative;
+    height: 40px; /* Ajusta a la altura de tus otros botones */
+}
+
+/* Parte principal (Lista) */
+.split-main-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0 15px;
+    border-radius: 4px 0 0 4px;
+    cursor: pointer;
+    font-weight: bold;
+    border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Parte de la flecha */
+.split-arrow-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    width: 30px;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.split-main-btn:hover, .split-arrow-btn:hover {
+    background-color: #5a6268;
+}
+
+/* El menú flotante */
+.split-dropdown-menu {
+    position: absolute;
+    top: 110%; /* Aparece justo debajo */
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    min-width: 160px;
+}
+
+.dropdown-option {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+}
+
+.dropdown-option:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+/* Para que la flecha cambie cuando está abierto */
+.split-arrow-btn.active {
+    background-color: #495057;
+}
+
+/* ===== GLOBAL ===== */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif; 
+  height: 100%;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: flex-start; 
+  align-items: flex-start;
+  padding: 20px;
+  background: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  background: none;
+}
+
+/* ===== HEADER ===== */
+.header-panel {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.header-panel h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin: 45px 0 0 0;
+}
+
+.selector-tipo {
+  display: flex;
+  gap: 15px;
+}
+
+.selector-tipo button {
+  padding: 10px 25px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+  background: #444;
+}
+
+.selector-tipo button.active {
+  background: linear-gradient(90deg, #00c0ff 0%, #007bff 100%);
+  box-shadow: 0 6px 12px rgba(0,192,255,0.5);
+  transform: scale(1.05);
+}
+
+/* ===== BÚSQUEDA ===== */
+.busqueda {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+.busqueda input {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid #6a1a9e; 
+  width: 130px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.busqueda button {
+  padding: 12px 25px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #00c0ff 0%, #007bff 100%);
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.busqueda-con-descripcion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.descripcion-producto {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c0ff;
+  max-width: 400px;
+  word-wrap: break-word;
+  position: absolute;
+  top: 100px;
+  left: 59%;
+}
+
+/* ===== PANEL DE PRODUCTO ===== */
+.producto-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tabla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.fila {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+  padding: 15px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.fila:hover {
+  transform: translateY(-3px);
+  background: rgba(0, 192, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 192, 255, 0.4);
+}
+
+.fila .litros-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00c0ff;
+  margin-bottom: 8px;
+}
+
+.fila input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: none; 
+  background: #2a2640; 
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== BOTONES JUNTOS ===== */
+.botones-cargas {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== BOTÓN AGREGAR ===== */
+.agregar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  padding: 15px;
+  background: linear-gradient(135deg, #00c0ff 0%, #007bff 100%);
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 800;
+  color: #fff;
+  font-size: 16px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 192, 255, 0.5);
+  transition: all 0.3s;
+}
+
+.agregar-btn.secondary {
+  background: linear-gradient(135deg, #ff5f7e 0%, #ff007f 100%);
+}
+
+.agregar-btn:hover {
+  background: linear-gradient(135deg, #0090cc 0%, #0056b3 100%);
+  transform: scale(1.01);
+  box-shadow: 0 10px 25px rgba(0, 192, 255, 0.7);
+}
+
+/* ===== CONTADOR DE LITROS ===== */
+.contador-litros {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00ffcc;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+
+
+.nombre-producto {
+  font-size: 28px;
+  font-weight: 600;
+  color: #00c0ff;
+  margin-bottom: 6px;
+}
+
+.poder-cubriente {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffffcc;
+}
+
+.poder-cubriente span {
+  font-weight: 800;
+  color: #00ffcc;
+}
+
+
+
+
+
+
+
+
+
+
+/* ===== BOTONES JUNTOS ===== */
+.botones-cargas {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ===== ESTILO BASE PARA LOS 3 BOTONES ===== */
+.agregar-btn, .exportar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px; 
+  height: 55px; 
+  padding: 0 15px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 800;
+  color: #fff;
+  font-size: 13px; 
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+/* Botón: Agregar Carga (Azul) */
+.agregar-btn {
+  background: linear-gradient(135deg, #00c0ff 0%, #007bff 100%);
+  box-shadow: 0 6px 15px rgba(0, 192, 255, 0.4);
+}
+
+/* Botón: Ver Lista (Rosa/Rojo) */
+.agregar-btn.secondary {
+  background: linear-gradient(135deg, #ff5f7e 0%, #ff007f 100%);
+  box-shadow: 0 6px 15px rgba(255, 0, 127, 0.4);
+}
+
+/* Botón: Exportar Excel (Verde) */
+.exportar-btn {
+  background: linear-gradient(135deg, #2ecc71 0%, #1d6f42 100%);
+  box-shadow: 0 6px 15px rgba(29, 111, 66, 0.4);
+  gap: 8px;
+}
+
+.agregar-btn:hover, .exportar-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.agregar-btn:active, .exportar-btn:active {
+  transform: translateY(0);
+}
+
+.subrayar-btn {
+  background-color: #6c5ce7; /* Un color morado elegante */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subrayar-btn:hover {
+  background-color: #5b4bc4;
+}
+
+
+
+/* Botones Mini Generales */
+.btn-mini {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.btn-mini:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Colores específicos */
+.btn-search { background-color: #4a90e2; color: white; }
+.btn-add { background-color: #34495e; color: white; }
+.btn-list { background-color: #95a5a6; color: white; }
+.btn-excel { background-color: #27ae60; color: white; }
+.btn-pdf { background-color: #e74c3c; color: white; }
+.btn-report { background-color: #16a085; color: white; }
+
+/* Contenedor de botones alineado */
+.botones-cargas-mini {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+/* Inputs pequeños */
+.input-mini {
+    padding: 6px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 120px;
+}
+
+.input-mini-table {
+    width: 50px;
+    padding: 2px 4px;
+    font-size: 12px;
+}
+
+.fila-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.split-button-container {
+    display: flex;
+    position: relative;
+    height: 40px; /* Ajusta a la altura de tus otros botones */
+}
+
+/* Parte principal (Lista) */
+.split-main-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0 15px;
+    border-radius: 4px 0 0 4px;
+    cursor: pointer;
+    font-weight: bold;
+    border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Parte de la flecha */
+.split-arrow-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    width: 30px;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.split-main-btn:hover, .split-arrow-btn:hover {
+    background-color: #5a6268;
+}
+
+/* El menú flotante */
+.split-dropdown-menu {
+    position: absolute;
+    top: 110%; /* Aparece justo debajo */
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    min-width: 160px;
+}
+
+.dropdown-option {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+}
+
+.dropdown-option:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+/* Para que la flecha cambie cuando está abierto */
+.split-arrow-btn.active {
+    background-color: #495057;
+}
+
+/* Contenedor del Dropdown */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* El menú que aparece */
+.dropdown-menu {
+    position: absolute;
+    bottom: 100%; /* Aparece hacia arriba para que no lo tapen las rondas */
+    left: 0;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 10px 0;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Items del menú */
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Estilo especial para la etiqueta del input file */
+.dropdown-item.label-input {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+
+/* --- OVERLAY DE CARGA --- */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  color: white;
+}
+
+.overlay-content {
+  background: white;
+  color: #333;
+  padding: 40px;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.spinner-large {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #f0f0f0;
+  border-top: 6px solid #6f42c1;
+  border-radius: 50%;
+  animation: spinApp 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spinApp {
+  to { transform: rotate(360deg); }
+}
+
+/* --- BARRA DE PROGRESO --- */
+.progress-container {
+  width: 100%;
+  background-color: #eee;
+  border-radius: 20px;
+  height: 14px;
+  margin: 20px 0 10px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6f42c1, #00d2ff);
+  transition: width 0.4s cubic-bezier(0.1, 0.5, 0.5, 1);
+  box-shadow: 0 0 10px rgba(111, 66, 193, 0.5);
+}
+
+.percentage-display {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #6f42c1;
+  margin-bottom: 5px;
+}
+
+.overlay-content p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}

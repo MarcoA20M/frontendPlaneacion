@@ -6,10 +6,12 @@
 }
 
 .rondas-panel h2 {
-  margin-bottom: 15px;
+  margin-bottom: 65px;
   font-size: 24px;
   color: #00c0ff;
   letter-spacing: 1px;
+  margin-left: 140px;
+  margin-top: 100px;
 }
 
 /* Tabla completa */

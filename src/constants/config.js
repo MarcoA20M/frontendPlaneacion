@@ -1,8 +1,8 @@
 export const API_URL = "http://localhost:5000";
 
 export const OPERARIOS = {
-  101: "Pedro", 102: "Luis", 103: "Carlos", 104: "Yunior",
-  105: "Pedro", 106: "Luis", 107: "Carlos", 108: "Yunior"
+  101: "Pedro", 102: "Luis", 103: "Carlos", 104: "Carlos",
+  105: "Pedro", 106: "Luis", 107: "Yunior", 108: "Yunior"
 };
 
 export const CODIGOS_EXCLUIDOS = ["890", "912", "908", "100", "852", "852IF"];

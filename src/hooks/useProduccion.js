@@ -107,25 +107,23 @@ export function useProduccion() {
     cargasAGuardar.forEach((carga) => {
       let asignada = false;
 
-      // 1. Si es un código excluido manualmente (independiente del tipo), va a especiales
       if (CODIGOS_EXCLUIDOS.includes(String(carga.codigoProducto))) {
         nuevasEspeciales.push(carga);
         return;
       }
 
-      // 2. Si es ESMALTE, lo guardamos en las rondas en cualquier espacio vacío.
-      // El componente TableroEsmaltes se encargará de mostrarlo filtrado.
       if (carga.tipo === "Esmalte") {
         for (let col = 0; col < 6 && !asignada; col++) {
           for (let fila = 0; fila < 8 && !asignada; fila++) {
             if (!nuevasRondas[fila][col]) {
+              // CORRECCIÓN: Asignar operario de la fila para el reporte
+              carga.operario = OPERARIOS[101 + fila];
               nuevasRondas[fila][col] = carga;
               asignada = true;
             }
           }
         }
       } 
-      // 3. Si es VINÍLICA, aplicamos la lógica de máquinas y litros
       else {
         for (let col = 0; col < 6 && !asignada; col++) {
           for (let fila = 0; fila < 8 && !asignada; fila++) {

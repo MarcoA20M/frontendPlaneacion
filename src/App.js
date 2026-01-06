@@ -239,8 +239,8 @@ function AppContent() {
                       </div>
                     )}
                   </div>
-                  <label className="agregar-btn btn-pdf">📄 PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
-                  <button className="agregar-btn btn-reporte" onClick={handleReporteClick}>📊 Reporte</button>
+                  <label className="agregar-btn btn-pdf">📄Subrayar PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
+                  <button className="agregar-btn btn-reporte" onClick={handleReporteClick}>📊 generar Reporte</button>
                 </div>
               </div>
 

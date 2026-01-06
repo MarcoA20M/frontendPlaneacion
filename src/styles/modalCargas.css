@@ -8,15 +8,81 @@
   z-index: 1000;
 }
 
+/* ... Tus estilos base se mantienen, pero agrega o modifica estos: ... */
+
 .modal-cargas {
-  width: 800px;
-  max-height: 90vh;
+  width: 900px;
+  height: 85vh; /* Altura fija para controlar el scroll interno */
   background: #1b1b2f;
   border-radius: 14px;
   padding: 24px;
-  overflow-y: auto;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column; /* Organiza header, info y tabla en vertical */
+  box-shadow: 0 0 30px rgba(0, 192, 255, 0.2);
+  border: 1px solid rgba(0, 192, 255, 0.1);
+  overflow: hidden; /* Evita que el modal entero haga scroll */
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* NUEVO BOTÓN SUPERIOR */
+.btn-guardar-top {
+  background: linear-gradient(135deg, #00ffcc 0%, #007bff 100%);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #000;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+}
+
+.btn-guardar-top:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5);
+  filter: brightness(1.1);
+}
+
+.btn-guardar-top:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tabla-seccion {
+  flex: 1; /* Ocupa todo el espacio restante */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.contenedor-scroll-tabla {
+  flex: 1;
+  overflow-y: auto; /* Solo esta parte hace scroll */
+  padding-right: 8px;
+  margin-top: 5px;
+}
+
+/* Personalización del scrollbar para que se vea moderno */
+.contenedor-scroll-tabla::-webkit-scrollbar {
+  width: 6px;
+}
+.contenedor-scroll-tabla::-webkit-scrollbar-thumb {
+  background: rgba(0, 192, 255, 0.3);
+  border-radius: 10px;
+}
+
+/* Ajuste de celdas para que no se rompan en resoluciones pequeñas */
+.celda.g-2 { flex: 2; min-width: 100px; }
+.celda.g-1 { flex: 1; min-width: 60px; }
 
 .modal-header {
   display: flex;
@@ -123,5 +189,179 @@
   transform: scale(1.02);
   box-shadow: 0 6px 15px rgba(0,192,255,0.5);
 }
+
+
+/* Estilo para el número de la carga */
+.nro-item {
+  flex: 0 0 40px !important; /* Más estrecho que las demás celdas */
+  color: #00c0ff;
+  font-weight: 800;
+  border-right: 1px solid #ffffff11;
+  margin-right: 10px;
+}
+
+/* El contenedor de las acciones (la X) */
+.acciones {
+  flex: 0 0 50px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* El botón X de cada fila con tu estética */
+.btn-borrar-fila {
+  background: rgba(255, 95, 126, 0.1);
+  border: 1px solid rgba(255, 95, 126, 0.3);
+  color: #ff5f7e;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-borrar-fila:hover {
+  background: #ff5f7e;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255, 95, 126, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Ajuste para que el contador de la cabecera se vea bien */
+.titulo-con-contador {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.badge-contador {
+  background: #00c0ff22;
+  color: #00ffcc;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid #00ffcc44;
+}
+
+/* Estilo para cuando no hay nada */
+.sin-cargas {
+  text-align: center;
+  color: #ccc;
+  padding: 40px;
+  background: #2a2640;
+  border-radius: 12px;
+  border: 1px dashed #ffffff22;
+
+  
+}
+
+
+
+
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-cargas {
+  width: 850px;
+  max-height: 85vh;
+  background: #1b1b2f;
+  border-radius: 14px;
+  padding: 24px;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(0, 192, 255, 0.2);
+  border: 1px solid rgba(0, 192, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.titulo-con-contador {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-header h2 {
+  color: #00c0ff;
+  font-size: 24px;
+  margin: 0;
+}
+
+.badge-contador {
+  background: rgba(0, 255, 204, 0.1);
+  color: #00ffcc;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ff5f7e;
+  transition: 0.2s;
+}
+
+.info-general {
+  display: flex;
+  justify-content: space-between;
+  background: #2a2640;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.label { font-size: 12px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+.value { font-size: 18px; color: #00ffcc; font-weight: 600; }
+
+.tabla-cargas { display: flex; flex-direction: column; gap: 8px; }
+
+.fila-carga {
+  display: flex;
+  align-items: center;
+  background: #2a2640;
+  padding: 12px 15px;
+  border-radius: 10px;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.fila-carga.header {
+  background: rgba(0, 192, 255, 0.15);
+  font-weight: 700;
+  color: #00c0ff;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+}
+
+/* --- CONTROL DE PROPORCIONALIDAD --- */
+.celda { text-align: center; }
+.celda.nro { flex: 0 0 40px; color: #00c0ff; font-weight: bold; }
+.celda.g-2 { flex: 2; } /* Columnas anchas: Codigo, Tipo, Lote */
+.celda.g-1 { flex: 1; text-align: center; } /* Columnas estrechas: Litros, Cubriente */
+.celda.accion { flex: 0 0 50px; display: flex; justify-content: flex-end; }
+
+
 
 

@@ -25,23 +25,7 @@
     padding-top: 20px;
 }
 
-/* La Card con tus colores */
-.card-esmalte-neon {
-    position: relative;
-    background: rgba(45, 10, 85, 0.7); /* Fondo morado translúcido */
-    border-left: 6px solid #bc13fe; 
-    border-radius: 16px;
-    min-height: 180px; 
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    box-sizing: border-box;
-    box-shadow: 0 0 25px rgba(188, 19, 254, 0.2);
-    border: 1px solid rgba(188, 19, 254, 0.3);
-    backdrop-filter: blur(5px);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+
 
 .card-esmalte-neon:hover {
     transform: translateY(-5px) scale(1.02);
@@ -110,3 +94,407 @@
     font-weight: bold;
     letter-spacing: 3px;
 }
+
+
+.lista-procesos-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 10px 0;
+  background: rgba(0, 243, 255, 0.05);
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #00f3ff;
+}
+
+.proceso-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proc-paso {
+  background: #00f3ff;
+  color: #000;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  box-shadow: 0 0 5px #00f3ff;
+}
+
+.proc-desc {
+  color: #fff;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+.descripcion-text {
+    font-size: 12px;            /* Tamaño de letra fijo */
+    color: #ffffff;             /* Aseguramos que sea blanco */
+    font-weight: 400;           /* Grosor normal para que no sature */
+    margin: 4px 0;              /* Pegadito al código del producto */
+    height: 32px;               /* Altura fija para que todos los cards midan lo mismo */
+    overflow: hidden;           /* Corta el texto si es muy largo */
+    text-transform: uppercase;  /* Opcional: Todo en mayúsculas para mejor lectura */
+    opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
+}
+
+.mini-codigo {
+    font-size: 18px;         /* Ajusta este valor a tu gusto (20px a 28px) */
+    font-weight: 900;        /* Máximo grosor */
+    margin: 0;               /* Evita que empuje los procesos hacia abajo */
+    text-transform: uppercase;
+}
+
+
+.esmaltes-full-view {
+    margin-top: 60px;
+    width: 100%;
+}
+
+.esmaltes-header-neon {
+    margin-bottom: 30px;
+    border-left: 4px solid #bc13fe;
+    padding-left: 15px;
+}
+
+.esmaltes-header-neon h2 {
+    color: #fff;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
+}
+
+/* Grid de Cards */
+.grid-esmaltes-neon {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding-top: 20px;
+}
+
+/* La Card con tus colores */
+
+
+.card-esmalte-neon:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
+    background: rgba(60, 15, 110, 0.9);
+}
+
+/* Badge Naranja Circular */
+.badge-litros {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: #ff9800; 
+    color: white;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    border: 4px solid #1a0633; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.badge-val { font-size: 18px; line-height: 1; }
+.badge-unit { font-size: 10px; opacity: 0.9; }
+
+
+.mini-divider {
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    margin: 15px 0;
+    width: 70%;
+}
+
+.info-grid-interna {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-box { display: flex; flex-direction: column; }
+.val-neon { color: #fff; font-weight: bold; font-size: 14px; }
+
+/* Footer */
+.mini-footer {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 11px;
+    color: #e0b0ff; 
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.empty-state-neon {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px;
+    color: rgba(255,255,255,0.2);
+    border: 2px dashed rgba(188, 19, 254, 0.3);
+    border-radius: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+
+.lista-procesos-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 10px 0;
+  background: rgba(0, 243, 255, 0.05);
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #00f3ff;
+}
+
+.proceso-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proc-paso {
+  background: #00f3ff;
+  color: #000;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  box-shadow: 0 0 5px #00f3ff;
+}
+
+.proc-desc {
+  color: #fff;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+.descripcion-text {
+    font-size: 12px;            /* Tamaño de letra fijo */
+    color: #ffffff;             /* Aseguramos que sea blanco */
+    font-weight: 400;           /* Grosor normal para que no sature */
+    margin: 4px 0;              /* Pegadito al código del producto */
+    height: 32px;               /* Altura fija para que todos los cards midan lo mismo */
+    overflow: hidden;           /* Corta el texto si es muy largo */
+    text-transform: uppercase;  /* Opcional: Todo en mayúsculas para mejor lectura */
+    opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
+}
+
+.mini-codigo {
+    font-size: 18px;         /* Ajusta este valor a tu gusto (20px a 28px) */
+    font-weight: 900;        /* Máximo grosor */
+    margin: 0;               /* Evita que empuje los procesos hacia abajo */
+    text-transform: uppercase;
+}
+
+
+/* Contenedor Principal */
+.esmaltes-full-view {
+    margin-top: 60px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.esmaltes-header-neon {
+    margin-bottom: 30px;
+    border-left: 4px solid #bc13fe;
+    padding-left: 15px;
+}
+
+.esmaltes-header-neon h2 {
+    color: #fff;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
+}
+
+/* Grid de Tarjetas */
+.grid-esmaltes-neon {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 35px;
+}
+
+/* Tarjeta Base */
+.card-esmalte-neon {
+    position: relative;
+    background: rgba(45, 10, 85, 0.7);
+    border-radius: 16px;
+    min-height: 220px; 
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 0 25px rgba(188, 19, 254, 0.2);
+    border: 1px solid rgba(188, 19, 254, 0.3);
+    border-left: 6px solid #bc13fe; 
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card-esmalte-neon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
+    background: rgba(60, 15, 110, 0.9);
+}
+
+/* Posicionamiento del Lote (Arriba junto al círculo) */
+.lote-container-top {
+    position: absolute;
+    top: 10px;
+    right: 65px; /* Espacio para no chocar con el círculo */
+    text-align: right;
+}
+
+.lote-numero {
+    display: block;
+    font-size: 0.95rem !important; /* Ajustable según tu preferencia */
+    font-weight: bold;
+}
+
+/* Badge de Litraje (Círculo Naranja) */
+.badge-litros {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: #ff9800; 
+    color: white;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    border: 4px solid #1a0633; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.badge-val { font-size: 18px; line-height: 1; }
+.badge-unit { font-size: 10px; opacity: 0.9; }
+
+/* Tipografía de la Tarjeta */
+.mini-label {
+    font-size: 0.65rem;
+    color: #e0b0ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+}
+
+.mini-codigo {
+    font-size: 1.5rem; /* Tamaño optimizado para el código */
+    font-weight: 900;
+    color: #fff;
+    margin: 5px 0;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.descripcion-text {
+    font-size: 0.85rem; /* Tamaño optimizado para descripción */
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.mini-divider {
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    margin: 15px 0;
+    width: 100%;
+}
+
+/* Sección de Procesos Corridos */
+.info-grid-interna {
+    display: flex;
+    width: 100%;
+}
+
+.stat-box.full-width {
+    width: 100%;
+}
+
+.procesos-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.proceso-item {
+    display: flex;
+    align-items: center;
+}
+
+.texto-proceso {
+    font-size: 10px !important; /* Tamaño pequeño para optimizar espacio */
+    white-space: nowrap;
+}
+
+.proceso-separador {
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    margin: 0 6px;
+}
+
+.val-neon {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Footer del Operario */
+.mini-footer {
+    position: absolute;
+    bottom: 12px;
+    right: 15px;
+    font-size: 11px;
+    color: #bc13fe; 
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(188, 19, 254, 0.3);
+    text-transform: uppercase;
+}
+
+/* Estado Vacío */
+.empty-state-neon {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px;
+    color: rgba(255,255,255,0.2);
+    border: 2px dashed rgba(188, 19, 254, 0.3);
+    border-radius: 20px;
+}
+
+

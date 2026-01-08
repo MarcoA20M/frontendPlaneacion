@@ -146,12 +146,7 @@
     opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
 }
 
-.mini-codigo {
-    font-size: 18px;         /* Ajusta este valor a tu gusto (20px a 28px) */
-    font-weight: 900;        /* Máximo grosor */
-    margin: 0;               /* Evita que empuje los procesos hacia abajo */
-    text-transform: uppercase;
-}
+
 
 
 .esmaltes-full-view {
@@ -303,12 +298,7 @@
     opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
 }
 
-.mini-codigo {
-    font-size: 18px;         /* Ajusta este valor a tu gusto (20px a 28px) */
-    font-weight: 900;        /* Máximo grosor */
-    margin: 0;               /* Evita que empuje los procesos hacia abajo */
-    text-transform: uppercase;
-}
+
 
 
 /* Contenedor Principal */
@@ -408,9 +398,10 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
+    margin: 1px;
 }
 
-.mini-codigo {
+.mini-codigo2 {
     font-size: 1.5rem; /* Tamaño optimizado para el código */
     font-weight: 900;
     color: #fff;

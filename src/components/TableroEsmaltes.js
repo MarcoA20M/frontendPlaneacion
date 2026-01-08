@@ -43,7 +43,7 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle 
 
               <div className="card-mini-body">
                 <span className="mini-label">ESMALTE ACTIVO</span>
-                <h3 className="mini-codigo">{carga.codigoProducto}</h3>
+                <h3 className="mini-codigo2">{carga.codigoProducto}</h3>
                 <p className="descripcion-text">{carga.descripcion}</p>
                 
                 <div className="mini-divider"></div>

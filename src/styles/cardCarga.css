@@ -1,7 +1,6 @@
 
 
 .card-mini-body {
-  display: flex;
   flex-direction: column;
   gap: 2px;
 }
@@ -13,18 +12,9 @@
   background: #ff9800; 
   color: white;
   width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column; 
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
+  
   font-size: 13px; /* Bajamos un poco para asegurar que no se salga */
-  line-height: 1.1;
-  border: 3px solid #1a0633; 
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  z-index: 20;
+
 }
 
 .mini-label {
@@ -36,7 +26,7 @@
 }
 
 .mini-codigo {
-  font-size: 22px; /* Un poco más grande para llenar el espacio */
+  font-size: 20px; /* Un poco más grande para llenar el espacio */
   font-weight: 900;
   color: #ffffff; 
   line-height: 1.1;

@@ -1,35 +1,55 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import "../styles/modalCargas.css";
 
-function ModalCargas({ visible, cargas, historialCargas, producto, onClose, onGuardar, onEliminarCarga }) {
+function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga }) {
+  const [filtroMarca, setFiltroMarca] = useState("TODOS");
+
+  const { cargasClasificadas, marcasDisponibles } = useMemo(() => {
+    if (!cargas) return { cargasClasificadas: [], marcasDisponibles: [] };
+
+    const procesadas = cargas.map(c => {
+      const texto = (c.descripcion + " " + c.codigoProducto).toUpperCase();
+      let marca = "OTRAS";
+      if (texto.includes("KOLORTEX")) marca = "KOLORTEX";
+      else if (texto.includes("VINET")) marca = "VINET";
+      else if (texto.includes("OMAR")) marca = "OMAR";
+      else if (texto.includes("SUPERVIN")) marca = "SUPERVIN";
+      else if (texto.includes("ACAPULCO")) marca = "ACAPULCO";
+      else if (texto.includes("AQUAMAR")) marca = "AQUAMAR";
+      else if (texto.includes("CH14")) marca = "CH14";
+      else if (texto.includes("CLASIKA")) marca = "CLASIKA";
+      else if (texto.includes("ESMALUX")) marca = "ESMALUX";
+      else if (texto.includes("ESMAFLEX")) marca = "ESMAFLEX";
+      else if (texto.includes("TRANSIKAR")) marca = "TRANSIKAR";
+      else if (texto.includes("TRANSITEX")) marca = "TRANSITEX";
+      else if (texto.includes("PINTAMAR")) marca = "PINTAMAR";
+      else if (texto.includes("DRYLUX")) marca = "DRYLUX";
+      else if (texto.includes("MAQUILA")) marca = "MAQUILAS";
+      
+      return { ...c, marcaComercial: marca };
+    });
+
+    procesadas.sort((a, b) => (a.nivelCubriente || 0) - (b.nivelCubriente || 0));
+
+    const marcasMap = {};
+    procesadas.forEach(c => {
+      const m = c.marcaComercial;
+      if (!marcasMap[m]) marcasMap[m] = { nombre: m, count: 0 };
+      marcasMap[m].count += 1;
+    });
+
+    return { cargasClasificadas: procesadas, marcasDisponibles: Object.values(marcasMap) };
+  }, [cargas]);
+
+  const cargasVisibles = useMemo(() => {
+    return filtroMarca === "TODOS" 
+      ? cargasClasificadas 
+      : cargasClasificadas.filter(c => c.marcaComercial === filtroMarca);
+  }, [filtroMarca, cargasClasificadas]);
+
   if (!visible) return null;
 
-  const cargasClasificadas = [...cargas].sort((a, b) => {
-    const cubrienteA = a.nivelCubriente || 0;
-    const cubrienteB = b.nivelCubriente || 0;
-    if (cubrienteA !== cubrienteB) return cubrienteA - cubrienteB;
-    const folioA = String(a.folio || "");
-    const folioB = String(b.folio || "");
-    return folioA.localeCompare(folioB, undefined, { numeric: true });
-  });
-
   const totalLitros = cargasClasificadas.reduce((t, c) => t + c.litros, 0);
-
-  const renderFila = (c, index, esHistorial = false) => (
-    <div className="fila-carga" key={c.idTemp || index}>
-      <div className="celda nro">{index + 1}</div>
-      <div className="celda g-2">{c.codigoProducto}</div>
-      <div className="celda g-2">{c.tipo || "N/A"}</div>
-      <div className="celda g-2 folio-lote">{c.folio || "-"}</div>
-      <div className="celda g-1">{c.litros.toFixed(2)} L</div>
-      <div className="celda g-1">{c.nivelCubriente}</div>
-      <div className="celda accion">
-        {!esHistorial && (
-          <button className="btn-borrar-fila" onClick={() => onEliminarCarga(c.idTemp)}>✕</button>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="modal-overlay">
@@ -39,7 +59,16 @@ function ModalCargas({ visible, cargas, historialCargas, producto, onClose, onGu
             <h2>Gestión de Cargas</h2>
             <span className="badge-contador">{cargasClasificadas.length} en espera</span>
           </div>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <div className="header-actions">
+            <button 
+              className="btn-guardar-top" 
+              disabled={cargasClasificadas.length === 0}
+              onClick={() => { onGuardar(cargasClasificadas); onClose(); }}
+            >
+              Guardar Producción
+            </button>
+            <button className="close-btn" onClick={onClose}>✕</button>
+          </div>
         </div>
 
         {producto && (
@@ -59,37 +88,67 @@ function ModalCargas({ visible, cargas, historialCargas, producto, onClose, onGu
           </div>
         )}
 
-        {/* EL BOTÓN AHORA ESTÁ AQUÍ ARRIBA */}
-        <div className="modal-footer" style={{ marginBottom: '20px', marginTop: '0px' }}>
-          <button 
-            className="btn-guardar" 
-            style={{ width: '100%' }} /* Lo hacemos ancho completo para que sea fácil de clickear */
-            disabled={cargasClasificadas.length === 0}
-            onClick={() => { onGuardar(cargasClasificadas); onClose(); }}
+        {/* Sección de Marcas (Cards sin litros) */}
+        <div className="contenedor-marcas-grid">
+          <div 
+            className={`marca-card ${filtroMarca === "TODOS" ? "activa" : ""}`}
+            onClick={() => setFiltroMarca("TODOS")}
           >
-            Agregar a producción ({cargasClasificadas.length} cargas)
-          </button>
+            <div className="card-icon">🎨</div>
+            <h3>TODAS</h3>
+            <span>{cargasClasificadas.length} Lotes</span>
+          </div>
+          
+          {marcasDisponibles.map((m) => (
+            <div 
+              key={m.nombre}
+              className={`marca-card ${filtroMarca === m.nombre ? "activa" : ""}`}
+              onClick={() => setFiltroMarca(m.nombre)}
+            >
+              <div className="card-icon">📦</div>
+              <h3>{m.nombre}</h3>
+              <span>{m.count} {m.count === 1 ? 'Lote' : 'Lotes'}</span>
+            </div>
+          ))}
         </div>
 
-        {cargasClasificadas.length > 0 ? (
-          <div className="tabla-container">
-            <h3 className="titulo-tabla">Prioridad: 1° Cubriente | 2° Lote</h3>
-            <div className="tabla-cargas">
-              <div className="fila-carga header">
-                <div className="celda nro">#</div>
-                <div className="celda g-2">Código</div>
-                <div className="celda g-2">Tipo</div>
-                <div className="celda g-2">Lote (Folio)</div>
-                <div className="celda g-1">Litros</div>
-                <div className="celda g-1">Cubr.</div>
-                <div className="celda accion"></div>
-              </div>
-              {cargasClasificadas.map((c, i) => renderFila(c, i, false))}
-            </div>
+        <div className="tabla-seccion">
+          <h3 className="titulo-tabla">
+            {filtroMarca === "TODOS" ? "Listado General" : `Filtrado por: ${filtroMarca}  `}
+          </h3>
+          
+          <div className="fila-carga header">
+            <div className="celda nro">#</div>
+            <div className="celda g-2">Código</div>
+            <div className="celda g-2">Tipo</div>
+            <div className="celda g-2">Lote</div>
+            <div className="celda g-1">Litros</div>
+            <div className="celda g-1">Cubr.</div>
+            <div className="celda accion"></div>
           </div>
-        ) : (
-          <div className="sin-cargas">No hay cargas en la cola de espera.</div>
-        )}
+
+          <div className="contenedor-scroll-tabla">
+            {cargasVisibles.length > 0 ? (
+              <div className="tabla-cargas">
+                {cargasVisibles.map((c, i) => (
+                  <div className="fila-carga" key={c.idTemp || i}>
+                    <div className="celda nro">{i + 1}</div>
+                    <div className="celda g-2">{c.codigoProducto}</div>
+                    <div className="celda g-2">{c.tipo || "N/A"}</div>
+                    <div className="celda g-2">{c.folio || "-"}</div>
+                    <div className="celda g-1">{c.litros.toFixed(1)}</div>
+                    <div className="celda g-1">{c.nivelCubriente}</div>
+                    <div className="celda accion">
+                      <button className="btn-borrar-fila" onClick={() => onEliminarCarga(c.idTemp)}>✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="sin-cargas">No hay datos para esta familia.</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

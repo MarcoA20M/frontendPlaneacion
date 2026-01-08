@@ -365,3 +365,57 @@
 
 
 
+/* GRID DE MARCAS COMERCIALES */
+.contenedor-marcas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.marca-card {
+  background: #2a2640;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.marca-card h3 {
+  font-size: 13px;
+  color: #ccc;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.marca-card p {
+  font-size: 16px;
+  color: #00ffcc;
+  font-weight: 700;
+  margin: 5px 0;
+}
+
+.marca-card span {
+  font-size: 10px;
+  color: #888;
+}
+
+.marca-card:hover {
+  background: rgba(0, 192, 255, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(0, 192, 255, 0.3);
+}
+
+.marca-card.activa {
+  background: rgba(0, 192, 255, 0.2);
+  border: 1px solid #00c0ff;
+  box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+}
+
+.marca-card.activa h3 {
+  color: #fff;
+}

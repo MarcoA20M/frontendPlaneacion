@@ -12,112 +12,113 @@ export function useProduccion() {
   const [tipoPintura, setTipoPintura] = useState("Vinílica");
   const [rondas, setRondas] = useState(Array.from({ length: 8 }, () => Array(6).fill(null)));
   const [cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas] = useState([]);
-  const [cargando, setCargando] = useState(false);
+  
+  const [cargandoExcel, setCargandoExcel] = useState(false);
+  const [buscandoManual, setBuscandoManual] = useState(false);
 
   const IGUALADORES = ["GASPAR", "ALBERTO", "PEDRO"];
   const PREPARADORES = ["GERMAN", "ALDO"];
 
   const normalizarCodigo = (cod) => {
     if (!cod) return "";
-    const str = String(cod).trim();
-    return str.replace(/^0+/, '') || "0";
+    return String(cod).trim().toUpperCase().replace(/^0+/, '') || "0";
   };
 
-  const ordenarCargas = (lista) => [...lista].sort((a, b) => {
-    const cubA = a.nivelCubriente || 0;
-    const cubB = b.nivelCubriente || 0;
-    if (cubA !== cubB) return cubA - cubB;
-    return String(a.folio).localeCompare(String(b.folio), undefined, { numeric: true });
-  });
+  const obtenerDatosProductoSeguro = async (codOriginal) => {
+    const codLimpio = normalizarCodigo(codOriginal);
+    let datosFinales = null;
 
-  const totalLitrosActuales = producto 
-    ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
-    : 0;
+    try {
+      datosFinales = await buscarProducto(codLimpio);
+      if (!datosFinales && codLimpio.endsWith("M")) {
+        const codBase = codLimpio.slice(0, -1);
+        let datosBase = await buscarProducto(codBase) || await buscarProducto("0" + codBase);
+        if (datosBase) {
+          datosFinales = { 
+            ...datosBase, 
+            codigo: codLimpio, 
+            descripcion: datosBase.descripcion + " (MAQUILA)" 
+          };
+        }
+      }
+    } catch (e) { datosFinales = null; }
+
+    if (!datosFinales) {
+      datosFinales = {
+        codigo: codLimpio,
+        descripcion: codLimpio.endsWith("M") ? "MAQUILA DESCONOCIDA" : "NO REGISTRADO",
+        poderCubriente: 0,
+        tipoPinturaId: tipoPintura === "Vinílica" ? 2 : 1,
+        envasados: [], procesos: []
+      };
+    }
+    return datosFinales;
+  };
 
   const consultar = async () => {
     const limpio = codigo.trim();
     if (!limpio) return;
-    try {
-      const codigoLimpio = normalizarCodigo(limpio);
-      const res = await buscarProducto(codigoLimpio);
-      if (!res) return alert("Producto no encontrado");
-      const esVinilica = res.tipoPinturaId === 2;
-      if (tipoPintura === "Vinílica" && !esVinilica) return alert("Este producto no pertenece a Vinílicas");
-      if (tipoPintura === "Esmalte" && esVinilica) return alert("Este producto no pertenece a Esmaltes");
-      setProducto({ ...res, envasados: res.envasados || [], procesos: res.procesos || [] });
-      setCantidades({});
-    } catch (e) { alert("Error al conectar con el servidor"); }
-  };
+    setBuscandoManual(true);
+    const res = await obtenerDatosProductoSeguro(limpio);
+    setBuscandoManual(false);
 
-  const agregarCargaManual = () => {
-    if (!producto || totalLitrosActuales === 0) return alert("Ingresa cantidades");
-    const resumenEnvasados = producto.envasados
-      .filter(env => (cantidades[env.id] || 0) > 0)
-      .map(env => ({ 
-        cantidad: cantidades[env.id], 
-        formato: `${litrosPorEnvasado(env.id)}`.replace('.', '') 
-      }));
+    const esVinilica = res.tipoPinturaId === 2;
+    if (tipoPintura === "Vinílica" && !esVinilica) return alert("Producto de ESMALTES");
+    if (tipoPintura === "Esmalte" && esVinilica) return alert("Producto de VINÍLICAS");
 
-    const nuevaCarga = {
-      idTemp: Date.now() + Math.random(),
-      folio: "MANUAL",
-      codigoProducto: normalizarCodigo(producto.codigo),
-      descripcion: producto.descripcion,
-      litros: totalLitrosActuales,
-      tipo: tipoPintura,
-      nivelCubriente: producto.poderCubriente,
-      detallesEnvasado: resumenEnvasados,
-      procesos: producto.procesos || [],
-      operario: ""
-    };
-
-    const esExcluido = CODIGOS_EXCLUIDOS.some(cod => normalizarCodigo(cod) === normalizarCodigo(producto.codigo));
-    if (esExcluido) setCargasEspeciales(prev => ordenarCargas([...prev, nuevaCarga]));
-    else setColaCargas(prev => ordenarCargas([...prev, nuevaCarga]));
-
-    setCantidades({}); setProducto(null); setCodigo("");
+    setProducto({ ...res, envasados: res.envasados || [], procesos: res.procesos || [] });
+    setCantidades({});
   };
 
   const handleImportExcel = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setCargando(true);
+    setCargandoExcel(true);
     try {
       const dataRaw = await analizarExcel(file);
       const nuevasNormales = [];
       const nuevasEspeciales = [];
+
       for (const item of dataRaw) {
         if (!item.articulo) continue;
-        const res = await buscarProducto(normalizarCodigo(item.articulo));
-        if (res) {
-          const tipoDetectado = res.tipoPinturaId === 2 ? "Vinílica" : "Esmalte";
-          const nueva = {
-            idTemp: Date.now() + Math.random(),
-            folio: item.folio || "S/F",
-            codigoProducto: res.codigo,
-            descripcion: res.descripcion,
-            litros: parseFloat(item.litros) || 0,
-            tipo: tipoDetectado,
-            nivelCubriente: res.poderCubriente,
-            procesos: res.procesos || [],
-            detallesEnvasado: item.hijas ? item.hijas.map(h => ({ 
-              cantidad: h.cantidad, 
-              formato: h.articulo.split('-')[0] 
-            })) : [],
-            operario: ""
-          };
-          if (CODIGOS_EXCLUIDOS.some(cod => normalizarCodigo(cod) === normalizarCodigo(res.codigo))) nuevasEspeciales.push(nueva);
-          else nuevasNormales.push(nueva);
+        const res = await obtenerDatosProductoSeguro(item.articulo);
+        const lote = String(item.folio || "").toUpperCase();
+        
+        let tipoFinal = "";
+        if (lote.startsWith("V")) tipoFinal = "Vinílica";
+        else if (lote.startsWith("E") || lote.startsWith("S")) tipoFinal = "Esmalte";
+        else tipoFinal = res.tipoPinturaId === 2 ? "Vinílica" : "Esmalte";
+
+        const nueva = {
+          idTemp: Date.now() + Math.random(),
+          folio: item.folio || "S/F",
+          codigoProducto: res.codigo,
+          descripcion: res.descripcion,
+          litros: parseFloat(item.litros) || 0,
+          tipo: tipoFinal,
+          nivelCubriente: res.poderCubriente || 0,
+          procesos: res.procesos || [],
+          detallesEnvasado: item.hijas ? item.hijas.map(h => ({ 
+            cantidad: h.cantidad, formato: h.articulo.split('-')[0] 
+          })) : [],
+          operario: ""
+        };
+
+        if (CODIGOS_EXCLUIDOS.some(cod => normalizarCodigo(cod) === normalizarCodigo(res.codigo))) {
+          nuevasEspeciales.push(nueva);
+        } else {
+          nuevasNormales.push(nueva);
         }
       }
-      setColaCargas(prev => ordenarCargas([...prev, ...nuevasNormales]));
-      setCargasEspeciales(prev => ordenarCargas([...prev, ...nuevasEspeciales]));
+      setColaCargas(prev => [...prev, ...nuevasNormales]);
+      setCargasEspeciales(prev => [...prev, ...nuevasEspeciales]);
     } catch (err) { alert("Error al procesar Excel"); }
-    finally { setCargando(false); }
+    finally { setCargandoExcel(false); }
   };
 
   const guardarCargasEnRondas = (cargasAGuardar) => {
     const idsAsignados = [];
+    
     if (tipoPintura === "Esmalte") {
       let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
       cargasAGuardar.forEach((carga) => {
@@ -130,43 +131,68 @@ export function useProduccion() {
         tempAsignadasEsmaltes.push({ ...carga, operario: balance[0].nombre, maquina: "ESM" });
         idsAsignados.push(carga.idTemp);
       });
-      setCargasEsmaltesAsignadas(ordenarCargas(tempAsignadasEsmaltes));
+      setCargasEsmaltesAsignadas([...tempAsignadasEsmaltes].sort((a,b) => (a.nivelCubriente||0)-(b.nivelCubriente||0)));
     } else {
       const nuevasRondas = [...rondas.map(f => [...f])];
       const nuevasEspeciales = [...cargasEspeciales];
-      cargasAGuardar.forEach((carga) => {
+
+      // --- LÓGICA DE FUSIÓN DE CÓDIGOS HERMANOS (3000 + 3000M) ---
+      const gruposMap = new Map();
+      cargasAGuardar.forEach(carga => {
+        const base = carga.codigoProducto.endsWith("M") ? carga.codigoProducto.slice(0, -1) : carga.codigoProducto;
+        if (!gruposMap.has(base)) {
+          gruposMap.set(base, { ...carga, idOriginales: [carga.idTemp] });
+        } else {
+          const existente = gruposMap.get(base);
+          existente.litros += carga.litros;
+          existente.folio += ` / ${carga.folio}`;
+          existente.idOriginales.push(carga.idTemp);
+        }
+      });
+
+      const gruposAFusionar = Array.from(gruposMap.values());
+
+      gruposAFusionar.forEach((cargaAgrupada) => {
         let asignada = false;
         for (let col = 0; col < 6 && !asignada; col++) {
           for (let fila = 0; fila < 8; fila++) {
             if (!nuevasRondas[fila][col]) {
               const numM = 101 + fila;
               const esGran = [104, 108].includes(numM);
-              const cumpleRegla = (carga.litros > 1600 && esGran) || 
-                                  (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || 
-                                  (carga.litros <= 855 && !esGran && numM !== 107);
+              const l = cargaAgrupada.litros;
+              const cumpleRegla = (l > 1600 && esGran) || 
+                                  (l > 855 && l <= 1600 && (esGran || numM === 107)) || 
+                                  (l <= 855 && !esGran && numM !== 107);
               if (cumpleRegla) {
-                carga.operario = getOperarioPorMaquina(numM);
-                nuevasRondas[fila][col] = { ...carga };
+                cargaAgrupada.operario = getOperarioPorMaquina(numM);
+                nuevasRondas[fila][col] = { ...cargaAgrupada };
                 asignada = true;
-                idsAsignados.push(carga.idTemp);
+                cargaAgrupada.idOriginales.forEach(id => idsAsignados.push(id));
                 break;
               }
             }
           }
         }
-        if (!asignada) { nuevasEspeciales.push(carga); idsAsignados.push(carga.idTemp); }
+        if (!asignada) { 
+          nuevasEspeciales.push(cargaAgrupada);
+          cargaAgrupada.idOriginales.forEach(id => idsAsignados.push(id));
+        }
       });
       setRondas(nuevasRondas);
-      setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+      setCargasEspeciales([...nuevasEspeciales].sort((a,b) => (a.nivelCubriente||0)-(b.nivelCubriente||0)));
     }
     setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
   };
+
+  const totalLitrosActuales = producto 
+    ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
+    : 0;
 
   return {
     codigo, setCodigo, producto, cantidades, setCantidades, colaCargas, setColaCargas,
     cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
     rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
-    cargando, totalLitrosActuales,
-    consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas
+    cargando: cargandoExcel, buscandoManual, totalLitrosActuales,
+    consultar, handleImportExcel, guardarCargasEnRondas
   };
 }

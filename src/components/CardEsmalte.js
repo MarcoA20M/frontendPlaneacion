@@ -26,7 +26,6 @@ const CardEsmalte = ({ carga }) => {
           <span>📦</span> {carga.litros.toFixed(1)} L
         </div>
         <div className="esmalte-stat" style={{color: '#2980b9'}}>
-          <span>🎯</span> {carga.nivelCubriente}
         </div>
       </div>
     </div>

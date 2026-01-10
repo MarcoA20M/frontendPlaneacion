@@ -1,22 +1,30 @@
 import React from 'react';
 import '../styles/esmaltes.css';
 
-const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle, filtroOperario }) => {
+const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle, filtroOperario, modoEsmalte }) => {
   
   const limpiarTexto = (texto) => {
     if (!texto) return "N/A";
     return texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
   };
 
-  // FILTRADO INTELIGENTE:
-  // Ahora usa .includes para que si el filtro es "Aldo", 
-  // encuentre también a "Aldo / Gaspar"
-  const cargasFiltradas = filtroOperario 
-    ? cargas.filter(c => {
-        const nombreCarga = c.operario || 'Área Esmaltes';
-        return nombreCarga.includes(filtroOperario);
-      })
-    : cargas;
+  // FILTRADO COMBINADO: Nombre + Modo (Directo/Molienda)
+  const cargasFiltradas = cargas.filter(c => {
+    const nombreCarga = c.operario || 'Área Esmaltes';
+    
+    // Filtro 1: Por nombre individual
+    const pasaNombre = filtroOperario ? nombreCarga.includes(filtroOperario) : true;
+    
+    // Filtro 2: Por modo (Molienda tiene '/', Directo no)
+    let pasaModo = true;
+    if (modoEsmalte === 'DIRECTO') {
+      pasaModo = !nombreCarga.includes('/');
+    } else if (modoEsmalte === 'MOLIENDA') {
+      pasaModo = nombreCarga.includes('/');
+    }
+
+    return pasaNombre && pasaModo;
+  });
 
   return (
     <div className="esmaltes-full-view">
@@ -31,6 +39,7 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle,
                 setMostrarDetalle(true);
               }}
             >
+              {/* DISEÑO ORIGINAL RESTAURADO */}
               <div style={{ position: 'absolute', top: '10px', right: '60px', textAlign: 'right' }}>
                 <span className="mini-label">Lote</span>
                 <span className="val-neon" style={{ display: 'block', fontSize: '0.9rem' }}>{carga.folio}</span>
@@ -69,14 +78,13 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle,
               </div>
 
               <div className="mini-footer" style={{ textTransform: 'none' }}>
-                {/* Mostramos el texto original (ej: Aldo / Gaspar) */}
                 {carga.operario || 'Área Esmaltes'}
               </div>
             </div>
           ))
         ) : (
           <div className="empty-state-neon">
-            <p>{filtroOperario ? `SIN CARGAS PARA ${filtroOperario.toUpperCase()}` : 'SISTEMA LISTO'}</p>
+            <p>{filtroOperario || modoEsmalte ? 'SIN COINCIDENCIAS' : 'SISTEMA LISTO'}</p>
           </div>
         )}
       </div>

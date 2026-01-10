@@ -35,6 +35,7 @@ function AppContent() {
   const navigate = useNavigate();
   const [fechaTrabajo, setFechaTrabajo] = useState(new Date());
   const [filtroOperario, setFiltroOperario] = useState(null); 
+  const [modoEsmalte, setModoEsmalte] = useState(null); 
   const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
@@ -60,12 +61,17 @@ function AppContent() {
 
   const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
-  // --- LÓGICA DE MOVIMIENTO A ESPECIALES ---
-  const handleMoverAEspecial = (carga) => {
-    // 1. Quitar de la cola de espera
-    setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+  // Lógica de Contadores
+  const stats = useMemo(() => {
+    return {
+      total: cargasEsmaltesAsignadas.length,
+      directos: cargasEsmaltesAsignadas.filter(c => !(c.operario || "").includes('/')).length,
+      molienda: cargasEsmaltesAsignadas.filter(c => (c.operario || "").includes('/')).length
+    };
+  }, [cargasEsmaltesAsignadas]);
 
-    // 2. Quitar de las rondas (Vinílica)
+  const handleMoverAEspecial = (carga) => {
+    setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
     setRondas(prevRondas => prevRondas.map(fila => 
       fila.map(celda => {
         if (!celda) return null;
@@ -76,17 +82,11 @@ function AppContent() {
         return celda.idTemp === carga.idTemp ? null : celda;
       })
     ));
-
-    // 3. Quitar de Esmaltes
     setCargasEsmaltesAsignadas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
-
-    // 4. Agregar a Especiales
     setCargasEspeciales(prev => ordenarCargas([...prev, { ...carga, operario: "Lázaro" }]));
-    
     setMostrarDetalle(false);
   };
 
-  // --- HANDLERS DE PROGRESO Y ARCHIVOS ---
   const simularProgreso = () => {
     setProgreso(0);
     return setInterval(() => {
@@ -200,7 +200,7 @@ function AppContent() {
                 </div>
                 <div className="selector-tipo">
                   {["Vinílica", "Esmalte"].map(t => (
-                    <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => {setTipoPintura(t); setFiltroOperario(null);}}>{t}</button>
+                    <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => {setTipoPintura(t); setFiltroOperario(null); setModoEsmalte(null);}}>{t}</button>
                   ))}
                 </div>
               </div>
@@ -243,8 +243,8 @@ function AppContent() {
               </div>
 
               <div className="main-board-section">
-                <div className="panel-header-actions">
-                  <div className="header-left-side">
+                <div className="panel-header-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <div className="header-left-side" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
                     <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}S</h2>
                     <ResumenOperarios 
                       tipoPintura={tipoPintura}
@@ -255,25 +255,40 @@ function AppContent() {
                       onFiltrar={setFiltroOperario}
                       filtroActivo={filtroOperario}
                     />
+                    
+                    {/* BOTONES CON GENERAL Y CONTADORES */}
+                    {tipoPintura === "Esmalte" && (
+                      <div style={{ display: 'inline-flex', gap: '5px', marginLeft: '15px', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px' }}>
+                         <button 
+                            className={`card-op ${modoEsmalte === null ? 'active' : ''}`}
+                            onClick={() => setModoEsmalte(null)}
+                            style={{ fontSize: '0.7rem' }}
+                         >🌍 GENERAL ({stats.total})</button>
+                         <button 
+                            className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`}
+                            onClick={() => setModoEsmalte('DIRECTO')}
+                            style={{ fontSize: '0.7rem' }}
+                         >🚀 DIRECTOS ({stats.directos})</button>
+                         <button 
+                            className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`}
+                            onClick={() => setModoEsmalte('MOLIENDA')}
+                            style={{ fontSize: '0.7rem' }}
+                         >⚙️ MOLIENDA ({stats.molienda})</button>
+                      </div>
+                    )}
                   </div>
                   <button className="btn-family-explorer" onClick={() => navigate("/familias")}>🏷️ FAMILIAS</button>
                 </div>
 
                 {tipoPintura === "Vinílica" ? (
-                  <TableroVinilica 
-                    rondas={rondas} 
-                    fechaTrabajo={fechaTrabajo} 
-                    handleDrop={handleDrop} 
-                    setCargaSeleccionada={setCargaSeleccionada} 
-                    setMostrarDetalle={setMostrarDetalle}
-                    filtroOperario={filtroOperario}
-                  />
+                  <TableroVinilica rondas={rondas} fechaTrabajo={fechaTrabajo} handleDrop={handleDrop} setCargaSeleccionada={setCargaSeleccionada} setMostrarDetalle={setMostrarDetalle} filtroOperario={filtroOperario} />
                 ) : (
                   <TableroEsmaltes 
                     cargas={cargasEsmaltesAsignadas} 
                     setCargaSeleccionada={setCargaSeleccionada} 
                     setMostrarDetalle={setMostrarDetalle}
                     filtroOperario={filtroOperario}
+                    modoEsmalte={modoEsmalte}
                   />
                 )}
               </div>
@@ -290,17 +305,7 @@ function AppContent() {
       </Routes>
 
       <ModalCargas visible={mostrarModal} cargas={colaFiltrada} onClose={() => setMostrarModal(false)} onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))} onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }} onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }} />
-      
-      <ModalDetalleCarga 
-        visible={mostrarDetalle} 
-        carga={cargaSeleccionada} 
-        onClose={() => setMostrarDetalle(false)} 
-        onEliminar={() => {
-           setColaCargas(prev => prev.filter(c => c.idTemp !== cargaSeleccionada.idTemp));
-           setMostrarDetalle(false);
-        }} 
-        onMoverEspecial={handleMoverAEspecial} 
-      />
+      <ModalDetalleCarga visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)} onEliminar={() => {setColaCargas(prev => prev.filter(c => c.idTemp !== cargaSeleccionada.idTemp)); setMostrarDetalle(false);}} onMoverEspecial={handleMoverAEspecial} />
     </>
   );
 }

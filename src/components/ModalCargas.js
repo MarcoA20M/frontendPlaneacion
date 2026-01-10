@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "../styles/modalCargas.css";
 
-function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga }) {
+function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga, onSeleccionarCarga }) {
   const [filtroMarca, setFiltroMarca] = useState("TODOS");
 
   const { cargasClasificadas, marcasDisponibles } = useMemo(() => {
@@ -88,7 +88,6 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
           </div>
         )}
 
-        {/* Sección de Marcas (Cards sin litros) */}
         <div className="contenedor-marcas-grid">
           <div 
             className={`marca-card ${filtroMarca === "TODOS" ? "activa" : ""}`}
@@ -114,7 +113,7 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
 
         <div className="tabla-seccion">
           <h3 className="titulo-tabla">
-            {filtroMarca === "TODOS" ? "Listado General" : `Filtrado por: ${filtroMarca}  `}
+            {filtroMarca === "TODOS" ? "Listado General" : `Filtrado por: ${filtroMarca}`}
           </h3>
           
           <div className="fila-carga header">
@@ -131,7 +130,11 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
             {cargasVisibles.length > 0 ? (
               <div className="tabla-cargas">
                 {cargasVisibles.map((c, i) => (
-                  <div className="fila-carga" key={c.idTemp || i}>
+                  <div 
+                    className="fila-carga clickable-row" 
+                    key={c.idTemp || i}
+                    onClick={() => onSeleccionarCarga(c)} // EVENTO PARA ABRIR DETALLE
+                  >
                     <div className="celda nro">{i + 1}</div>
                     <div className="celda g-2">{c.codigoProducto}</div>
                     <div className="celda g-2">{c.tipo || "N/A"}</div>
@@ -139,7 +142,13 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
                     <div className="celda g-1">{c.litros.toFixed(1)}</div>
                     <div className="celda g-1">{c.nivelCubriente}</div>
                     <div className="celda accion">
-                      <button className="btn-borrar-fila" onClick={() => onEliminarCarga(c.idTemp)}>✕</button>
+                      <button 
+                        className="btn-borrar-fila" 
+                        onClick={(e) => {
+                            e.stopPropagation(); // Evita abrir el detalle al borrar
+                            onEliminarCarga(c.idTemp);
+                        }}
+                      >✕</button>
                     </div>
                   </div>
                 ))}

@@ -7,7 +7,7 @@ export function useProduccion() {
   const [codigo, setCodigo] = useState("");
   const [producto, setProducto] = useState(null);
   const [cantidades, setCantidades] = useState({});
-  const [colaCargas, setColaCargas] = useState([]); 
+  const [colaCargas, setColaCargas] = useState([]);
   const [cargasEspeciales, setCargasEspeciales] = useState([]);
   const [tipoPintura, setTipoPintura] = useState("Vinílica");
   const [rondas, setRondas] = useState(Array.from({ length: 8 }, () => Array(6).fill(null)));
@@ -16,8 +16,9 @@ export function useProduccion() {
   const [cargandoExcel, setCargandoExcel] = useState(false);
   const [buscandoManual, setBuscandoManual] = useState(false);
 
-  const IGUALADORES = ["GASPAR", "ALBERTO", "PEDRO"];
-  const PREPARADORES = ["GERMAN", "ALDO"];
+  // --- CONFIGURACIÓN DE PERSONAL ---
+  const IGUALADORES = ["Gaspar", "Alberto", "Pedro"];
+  const CODIGOS_BASES = ["BBE20", "BBE30", "BAL40", "BNE10", "BSP10"];
 
   const normalizarCodigo = (cod) => {
     if (!cod) return "";
@@ -29,12 +30,10 @@ export function useProduccion() {
     let datosFinales = null;
 
     try {
-      // 1. Intentar búsqueda directa
       try {
         datosFinales = await buscarProducto(codLimpio);
       } catch (e) { datosFinales = null; }
 
-      // 2. Si no existe y es Maquila (termina en M), buscamos el base para heredar PODER CUBRIENTE
       if (!datosFinales && codLimpio.endsWith("M")) {
         const codBase = codLimpio.slice(0, -1);
         let datosBase = null;
@@ -44,11 +43,10 @@ export function useProduccion() {
         } catch (e) { datosBase = null; }
 
         if (datosBase) {
-          datosFinales = { 
-            ...datosBase, 
-            codigo: codLimpio, 
-            descripcion: datosBase.descripcion + " (MAQUILA)",
-            // Mantenemos el poderCubriente y procesos del padre
+          datosFinales = {
+            ...datosBase,
+            codigo: codLimpio,
+            descripcion: datosBase.descripcion + " (Maquila)",
           };
         }
       }
@@ -57,7 +55,7 @@ export function useProduccion() {
     if (!datosFinales) {
       datosFinales = {
         codigo: codLimpio,
-        descripcion: codLimpio.endsWith("M") ? "MAQUILA DESCONOCIDA" : "PRODUCTO NO REGISTRADO",
+        descripcion: codLimpio.endsWith("M") ? "Maquila Desconocida" : "Producto no Registrado",
         poderCubriente: 0,
         tipoPinturaId: tipoPintura === "Vinílica" ? 2 : 1,
         envasados: [],
@@ -93,18 +91,14 @@ export function useProduccion() {
 
       for (const item of dataRaw) {
         if (!item.articulo) continue;
-        
-        // 1. Buscamos los datos técnicos (incluye poder cubriente heredado de M)
         const res = await obtenerDatosProductoSeguro(item.articulo);
-        
-        // 2. Determinamos el tipo por el lote (V, E, S)
         const lote = String(item.folio || "").toUpperCase();
+        
         let tipoFinal = "";
         if (lote.startsWith("V")) tipoFinal = "Vinílica";
         else if (lote.startsWith("E") || lote.startsWith("S")) tipoFinal = "Esmalte";
         else tipoFinal = res.tipoPinturaId === 2 ? "Vinílica" : "Esmalte";
 
-        // 3. Creamos la carga asegurando que "nivelCubriente" venga de la BD
         const nueva = {
           idTemp: Date.now() + Math.random(),
           folio: item.folio || "S/F",
@@ -112,11 +106,11 @@ export function useProduccion() {
           descripcion: res.descripcion,
           litros: parseFloat(item.litros) || 0,
           tipo: tipoFinal,
-          nivelCubriente: res.poderCubriente || 0, // AQUI RECUPERAMOS EL PODER CUBRIENTE
+          nivelCubriente: res.poderCubriente || 0,
           procesos: res.procesos || [],
-          detallesEnvasado: item.hijas ? item.hijas.map(h => ({ 
-            cantidad: h.cantidad, 
-            formato: h.articulo.split('-')[0] 
+          detallesEnvasado: item.hijas ? item.hijas.map(h => ({
+            cantidad: h.cantidad,
+            formato: h.articulo.split('-')[0]
           })) : [],
           operario: ""
         };
@@ -127,13 +121,12 @@ export function useProduccion() {
           nuevasNormales.push(nueva);
         }
       }
-      setColaCargas(prev => [...prev, ...nuevasNormales]); // Ordenaremos al final
+      setColaCargas(prev => [...prev, ...nuevasNormales]);
       setCargasEspeciales(prev => [...prev, ...nuevasEspeciales]);
     } catch (err) { alert("Error al procesar Excel"); }
     finally { setCargandoExcel(false); }
   };
 
-  // ... (Resto de funciones: agregarCargaManual, guardarCargasEnRondas, ordenarCargas se mantienen igual)
   const ordenarCargas = (lista) => [...lista].sort((a, b) => {
     const cubA = a.nivelCubriente || 0;
     const cubB = b.nivelCubriente || 0;
@@ -164,22 +157,64 @@ export function useProduccion() {
 
   const guardarCargasEnRondas = (cargasAGuardar) => {
     const idsAsignados = [];
+    
     if (tipoPintura === "Esmalte") {
       let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
+
       cargasAGuardar.forEach((carga) => {
         const listaProcesos = (carga.procesos || []).map(p => p.descripcion.toUpperCase());
-        const requiereIgualacion = listaProcesos.some(desc => desc.includes("IGUALACION") || desc.includes("TERMINACION"));
-        const grupoCandidatos = requiereIgualacion ? IGUALADORES : PREPARADORES;
-        const balance = grupoCandidatos.map(nombre => ({
-          nombre, total: tempAsignadasEsmaltes.filter(c => c.operario === nombre).length + (nombre === "ALBERTO" ? 2 : 0)
-        })).sort((a, b) => a.total - b.total);
-        tempAsignadasEsmaltes.push({ ...carga, operario: balance[0].nombre, maquina: "ESM" });
+        const codigoUpper = normalizarCodigo(carga.codigoProducto);
+        
+        // --- DETECCIÓN DE ETAPAS ---
+        const esBase = CODIGOS_BASES.includes(codigoUpper) || codigoUpper.startsWith("B");
+        const tieneMolienda = listaProcesos.some(d => d.includes("MOLIENDA"));
+        const tienePreparado = listaProcesos.some(d => d.includes("PREPARADO") || d.includes("DISPERSION"));
+        const tieneEtapaFinal = listaProcesos.some(d =>
+          d.includes("IGUALACIÓN") || d.includes("IGUALACION") || d.includes("TERMINADO") || d.includes("AJUSTE")
+        );
+
+        let operariosAsignados = [];
+
+        // 1. ASIGNACIÓN DE INICIO (Aldo, Germán o Pedro)
+        if (esBase) {
+          operariosAsignados.push("Aldo"); // Las bases siempre las hace Aldo
+        } else if (tieneMolienda) {
+          operariosAsignados.push("Germán");
+        } else if (tienePreparado) {
+          operariosAsignados.push("Aldo"); // Aldo también hace el preparado normal
+        }
+
+        // 2. ASIGNACIÓN FINAL (Igualadores)
+        if (tieneEtapaFinal || operariosAsignados.length === 0) {
+          // Si es carga larga (molienda o preparado) o es una BASE, Alberto NO iguala
+          const esCargaCompleja = tieneMolienda || tienePreparado || esBase;
+          const candidatos = esCargaCompleja ? ["Gaspar", "Pedro"] : IGUALADORES;
+
+          const balance = candidatos.map(nombre => {
+            const conteoActual = tempAsignadasEsmaltes.filter(c => c.operario.includes(nombre)).length;
+            const handicap = (nombre === "Alberto") ? 3 : 0;
+            return { nombre, total: conteoActual + handicap };
+          }).sort((a, b) => a.total - b.total);
+
+          const elegido = balance[0].nombre;
+          
+          if (!operariosAsignados.includes(elegido)) {
+            operariosAsignados.push(elegido);
+          }
+        }
+
+        const operarioFinal = operariosAsignados.join(" / ");
+        tempAsignadasEsmaltes.push({ ...carga, operario: operarioFinal, maquina: "ESM" });
         idsAsignados.push(carga.idTemp);
       });
+
       setCargasEsmaltesAsignadas(ordenarCargas(tempAsignadasEsmaltes));
+
     } else {
+      // --- LÓGICA DE VINÍLICAS ---
       const nuevasRondas = [...rondas.map(f => [...f])];
       const nuevasEspeciales = [...cargasEspeciales];
+      
       cargasAGuardar.forEach((carga) => {
         let asignada = false;
         for (let col = 0; col < 6 && !asignada; col++) {
@@ -187,8 +222,8 @@ export function useProduccion() {
             if (!nuevasRondas[fila][col]) {
               const numM = 101 + fila;
               const esGran = [104, 108].includes(numM);
-              const cumpleRegla = (carga.litros > 1600 && esGran) || 
-                                  (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || 
+              const cumpleRegla = (carga.litros > 1600 && esGran) ||
+                                  (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) ||
                                   (carga.litros <= 855 && !esGran && numM !== 107);
               if (cumpleRegla) {
                 carga.operario = getOperarioPorMaquina(numM);
@@ -208,7 +243,7 @@ export function useProduccion() {
     setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
   };
 
-  const totalLitrosActuales = producto 
+  const totalLitrosActuales = producto
     ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
     : 0;
 

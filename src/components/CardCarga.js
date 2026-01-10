@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/cardCarga.css'; 
+import '../styles/cardCarga.css';
 
 const CardCarga = ({ carga }) => {
   if (!carga) return null;
@@ -15,7 +15,6 @@ const CardCarga = ({ carga }) => {
         
         <div className="mini-divider"></div>
         
-        {/* 🟢 NUEVO: Lista de botes/envases */}
         <div className="mini-envasados">
           {carga.detallesEnvasado && carga.detallesEnvasado.map((item, idx) => (
             <div key={idx} className="envasado-linea">

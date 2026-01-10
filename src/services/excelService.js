@@ -13,10 +13,24 @@ export const exportarReporte = async (cargas) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cargas })
   });
+
+  // Obtenemos la fecha actual en formato DD-MM-YYYY
+  const fecha = new Date();
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const anio = fecha.getFullYear();
+  const fechaFormateada = `${dia}-${mes}-${anio}`;
+
   const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `Reporte_${new Date().toLocaleDateString().replace(/\//g,'-')}.xlsx`;
+
+  // AQUÍ ES DONDE CAMBIAMOS EL NOMBRE:
+  link.download = `Control de la producción ${fechaFormateada}.xlsx`;
+
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };

@@ -419,3 +419,15 @@
 .marca-card.activa h3 {
   color: #fff;
 }
+
+
+
+
+.fila-carga.clickable-row {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.fila-carga.clickable-row:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* Un azul muy suave */
+}

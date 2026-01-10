@@ -72,17 +72,7 @@
 .val-neon { color: #fff; font-weight: bold; font-size: 14px; }
 
 /* Footer */
-.mini-footer {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    font-size: 11px;
-    color: #e0b0ff; 
-    font-weight: 600;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 4px 10px;
-    border-radius: 6px;
-}
+
 
 .empty-state-neon {
     grid-column: 1 / -1;
@@ -224,17 +214,6 @@
 .val-neon { color: #fff; font-weight: bold; font-size: 14px; }
 
 /* Footer */
-.mini-footer {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    font-size: 11px;
-    color: #e0b0ff; 
-    font-weight: 600;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 4px 10px;
-    border-radius: 6px;
-}
 
 .empty-state-neon {
     grid-column: 1 / -1;
@@ -466,9 +445,9 @@
 /* Footer del Operario */
 .mini-footer {
     position: absolute;
-    bottom: 12px;
-    right: 15px;
-    font-size: 11px;
+    bottom: 8px;
+    right: 5px;
+    font-size: 9.5px;
     color: #bc13fe; 
     font-weight: 700;
     background: rgba(0, 0, 0, 0.3);

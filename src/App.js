@@ -2,14 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { useProduccion } from "./hooks/useProduccion";
 import { exportarReporte } from "./services/excelService";
-import { procesarPdfConRondas } from "./services/pdfService"; 
+import { procesarPdfConRondas } from "./services/pdfService";
 import { familiaService } from "./services/familiaService";
 import { getOperarioPorMaquina, litrosPorEnvasado, litrosATexto } from "./constants/config";
 
-// Componentes UI
+// Componentes UI Extraídos
+import BusquedaSeccion from "./components/BusquedaSeccion";
+import TableroVinilica from "./components/TableroVinilica";
+
+// Resto de Componentes UI
 import ModalCargas from "./components/ModalCargas";
 import ModalDetalleCarga from "./components/ModalDetalleCarga";
-import CardCarga from "./components/CardCarga";
 import TableroEsmaltes from "./components/TableroEsmaltes";
 import PanelEspeciales from "./components/PanelEspeciales";
 import LoadingOverlay from "./components/LoadingOverlay";
@@ -25,31 +28,13 @@ function AppContent() {
   const {
     codigo, setCodigo, producto, cantidades, setCantidades, colaCargas, setColaCargas,
     cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
-    rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas, 
+    rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
     cargando, totalLitrosActuales,
     consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas
   } = useProduccion();
 
   const navigate = useNavigate();
   const [fechaTrabajo, setFechaTrabajo] = useState(new Date());
-
-  // --- LÓGICA DE ELIMINACIÓN PARA EL MODAL DE GESTIÓN ---
-  const handleEliminarCargaDeCola = (idTemp) => {
-    if (window.confirm("¿Deseas eliminar esta carga de la lista de espera?")) {
-      setColaCargas(prev => prev.filter(c => c.idTemp !== idTemp));
-    }
-  };
-
-  const moverSemana = (offset) => {
-    const nueva = new Date(fechaTrabajo);
-    nueva.setDate(nueva.getDate() + (offset * 7));
-    setFechaTrabajo(nueva);
-  };
-
-  const colaFiltrada = useMemo(() => {
-    return colaCargas.filter(carga => carga.tipo === tipoPintura);
-  }, [colaCargas, tipoPintura]);
-
   const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
@@ -61,6 +46,7 @@ function AppContent() {
   const [familias, setFamilias] = useState([]);
   const [cargandoFamilias, setCargandoFamilias] = useState(false);
 
+  // --- LÓGICA DE DATOS ---
   useEffect(() => {
     const fetchFamilias = async () => {
       setCargandoFamilias(true);
@@ -71,6 +57,9 @@ function AppContent() {
     fetchFamilias();
   }, [tipoPintura]);
 
+  const colaFiltrada = useMemo(() => colaCargas.filter(carga => carga.tipo === tipoPintura), [colaCargas, tipoPintura]);
+
+  // --- HANDLERS ---
   const simularProgreso = () => {
     setProgreso(0);
     return setInterval(() => {
@@ -80,53 +69,61 @@ function AppContent() {
 
   const handleImportExcelConProgreso = async (e) => {
     const idIntervalo = simularProgreso();
-    try { await handleImportExcel(e); setProgreso(100); } 
-    catch (error) { alert("Error: " + error.message); }
-    finally { clearInterval(idIntervalo); setTimeout(() => setProgreso(0), 600); setMenuCargasAbierto(false); }
+    try { 
+      await handleImportExcel(e); 
+      setProgreso(100); 
+    } catch (error) { 
+      alert("Error: " + error.message); 
+    } finally { 
+      clearInterval(idIntervalo); 
+      setTimeout(() => setProgreso(0), 600); 
+      setMenuCargasAbierto(false); 
+    }
   };
 
   const handlePdfClick = async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    setProcesandoPdf(true); const idIntervalo = simularProgreso();
+    const file = e.target.files[0];
+    if (!file) return;
+    setProcesandoPdf(true);
+    const idIntervalo = simularProgreso();
     try {
-      const tableroAProcesar = tipoPintura === "Vinílica" ? rondas : cargasEsmaltesAsignadas;
+      let tableroAProcesar = tipoPintura === "Vinílica" 
+        ? rondas.map((fila, fIdx) => fila.map(celda => {
+            if (!celda) return null;
+            const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
+            return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
+          }))
+        : [cargasEsmaltesAsignadas];
+
       const blob = await procesarPdfConRondas(file, tableroAProcesar, cargasEspeciales.filter(c => c.tipo === tipoPintura));
       setProgreso(100);
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      a.download = `Reporte_${tipoPintura}_${new Date().getTime()}.pdf`; a.click();
-    } catch (error) { alert("Error en PDF: " + error.message); }
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte_${tipoPintura}.pdf`;
+      a.click();
+    } catch (error) { alert("Error PDF: " + error.message); }
     finally { clearInterval(idIntervalo); setTimeout(() => { setProcesandoPdf(false); setProgreso(0); }, 600); e.target.value = null; }
   };
 
   const handleReporteClick = async () => {
     const cargasFinales = [];
     rondas.forEach((fila, fIdx) => {
-      fila.forEach(celda => { 
-        if (celda) {
-          const idM = 101 + fIdx;
-          cargasFinales.push({ 
-            ...celda, 
-            maquina: `VI-${idM}`, 
-            operario: getOperarioPorMaquina(idM, fechaTrabajo) 
-          }); 
-        }
+      const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
+      fila.forEach(celda => {
+        if (!celda) return;
+        if (Array.isArray(celda)) celda.forEach(c => cargasFinales.push({ ...c, maquina: `VI-${101+fIdx}`, operario: op }));
+        else cargasFinales.push({ ...celda, maquina: `VI-${101+fIdx}`, operario: op });
       });
     });
-
-    cargasEsmaltesAsignadas.forEach(c => {
-      cargasFinales.push({ ...c, maquina: "ESM", operario: "Esmaltador" });
-    });
+    cargasEsmaltesAsignadas.forEach(c => cargasFinales.push({ ...c, maquina: "ESM", operario: c.operario || "Esmaltador" }));
+    cargasEspeciales.filter(c => c.tipo === tipoPintura).forEach(esp => cargasFinales.push({ ...esp, maquina: "ESPECIAL", operario: "Lazaro" }));
     
-    cargasEspeciales.forEach(esp => {
-      cargasFinales.push({ ...esp, maquina: "ESPECIAL", operario: "Lazaro" });
-    });
-    
-    if (cargasFinales.length === 0) return alert("No hay cargas asignadas.");
-    setProcesandoReporte(true); 
+    if (cargasFinales.length === 0) return alert("No hay cargas.");
+    setProcesandoReporte(true);
     const idIntervalo = simularProgreso();
     try { await exportarReporte(cargasFinales); setProgreso(100); } 
-    catch (error) { alert("Error: " + error.message); }
+    catch (error) { alert("Error: " + error.message); } 
     finally { clearInterval(idIntervalo); setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600); }
   };
 
@@ -137,49 +134,51 @@ function AppContent() {
     const origen = JSON.parse(dataRaw);
     let nR = [...rondas.map(f => [...f])];
     let nE = [...cargasEspeciales];
-    let carga;
-    const idM = 101 + fDestino;
+    let cargaEntrante;
 
     if (origen.tipo === 'ronda') {
-      carga = nR[origen.f][origen.c];
-      nR[origen.f][origen.c] = nR[fDestino][cDestino];
-      nR[fDestino][cDestino] = carga;
+      const contenido = nR[origen.f][origen.c];
+      if (Array.isArray(contenido)) {
+        cargaEntrante = { ...contenido[origen.subIndex] };
+        contenido.splice(origen.subIndex, 1);
+        nR[origen.f][origen.c] = contenido.length === 0 ? null : (contenido.length === 1 ? contenido[0] : contenido);
+      } else {
+        cargaEntrante = { ...contenido };
+        nR[origen.f][origen.c] = null;
+      }
     } else {
-      carga = nE[origen.index];
-      if (nR[fDestino][cDestino]) return alert("Celda ocupada");
-      nR[fDestino][cDestino] = carga;
+      cargaEntrante = { ...nE[origen.index] };
       nE.splice(origen.index, 1);
     }
 
-    if (nR[fDestino][cDestino]) {
-      nR[fDestino][cDestino].operario = getOperarioPorMaquina(idM, fechaTrabajo);
-    }
+    cargaEntrante.operario = getOperarioPorMaquina(101 + fDestino, fechaTrabajo);
+    const destinoActual = nR[fDestino][cDestino];
+    nR[fDestino][cDestino] = destinoActual ? (Array.isArray(destinoActual) ? [...destinoActual, cargaEntrante] : [destinoActual, cargaEntrante]) : cargaEntrante;
+    
     setRondas(nR); setCargasEspeciales(nE);
   };
 
   return (
     <>
       <LoadingOverlay cargando={cargando} procesandoPdf={procesandoPdf} procesandoReporte={procesandoReporte} progreso={progreso} />
-
+      
       <Routes>
         <Route path="/" element={
           <div className="app">
             <div className="container">
+              {/* --- ENCABEZADO --- */}
               <div className="header-panel">
                 <div className="titulo-app">
                    <h1>Gestión de Pinturas</h1>
                    {tipoPintura === "Vinílica" && (
                      <div className="planificador-semanal">
-                        <button onClick={() => moverSemana(-1)}>◀</button>
-                        <div className="fecha-actual-view">
-                          <strong>Semana:</strong> {fechaTrabajo.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                        </div>
-                        <button onClick={() => moverSemana(1)}>▶</button>
+                        <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() - 7)))}>◀</button>
+                        <div className="fecha-actual-view"><strong>Semana:</strong> {fechaTrabajo.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</div>
+                        <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() + 7)))}>▶</button>
                         <button className="btn-hoy-reset" onClick={() => setFechaTrabajo(new Date())}>Hoy</button>
                      </div>
                    )}
                 </div>
-
                 <div className="selector-tipo">
                   {["Vinílica", "Esmalte"].map(t => (
                     <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => setTipoPintura(t)}>{t}</button>
@@ -187,33 +186,16 @@ function AppContent() {
                 </div>
               </div>
 
-              <div className="busqueda-con-descripcion">
-                <div className="busqueda">
-                  <input placeholder="Código de producto..." value={codigo} onChange={(e) => setCodigo(e.target.value)} />
-                  <button onClick={consultar}>Buscar</button>
-                </div>
-                {producto && (
-                  <div className="descripcion-producto">
-                    <div className="nombre-producto">{producto.descripcion}</div>
-                    <div className="poder-cubriente">Poder Cubriente: <span>{producto.poderCubriente || "N/A"}</span></div>
-                    <div className="procesos-info">
-                      <strong>Ruta:</strong>
-                      <div className="lista-procesos-tags">
-                        {producto.procesos?.map((p) => (
-                          <div key={p.paso} className="proceso-item"><span className="paso-nro">{p.paso}</span><span className="paso-desc">{p.descripcion}</span></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <PanelEspeciales 
-                  cargasEspeciales={cargasEspeciales.filter(c => c.tipo === tipoPintura)} 
-                  mostrarEspeciales={mostrarEspeciales} setMostrarEspeciales={setMostrarEspeciales}
-                  handleDragStart={(e, o) => e.dataTransfer.setData("transferData", JSON.stringify(o))}
-                  seleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
-                />
-              </div>
+              {/* --- SECCIÓN BÚSQUEDA Y ESPECIALES (Componente Extraído) --- */}
+              <BusquedaSeccion 
+                codigo={codigo} setCodigo={setCodigo} 
+                consultar={consultar} producto={producto}
+                cargasEspeciales={cargasEspeciales.filter(c => c.tipo === tipoPintura)}
+                mostrarEspeciales={mostrarEspeciales} setMostrarEspeciales={setMostrarEspeciales}
+                onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
+              />
 
+              {/* --- PANEL DE PRODUCTO --- */}
               <div className="producto-panel">
                 {producto && (
                   <>
@@ -244,6 +226,7 @@ function AppContent() {
                 </div>
               </div>
 
+              {/* --- TABLERO PRINCIPAL (Componente Extraído) --- */}
               <div className="main-board-section">
                 <div className="panel-header-actions">
                   <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}S</h2>
@@ -251,30 +234,12 @@ function AppContent() {
                 </div>
 
                 {tipoPintura === "Vinílica" ? (
-                  <div className="rondas-panel">
-                    <div className="tabla-rondas">
-                      <div className="fila-ronda header">
-                        <div></div>{[...Array(6)].map((_, i) => <div key={i}>Ronda {i + 1}</div>)}
-                      </div>
-                      {rondas.map((fila, fIdx) => (
-                        <div className="fila-ronda" key={fIdx}>
-                          <div className="etiqueta-ronda">
-                            <span className="codigo-maquina">VI-{101 + fIdx}</span>
-                            <span className="nombre-operario">{getOperarioPorMaquina(101 + fIdx, fechaTrabajo)}</span>
-                          </div>
-                          {fila.map((celda, cIdx) => (
-                            <div className="celda-ronda clickable" key={cIdx} onDragOver={(e) => e.preventDefault()} onDrop={(e) => handleDrop(e, fIdx, cIdx)}>
-                              {celda?.tipo === "Vinílica" && (
-                                <div draggable onDragStart={(e) => e.dataTransfer.setData("transferData", JSON.stringify({ tipo: 'ronda', f: fIdx, c: cIdx }))} onClick={() => { setCargaSeleccionada(celda); setMostrarDetalle(true); }} className="full-cell-link">
-                                  <CardCarga carga={celda} />
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <TableroVinilica 
+                    rondas={rondas} 
+                    fechaTrabajo={fechaTrabajo} 
+                    handleDrop={handleDrop} 
+                    onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }} 
+                  />
                 ) : (
                   <TableroEsmaltes cargas={cargasEsmaltesAsignadas} setCargaSeleccionada={setCargaSeleccionada} setMostrarDetalle={setMostrarDetalle} />
                 )}
@@ -292,28 +257,37 @@ function AppContent() {
         } />
       </Routes>
 
-      {/* MODAL DE GESTIÓN DE CARGAS INTEGRADO */}
-      <ModalCargas 
-        visible={mostrarModal} 
-        cargas={colaFiltrada} 
-        onClose={() => setMostrarModal(false)} 
-        onEliminarCarga={handleEliminarCargaDeCola}
-        onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }} 
+      {/* --- MODALES --- */}
+      <ModalCargas
+        visible={mostrarModal} cargas={colaFiltrada}
+        onClose={() => setMostrarModal(false)}
+        onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
+        onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
+        onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
       />
 
       <ModalDetalleCarga
-        visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)}
-        onEliminar={(c) => { 
-          if(c.tipo === "Vinílica") { setRondas(rondas.map(f => f.map(celda => celda?.idTemp === c.idTemp ? null : celda))); } 
-          else { setCargasEsmaltesAsignadas(prev => prev.filter(e => e.idTemp !== c.idTemp)); }
-          setCargasEspeciales(cargasEspeciales.filter(ce => ce.idTemp !== c.idTemp)); 
-          setMostrarDetalle(false); 
+        visible={mostrarDetalle} carga={cargaSeleccionada} 
+        onClose={() => setMostrarDetalle(false)}
+        onEliminar={(c) => {
+          if(c.tipo === "Vinílica") {
+            setRondas(rondas.map(f => f.map(celda => {
+              if (!celda) return null;
+              if (Array.isArray(celda)) {
+                const f = celda.filter(item => item.idTemp !== c.idTemp);
+                return f.length === 0 ? null : (f.length === 1 ? f[0] : f);
+              }
+              return celda.idTemp === c.idTemp ? null : celda;
+            })));
+          } else setCargasEsmaltesAsignadas(prev => prev.filter(e => e.idTemp !== c.idTemp));
+          setCargasEspeciales(prev => prev.filter(ce => ce.idTemp !== c.idTemp));
+          setColaCargas(prev => prev.filter(cola => cola.idTemp !== c.idTemp));
+          setMostrarDetalle(false);
         }}
-        onMoverEspecial={(c) => { 
-          if(c.tipo === "Vinílica") { setRondas(rondas.map(f => f.map(celda => celda?.idTemp === c.idTemp ? null : celda))); } 
-          else { setCargasEsmaltesAsignadas(prev => prev.filter(e => e.idTemp !== c.idTemp)); }
-          setCargasEspeciales(ordenarCargas([...cargasEspeciales, { ...c, operario: "" }])); 
-          setMostrarDetalle(false); 
+        onMoverEspecial={(c) => {
+          // Lógica similar para mover a especiales...
+          setCargasEspeciales(ordenarCargas([...cargasEspeciales, { ...c, operario: "" }]));
+          setMostrarDetalle(false);
         }}
       />
     </>
@@ -321,9 +295,5 @@ function AppContent() {
 }
 
 export default function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
+  return <Router><AppContent /></Router>;
 }

@@ -1,8 +1,8 @@
 /* ===== RONDAS VINÍLICA ===== */
 .rondas-panel {
   margin-top: 40px;
-  width: 95%; /* un poco menos que 100% para mover a la izquierda */
-  margin-left: -8%; /* mueve todo a la izquierda */
+  width: 95%;
+  margin-left: -8%;
 }
 
 .rondas-panel h2 {
@@ -19,16 +19,15 @@
   width: 110%;
   display: flex;
   flex-direction: column;
-  gap: 60px;
-  
+  gap: 20px; /* Reducido para evitar exceso de espacio entre filas */
 }
 
 /* Filas */
 .fila-ronda {
   display: grid;
-  grid-template-columns: 240px repeat(6, 1fr); /* etiqueta más ancha, celdas más grandes */
+  grid-template-columns: 240px repeat(6, 1fr);
   gap: 12px;
-  align-items: center;
+  align-items: stretch; /* Obliga a todas las celdas de la fila a tener la misma altura */
 }
 
 /* Header */
@@ -54,18 +53,21 @@
 /* Celdas */
 .celda-ronda {
   height: 155px;
+  height: auto;      /* CRECIMIENTO DINÁMICO: La celda se estira si hay 2+ cards */
   border-radius: 8px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
   display: flex;
+  flex-direction: column; /* APILADO VERTICAL: Evita que las cards se choquen de lado */
   align-items: center;
-  justify-content: center;
-  
-  /* AGREGAR ESTO: */
-  overflow: visible !important; /* Permite que el badge naranja sobresalga */
-  padding: 0; /* Quitamos padding para que la card maneje su espacio */
-  position: relative; 
-}
+  justify-content: flex-start;
+  gap: 12px;             /* Espacio entre la card de Maquila y de Línea */
+  padding: 10px 1px;     /* Espacio interno */
+  overflow: visible !important;
+  position: relative;
+} 
+
+
 .etiqueta-ronda {
   display: flex;
   flex-direction: column; /* Alineación vertical */
@@ -187,4 +189,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
 

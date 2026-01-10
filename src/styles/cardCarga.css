@@ -40,19 +40,7 @@
 }
 
 /* FOOTER POSICIONADO ABAJO A LA DERECHA */
-.mini-footer {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  font-size: 11px;
-  color: #e0b0ff; 
-  font-weight: 600;
-  text-align: right;
-  text-transform: capitalize;
-  background: rgba(0, 0, 0, 0.2); /* Fondo sutil para mejor lectura */
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+
 
 /* Asegura que el contenedor del drag no rompa el diseño */
 .celda-ronda > div[draggable="true"] {

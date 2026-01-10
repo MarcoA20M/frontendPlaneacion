@@ -3,9 +3,11 @@ import '../styles/esmaltes.css';
 
 const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle }) => {
   
+  // MODIFICACIÓN: Quitamos el .toUpperCase() para respetar el formato original
   const limpiarTexto = (texto) => {
     if (!texto) return "N/A";
-    return texto.includes(':') ? texto.split(':')[1].trim().toUpperCase() : texto.toUpperCase();
+    // Solo hacemos el split y el trim, pero dejamos el case original
+    return texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
   };
 
   return (
@@ -65,8 +67,8 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle 
                 </div>
               </div>
 
-              <div className="mini-footer">
-                {/* Muestra el nombre del operario real o 'Área Esmaltes' */}
+              <div className="mini-footer" style={{ textTransform: 'none' }}>
+                {/* Muestra el nombre del operario respetando minúsculas */}
                 {carga.operario || 'Área Esmaltes'}
               </div>
             </div>

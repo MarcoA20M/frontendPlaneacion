@@ -88,11 +88,7 @@
   font-size: 2rem;
 }
 
-/* Footer / Botón */
-.detalle-modal-footer {
-  padding: 15px;
-  background: #161616;
-}
+
 
 .btn-cerrar-info {
   width: 100%;
@@ -113,19 +109,33 @@
 }
 
 .detalle-modal-footer {
+  padding: 15px;
+  background: #161616;
+  width: 100%;
+  box-sizing: border-box; /* Fundamental para que el padding no "empuje" los botones afuera */
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 100%;
 }
-
 .acciones-peligrosas {
   display: flex;
   gap: 10px;
   width: 100%;
+  box-sizing: border-box; /* Asegura que el padding no sume ancho extra */
 }
 
-.btn-eliminar, .btn-especial {
+.btn-eliminar {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 11px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-especial {
   flex: 1;
   padding: 10px;
   border: none;

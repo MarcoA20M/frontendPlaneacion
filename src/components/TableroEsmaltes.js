@@ -1,27 +1,28 @@
 import React from 'react';
 import '../styles/esmaltes.css';
 
-const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle }) => {
+const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle, filtroOperario }) => {
   
-  // MODIFICACIÓN: Quitamos el .toUpperCase() para respetar el formato original
   const limpiarTexto = (texto) => {
     if (!texto) return "N/A";
-    // Solo hacemos el split y el trim, pero dejamos el case original
     return texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
   };
 
+  // FILTRADO INTELIGENTE:
+  // Ahora usa .includes para que si el filtro es "Aldo", 
+  // encuentre también a "Aldo / Gaspar"
+  const cargasFiltradas = filtroOperario 
+    ? cargas.filter(c => {
+        const nombreCarga = c.operario || 'Área Esmaltes';
+        return nombreCarga.includes(filtroOperario);
+      })
+    : cargas;
+
   return (
     <div className="esmaltes-full-view">
-      <div className="esmaltes-header-neon">
-        <div className="title-group">
-          <h2>TABLERO DE ESMALTES</h2>
-          <p className="mini-label">Cargas de alta viscosidad en proceso</p>
-        </div>
-      </div>
-
       <div className="grid-esmaltes-neon">
-        {cargas.length > 0 ? (
-          cargas.map((carga) => (
+        {cargasFiltradas.length > 0 ? (
+          cargasFiltradas.map((carga) => (
             <div 
               key={carga.idTemp} 
               className="card-esmalte-neon"
@@ -68,14 +69,14 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle 
               </div>
 
               <div className="mini-footer" style={{ textTransform: 'none' }}>
-                {/* Muestra el nombre del operario respetando minúsculas */}
+                {/* Mostramos el texto original (ej: Aldo / Gaspar) */}
                 {carga.operario || 'Área Esmaltes'}
               </div>
             </div>
           ))
         ) : (
           <div className="empty-state-neon">
-            <p>SISTEMA LISTO - ESPERANDO CARGAS DE ESMALTE</p>
+            <p>{filtroOperario ? `SIN CARGAS PARA ${filtroOperario.toUpperCase()}` : 'SISTEMA LISTO'}</p>
           </div>
         )}
       </div>

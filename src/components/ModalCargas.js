@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "../styles/modalCargas.css";
 
-function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga, onSeleccionarCarga }) {
+function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga, onSeleccionarCarga, onVaciarTodo }) {
   const [filtroMarca, setFiltroMarca] = useState("TODOS");
 
   const { cargasClasificadas, marcasDisponibles } = useMemo(() => {
@@ -59,7 +59,25 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
             <h2>Gestión de Cargas</h2>
             <span className="badge-contador">{cargasClasificadas.length} en espera</span>
           </div>
-          <div className="header-actions">
+          <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {/* BOTÓN DE BORRAR TODO */}
+            <button 
+              className="btn-borrar-todo" 
+              onClick={onVaciarTodo}
+              style={{
+                backgroundColor: '#ff4d4d',
+                color: 'white',
+                border: 'none',
+                padding: '8px 15px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.8rem'
+              }}
+            >
+              🗑️ Borrar Todo
+            </button>
+
             <button 
               className="btn-guardar-top" 
               disabled={cargasClasificadas.length === 0}
@@ -133,7 +151,7 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
                   <div 
                     className="fila-carga clickable-row" 
                     key={c.idTemp || i}
-                    onClick={() => onSeleccionarCarga(c)} // EVENTO PARA ABRIR DETALLE
+                    onClick={() => onSeleccionarCarga(c)}
                   >
                     <div className="celda nro">{i + 1}</div>
                     <div className="celda g-2">{c.codigoProducto}</div>
@@ -145,7 +163,7 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
                       <button 
                         className="btn-borrar-fila" 
                         onClick={(e) => {
-                            e.stopPropagation(); // Evita abrir el detalle al borrar
+                            e.stopPropagation();
                             onEliminarCarga(c.idTemp);
                         }}
                       >✕</button>

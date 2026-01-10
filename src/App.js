@@ -34,8 +34,8 @@ function AppContent() {
 
   const navigate = useNavigate();
   const [fechaTrabajo, setFechaTrabajo] = useState(new Date());
-  const [filtroOperario, setFiltroOperario] = useState(null); 
-  const [modoEsmalte, setModoEsmalte] = useState(null); 
+  const [filtroOperario, setFiltroOperario] = useState(null);
+  const [modoEsmalte, setModoEsmalte] = useState(null);
   const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
@@ -72,7 +72,7 @@ function AppContent() {
 
   const handleMoverAEspecial = (carga) => {
     setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
-    setRondas(prevRondas => prevRondas.map(fila => 
+    setRondas(prevRondas => prevRondas.map(fila =>
       fila.map(celda => {
         if (!celda) return null;
         if (Array.isArray(celda)) {
@@ -87,6 +87,13 @@ function AppContent() {
     setMostrarDetalle(false);
   };
 
+  const handleVaciarCola = () => {
+    if (window.confirm(`¿Estás seguro de que deseas borrar todas las cargas de ${tipoPintura} en espera?`)) {
+      // Mantenemos solo las cargas que NO pertenecen al tipo de pintura actual
+      setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura));
+    }
+  };
+
   const simularProgreso = () => {
     setProgreso(0);
     return setInterval(() => {
@@ -96,15 +103,15 @@ function AppContent() {
 
   const handleImportExcelConProgreso = async (e) => {
     const idIntervalo = simularProgreso();
-    try { 
-      await handleImportExcel(e); 
-      setProgreso(100); 
-    } catch (error) { 
-      alert("Error: " + error.message); 
-    } finally { 
-      clearInterval(idIntervalo); 
-      setTimeout(() => setProgreso(0), 600); 
-      setMenuCargasAbierto(false); 
+    try {
+      await handleImportExcel(e);
+      setProgreso(100);
+    } catch (error) {
+      alert("Error: " + error.message);
+    } finally {
+      clearInterval(idIntervalo);
+      setTimeout(() => setProgreso(0), 600);
+      setMenuCargasAbierto(false);
     }
   };
 
@@ -114,12 +121,12 @@ function AppContent() {
     setProcesandoPdf(true);
     const idIntervalo = simularProgreso();
     try {
-      let tableroAProcesar = tipoPintura === "Vinílica" 
+      let tableroAProcesar = tipoPintura === "Vinílica"
         ? rondas.map((fila, fIdx) => fila.map(celda => {
-            if (!celda) return null;
-            const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
-            return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
-          }))
+          if (!celda) return null;
+          const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
+          return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
+        }))
         : [cargasEsmaltesAsignadas];
       const blob = await procesarPdfConRondas(file, tableroAProcesar, cargasEspeciales.filter(c => c.tipo === tipoPintura));
       setProgreso(100);
@@ -135,25 +142,25 @@ function AppContent() {
       const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
       fila.forEach(celda => {
         if (!celda) return;
-        if (Array.isArray(celda)) celda.forEach(c => cargasFinales.push({ ...c, maquina: `VI-${101+fIdx}`, operario: op }));
-        else cargasFinales.push({ ...celda, maquina: `VI-${101+fIdx}`, operario: op });
+        if (Array.isArray(celda)) celda.forEach(c => cargasFinales.push({ ...c, maquina: `VI-${101 + fIdx}`, operario: op }));
+        else cargasFinales.push({ ...celda, maquina: `VI-${101 + fIdx}`, operario: op });
       });
     });
     cargasEsmaltesAsignadas.forEach(c => cargasFinales.push({ ...c, maquina: "ESM", operario: c.operario || "Esmaltador" }));
     cargasEspeciales.filter(c => c.tipo === tipoPintura).forEach(esp => cargasFinales.push({ ...esp, maquina: "ESPECIAL", operario: "Lazaro" }));
-    
+
     if (cargasFinales.length === 0) return alert("No hay cargas para reportar.");
-    
+
     setProcesandoReporte(true);
     const idIntervalo = simularProgreso();
-    try { 
-      await exportarReporte(cargasFinales); 
-      setProgreso(100); 
-    } catch (error) { 
-      alert("Error Excel: " + error.message); 
-    } finally { 
-      clearInterval(idIntervalo); 
-      setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600); 
+    try {
+      await exportarReporte(cargasFinales);
+      setProgreso(100);
+    } catch (error) {
+      alert("Error Excel: " + error.message);
+    } finally {
+      clearInterval(idIntervalo);
+      setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600);
     }
   };
 
@@ -188,24 +195,24 @@ function AppContent() {
             <div className="container">
               <div className="header-panel">
                 <div className="titulo-app">
-                   <h1>Gestión de Pinturas</h1>
-                   {tipoPintura === "Vinílica" && (
-                     <div className="planificador-semanal">
-                        <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() - 7)))}>◀</button>
-                        <div className="fecha-actual-view"><strong>Semana:</strong> {fechaTrabajo.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</div>
-                        <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() + 7)))}>▶</button>
-                        <button className="btn-hoy-reset" onClick={() => setFechaTrabajo(new Date())}>Hoy</button>
-                     </div>
-                   )}
+                  <h1>Gestión de Pinturas</h1>
+                  {tipoPintura === "Vinílica" && (
+                    <div className="planificador-semanal">
+                      <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() - 7)))}>◀</button>
+                      <div className="fecha-actual-view"><strong>Semana:</strong> {fechaTrabajo.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</div>
+                      <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() + 7)))}>▶</button>
+                      <button className="btn-hoy-reset" onClick={() => setFechaTrabajo(new Date())}>Hoy</button>
+                    </div>
+                  )}
                 </div>
                 <div className="selector-tipo">
                   {["Vinílica", "Esmalte"].map(t => (
-                    <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => {setTipoPintura(t); setFiltroOperario(null); setModoEsmalte(null);}}>{t}</button>
+                    <button key={t} className={tipoPintura === t ? "active" : ""} onClick={() => { setTipoPintura(t); setFiltroOperario(null); setModoEsmalte(null); }}>{t}</button>
                   ))}
                 </div>
               </div>
 
-              <BusquedaSeccion 
+              <BusquedaSeccion
                 codigo={codigo} setCodigo={setCodigo} consultar={consultar} producto={producto}
                 cargasEspeciales={cargasEspeciales.filter(c => c.tipo === tipoPintura)}
                 mostrarEspeciales={mostrarEspeciales} setMostrarEspeciales={setMostrarEspeciales}
@@ -246,34 +253,34 @@ function AppContent() {
                 <div className="panel-header-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   <div className="header-left-side" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
                     <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}S</h2>
-                    <ResumenOperarios 
+                    <ResumenOperarios
                       tipoPintura={tipoPintura}
-                      rondas={rondas} 
+                      rondas={rondas}
                       cargasEsmaltes={cargasEsmaltesAsignadas}
-                      fechaTrabajo={fechaTrabajo} 
+                      fechaTrabajo={fechaTrabajo}
                       getOperarioPorMaquina={getOperarioPorMaquina}
                       onFiltrar={setFiltroOperario}
                       filtroActivo={filtroOperario}
                     />
-                    
+
                     {/* BOTONES CON GENERAL Y CONTADORES */}
                     {tipoPintura === "Esmalte" && (
                       <div style={{ display: 'inline-flex', gap: '5px', marginLeft: '15px', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px' }}>
-                         <button 
-                            className={`card-op ${modoEsmalte === null ? 'active' : ''}`}
-                            onClick={() => setModoEsmalte(null)}
-                            style={{ fontSize: '0.7rem' }}
-                         >🌍 GENERAL ({stats.total})</button>
-                         <button 
-                            className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`}
-                            onClick={() => setModoEsmalte('DIRECTO')}
-                            style={{ fontSize: '0.7rem' }}
-                         >🚀 DIRECTOS ({stats.directos})</button>
-                         <button 
-                            className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`}
-                            onClick={() => setModoEsmalte('MOLIENDA')}
-                            style={{ fontSize: '0.7rem' }}
-                         >⚙️ MOLIENDA ({stats.molienda})</button>
+                        <button
+                          className={`card-op ${modoEsmalte === null ? 'active' : ''}`}
+                          onClick={() => setModoEsmalte(null)}
+                          style={{ fontSize: '0.7rem' }}
+                        >🌍 GENERAL ({stats.total})</button>
+                        <button
+                          className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`}
+                          onClick={() => setModoEsmalte('DIRECTO')}
+                          style={{ fontSize: '0.7rem' }}
+                        >🚀 DIRECTOS ({stats.directos})</button>
+                        <button
+                          className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`}
+                          onClick={() => setModoEsmalte('MOLIENDA')}
+                          style={{ fontSize: '0.7rem' }}
+                        >⚙️ MOLIENDA ({stats.molienda})</button>
                       </div>
                     )}
                   </div>
@@ -283,9 +290,9 @@ function AppContent() {
                 {tipoPintura === "Vinílica" ? (
                   <TableroVinilica rondas={rondas} fechaTrabajo={fechaTrabajo} handleDrop={handleDrop} setCargaSeleccionada={setCargaSeleccionada} setMostrarDetalle={setMostrarDetalle} filtroOperario={filtroOperario} />
                 ) : (
-                  <TableroEsmaltes 
-                    cargas={cargasEsmaltesAsignadas} 
-                    setCargaSeleccionada={setCargaSeleccionada} 
+                  <TableroEsmaltes
+                    cargas={cargasEsmaltesAsignadas}
+                    setCargaSeleccionada={setCargaSeleccionada}
                     setMostrarDetalle={setMostrarDetalle}
                     filtroOperario={filtroOperario}
                     modoEsmalte={modoEsmalte}
@@ -304,8 +311,47 @@ function AppContent() {
         } />
       </Routes>
 
-      <ModalCargas visible={mostrarModal} cargas={colaFiltrada} onClose={() => setMostrarModal(false)} onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))} onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }} onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }} />
-      <ModalDetalleCarga visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)} onEliminar={() => {setColaCargas(prev => prev.filter(c => c.idTemp !== cargaSeleccionada.idTemp)); setMostrarDetalle(false);}} onMoverEspecial={handleMoverAEspecial} />
+   <ModalCargas
+        visible={mostrarModal}
+        cargas={colaFiltrada}
+        onClose={() => setMostrarModal(false)}
+        onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
+        onVaciarTodo={handleVaciarCola} 
+        onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
+        onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }} 
+      />
+
+      <ModalDetalleCarga 
+        visible={mostrarDetalle}
+        carga={cargaSeleccionada}
+        onClose={() => setMostrarDetalle(false)}
+        onEliminar={(carga) => {
+          // 1. Borrar de la cola de espera (Lista de Gestión)
+          setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+
+          // 2. Borrar del tablero de Vinílica (Rondas)
+          setRondas(prevRondas => prevRondas.map(fila => 
+            fila.map(celda => {
+              if (!celda) return null;
+              if (Array.isArray(celda)) {
+                const nuevaCelda = celda.filter(c => c.idTemp !== carga.idTemp);
+                return nuevaCelda.length === 0 ? null : (nuevaCelda.length === 1 ? nuevaCelda[0] : nuevaCelda);
+              }
+              return celda.idTemp === carga.idTemp ? null : celda;
+            })
+          ));
+
+          // 3. Borrar del tablero de Esmaltes
+          setCargasEsmaltesAsignadas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+
+          // 4. Borrar de la lista de Especiales
+          setCargasEspeciales(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+
+          // Cerrar el modal al terminar
+          setMostrarDetalle(false);
+        }} 
+        onMoverEspecial={handleMoverAEspecial} 
+      />
     </>
   );
 }

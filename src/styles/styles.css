@@ -1028,6 +1028,12 @@ body, html {
   padding: 0 5px;
 }
 
+.header-left-side {
+  display: flex;
+  align-items: center;
+  gap: 25px; /* Espacio entre título y botones */
+}
+
 /* Botón estilo "Pill" translúcido */
 .btn-family-explorer {
   background: rgba(255, 255, 255, 0.08);

@@ -83,6 +83,64 @@ function AppContent() {
     };
   }, [cargasEsmaltesAsignadas, filtroOperario]);
 
+
+
+const handleImprimirBitacora = async () => {
+  if (tipoPintura !== "Vinílica") return alert("Solo Vinílica.");
+  
+  const tieneDatos = rondas.some(fila => fila.some(celda => celda !== null));
+  if (!tieneDatos) return alert("Tablero vacío.");
+
+  // --- NUEVA LÓGICA: Asegurar que el cubriente viaje ---
+  const rondasProcesadas = rondas.map(fila => 
+    fila.map(celda => {
+      if (!celda) return null;
+      // Si es un array de cargas (varias en una celda) o una sola
+      const items = Array.isArray(celda) ? celda : [celda];
+      return items.map(item => ({
+        ...item,
+        // Forzamos que lleve el cubriente si el objeto producto lo tiene
+        cubriente: item.cubriente || item.producto?.cubriente || ""
+      }));
+    })
+  );
+
+  const listaOperarios = Array.from({ length: 8 }, (_, i) => getOperarioPorMaquina(101 + i, fechaTrabajo));
+
+  try {
+    const response = await fetch("http://localhost:5000/generar_bitacora_impresion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rondas: rondasProcesadas, // <--- Enviamos la versión con cubriente
+        operarios: listaOperarios,
+        fecha: fechaTrabajo.toLocaleDateString('es-ES'),
+        tipo: tipoPintura
+      })
+    });
+
+    if (!response.ok) throw new Error("Error al generar el PDF");
+
+    // Manejo de la descarga del archivo
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Bitacora_${tipoPintura}_${fechaTrabajo.toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    setMenuReporteAbierto(false);
+  }
+};
+
+
+
   // --- FUNCIÓN PARA VACIAR EL TABLERO ---
   const handleVaciarTablero = () => {
     const confirmar = window.confirm(`¿Estás seguro de borrar todas las cargas de ${tipoPintura.toUpperCase()} del tablero actual?`);
@@ -169,40 +227,32 @@ function AppContent() {
       e.target.value = null;
     }
   };
-
   const handleAnalizarInventario = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 1. Iniciamos el estado de carga y el progreso simulado
     setAnalizandoStock(true);
+    setMenuCargasAbierto(false); // <--- Cerramos el menú al iniciar
     const idInt = simularProgreso();
 
     try {
-      // 2. Llamada al servicio de Python
       const data = await inventarioService.analizarBajoInventario(file);
-
-      // 3. Si todo sale bien, llevamos la barra al 100%
       setProgreso(100);
       setAlertasInventario(data.alertas);
 
-      // 4. Pequeño delay para que el usuario vea el "100%" antes de abrir el modal
       setTimeout(() => {
         setMostrarModalInventario(true);
       }, 500);
 
     } catch (error) {
-      console.error(error);
       alert("Error al conectar con el microservicio de Python.");
     } finally {
-      // 5. Limpiamos el intervalo y reseteamos estados
       clearInterval(idInt);
-      // Damos un tiempo para que el overlay se desvanezca suavemente
       setTimeout(() => {
         setAnalizandoStock(false);
         setProgreso(0);
       }, 600);
-      e.target.value = null; // Limpiar el input file
+      e.target.value = null;
     }
   };
 
@@ -324,19 +374,30 @@ function AppContent() {
                 )}
                 <div className="botones-cargas">
                   <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
-                  <label className="agregar-btn btn-analisis" style={{ backgroundColor: '#6c5ce7' }}>
-                    🔍 Analizar Stock
-                    <input type="file" hidden accept=".xlsx, .xls" onChange={handleAnalizarInventario} />
-                  </label>
+
+                  {/* MENÚ GESTIÓN (Ahora incluye Análisis) */}
                   <div className="dropdown-container">
-                    <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>📂 Gestión ({colaFiltrada.length})</button>
+                    <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>
+                      📂 Gestión ({colaFiltrada.length})
+                    </button>
                     {menuCargasAbierto && (
                       <div className="dropdown-menu">
-                        <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>📋 Lista Espera</button>
-                        <label className="dropdown-item label-input">📊 Importar Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handleImportExcelConProgreso} /></label>
+                        <label className="dropdown-item label-input" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '5px', paddingTop: '8px' }}>
+                          🔍 Analizar Stock
+                          <input type="file" hidden accept=".xlsx, .xls" onChange={handleAnalizarInventario} />
+                        </label>
+                        <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>
+                          📋 Lista Espera
+                        </button>
+
+                        <label className="dropdown-item label-input">
+                          📊 Importar Excel
+                          <input type="file" hidden accept=".xlsx, .xls" onChange={handleImportExcelConProgreso} />
+                        </label>
                       </div>
                     )}
                   </div>
+
                   <label className="agregar-btn btn-pdf">📄 subrayar PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
 
                   <div className="dropdown-container">
@@ -344,8 +405,12 @@ function AppContent() {
                     {menuReporteAbierto && (
                       <div className="dropdown-menu">
                         <button className="dropdown-item" onClick={handleReporteClick}>🖥️ Reporte Tablero</button>
+                        <button className="dropdown-item" onClick={handleImprimirBitacora}>
+        🖨️ Bitácora para Libreta (PDF)
+      </button>
                         <label className="dropdown-item label-input">📂 Reporte desde Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handleReporteDesdeExcel} /></label>
                       </div>
+                      
                     )}
                   </div>
 

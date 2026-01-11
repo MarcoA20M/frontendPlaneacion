@@ -8,19 +8,26 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle,
     return texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
   };
 
-  // FILTRADO COMBINADO: Nombre + Modo (Directo/Molienda)
+  // FILTRADO LÓGICO CORREGIDO
   const cargasFiltradas = cargas.filter(c => {
     const nombreCarga = c.operario || 'Área Esmaltes';
     
-    // Filtro 1: Por nombre individual
+    // 1. Filtro por nombre individual (el que seleccionas en las burbujas de arriba)
     const pasaNombre = filtroOperario ? nombreCarga.includes(filtroOperario) : true;
     
-    // Filtro 2: Por modo (Molienda tiene '/', Directo no)
+    // 2. Filtro por modo (Lógica por nombres específicos)
     let pasaModo = true;
     if (modoEsmalte === 'DIRECTO') {
+      // Directo: No tiene diagonal (solo está el igualador)
       pasaModo = !nombreCarga.includes('/');
-    } else if (modoEsmalte === 'MOLIENDA') {
-      pasaModo = nombreCarga.includes('/');
+    } 
+    else if (modoEsmalte === 'MOLIENDA') {
+      // Molienda: Debe incluir a Germán
+      pasaModo = nombreCarga.includes('Germán');
+    }
+    else if (modoEsmalte === 'PREPARADO') {
+      // Preparado: Debe incluir a Aldo
+      pasaModo = nombreCarga.includes('Aldo');
     }
 
     return pasaNombre && pasaModo;
@@ -39,7 +46,6 @@ const TableroEsmaltes = ({ cargas = [], setCargaSeleccionada, setMostrarDetalle,
                 setMostrarDetalle(true);
               }}
             >
-              {/* DISEÑO ORIGINAL RESTAURADO */}
               <div style={{ position: 'absolute', top: '10px', right: '60px', textAlign: 'right' }}>
                 <span className="mini-label">Lote</span>
                 <span className="val-neon" style={{ display: 'block', fontSize: '0.9rem' }}>{carga.folio}</span>

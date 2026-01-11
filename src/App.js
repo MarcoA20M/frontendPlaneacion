@@ -62,14 +62,26 @@ function AppContent() {
 
   const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
+  // --- STATS DINÁMICAS (CORREGIDAS) ---
   const stats = useMemo(() => {
-    const soloEsmaltes = cargasEsmaltesAsignadas.filter(c => c.tipo === "Esmalte");
+    // 1. Base: Solo esmaltes
+    let baseEsmaltes = cargasEsmaltesAsignadas.filter(c => c.tipo === "Esmalte");
+
+    // 2. Si hay un filtro de operario seleccionado arriba, filtramos la base antes de contar
+    if (filtroOperario) {
+      baseEsmaltes = baseEsmaltes.filter(c => 
+        (c.operario || "").toLowerCase().includes(filtroOperario.toLowerCase())
+      );
+    }
+
+    // 3. Retornamos los conteos basados en la base (filtrada o no)
     return {
-      total: soloEsmaltes.length,
-      directos: soloEsmaltes.filter(c => !(c.operario || "").includes('/')).length,
-      molienda: soloEsmaltes.filter(c => (c.operario || "").includes('/')).length
+      total: baseEsmaltes.length,
+      directos: baseEsmaltes.filter(c => !(c.operario || "").includes('/')).length,
+      molienda: baseEsmaltes.filter(c => (c.operario || "").includes('Germán')).length,
+      preparado: baseEsmaltes.filter(c => (c.operario || "").includes('Aldo')).length
     };
-  }, [cargasEsmaltesAsignadas]);
+  }, [cargasEsmaltesAsignadas, filtroOperario]); // Escucha cambios en el filtro de arriba
 
   const handleMoverAEspecial = (carga) => {
     setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
@@ -98,7 +110,6 @@ function AppContent() {
     finally { clearInterval(idInt); setTimeout(() => setProgreso(0), 600); setMenuCargasAbierto(false); }
   };
 
-  // --- LÓGICA DE REPORTE SINCRONIZADO ---
   const handleReporteDesdeExcel = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -110,13 +121,10 @@ function AppContent() {
         alert("El Excel no contiene datos válidos.");
         return;
       }
-
       const reporteSincronizado = datosExcel.map(item => {
         let maq = "NO ASIGNADA";
         let ope = "PENDIENTE";
         const folioBusqueda = String(item.folio).trim().toUpperCase();
-
-        // 1. Buscar en Vinílicas
         rondas.forEach((fila, fIdx) => {
           fila.forEach(celda => {
             if (!celda) return;
@@ -128,18 +136,12 @@ function AppContent() {
             }
           });
         });
-
-        // 2. Buscar en Esmaltes
         const matchEsm = cargasEsmaltesAsignadas.find(c => String(c.folio).trim().toUpperCase() === folioBusqueda);
         if (matchEsm) { maq = "ESM"; ope = matchEsm.operario; }
-
-        // 3. Buscar en Especiales
         const matchEsp = cargasEspeciales.find(c => String(c.folio).trim().toUpperCase() === folioBusqueda);
         if (matchEsp) { maq = "ESPECIAL"; ope = "LÁZARO"; }
-
         return { ...item, maquina: maq, operario: ope };
       });
-
       await exportarReporte(reporteSincronizado);
       setProgreso(100);
     } catch (error) {
@@ -164,7 +166,6 @@ function AppContent() {
     });
     cargasEsmaltesAsignadas.forEach(c => finales.push({ ...c, maquina: "ESM", operario: c.operario || "Esmaltador" }));
     cargasEspeciales.filter(c => c.tipo === tipoPintura).forEach(esp => finales.push({ ...esp, maquina: "ESPECIAL", operario: "Lazaro" }));
-    
     if (finales.length === 0) return alert("No hay cargas en el tablero.");
     setProcesandoReporte(true);
     const idInt = simularProgreso();
@@ -210,7 +211,6 @@ function AppContent() {
         nR[origen.f][origen.c] = contenido.length === 0 ? null : (contenido.length === 1 ? contenido[0] : contenido);
       } else { cargaEntrante = { ...contenido }; nR[origen.f][origen.c] = null; }
     } else { cargaEntrante = { ...nE[origen.index] }; nE.splice(origen.index, 1); }
-    
     cargaEntrante.operario = getOperarioPorMaquina(101 + fDestino, fechaTrabajo);
     cargaEntrante.maquina = `VI-${101 + fDestino}`;
     const destinoActual = nR[fDestino][cDestino];
@@ -276,15 +276,15 @@ function AppContent() {
                       </div>
                     )}
                   </div>
-                  <label className="agregar-btn btn-pdf">📄 PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
-                  
+                  <label className="agregar-btn btn-pdf">📄 subrayar PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
+
                   <div className="dropdown-container">
-                    <button className="agregar-btn btn-reporte" onClick={() => setMenuReporteAbierto(!menuReporteAbierto)}>📊 Reportes</button>
+                    <button className="agregar-btn btn-reporte" onClick={() => setMenuReporteAbierto(!menuReporteAbierto)}>📊 Generar Reporte</button>
                     {menuReporteAbierto && (
-                       <div className="dropdown-menu">
-                          <button className="dropdown-item" onClick={handleReporteClick}>🖥️ Reporte Tablero</button>
-                          <label className="dropdown-item label-input">📂 Reporte desde Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handleReporteDesdeExcel} /></label>
-                       </div>
+                      <div className="dropdown-menu">
+                        <button className="dropdown-item" onClick={handleReporteClick}>🖥️ Reporte Tablero</button>
+                        <label className="dropdown-item label-input">📂 Reporte desde Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handleReporteDesdeExcel} /></label>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -292,43 +292,55 @@ function AppContent() {
 
               <div className="main-board-section">
                 <div className="panel-header-actions">
-                  <div className="header-left-side">
-                    <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}S</h2>
-                    <ResumenOperarios
-                      tipoPintura={tipoPintura} rondas={rondas} cargasEsmaltes={cargasEsmaltesAsignadas}
-                      fechaTrabajo={fechaTrabajo} getOperarioPorMaquina={getOperarioPorMaquina}
-                      onFiltrar={setFiltroOperario} filtroActivo={filtroOperario}
-                    />
-                   {tipoPintura === "Esmalte" && (
-  <div className="resumen-operarios" style={{ marginLeft: '15px', display: 'flex', gap: '8px' }}>
-    <button 
-      className={`card-op ${modoEsmalte === null ? 'active' : ''}`} 
-      onClick={() => setModoEsmalte(null)}
-    >
-      <span className="op-nombre">🌍 General</span>
-      <span className="op-maquina">({stats.total})</span>
-    </button>
-    
-    <button 
-      className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`} 
-      onClick={() => setModoEsmalte('DIRECTO')}
-    >
-      <span className="op-nombre">🚀 Directos</span>
-      <span className="op-maquina">({stats.directos})</span>
-    </button>
-    
-    <button 
-      className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`} 
-      onClick={() => setModoEsmalte('MOLIENDA')}
-    >
-      <span className="op-nombre">⚙️ Molienda</span>
-      <span className="op-maquina">({stats.molienda})</span>
-    </button>
-  </div>
-)}
+                  
+                  {/* CONTENEDOR DE FILAS (IZQUIERDA) */}
+                  <div className="header-left-side" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    
+                    {/* FILA 1: Título y Operarios al lado */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <h2 className="tablero-titulo" style={{ margin: 0, whiteSpace: 'nowrap' }}>TABLERO {tipoPintura.toUpperCase()}S</h2>
+                      
+                      <ResumenOperarios
+                        tipoPintura={tipoPintura} 
+                        rondas={rondas} 
+                        cargasEsmaltes={cargasEsmaltesAsignadas}
+                        fechaTrabajo={fechaTrabajo} 
+                        getOperarioPorMaquina={getOperarioPorMaquina}
+                        onFiltrar={setFiltroOperario} 
+                        filtroActivo={filtroOperario}
+                      />
+                    </div>
+
+                    {/* FILA 2: Modos de Esmalte (Debajo de los nombres) */}
+                    {tipoPintura === "Esmalte" && (
+                      <div className="resumen-operarios" style={{ display: 'flex', gap: '8px', paddingLeft: '5px' }}>
+                        <button className={`card-op ${modoEsmalte === null ? 'active' : ''}`} onClick={() => setModoEsmalte(null)}>
+                          <span className="op-nombre">🌍 {filtroOperario ? `Ver ${filtroOperario}` : 'General'}</span>
+                          <span className="op-maquina">({stats.total})</span>
+                        </button>
+
+                        <button className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`} onClick={() => setModoEsmalte('DIRECTO')}>
+                          <span className="op-nombre">🚀 Directos</span>
+                          <span className="op-maquina">({stats.directos})</span>
+                        </button>
+
+                        <button className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`} onClick={() => setModoEsmalte('MOLIENDA')}>
+                          <span className="op-nombre">⚙️ Molienda</span>
+                          <span className="op-maquina">({stats.molienda})</span>
+                        </button>
+
+                        <button className={`card-op ${modoEsmalte === 'PREPARADO' ? 'active' : ''}`} onClick={() => setModoEsmalte('PREPARADO')}>
+                          <span className="op-nombre">🧪 Preparado</span>
+                          <span className="op-maquina">({stats.preparado})</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
+
+                  {/* BOTÓN FAMILIAS (DERECHA) */}
                   <button className="btn-family-explorer" onClick={() => navigate("/familias")}>🏷️ FAMILIAS</button>
                 </div>
+
                 {tipoPintura === "Vinílica" ? (
                   <TableroVinilica rondas={rondas} fechaTrabajo={fechaTrabajo} handleDrop={handleDrop} setCargaSeleccionada={setCargaSeleccionada} setMostrarDetalle={setMostrarDetalle} filtroOperario={filtroOperario} />
                 ) : (
@@ -350,7 +362,7 @@ function AppContent() {
       <ModalCargas
         visible={mostrarModal} cargas={colaFiltrada} onClose={() => setMostrarModal(false)}
         onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
-        onVaciarTodo={() => { if(window.confirm("¿Vaciar cola?")) setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura)); }}
+        onVaciarTodo={() => { if (window.confirm("¿Vaciar cola?")) setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura)); }}
         onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
         onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
       />

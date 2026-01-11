@@ -16,7 +16,8 @@ import TableroEsmaltes from "./components/TableroEsmaltes";
 import LoadingOverlay from "./components/LoadingOverlay";
 import { VistaProductosFamilia } from "./components/ExploradorFamilias";
 import { VistaFamiliasScreen } from "./components/VistaFamiliasScreen";
-
+import { inventarioService } from "./services/inventarioService";
+import ModalInventarioBajo from "./components/ModalInventarioBajo";
 // Estilos
 import "./styles/styles.css";
 import "./styles/rondas.css";
@@ -47,6 +48,11 @@ function AppContent() {
   const [progreso, setProgreso] = useState(0);
   const [familias, setFamilias] = useState([]);
   const [cargandoFamilias, setCargandoFamilias] = useState(false);
+  // --- NUEVO ESTADO PARA ALERTAS DE PYTHON ---
+  const [alertasInventario, setAlertasInventario] = useState([]);
+  const [analizandoStock, setAnalizandoStock] = useState(false);
+
+  const [mostrarModalInventario, setMostrarModalInventario] = useState(false);
 
   useEffect(() => {
     const fetchFamilias = async () => {
@@ -62,26 +68,34 @@ function AppContent() {
 
   const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
-  // --- STATS DINÁMICAS (CORREGIDAS) ---
   const stats = useMemo(() => {
-    // 1. Base: Solo esmaltes
     let baseEsmaltes = cargasEsmaltesAsignadas.filter(c => c.tipo === "Esmalte");
-
-    // 2. Si hay un filtro de operario seleccionado arriba, filtramos la base antes de contar
     if (filtroOperario) {
-      baseEsmaltes = baseEsmaltes.filter(c => 
+      baseEsmaltes = baseEsmaltes.filter(c =>
         (c.operario || "").toLowerCase().includes(filtroOperario.toLowerCase())
       );
     }
-
-    // 3. Retornamos los conteos basados en la base (filtrada o no)
     return {
       total: baseEsmaltes.length,
       directos: baseEsmaltes.filter(c => !(c.operario || "").includes('/')).length,
       molienda: baseEsmaltes.filter(c => (c.operario || "").includes('Germán')).length,
       preparado: baseEsmaltes.filter(c => (c.operario || "").includes('Aldo')).length
     };
-  }, [cargasEsmaltesAsignadas, filtroOperario]); // Escucha cambios en el filtro de arriba
+  }, [cargasEsmaltesAsignadas, filtroOperario]);
+
+  // --- FUNCIÓN PARA VACIAR EL TABLERO ---
+  const handleVaciarTablero = () => {
+    const confirmar = window.confirm(`¿Estás seguro de borrar todas las cargas de ${tipoPintura.toUpperCase()} del tablero actual?`);
+    if (confirmar) {
+      if (tipoPintura === "Vinílica") {
+        setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
+      } else {
+        setCargasEsmaltesAsignadas([]);
+      }
+      // Opcional: Limpiar también las especiales de este tipo
+      setCargasEspeciales(prev => prev.filter(c => c.tipo !== tipoPintura));
+    }
+  };
 
   const handleMoverAEspecial = (carga) => {
     setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
@@ -109,6 +123,8 @@ function AppContent() {
     catch (err) { alert(err.message); }
     finally { clearInterval(idInt); setTimeout(() => setProgreso(0), 600); setMenuCargasAbierto(false); }
   };
+
+
 
   const handleReporteDesdeExcel = async (e) => {
     const file = e.target.files[0];
@@ -151,6 +167,42 @@ function AppContent() {
       setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600);
       setMenuReporteAbierto(false);
       e.target.value = null;
+    }
+  };
+
+  const handleAnalizarInventario = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 1. Iniciamos el estado de carga y el progreso simulado
+    setAnalizandoStock(true);
+    const idInt = simularProgreso();
+
+    try {
+      // 2. Llamada al servicio de Python
+      const data = await inventarioService.analizarBajoInventario(file);
+
+      // 3. Si todo sale bien, llevamos la barra al 100%
+      setProgreso(100);
+      setAlertasInventario(data.alertas);
+
+      // 4. Pequeño delay para que el usuario vea el "100%" antes de abrir el modal
+      setTimeout(() => {
+        setMostrarModalInventario(true);
+      }, 500);
+
+    } catch (error) {
+      console.error(error);
+      alert("Error al conectar con el microservicio de Python.");
+    } finally {
+      // 5. Limpiamos el intervalo y reseteamos estados
+      clearInterval(idInt);
+      // Damos un tiempo para que el overlay se desvanezca suavemente
+      setTimeout(() => {
+        setAnalizandoStock(false);
+        setProgreso(0);
+      }, 600);
+      e.target.value = null; // Limpiar el input file
     }
   };
 
@@ -220,7 +272,12 @@ function AppContent() {
 
   return (
     <>
-      <LoadingOverlay cargando={cargando} procesandoPdf={procesandoPdf} procesandoReporte={procesandoReporte} progreso={progreso} />
+      <LoadingOverlay
+        cargando={cargando}
+        procesandoPdf={procesandoPdf}
+        procesandoReporte={procesandoReporte || analizandoStock} // <--- AÑADE ESTO
+        progreso={progreso}
+      />
       <Routes>
         <Route path="/" element={
           <div className="app">
@@ -267,6 +324,10 @@ function AppContent() {
                 )}
                 <div className="botones-cargas">
                   <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
+                  <label className="agregar-btn btn-analisis" style={{ backgroundColor: '#6c5ce7' }}>
+                    🔍 Analizar Stock
+                    <input type="file" hidden accept=".xlsx, .xls" onChange={handleAnalizarInventario} />
+                  </label>
                   <div className="dropdown-container">
                     <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>📂 Gestión ({colaFiltrada.length})</button>
                     {menuCargasAbierto && (
@@ -279,7 +340,7 @@ function AppContent() {
                   <label className="agregar-btn btn-pdf">📄 subrayar PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
 
                   <div className="dropdown-container">
-                    <button className="agregar-btn btn-reporte" onClick={() => setMenuReporteAbierto(!menuReporteAbierto)}>📊 Generar Reporte</button>
+                    <button className="exportar-btn" onClick={() => setMenuReporteAbierto(!menuReporteAbierto)}>📊 Generar Reporte</button>
                     {menuReporteAbierto && (
                       <div className="dropdown-menu">
                         <button className="dropdown-item" onClick={handleReporteClick}>🖥️ Reporte Tablero</button>
@@ -287,48 +348,41 @@ function AppContent() {
                       </div>
                     )}
                   </div>
+
+                  <button className="eliminar-btn" onClick={handleVaciarTablero}>🗑️ Vaciar Tablero</button>
                 </div>
               </div>
 
               <div className="main-board-section">
                 <div className="panel-header-actions">
-                  
-                  {/* CONTENEDOR DE FILAS (IZQUIERDA) */}
                   <div className="header-left-side" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    
-                    {/* FILA 1: Título y Operarios al lado */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                       <h2 className="tablero-titulo" style={{ margin: 0, whiteSpace: 'nowrap' }}>TABLERO {tipoPintura.toUpperCase()}S</h2>
-                      
                       <ResumenOperarios
-                        tipoPintura={tipoPintura} 
-                        rondas={rondas} 
+                        tipoPintura={tipoPintura}
+                        rondas={rondas}
                         cargasEsmaltes={cargasEsmaltesAsignadas}
-                        fechaTrabajo={fechaTrabajo} 
+                        fechaTrabajo={fechaTrabajo}
                         getOperarioPorMaquina={getOperarioPorMaquina}
-                        onFiltrar={setFiltroOperario} 
+                        onFiltrar={setFiltroOperario}
                         filtroActivo={filtroOperario}
                       />
                     </div>
 
-                    {/* FILA 2: Modos de Esmalte (Debajo de los nombres) */}
                     {tipoPintura === "Esmalte" && (
                       <div className="resumen-operarios" style={{ display: 'flex', gap: '8px', paddingLeft: '5px' }}>
                         <button className={`card-op ${modoEsmalte === null ? 'active' : ''}`} onClick={() => setModoEsmalte(null)}>
                           <span className="op-nombre">🌍 {filtroOperario ? `Ver ${filtroOperario}` : 'General'}</span>
                           <span className="op-maquina">({stats.total})</span>
                         </button>
-
                         <button className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`} onClick={() => setModoEsmalte('DIRECTO')}>
                           <span className="op-nombre">🚀 Directos</span>
                           <span className="op-maquina">({stats.directos})</span>
                         </button>
-
                         <button className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`} onClick={() => setModoEsmalte('MOLIENDA')}>
                           <span className="op-nombre">⚙️ Molienda</span>
                           <span className="op-maquina">({stats.molienda})</span>
                         </button>
-
                         <button className={`card-op ${modoEsmalte === 'PREPARADO' ? 'active' : ''}`} onClick={() => setModoEsmalte('PREPARADO')}>
                           <span className="op-nombre">🧪 Preparado</span>
                           <span className="op-maquina">({stats.preparado})</span>
@@ -336,8 +390,6 @@ function AppContent() {
                       </div>
                     )}
                   </div>
-
-                  {/* BOTÓN FAMILIAS (DERECHA) */}
                   <button className="btn-family-explorer" onClick={() => navigate("/familias")}>🏷️ FAMILIAS</button>
                 </div>
 
@@ -365,6 +417,17 @@ function AppContent() {
         onVaciarTodo={() => { if (window.confirm("¿Vaciar cola?")) setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura)); }}
         onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
         onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
+      />
+
+      <ModalInventarioBajo
+        visible={mostrarModalInventario}
+        alertas={alertasInventario}
+        onClose={() => setMostrarModalInventario(false)}
+        onSelectCode={(codigo) => {
+          setCodigo(codigo); // Setea el código en tu buscador principal
+          // Si quieres que busque automáticamente al hacer click:
+          // setTimeout(() => consultar(), 100); 
+        }}
       />
 
       <ModalDetalleCarga

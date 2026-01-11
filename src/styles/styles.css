@@ -254,25 +254,6 @@ body, html {
   align-items: center;
 }
 
-/* ===== ESTILO BASE PARA LOS 3 BOTONES ===== */
-.agregar-btn, .exportar-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 180px; 
-  height: 55px; 
-  padding: 0 15px;
-  border: none;
-  border-radius: 15px;
-  cursor: pointer;
-  font-weight: 800;
-  color: #fff;
-  font-size: 13px; 
-  text-transform: uppercase;
-  text-align: center;
-  transition: all 0.3s;
-  box-sizing: border-box;
-}
 
 /* Botón: Agregar Carga (Azul) */
 .agregar-btn {
@@ -707,11 +688,11 @@ body, html {
 }
 
 /* ===== ESTILO BASE PARA LOS 3 BOTONES ===== */
-.agregar-btn, .exportar-btn {
+.agregar-btn, .exportar-btn, .eliminar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 180px; 
+  width: 140px; 
   height: 55px; 
   padding: 0 15px;
   border: none;
@@ -741,6 +722,12 @@ body, html {
 /* Botón: Exportar Excel (Verde) */
 .exportar-btn {
   background: linear-gradient(135deg, #2ecc71 0%, #1d6f42 100%);
+  box-shadow: 0 6px 15px rgba(29, 111, 66, 0.4);
+  gap: 8px;
+}
+
+.eliminar-btn {
+  background: linear-gradient(135deg, #ec2334 0%, #af0e16 100%);
   box-shadow: 0 6px 15px rgba(29, 111, 66, 0.4);
   gap: 8px;
 }
@@ -1311,3 +1298,11 @@ body, html {
   min-width: 100px;
   text-align: center;
 }
+
+
+
+
+
+
+
+

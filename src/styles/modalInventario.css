@@ -1,0 +1,166 @@
+/* --- CONTENEDOR PRINCIPAL: EL "PANEL DE CONTROL" --- */
+.inv-container {
+  width: 950px !important;
+  background: #1b1b2f !important;
+  border: 1px solid rgba(0, 192, 255, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* --- BLOQUE UNIFICADO (TARJETA POR CÓDIGO) --- */
+.bloque-grupo-codigo {
+  display: flex;
+  background: #232339; /* Un tono ligeramente más claro que el fondo para dar profundidad */
+  margin-bottom: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bloque-grupo-codigo:hover {
+  border-color: rgba(0, 192, 255, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* --- COLUMNA IZQUIERDA: EL CÓDIGO --- */
+.columna-codigo-unificada {
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 192, 255, 0.08) 0%, rgba(0, 192, 255, 0.02) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+/* Pequeña barra lateral decorativa */
+.columna-codigo-unificada::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 40%;
+  width: 3px;
+  background: #00c0ff;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px #00c0ff;
+}
+
+.codigo-resaltado-grande {
+  color: #00c0ff;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* --- COLUMNA DERECHA: PRESENTACIONES --- */
+.columna-presentaciones {
+  flex: 1;
+}
+
+.sub-fila-inventario {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.sub-fila-inventario:last-child {
+  border-bottom: none;
+}
+
+/* Tipografía de los datos */
+.nombre-producto-inv {
+  color: #e2e8f0;
+  font-size: 12.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 20px; 
+}
+
+.dato-existencia, .dato-salidas {
+  font-family: 'Roboto Mono', monospace; /* Números alineados */
+  font-size: 15px;
+}
+
+.dato-existencia { color: #fff; font-weight: 600; }
+.dato-salidas { color: #94a3b8; }
+
+/* --- BADGES DE ALCANCE PULIDOS --- */
+.badge-alcance-final {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-alcance-final.crítico {
+  background: rgba(255, 95, 126, 0.1);
+  color: #ff5f7e;
+  border: 1px solid rgba(255, 95, 126, 0.2);
+}
+
+.badge-alcance-final.estancado {
+  background: rgba(246, 173, 85, 0.1);
+  color: #f6ad55;
+  border: 1px solid rgba(246, 173, 85, 0.2);
+}
+
+/* --- BOTÓN ACCIÓN ESTILO "TARGET" --- */
+.btn-ir-code {
+  background: #1b1b2f;
+  border: 1px solid rgba(0, 192, 255, 0.3);
+  color: #00c0ff;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-ir-code:hover {
+  background: #00c0ff;
+  color: #1b1b2f;
+  box-shadow: 0 0 15px rgba(0, 192, 255, 0.5);
+  transform: rotate(15deg) scale(1.1);
+}
+
+
+
+.contenedor-info-producto {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Espacio entre el badge y el nombre */
+}
+
+.badge-envasado {
+  background: rgba(0, 255, 204, 0.1);
+  color: #00ffcc;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  padding: 15px 15px;
+  border-radius: 4px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: center;
+  text-shadow: 0 0 5px rgba(0, 255, 204, 0.2);
+}
+
+
+
+
+/* Efecto hover en la fila para resaltar el envasado */
+.sub-fila-inventario:hover .badge-envasado {
+  background: #00ffcc;
+  color: #1b1b2f;
+}

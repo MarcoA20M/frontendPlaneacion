@@ -19,7 +19,7 @@ export const exportarReporte = async (cargas) => {
   const dia = String(fecha.getDate()).padStart(2, '0');
   const mes = String(fecha.getMonth() + 1).padStart(2, '0');
   const anio = fecha.getFullYear();
-  const fechaFormateada = `${dia}-${mes}-${anio}`;
+  const fechaFormateada = `${mes}-${dia}-${anio}`;
 
   const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);

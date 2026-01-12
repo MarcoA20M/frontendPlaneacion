@@ -1304,5 +1304,70 @@ body, html {
 
 
 
+.layout-dinamico-produccion {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 100%;
+}
 
+.envasado-column {
+    min-width: 250px;
+}
 
+/* Contenedor de la tabla movido a la derecha */
+.inventario-column {
+    flex: 0 1 auto;
+    margin-left: auto; /* Empuja todo a la derecha */
+    background: rgba(0, 0, 0, 0.4); 
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* La Tabla */
+.tabla-inventario-tecnica {
+    width: auto;
+    border-collapse: collapse; /* Une las líneas/rayitas */
+}
+
+/* Encabezados (Arriba) */
+.tabla-inventario-tecnica th {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(60, 20, 90, 0.7);
+    color: #00e5ff;
+    font-size: 0.55rem;
+    padding: 6px 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Celdas (Abajo) */
+.tabla-inventario-tecnica td {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    text-align: center;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Estilos especiales */
+.tipo-envase-cell {
+    color: #00e5ff !important;
+    font-size: 0.7rem !important;
+    text-align: left !important;
+}
+
+.alcance-alerta {
+    color: #ff4444 !important;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+.placeholder-text {
+    color: #555;
+    font-size: 0.7rem;
+    font-style: italic;
+    padding: 20px !important;
+}

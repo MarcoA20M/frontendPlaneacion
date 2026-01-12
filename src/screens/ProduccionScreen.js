@@ -8,6 +8,7 @@ import { procesarPdfConRondas } from "../services/pdfService";
 import { familiaService } from "../services/familiaService";
 import { inventarioService } from "../services/inventarioService";
 import { bitacoraService } from "../services/bitacoraService";
+import { planificadorService } from "../services/planificadorService";
 import { tableroUtils } from "../utils/tableroUtils";
 import { getOperarioPorMaquina, litrosPorEnvasado, litrosATexto } from "../constants/config";
 
@@ -20,6 +21,8 @@ import ModalDetalleCarga from "../components/ModalDetalleCarga";
 import TableroEsmaltes from "../components/TableroEsmaltes";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ModalInventarioBajo from "../components/ModalInventarioBajo";
+// --- NUEVA IMPORTACIÓN ---
+import ModalPlanificador from "../components/ModalPlanificador";
 
 // Estilos
 import "../styles/styles.css";
@@ -37,7 +40,7 @@ export default function ProduccionScreen() {
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas
     } = useProduccion();
 
-    // Estados de UI y Control
+    // --- ESTADOS DE UI Y CONTROL ---
     const [fechaTrabajo, setFechaTrabajo] = useState(new Date());
     const [filtroOperario, setFiltroOperario] = useState(null);
     const [modoEsmalte, setModoEsmalte] = useState(null);
@@ -55,7 +58,14 @@ export default function ProduccionScreen() {
     const [mostrarModalInventario, setMostrarModalInventario] = useState(false);
     const [familias, setFamilias] = useState([]);
 
-    // --- LÓGICA DE FAMILIAS (RESTAURADA) ---
+    // --- ESTADO PARA EL PLANIFICADOR ---
+    const [mostrarModalPlanificador, setMostrarModalPlanificador] = useState(false);
+    const [datosPlanificador, setDatosPlanificador] = useState(() => {
+        const guardado = localStorage.getItem("planificador_data");
+        return guardado ? JSON.parse(guardado) : null;
+    });
+
+    // --- EFECTOS ---
     useEffect(() => {
         const fetchFamilias = async () => {
             try {
@@ -71,7 +81,7 @@ export default function ProduccionScreen() {
     const stats = useMemo(() => {
         let baseEsmaltes = cargasEsmaltesAsignadas.filter(c => c.tipo === "Esmalte");
         if (filtroOperario) {
-            baseEsmaltes = baseEsmaltes.filter(c => 
+            baseEsmaltes = baseEsmaltes.filter(c =>
                 (c.operario || "").toLowerCase().includes(filtroOperario.toLowerCase())
             );
         }
@@ -88,18 +98,35 @@ export default function ProduccionScreen() {
         return setInterval(() => setProgreso(p => p >= 92 ? p : p + Math.floor(Math.random() * 7) + 2), 250);
     };
 
-    // --- MANEJO DE BITÁCORA (Usando tu Service) ---
-    const handleImprimirBitacora = async () => {
+    // --- LOGICA PLANIFICADOR ---
+    const handleCargarPlanificador = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setAnalizandoStock(true);
+        const idInt = simularProgreso();
         try {
-            await bitacoraService.generarPdf(rondas, fechaTrabajo, tipoPintura, getOperarioPorMaquina);
-        } catch (e) {
-            alert("Error: " + e.message);
+            const data = await planificadorService.cargarExcelPlanificador(file);
+            setDatosPlanificador(data);
+            localStorage.setItem("planificador_data", JSON.stringify(data));
+            setProgreso(100);
+            setTimeout(() => setMostrarModalPlanificador(true), 500);
+        } catch (error) {
+            alert("❌ Error al procesar planificador: " + error.message);
         } finally {
-            setMenuReporteAbierto(false);
+            clearInterval(idInt);
+            setTimeout(() => { setAnalizandoStock(false); setProgreso(0); }, 600);
+            setMenuCargasAbierto(false);
+            e.target.value = null;
         }
     };
 
-    // --- REPORTE DESDE EXCEL (Lógica sincronizada de App.js) ---
+    // --- MANEJADORES DE REPORTES Y PDF ---
+    const handleImprimirBitacora = async () => {
+        try {
+            await bitacoraService.generarPdf(rondas, fechaTrabajo, tipoPintura, getOperarioPorMaquina);
+        } catch (e) { alert("Error: " + e.message); } finally { setMenuReporteAbierto(false); }
+    };
+
     const handleReporteDesdeExcel = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -108,11 +135,9 @@ export default function ProduccionScreen() {
         try {
             const datosExcel = await handleImportExcel(e, true);
             if (!datosExcel || datosExcel.length === 0) return alert("Excel sin datos");
-
             const reporteSincronizado = datosExcel.map(item => {
                 let maq = "NO ASIGNADA", ope = "PENDIENTE";
                 const folioBusqueda = String(item.folio).trim().toUpperCase();
-
                 rondas.forEach((fila, fIdx) => {
                     fila.forEach(celda => {
                         if (!celda) return;
@@ -124,25 +149,16 @@ export default function ProduccionScreen() {
                         }
                     });
                 });
-
                 const matchEsm = cargasEsmaltesAsignadas.find(c => String(c.folio).trim().toUpperCase() === folioBusqueda);
                 if (matchEsm) { maq = "ESM"; ope = matchEsm.operario; }
-                
                 const matchEsp = cargasEspeciales.find(c => String(c.folio).trim().toUpperCase() === folioBusqueda);
                 if (matchEsp) { maq = "ESPECIAL"; ope = "LÁZARO"; }
-
                 return { ...item, maquina: maq, operario: ope };
             });
-
             await exportarReporte(reporteSincronizado);
             setProgreso(100);
         } catch (error) { alert("Error al sincronizar reporte"); }
-        finally {
-            clearInterval(idInt);
-            setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600);
-            setMenuReporteAbierto(false);
-            e.target.value = null;
-        }
+        finally { clearInterval(idInt); setTimeout(() => { setProcesandoReporte(false); setProgreso(0); }, 600); setMenuReporteAbierto(false); e.target.value = null; }
     };
 
     const handlePdfClick = async (e) => {
@@ -156,8 +172,7 @@ export default function ProduccionScreen() {
                     if (!celda) return null;
                     const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
                     return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
-                }))
-                : [cargasEsmaltesAsignadas];
+                })) : [cargasEsmaltesAsignadas];
             const blob = await procesarPdfConRondas(file, tableroAProcesar, cargasEspeciales.filter(c => c.tipo === tipoPintura));
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `Reporte_${tipoPintura}.pdf`; a.click();
@@ -168,9 +183,8 @@ export default function ProduccionScreen() {
 
     const handleVaciarTablero = () => {
         if (window.confirm(`¿Borrar todas las cargas de ${tipoPintura.toUpperCase()}?`)) {
-            if (tipoPintura === "Vinílica") {
-                setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
-            } else { setCargasEsmaltesAsignadas([]); }
+            if (tipoPintura === "Vinílica") { setRondas(Array.from({ length: 8 }, () => Array(6).fill(null))); }
+            else { setCargasEsmaltesAsignadas([]); }
             setCargasEspeciales(prev => prev.filter(c => c.tipo !== tipoPintura));
         }
     };
@@ -183,7 +197,6 @@ export default function ProduccionScreen() {
         let nR = [...rondas.map(f => [...f])];
         let nE = [...cargasEspeciales];
         let cargaEntrante;
-
         if (origen.tipo === 'ronda') {
             const contenido = nR[origen.f][origen.c];
             if (Array.isArray(contenido)) {
@@ -192,7 +205,6 @@ export default function ProduccionScreen() {
                 nR[origen.f][origen.c] = contenido.length === 0 ? null : (contenido.length === 1 ? contenido[0] : contenido);
             } else { cargaEntrante = { ...contenido }; nR[origen.f][origen.c] = null; }
         } else { cargaEntrante = { ...nE[origen.index] }; nE.splice(origen.index, 1); }
-
         cargaEntrante.operario = getOperarioPorMaquina(101 + fDest, fechaTrabajo);
         cargaEntrante.maquina = `VI-${101 + fDest}`;
         const destinoActual = nR[fDest][cDest];
@@ -208,6 +220,11 @@ export default function ProduccionScreen() {
                 <div className="header-panel">
                     <div className="titulo-app">
                         <h1>Gestión de Pinturas</h1>
+                        {datosPlanificador && (
+                            <button className="badge-planificador-btn" onClick={() => setMostrarModalPlanificador(true)}>
+                                📅 Planificador Activo ({datosPlanificador.total})
+                            </button>
+                        )}
                         {tipoPintura === "Vinílica" && (
                             <div className="planificador-semanal">
                                 <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() - 7)))}>◀</button>
@@ -233,36 +250,124 @@ export default function ProduccionScreen() {
 
                 <div className="producto-panel">
                     {producto && (
-                        <>
-                            <div className="tabla">
-                                {[...producto.envasados].sort((a, b) => litrosPorEnvasado(a.id) - litrosPorEnvasado(b.id)).map(env => (
-                                    <div className="fila" key={env.id}>
-                                        <span className="litros-text">{litrosATexto(litrosPorEnvasado(env.id))}</span>
-                                        <input type="number" value={cantidades[env.id] || 0} onChange={(e) => setCantidades({ ...cantidades, [env.id]: Number(e.target.value) })} />
-                                    </div>
-                                ))}
+                        <div className="layout-dinamico-produccion">
+                            <div className="envasado-column">
+                                <div className="tabla">
+                                    {[...producto.envasados].sort((a, b) => litrosPorEnvasado(a.id) - litrosPorEnvasado(b.id)).map(env => (
+                                        <div className="fila" key={env.id}>
+                                            <span className="litros-text">{litrosATexto(litrosPorEnvasado(env.id))}</span>
+                                            <input
+                                                type="number"
+                                                value={cantidades[env.id] || 0}
+                                                onChange={(e) => setCantidades({ ...cantidades, [env.id]: Number(e.target.value) })}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="contador-litros">Total: <span>{totalLitrosActuales.toFixed(2)} L</span></div>
                             </div>
-                            <div className="contador-litros">Total: <span>{totalLitrosActuales.toFixed(2)} L</span></div>
-                        </>
+
+                            {/* --- Cambia esta sección dentro de la columna de inventario --- */}
+                            <div className="inventario-column">
+                                <table className="tabla-inventario-tecnica">
+                                    <thead>
+                                        <tr>
+                                            <th>TIPO ENVASE</th>
+                                            <th>PZ A PRODUCIR</th>
+                                            <th>CAJA CERRADA</th>
+                                            <th>SALIDAS</th>
+                                            <th>EXISTENCIA</th>
+                                            <th>ALCANCE (DÍAS)</th>
+                                            <th>NUEVO INV.</th>
+                                            <th>DÍAS EST.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {producto && producto.envasados && producto.envasados.length > 0 ? (
+                                            [...producto.envasados]
+                                                .sort((a, b) => litrosPorEnvasado(a.id) - litrosPorEnvasado(b.id))
+                                                .map(env => {
+                                                    const id = env.id;
+                                                    const pz = cantidades[id] || 0;
+                                                    const capacidadSistema = Number(litrosPorEnvasado(id));
+
+                                                    // --- LÓGICA DE EXTRACCIÓN DEL PLANIFICADOR ---
+                                                    const extraerLitrosDeArticulo = (art) => {
+                                                        if (!art) return 0;
+                                                        const prefijo = String(art).split('-')[0].replace(/^0+/, '');
+                                                        return parseFloat(prefijo) || 0;
+                                                    };
+
+                                                    // Buscamos el match exacto por litros entre el envasado y el planificador
+                                                    const infoPlanificador = producto.datosPlanificador?.find(item => {
+                                                        const litrosPlan = extraerLitrosDeArticulo(item.articulo);
+                                                        return Math.abs(litrosPlan - capacidadSistema) < 0.1;
+                                                    });
+
+                                                    // Cálculos dinámicos
+                                                    const salidas = infoPlanificador ? parseFloat(infoPlanificador.salidas) : 0;
+                                                    const existencia = infoPlanificador ? parseFloat(infoPlanificador.existencia) : 0;
+                                                    const alcanceActual = infoPlanificador ? infoPlanificador.alcance : 0;
+
+                                                    // Lógica de cajas
+                                                    const divisorCaja = (capacidadSistema >= 3 && capacidadSistema <= 5) ? 2 : (capacidadSistema <= 1 ? 6 : 1);
+                                                    const cajaCerrada = pz > 0 ? (pz / divisorCaja).toFixed(1) : 0;
+
+                                                    const nuevoInv = existencia + Number(pz);
+                                                    const diasEst = salidas > 0 ? (nuevoInv / salidas).toFixed(1) : "---";
+
+                                                    return (
+                                                        <tr key={id}>
+                                                            <td style={{ color: '#00e5ff', fontWeight: 'bold' }}>
+                                                                {litrosATexto(capacidadSistema)}
+                                                            </td>
+                                                            <td style={{ color: pz > 0 ? '#fff' : '#555' }}>{pz}</td>
+                                                            <td style={{ opacity: 0.7 }}>{cajaCerrada}</td>
+                                                            <td>{salidas.toFixed(1)}</td>
+                                                            <td>{existencia}</td>
+                                                            <td style={{
+                                                                color: alcanceActual < 3 ? '#ff5252' : '#ffca28',
+                                                                fontWeight: 'bold'
+                                                            }}>{alcanceActual}</td>
+                                                            <td style={{ backgroundColor: 'rgba(0, 229, 255, 0.05)' }}>{nuevoInv}</td>
+                                                            <td style={{
+                                                                color: diasEst < 5 ? '#ff5252' : '#00ff88',
+                                                                fontWeight: 'bold'
+                                                            }}>{diasEst}</td>
+                                                        </tr>
+                                                    );
+                                                })
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="8" style={{ color: '#666', padding: '15px', textAlign: 'center' }}>
+                                                    Busque un producto para ver el análisis de stock...
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     )}
+
                     <div className="botones-cargas">
                         <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
-                        
                         <div className="dropdown-container">
                             <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>📂 Gestión ({colaFiltrada.length})</button>
                             {menuCargasAbierto && (
                                 <div className="dropdown-menu">
+                                    <label className="dropdown-item label-input" style={{ borderBottom: '2px solid #00e5ff', color: '#00e5ff', fontWeight: 'bold' }}>
+                                        📅 Cargar Planificador <input type="file" hidden accept=".xlsx, .xls" onChange={handleCargarPlanificador} />
+                                    </label>
                                     <label className="dropdown-item label-input" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '5px', paddingBottom: '8px' }}>
                                         🔍 Analizar Stock <input type="file" hidden accept=".xlsx, .xls" onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (!file) return;
-                                            setAnalizandoStock(true);
-                                            setMenuCargasAbierto(false);
+                                            setAnalizandoStock(true); setMenuCargasAbierto(false);
                                             const idInt = simularProgreso();
                                             try {
                                                 const data = await inventarioService.analizarBajoInventario(file);
-                                                setAlertasInventario(data.alertas);
-                                                setProgreso(100);
+                                                setAlertasInventario(data.alertas); setProgreso(100);
                                                 setTimeout(() => setMostrarModalInventario(true), 500);
                                             } catch (err) { alert("Error con inventario"); }
                                             finally { clearInterval(idInt); setTimeout(() => { setAnalizandoStock(false); setProgreso(0); }, 600); e.target.value = null; }
@@ -271,31 +376,26 @@ export default function ProduccionScreen() {
                                     <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>📋 Lista Espera</button>
                                     <label className="dropdown-item label-input">📊 Importar Excel <input type="file" hidden accept=".xlsx, .xls" onChange={async (e) => {
                                         const idInt = simularProgreso();
-                                        try { await handleImportExcel(e); setProgreso(100); }
-                                        catch (err) { alert(err.message); }
+                                        try { await handleImportExcel(e); setProgreso(100); } catch (err) { alert(err.message); }
                                         finally { clearInterval(idInt); setTimeout(() => setProgreso(0), 600); setMenuCargasAbierto(false); }
                                     }} /></label>
                                 </div>
                             )}
                         </div>
-
                         <label className="agregar-btn btn-pdf">📄 PDF <input type="file" hidden accept=".pdf" onChange={handlePdfClick} /></label>
-
                         <div className="dropdown-container">
                             <button className="exportar-btn" onClick={() => setMenuReporteAbierto(!menuReporteAbierto)}>📊 Reportes</button>
                             {menuReporteAbierto && (
                                 <div className="dropdown-menu">
                                     <button className="dropdown-item" onClick={async () => {
                                         const finales = tableroUtils.prepararDatosReporte(rondas, cargasEsmaltesAsignadas, cargasEspeciales, tipoPintura, fechaTrabajo, getOperarioPorMaquina);
-                                        await exportarReporte(finales);
-                                        setMenuReporteAbierto(false);
+                                        await exportarReporte(finales); setMenuReporteAbierto(false);
                                     }}>🖥️ Tablero</button>
                                     <button className="dropdown-item" onClick={handleImprimirBitacora}>🖨️ Bitácora</button>
                                     <label className="dropdown-item label-input">📂 Desde Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handleReporteDesdeExcel} /></label>
                                 </div>
                             )}
                         </div>
-
                         <button className="eliminar-btn" onClick={handleVaciarTablero}>🗑️ Vaciar Tablero</button>
                     </div>
                 </div>
@@ -331,16 +431,34 @@ export default function ProduccionScreen() {
                 </div>
             </div>
 
+            {/* --- INTEGRACIÓN DEL NUEVO COMPONENTE MODULARIZADO --- */}
+            <ModalPlanificador
+                visible={mostrarModalPlanificador}
+                datos={datosPlanificador}
+                onClose={() => setMostrarModalPlanificador(false)}
+                onSelectCode={(codigo) => {
+                    setCodigo(codigo);
+                    setMostrarModalPlanificador(false);
+                }}
+                onClear={() => {
+                    if (window.confirm("¿Borrar memoria del planificador?")) {
+                        setDatosPlanificador(null);
+                        localStorage.removeItem("planificador_data");
+                        setMostrarModalPlanificador(false);
+                    }
+                }}
+            />
+
             <ModalCargas
                 visible={mostrarModal} cargas={colaFiltrada} onClose={() => setMostrarModal(false)}
                 onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
-                onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))} 
+                onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))}
                 onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
                 onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
             />
 
             <ModalInventarioBajo visible={mostrarModalInventario} alertas={alertasInventario} onClose={() => setMostrarModalInventario(false)} onSelectCode={setCodigo} />
-            
+
             <ModalDetalleCarga
                 visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)}
                 onEliminar={(c) => {

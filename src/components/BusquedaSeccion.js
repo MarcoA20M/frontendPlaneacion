@@ -27,6 +27,8 @@ export default function BusquedaSeccion({
         </div>
       )}
 
+
+
       <PanelEspeciales
         cargasEspeciales={cargasEspeciales}
         mostrarEspeciales={mostrarEspeciales} 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "../styles/modalCargas.css";
+import { reporteModalService } from "../services/reporteModalService";
 
 function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminarCarga, onSeleccionarCarga, onVaciarTodo }) {
   const [filtroMarca, setFiltroMarca] = useState("TODOS");
@@ -19,13 +20,17 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
       else if (texto.includes("CH14")) marca = "CH14";
       else if (texto.includes("CLASIKA")) marca = "CLASIKA";
       else if (texto.includes("ESMALUX")) marca = "ESMALUX";
+      else if (texto.includes("BARNI-SPAR")) marca = "BARNIZ SPAR";
+      else if (texto.includes("BASES")) marca = "BASES";
       else if (texto.includes("ESMAFLEX")) marca = "ESMAFLEX";
+      else if (texto.includes("SELLAVIN")) marca = "SELLAVIN";
+      else if (texto.includes("SELLADOR ENTINTABLE")) marca = "SELLADOR ENTINTABLE";
       else if (texto.includes("TRANSIKAR")) marca = "TRANSIKAR";
       else if (texto.includes("TRANSITEX")) marca = "TRANSITEX";
       else if (texto.includes("PINTAMAR")) marca = "PINTAMAR";
       else if (texto.includes("DRYLUX")) marca = "DRYLUX";
       else if (texto.includes("MAQUILA")) marca = "MAQUILAS";
-      
+
       return { ...c, marcaComercial: marca };
     });
 
@@ -42,10 +47,16 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
   }, [cargas]);
 
   const cargasVisibles = useMemo(() => {
-    return filtroMarca === "TODOS" 
-      ? cargasClasificadas 
+    return filtroMarca === "TODOS"
+      ? cargasClasificadas
       : cargasClasificadas.filter(c => c.marcaComercial === filtroMarca);
   }, [filtroMarca, cargasClasificadas]);
+
+  // Función para manejar la descarga desde el servicio
+  const handleDescarga = (formato) => {
+    if (cargasVisibles.length === 0) return;
+    reporteModalService.generarReporte(cargasVisibles, formato, filtroMarca);
+  };
 
   if (!visible) return null;
 
@@ -59,27 +70,30 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
             <h2>Gestión de Cargas</h2>
             <span className="badge-contador">{cargasClasificadas.length} en espera</span>
           </div>
+          
           <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            {/* BOTÓN DE BORRAR TODO */}
-            <button 
-              className="btn-borrar-todo" 
+            
+            {/* BOTONES DE EXPORTACIÓN */}
+          
+
+            <button
+              onClick={() => handleDescarga('pdf')}
+              title="Descargar PDF"
+              style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+            >
+              📄 PDF
+            </button>
+
+            <button
+              className="btn-borrar-todo"
               onClick={onVaciarTodo}
-              style={{
-                backgroundColor: '#ff4d4d',
-                color: 'white',
-                border: 'none',
-                padding: '8px 15px',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '0.8rem'
-              }}
+              style={{ backgroundColor: '#ff4d4d', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
             >
               🗑️ Borrar Todo
             </button>
 
-            <button 
-              className="btn-guardar-top" 
+            <button
+              className="btn-guardar-top"
               disabled={cargasClasificadas.length === 0}
               onClick={() => { onGuardar(cargasClasificadas); onClose(); }}
             >
@@ -107,7 +121,7 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
         )}
 
         <div className="contenedor-marcas-grid">
-          <div 
+          <div
             className={`marca-card ${filtroMarca === "TODOS" ? "activa" : ""}`}
             onClick={() => setFiltroMarca("TODOS")}
           >
@@ -115,9 +129,9 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
             <h3>TODAS</h3>
             <span>{cargasClasificadas.length} Lotes</span>
           </div>
-          
+
           {marcasDisponibles.map((m) => (
-            <div 
+            <div
               key={m.nombre}
               className={`marca-card ${filtroMarca === m.nombre ? "activa" : ""}`}
               onClick={() => setFiltroMarca(m.nombre)}
@@ -133,7 +147,7 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
           <h3 className="titulo-tabla">
             {filtroMarca === "TODOS" ? "Listado General" : `Filtrado por: ${filtroMarca}`}
           </h3>
-          
+
           <div className="fila-carga header">
             <div className="celda nro">#</div>
             <div className="celda g-2">Código</div>
@@ -148,8 +162,8 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
             {cargasVisibles.length > 0 ? (
               <div className="tabla-cargas">
                 {cargasVisibles.map((c, i) => (
-                  <div 
-                    className="fila-carga clickable-row" 
+                  <div
+                    className="fila-carga clickable-row"
                     key={c.idTemp || i}
                     onClick={() => onSeleccionarCarga(c)}
                   >
@@ -160,11 +174,11 @@ function ModalCargas({ visible, cargas, producto, onClose, onGuardar, onEliminar
                     <div className="celda g-1">{c.litros.toFixed(1)}</div>
                     <div className="celda g-1">{c.nivelCubriente}</div>
                     <div className="celda accion">
-                      <button 
-                        className="btn-borrar-fila" 
+                      <button
+                        className="btn-borrar-fila"
                         onClick={(e) => {
-                            e.stopPropagation();
-                            onEliminarCarga(c.idTemp);
+                          e.stopPropagation();
+                          onEliminarCarga(c.idTemp);
                         }}
                       >✕</button>
                     </div>

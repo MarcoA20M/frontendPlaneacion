@@ -4,7 +4,7 @@ export const inventarioService = {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/analizar-inventario", {
+      const response = await fetch("http://localhost:5000/analizar-inventario", {
         method: "POST",
         body: formData,
       });

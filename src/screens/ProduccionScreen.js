@@ -460,7 +460,20 @@ export default function ProduccionScreen() {
             <ModalInventarioBajo visible={mostrarModalInventario} alertas={alertasInventario} onClose={() => setMostrarModalInventario(false)} onSelectCode={setCodigo} />
 
             <ModalDetalleCarga
-                visible={mostrarDetalle} carga={cargaSeleccionada} onClose={() => setMostrarDetalle(false)}
+                visible={mostrarDetalle}
+                carga={cargaSeleccionada}
+                onClose={() => setMostrarDetalle(false)}
+
+                // --- NUEVA LÓGICA DE CAMBIO DE OPERARIO ---
+                onCambiarOperario={(id, nuevoOperario) => {
+                    // 1. Actualizamos en el estado de Esmaltes
+                    setCargasEsmaltesAsignadas(prev =>
+                        prev.map(c => c.idTemp === id ? { ...c, operario: nuevoOperario } : c)
+                    );
+                    // 2. También actualizamos la carga seleccionada para que el modal cambie visualmente
+                    setCargaSeleccionada(prev => ({ ...prev, operario: nuevoOperario }));
+                }}
+
                 onEliminar={(c) => {
                     setColaCargas(prev => prev.filter(item => item.idTemp !== c.idTemp));
                     setRondas(prev => prev.map(f => f.map(celda => {
@@ -475,6 +488,7 @@ export default function ProduccionScreen() {
                     setCargasEspeciales(prev => prev.filter(item => item.idTemp !== c.idTemp));
                     setMostrarDetalle(false);
                 }}
+
                 onMoverEspecial={(carga) => {
                     setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
                     setRondas(prevRondas => prevRondas.map(f => f.map(celda => {
@@ -490,6 +504,8 @@ export default function ProduccionScreen() {
                     setMostrarDetalle(false);
                 }}
             />
+
+
         </div>
     );
 }

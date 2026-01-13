@@ -179,6 +179,14 @@ export function useProduccion() {
     setCantidades({}); setProducto(null); setCodigo("");
   };
 
+
+const actualizarOperarioEsmalte = (idTemp, nuevoOperario) => {
+    setCargasEsmaltesAsignadas(prev => 
+        prev.map(c => c.idTemp === idTemp ? { ...c, operario: nuevoOperario } : c)
+    );
+};
+
+  
   // --- RESTAURADO: Lógica de Operarios para Vinílicas y Esmaltes ---
   const guardarCargasEnRondas = (cargasAGuardar) => {
     const idsAsignados = [];
@@ -237,6 +245,7 @@ export function useProduccion() {
     cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
     rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
     cargando: cargandoExcel, buscandoManual, totalLitrosActuales,
-    consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas
+    consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
+    actualizarOperarioEsmalte
   };
 }

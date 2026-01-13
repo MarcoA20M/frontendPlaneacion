@@ -1,8 +1,20 @@
 import React from 'react';
 import '../styles/modalDetalle.css'; 
 
-const ModalDetalleCarga = ({ visible, carga, onClose, onEliminar, onMoverEspecial }) => {
+const ModalDetalleCarga = ({ 
+  visible, 
+  carga, 
+  onClose, 
+  onEliminar, 
+  onMoverEspecial,
+  onCambiarOperario // <-- Nueva prop para la función de cambio
+}) => {
   if (!visible || !carga) return null;
+
+  // Lista de operarios disponibles para Esmaltes
+  const OPERARIOS_ESMALTE = ["Aldo", "Germán", "Gaspar", "Pedro", "Alberto", "Aldo / Gaspar", "Aldo / Pedro", "Germán / Gaspar", "Germán / Pedro"];
+
+  const esEsmalte = carga.tipo === "Esmalte";
 
   return (
     <div className="detalle-modal-overlay" onClick={onClose}>
@@ -13,7 +25,6 @@ const ModalDetalleCarga = ({ visible, carga, onClose, onEliminar, onMoverEspecia
         </div>
         
         <div className="detalle-modal-body">
-          {/* CAMBIO AQUÍ: Sección de Folio */}
           <div className="info-group">
             <label>Folio de Orden</label>
             <div className="data" style={{color: '#007bff', fontWeight: 'bold', fontSize: '1.2rem'}}>
@@ -39,18 +50,40 @@ const ModalDetalleCarga = ({ visible, carga, onClose, onEliminar, onMoverEspecia
           <div className="info-group">
             <label>Especificaciones</label>
             <div className="data">
-              {carga.tipoPintura} — Cubriente: {carga.nivelCubriente}
+              {carga.tipo} — Cubriente: {carga.nivelCubriente}
             </div>
           </div>
           
-          {carga.operario && (
-            <div className="info-group">
-              <label>Operario Asignado</label>
+          <div className="info-group">
+            <label>Operario Asignado</label>
+            {esEsmalte ? (
+              /* SELECTOR PARA ESMALTES */
+              <select 
+                value={carga.operario} 
+                onChange={(e) => onCambiarOperario(carga.idTemp, e.target.value)}
+                className="select-operario-detalle"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#1a1a1a',
+                  color: '#bc13fe',
+                  border: '2px solid #bc13fe',
+                  borderRadius: '5px',
+                  fontWeight: 'bold',
+                  marginTop: '5px'
+                }}
+              >
+                {OPERARIOS_ESMALTE.map(op => (
+                  <option key={op} value={op}>{op}</option>
+                ))}
+              </select>
+            ) : (
+              /* TEXTO ESTATÁTICO PARA VINÍLICAS */
               <div className="data" style={{color: '#bc13fe', fontWeight: 'bold'}}>
                 {carga.operario}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
         <div className="detalle-modal-footer">

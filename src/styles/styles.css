@@ -1371,3 +1371,63 @@ body, html {
     font-style: italic;
     padding: 20px !important;
 }
+
+
+
+
+.badge-planificador-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2c3e50; /* Azul oscuro profesional */
+  color: #ffffff;
+  border: none;
+  padding: 8px 6px;
+  border-radius: 20px; /* Estilo píldora */
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge-planificador-btn:hover {
+  background-color: #34495e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge-planificador-btn:active {
+  transform: translateY(0);
+}
+
+/* Efecto de pulso suave para indicar que está "Activo" */
+.badge-planificador-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-planificador-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% { transform: scale(0, 0); opacity: 1; }
+  20% { transform: scale(25, 25); opacity: 1; }
+  100% { opacity: 0; transform: scale(40, 40); }
+}
+
+.badge-planificador-btn:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}

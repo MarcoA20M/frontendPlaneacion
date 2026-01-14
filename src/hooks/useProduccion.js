@@ -33,7 +33,8 @@ export function useProduccion() {
       case "19": return 19;
       case "4":  return 4;
       case "1":  return 1;
-      case "500": return 0.5; // Corregido a 0.5 exacto
+      case "500": return 0.5;
+      case "250": return 0.25; // Corregido a 0.5 exacto
       default:
         const num = parseFloat(prefijoCapacidad);
         return isNaN(num) ? 0 : num;

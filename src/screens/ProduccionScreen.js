@@ -4,7 +4,7 @@ import { useProduccion } from "../hooks/useProduccion";
 
 // Servicios y Utils
 import { getOperarioPorMaquina } from "../constants/config";
-import { createProduccionHandlers } from "../utils/produccionHandlers"; // NUEVO
+import { createProduccionHandlers } from "../utils/produccionHandlers";
 
 // Componentes
 import BusquedaSeccion from "../components/BusquedaSeccion";
@@ -47,7 +47,13 @@ export default function ProduccionScreen() {
     const [menuCargasAbierto, setMenuCargasAbierto] = useState(false);
     const [menuReporteAbierto, setMenuReporteAbierto] = useState(false);
     const [progreso, setProgreso] = useState(0);
-    const [alertasInventario, setAlertasInventario] = useState([]);
+
+    // MODIFICACIÓN: Estado de alertas como objeto para separar categorías
+    const [alertasInventario, setAlertasInventario] = useState({
+        "Vinílica": [],
+        "Esmalte": []
+    });
+
     const [analizandoStock, setAnalizandoStock] = useState(false);
     const [mostrarModalInventario, setMostrarModalInventario] = useState(false);
     const [familias, setFamilias] = useState([]);
@@ -61,14 +67,7 @@ export default function ProduccionScreen() {
 
     // --- EFECTOS ---
     useEffect(() => {
-        const fetchFamilias = async () => {
-            try {
-                // Importar aquí si es necesario
-                // const data = await familiaService.getFamiliasPorTipo(tipoPintura);
-                // setFamilias(data);
-            } catch (e) { console.error("Error cargando familias:", e); }
-        };
-        fetchFamilias();
+        // Aquí podrías cargar familias si fuera necesario
     }, [tipoPintura]);
 
     const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
@@ -91,7 +90,6 @@ export default function ProduccionScreen() {
     // --- CREAR HANDLERS ---
     const handlers = useMemo(() => {
         return createProduccionHandlers({
-            // Estados y setters
             tipoPintura,
             rondas,
             cargasEsmaltesAsignadas,
@@ -102,33 +100,32 @@ export default function ProduccionScreen() {
             setAnalizandoStock,
             setProcesandoPdf,
             setProcesandoReporte,
-            setAlertasInventario,
+            // MODIFICACIÓN: Setter inteligente que guarda en la categoría activa
+            setAlertasInventario: (nuevasAlertas) => {
+                setAlertasInventario(prev => ({
+                    ...prev,
+                    [tipoPintura]: nuevasAlertas
+                }));
+            },
             setProgreso,
             setMenuCargasAbierto,
             setMenuReporteAbierto,
             setDatosPlanificador,
             setMostrarModalPlanificador,
             setMostrarModalInventario,
-            
-            // Funciones
             handleImportExcel,
             ordenarCargas,
-            
-            // Otros
             fechaTrabajo
         });
-    }, [
-        tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
-        fechaTrabajo, handleImportExcel, ordenarCargas
-    ]);
+    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaTrabajo, handleImportExcel, ordenarCargas]);
 
     return (
         <div className="app">
-            <LoadingOverlay 
-                cargando={cargando} 
-                procesandoPdf={procesandoPdf} 
-                procesandoReporte={procesandoReporte || analizandoStock} 
-                progreso={progreso} 
+            <LoadingOverlay
+                cargando={cargando}
+                procesandoPdf={procesandoPdf}
+                procesandoReporte={procesandoReporte || analizandoStock}
+                progreso={progreso}
             />
 
             <div className="container">
@@ -151,7 +148,7 @@ export default function ProduccionScreen() {
                     </div>
                     <div className="selector-tipo">
                         {["Vinílica", "Esmalte"].map(t => (
-                            <button key={t} className={tipoPintura === t ? "active" : ""} 
+                            <button key={t} className={tipoPintura === t ? "active" : ""}
                                 onClick={() => { setTipoPintura(t); setFiltroOperario(null); setModoEsmalte(null); }}>
                                 {t}
                             </button>
@@ -187,9 +184,25 @@ export default function ProduccionScreen() {
                                     <label className="dropdown-item label-input" style={{ borderBottom: '2px solid #00e5ff', color: '#00e5ff', fontWeight: 'bold' }}>
                                         📅 Cargar Planificador <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleCargarPlanificador} />
                                     </label>
-                                    <label className="dropdown-item label-input" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '5px', paddingBottom: '8px' }}>
-                                        🔍 Analizar Stock <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleAnalizarStock} />
-                                    </label>
+
+                                    {/* Lógica dinámica para Analizar Stock - Sin cambios visuales */}
+                                    {alertasInventario[tipoPintura].length > 0 ? (
+                                        <button
+                                            className="dropdown-item"
+                                            onClick={() => {
+                                                setMostrarModalInventario(true);
+                                                setMenuCargasAbierto(false);
+                                            }}
+                                            style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '5px', paddingBottom: '8px' }}
+                                        >
+                                            🔍 Ver Análisis ({alertasInventario[tipoPintura].length})
+                                        </button>
+                                    ) : (
+                                        <label className="dropdown-item label-input" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '5px', paddingBottom: '8px' }}>
+                                            🔍 Analizar Stock <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleAnalizarStock} />
+                                        </label>
+                                    )}
+
                                     <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>
                                         📋 Lista Espera
                                     </button>
@@ -226,12 +239,12 @@ export default function ProduccionScreen() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                 <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}</h2>
                                 <ResumenOperarios
-                                    tipoPintura={tipoPintura} 
-                                    rondas={rondas} 
+                                    tipoPintura={tipoPintura}
+                                    rondas={rondas}
                                     cargasEsmaltes={cargasEsmaltesAsignadas}
-                                    fechaTrabajo={fechaTrabajo} 
+                                    fechaTrabajo={fechaTrabajo}
                                     getOperarioPorMaquina={getOperarioPorMaquina}
-                                    onFiltrar={setFiltroOperario} 
+                                    onFiltrar={setFiltroOperario}
                                     filtroActivo={filtroOperario}
                                 />
                             </div>
@@ -256,21 +269,21 @@ export default function ProduccionScreen() {
                     </div>
 
                     {tipoPintura === "Vinílica" ? (
-                        <TableroVinilica 
-                            rondas={rondas} 
-                            fechaTrabajo={fechaTrabajo} 
-                            handleDrop={handlers.handleDrop} 
-                            setCargaSeleccionada={setCargaSeleccionada} 
-                            setMostrarDetalle={setMostrarDetalle} 
-                            filtroOperario={filtroOperario} 
+                        <TableroVinilica
+                            rondas={rondas}
+                            fechaTrabajo={fechaTrabajo}
+                            handleDrop={handlers.handleDrop}
+                            setCargaSeleccionada={setCargaSeleccionada}
+                            setMostrarDetalle={setMostrarDetalle}
+                            filtroOperario={filtroOperario}
                         />
                     ) : (
-                        <TableroEsmaltes 
-                            cargas={cargasEsmaltesAsignadas} 
-                            setCargaSeleccionada={setCargaSeleccionada} 
-                            setMostrarDetalle={setMostrarDetalle} 
-                            filtroOperario={filtroOperario} 
-                            modoEsmalte={modoEsmalte} 
+                        <TableroEsmaltes
+                            cargas={cargasEsmaltesAsignadas}
+                            setCargaSeleccionada={setCargaSeleccionada}
+                            setMostrarDetalle={setMostrarDetalle}
+                            filtroOperario={filtroOperario}
+                            modoEsmalte={modoEsmalte}
                         />
                     )}
                 </div>
@@ -295,8 +308,8 @@ export default function ProduccionScreen() {
             />
 
             <ModalCargas
-                visible={mostrarModal} 
-                cargas={colaFiltrada} 
+                visible={mostrarModal}
+                cargas={colaFiltrada}
                 onClose={() => setMostrarModal(false)}
                 onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
                 onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))}
@@ -304,11 +317,13 @@ export default function ProduccionScreen() {
                 onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
             />
 
-            <ModalInventarioBajo 
-                visible={mostrarModalInventario} 
-                alertas={alertasInventario} 
-                onClose={() => setMostrarModalInventario(false)} 
-                onSelectCode={setCodigo} 
+            <ModalInventarioBajo
+                visible={mostrarModalInventario}
+                // IMPORTANTE: Solo pasa las alertas de la categoría activa
+                alertas={alertasInventario[tipoPintura]}
+                onClose={() => setMostrarModalInventario(false)}
+                onSelectCode={setCodigo}
+                onAnalizarNuevo={handlers.handleAnalizarStock}
             />
 
             <ModalDetalleCarga

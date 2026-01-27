@@ -27,12 +27,12 @@ export function useProduccion() {
   const extraerLitrosDeArticulo = (articuloCompleto) => {
     if (!articuloCompleto) return 0;
     const partes = String(articuloCompleto).split('-');
-    const prefijoCapacidad = partes[0].replace(/^0+/, ''); 
+    const prefijoCapacidad = partes[0].replace(/^0+/, '');
 
     switch (prefijoCapacidad) {
       case "19": return 19;
-      case "4":  return 4;
-      case "1":  return 1;
+      case "4": return 4;
+      case "1": return 1;
       case "500": return 0.5;
       case "250": return 0.25; // Corregido a 0.5 exacto
       default:
@@ -56,9 +56,9 @@ export function useProduccion() {
     const codNormalizado = normalizarCodigo(datosProducto.codigo);
 
     const coincidencias = (planificador.data || []).filter(item => {
-        const partes = String(item.articulo).split('-');
-        const colorEnArticulo = partes.length > 1 ? normalizarCodigo(partes[1]) : "";
-        return colorEnArticulo === codNormalizado || normalizarCodigo(item.color) === codNormalizado;
+      const partes = String(item.articulo).split('-');
+      const colorEnArticulo = partes.length > 1 ? normalizarCodigo(partes[1]) : "";
+      return colorEnArticulo === codNormalizado || normalizarCodigo(item.color) === codNormalizado;
     });
 
     return {
@@ -106,14 +106,14 @@ export function useProduccion() {
     const esVinilica = res.tipoPinturaId === 2;
     if (tipoPintura === "Vinílica" && !esVinilica) return alert("Producto de ESMALTES");
     if (tipoPintura === "Esmalte" && esVinilica) return alert("Producto de VINÍLICAS");
-    
+
     const nuevasCantidades = {};
     if (res.datosPlanificador && res.datosPlanificador.length > 0) {
       res.envasados.forEach(env => {
         const capSistema = litrosPorEnvasado(env.id);
         const match = res.datosPlanificador.find(d => {
-            const capPlanificador = extraerLitrosDeArticulo(d.articulo);
-            return Math.abs(capPlanificador - capSistema) < 0.1;
+          const capPlanificador = extraerLitrosDeArticulo(d.articulo);
+          return Math.abs(capPlanificador - capSistema) < 0.1;
         });
         if (match) nuevasCantidades[env.id] = Number(match.piezas || match.cantidad || 0);
       });
@@ -122,8 +122,8 @@ export function useProduccion() {
     setCantidades(nuevasCantidades);
   };
 
-  const totalLitrosActuales = producto 
-    ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0) 
+  const totalLitrosActuales = producto
+    ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
     : 0;
 
   const handleImportExcel = async (e, soloRetornar = false) => {
@@ -181,13 +181,13 @@ export function useProduccion() {
   };
 
 
-const actualizarOperarioEsmalte = (idTemp, nuevoOperario) => {
-    setCargasEsmaltesAsignadas(prev => 
-        prev.map(c => c.idTemp === idTemp ? { ...c, operario: nuevoOperario } : c)
+  const actualizarOperarioEsmalte = (idTemp, nuevoOperario) => {
+    setCargasEsmaltesAsignadas(prev =>
+      prev.map(c => c.idTemp === idTemp ? { ...c, operario: nuevoOperario } : c)
     );
-};
+  };
 
-  
+
   // --- RESTAURADO: Lógica de Operarios para Vinílicas y Esmaltes ---
   const guardarCargasEnRondas = (cargasAGuardar) => {
     const idsAsignados = [];
@@ -196,15 +196,15 @@ const actualizarOperarioEsmalte = (idTemp, nuevoOperario) => {
       cargasAGuardar.forEach((carga) => {
         const listaProcesos = (carga.procesos || []).map(p => p.descripcion.toUpperCase());
         const codigoUpper = normalizarCodigo(carga.codigoProducto);
-        
+
         const esBase = CODIGOS_BASES.includes(codigoUpper) || codigoUpper.startsWith("B");
         const tieneMolienda = listaProcesos.some(d => d.includes("MOLIENDA"));
         const tienePreparado = listaProcesos.some(d => d.includes("PREPARADO") || d.includes("DISPERSION"));
         const tieneEtapaFinal = listaProcesos.some(d => d.includes("IGUALACIÓN") || d.includes("IGUALACION") || d.includes("TERMINADO") || d.includes("AJUSTE"));
-        
+
         let ops = [];
-        if (esBase) ops.push("Aldo"); 
-        else if (tieneMolienda) ops.push("Germán"); 
+        if (esBase) ops.push("Aldo");
+        else if (tieneMolienda) ops.push("Germán");
         else if (tienePreparado) ops.push("Aldo");
 
         if (tieneEtapaFinal || ops.length === 0) {
@@ -219,23 +219,48 @@ const actualizarOperarioEsmalte = (idTemp, nuevoOperario) => {
     } else {
       const nuevasRondas = [...rondas.map(f => [...f])];
       const nuevasEspeciales = [...cargasEspeciales];
+      // ... dentro de guardarCargasEnRondas, en el bloque de Vinílicas (else)
       cargasAGuardar.forEach((carga) => {
         let asignada = false;
         for (let col = 0; col < 6 && !asignada; col++) {
           for (let fila = 0; fila < 8; fila++) {
             if (!nuevasRondas[fila][col]) {
               const numM = 101 + fila;
-              const esGran = [104, 108].includes(numM);
-              const cumpleRegla = (carga.litros > 1600 && esGran) || (carga.litros > 855 && carga.litros <= 1600 && (esGran || numM === 107)) || (carga.litros <= 855 && !esGran && numM !== 107);
+              const esGran = [104, 108].includes(numM); // Máquinas de alto litraje
+
+              // --- NUEVA LÓGICA DE ASIGNACIÓN POR LITROS ---
+              const esCargaGrande = carga.litros > 1600;
+              const esCargaMediana = carga.litros > 855 && carga.litros <= 1600;
+              const esCargaChica = carga.litros <= 855;
+
+              let cumpleRegla = false;
+
+              if (esCargaGrande) {
+                // Solo 104 y 108 (y si están llenas, permite la 107 como respaldo)
+                cumpleRegla = esGran || numM === 107;
+              }
+              else if (esCargaMediana) {
+                // Cargas tipo 1596L: NO entran en 104/108. Van a la 107 o a las pequeñas.
+                cumpleRegla = !esGran;
+              }
+              else if (esCargaChica) {
+                // Cargas pequeñas: Evitan las grandes y evitan la 107
+                cumpleRegla = !esGran && numM !== 107;
+              }
+
               if (cumpleRegla) {
                 carga.operario = getOperarioPorMaquina(numM);
-                nuevasRondas[fila][col] = { ...carga }; asignada = true; idsAsignados.push(carga.idTemp); break;
+                nuevasRondas[fila][col] = { ...carga };
+                asignada = true;
+                idsAsignados.push(carga.idTemp);
+                break;
               }
             }
           }
         }
         if (!asignada) { nuevasEspeciales.push(carga); idsAsignados.push(carga.idTemp); }
       });
+      // ... resto de la función
       setRondas(nuevasRondas); setCargasEspeciales(ordenarCargas(nuevasEspeciales));
     }
     setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));

@@ -33,11 +33,12 @@ export default function ProduccionScreen() {
         cargando, totalLitrosActuales,
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
         guardarProduccionEnBD,
-        cargarDatosPorFecha  // <-- AGREGAR ESTA LÍNEA
+        cargarDatosPorFecha  // Función para cargar cargas de la BD por fecha
     } = useProduccion();
 
     // --- ESTADOS DE UI Y CONTROL ---
-    const [fechaTrabajo, setFechaTrabajo] = useState(new Date());
+    const [fechaRotacion, setFechaRotacion] = useState(new Date()); // Para rotación de personal (cambia con flechas)
+    const [fechaCargaBD, setFechaCargaBD] = useState(new Date());   // Para cargar datos de la BD (cambia con date picker)
     const [filtroOperario, setFiltroOperario] = useState(null);
     const [modoEsmalte, setModoEsmalte] = useState(null);
     const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
@@ -81,12 +82,12 @@ export default function ProduccionScreen() {
         return () => document.removeEventListener("mousedown", handleClickAfuera);
     }, []);
 
-    // --- EFECTO PARA CARGAR DATOS CUANDO CAMBIA LA FECHA ---
+    // EFECTO PARA CARGAR DATOS DE LA BD CUANDO CAMBIA LA FECHA DEL DATE PICKER
     useEffect(() => {
         if (cargarDatosPorFecha) {
-            cargarDatosPorFecha(fechaTrabajo);
+            cargarDatosPorFecha(fechaCargaBD);
         }
-    }, [fechaTrabajo, cargarDatosPorFecha]);
+    }, [fechaCargaBD, cargarDatosPorFecha]);
 
     const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
@@ -132,9 +133,26 @@ export default function ProduccionScreen() {
             setMostrarModalInventario,
             handleImportExcel,
             ordenarCargas,
-            fechaTrabajo
+            fechaTrabajo: fechaRotacion  // Pasamos la fecha de rotación para los handlers
         });
-    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaTrabajo, handleImportExcel, ordenarCargas]);
+    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
+
+    // Funciones para navegar semanas de ROTACIÓN (solo cambian los nombres de los operadores)
+    const semanaAnterior = () => {
+        const nuevaFecha = new Date(fechaRotacion);
+        nuevaFecha.setDate(nuevaFecha.getDate() - 7);
+        setFechaRotacion(nuevaFecha);
+    };
+
+    const semanaSiguiente = () => {
+        const nuevaFecha = new Date(fechaRotacion);
+        nuevaFecha.setDate(nuevaFecha.getDate() + 7);
+        setFechaRotacion(nuevaFecha);
+    };
+
+    const irAHoyRotacion = () => {
+        setFechaRotacion(new Date());
+    };
 
     return (
         <div className="app">
@@ -147,7 +165,7 @@ export default function ProduccionScreen() {
 
             <div className="container">
                 <div className="header-panel">
-
+                    {/* Perfil */}
                     <div className="perfil-container" ref={perfilRef}>
                         <div
                             className={`perfil-icono ${menuPerfilAbierto ? 'active' : ''}`}
@@ -172,6 +190,7 @@ export default function ProduccionScreen() {
                             </div>
                         )}
                     </div>
+
                     <div className="titulo-app">
                         <h1>Gestión de Pinturas</h1>
                         {datosPlanificador && (
@@ -181,10 +200,12 @@ export default function ProduccionScreen() {
                         )}
                         {tipoPintura === "Vinílica" && (
                             <div className="planificador-semanal">
-                                <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() - 7)))}>◀</button>
-                                <div className="fecha-actual-view"><strong>Semana:</strong> {fechaTrabajo.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</div>
-                                <button onClick={() => setFechaTrabajo(new Date(fechaTrabajo.setDate(fechaTrabajo.getDate() + 7)))}>▶</button>
-                                <button className="btn-hoy-reset" onClick={() => setFechaTrabajo(new Date())}>Hoy</button>
+                                <button onClick={semanaAnterior}>◀</button>
+                                <div className="fecha-actual-view">
+                                    <strong>Semana Rotación:</strong> {fechaRotacion.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                </div>
+                                <button onClick={semanaSiguiente}>▶</button>
+                                <button className="btn-hoy-reset" onClick={irAHoyRotacion}>Hoy</button>
                             </div>
                         )}
                     </div>
@@ -288,7 +309,7 @@ export default function ProduccionScreen() {
                                     tipoPintura={tipoPintura}
                                     rondas={rondas}
                                     cargasEsmaltes={cargasEsmaltesAsignadas}
-                                    fechaTrabajo={fechaTrabajo}
+                                    fechaTrabajo={fechaRotacion}
                                     getOperarioPorMaquina={getOperarioPorMaquina}
                                     onFiltrar={setFiltroOperario}
                                     filtroActivo={filtroOperario}
@@ -311,7 +332,9 @@ export default function ProduccionScreen() {
                                 </div>
                             )}
                         </div>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                        {/* CALENDARIO SELECTOR DE FECHA - PARA CARGAR DATOS DE LA BD */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="calendar-picker-container" style={{
                                 display: 'flex', alignItems: 'center', background: '#1e1e1e',
                                 padding: '6px 12px', borderRadius: '8px', border: '1px solid #333',
@@ -320,12 +343,12 @@ export default function ProduccionScreen() {
                                 <span style={{ marginRight: '8px' }}>📅</span>
                                 <input
                                     type="date"
-                                    value={fechaTrabajo.toISOString().split('T')[0]}
+                                    value={fechaCargaBD.toISOString().split('T')[0]}
                                     onChange={(e) => {
                                         const valor = e.target.value;
                                         if (!valor) return;
                                         const nuevaFecha = new Date(valor + 'T00:00:00');
-                                        setFechaTrabajo(nuevaFecha);
+                                        setFechaCargaBD(nuevaFecha);
                                     }}
                                     style={{
                                         background: 'transparent', border: 'none', color: '#00e5ff',
@@ -340,7 +363,7 @@ export default function ProduccionScreen() {
                     {tipoPintura === "Vinílica" ? (
                         <TableroVinilica
                             rondas={rondas}
-                            fechaTrabajo={fechaTrabajo}
+                            fechaTrabajo={fechaRotacion}  // ← Usa fechaRotacion para cambiar nombres de operadores
                             handleDrop={handlers.handleDrop}
                             setCargaSeleccionada={setCargaSeleccionada}
                             setMostrarDetalle={setMostrarDetalle}
@@ -358,6 +381,7 @@ export default function ProduccionScreen() {
                 </div>
             </div>
 
+            {/* Modales */}
             <ModalPlanificador
                 visible={mostrarModalPlanificador}
                 datos={datosPlanificador}

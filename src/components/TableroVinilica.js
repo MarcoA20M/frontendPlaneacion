@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import CardCarga from './CardCarga';
 import { getOperarioPorMaquina } from '../constants/config';
 
 export default function TableroVinilica({ rondas, fechaTrabajo, handleDrop, setCargaSeleccionada, setMostrarDetalle, filtroOperario }) {
+  
+  // Usamos useMemo para recalcular los operarios cuando cambia fechaTrabajo
+  const operariosPorMaquina = useMemo(() => {
+    const operarios = {};
+    for (let i = 0; i < 8; i++) {
+      const maquinaId = 101 + i;
+      operarios[maquinaId] = getOperarioPorMaquina(maquinaId, fechaTrabajo);
+    }
+    return operarios;
+  }, [fechaTrabajo]);
+
   return (
     <div className="rondas-panel">
       <div className="tabla-rondas">
@@ -10,15 +21,16 @@ export default function TableroVinilica({ rondas, fechaTrabajo, handleDrop, setC
           <div></div>{[...Array(6)].map((_, i) => <div key={i}>Ronda {i + 1}</div>)}
         </div>
         {rondas.map((fila, fIdx) => {
-          const nombreOp = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
+          const maquinaId = 101 + fIdx;
+          const nombreOp = operariosPorMaquina[maquinaId];
           
           // Ocultar filas que no pertenecen al operario filtrado
           if (filtroOperario && nombreOp !== filtroOperario) return null;
 
           return (
-            <div className="fila-ronda" key={fIdx}>
+            <div className="fila-ronda" key={`${fIdx}-${fechaTrabajo.getTime()}`}>
               <div className="etiqueta-ronda">
-                <span className="codigo-maquina">VI-{101 + fIdx}</span>
+                <span className="codigo-maquina">VI-{maquinaId}</span>
                 <span className="nombre-operario">{nombreOp}</span>
               </div>
               {fila.map((celda, cIdx) => (

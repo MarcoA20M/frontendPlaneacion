@@ -1,40 +1,124 @@
 export const API_URL = "http://localhost:5000";
 
-// Ahora son 4 operarios en la lista
-const OPERARIOS_ROTATIVOS = ["Pedro", "Carlos", "Yunior", "Luis"];
-
-export const getOperarioPorMaquina = (idMaquina, fechaRef = new Date()) => {
+// Función para obtener la configuración guardada (base)
+const getConfiguracionGuardada = () => {
+  try {
+    const operariosGuardados = localStorage.getItem("operarios_vinilica");
+    const gruposBaseGuardados = localStorage.getItem("config_grupos_base_vinilica");
+    
+    if (operariosGuardados && gruposBaseGuardados) {
+      const operarios = JSON.parse(operariosGuardados);
+      const gruposBase = JSON.parse(gruposBaseGuardados);
+      
+      return { operarios, gruposBase };
+    }
+  } catch (error) {
+    console.error("Error al leer configuración:", error);
+  }
   
-  // 1. Mapeo de máquinas a su índice base (ahora tenemos 4 grupos)
+  // Configuración por defecto si no hay nada guardado
+  return {
+    operarios: [
+      { id: 1, nombre: "Pedro" },
+      { id: 2, nombre: "Carlos" },
+      { id: 3, nombre: "Yunior" },
+      { id: 4, nombre: "Luis" }
+    ],
+    gruposBase: {
+      grupo0: { operarioId: 1, maquinas: [101, 102] },
+      grupo1: { operarioId: 2, maquinas: [103, 104] },
+      grupo2: { operarioId: 3, maquinas: [105, 106] },
+      grupo3: { operarioId: 4, maquinas: [107, 108] }
+    }
+  };
+};
+
+// Función para calcular semanas entre dos fechas
+const calcularSemanasDiferencia = (fechaReferencia, fechaAnclaje) => {
+  const diferenciaMilis = fechaReferencia - fechaAnclaje;
+  return Math.floor(diferenciaMilis / (7 * 24 * 60 * 60 * 1000));
+};
+
+// Función principal - AHORA USA LA FECHA QUE RECIBE
+export const getOperarioPorMaquina = (idMaquina, fechaRef = new Date()) => {
+  // 1. Mapeo de máquinas a su grupo
   const grupos = {
-    101: 0, 102: 0, // Grupo 0
-    103: 1, 104: 1, // Grupo 1
-    105: 2, 106: 2, // Grupo 2
-    107: 3, 108: 3  // Grupo 3 (Yunior entra aquí como base)
+    101: "grupo0", 102: "grupo0",
+    103: "grupo1", 104: "grupo1",
+    105: "grupo2", 106: "grupo2",
+    107: "grupo3", 108: "grupo3"
   };
 
-  const indiceBase = grupos[idMaquina];
-  if (indiceBase === undefined) return "Operario V";
+  const grupoId = grupos[idMaquina];
+  if (!grupoId) return "Operario V";
 
-  // 2. ANCLAJE: Lunes 5 de Enero 2026
-  const fechaAnclaje = new Date(2026, 0, 5); 
+  // Obtener configuración base
+  const { operarios, gruposBase } = getConfiguracionGuardada();
   
-  // Calculamos semanas transcurridas
-  const diferenciaMilis = fechaRef - fechaAnclaje;
-  const semanasTranscurridas = Math.floor(diferenciaMilis / (7 * 24 * 60 * 60 * 1000));
-
-  /**
-   * 3. Lógica de Rotación para 4 personas:
-   * (IndiceBase - Semanas) % 4
-   * Esto hace que el operario de la posición 3 suba a la 2, el de la 2 a la 1, etc.
-   */
-  const numOperarios = OPERARIOS_ROTATIVOS.length;
-  const finalIdx = (indiceBase - semanasTranscurridas) % numOperarios;
+  // Obtener la asignación base del grupo
+  const grupoBase = gruposBase[grupoId];
+  if (!grupoBase || !grupoBase.operarioId) return "Sin asignar";
   
-  // Asegurar que el resultado sea un índice positivo dentro del array
-  const resultadoPositivo = finalIdx < 0 ? finalIdx + numOperarios : finalIdx;
+  // Orden de los grupos para la rotación
+  const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+  const idxGrupoActual = gruposOrden.indexOf(grupoId);
+  
+  // Obtener semanas rotadas DESDE LA FECHA DE REFERENCIA
+  // Fecha anclaje base (Lunes 5 de Enero 2026)
+  const fechaAnclaje = new Date(2026, 0, 5);
+  const semanasRotadas = calcularSemanasDiferencia(fechaRef, fechaAnclaje);
+  
+  // Aplicar la rotación según las semanas calculadas
+  const asignacionBase = gruposOrden.map(g => gruposBase[g]?.operarioId);
+  
+  // Aplicar rotación (mover hacia la derecha según semanasRotadas)
+  const asignacionRotada = [...asignacionBase];
+  for (let i = 0; i < semanasRotadas; i++) {
+    // Rotar hacia la derecha (el último pasa al primero)
+    const ultimo = asignacionRotada.pop();
+    asignacionRotada.unshift(ultimo);
+  }
+  
+  // Obtener el ID del operario para este grupo después de la rotación
+  const operarioId = asignacionRotada[idxGrupoActual];
+  
+  // Buscar el nombre del operario
+  const operario = operarios.find(op => op.id === operarioId);
+  
+  return operario ? operario.nombre : "Desconocido";
+};
 
-  return OPERARIOS_ROTATIVOS[resultadoPositivo];
+// Función para obtener la configuración actual (para el ResumenOperarios)
+export const getConfiguracionRotacionActual = (fechaRef = new Date()) => {
+  const { operarios, gruposBase } = getConfiguracionGuardada();
+  const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+  const fechaAnclaje = new Date(2026, 0, 5);
+  const semanasRotadas = calcularSemanasDiferencia(fechaRef, fechaAnclaje);
+  
+  const asignacionBase = gruposOrden.map(g => gruposBase[g]?.operarioId);
+  
+  // Aplicar rotación
+  const asignacionRotada = [...asignacionBase];
+  for (let i = 0; i < semanasRotadas; i++) {
+    const ultimo = asignacionRotada.pop();
+    asignacionRotada.unshift(ultimo);
+  }
+  
+  // Crear mapeo de máquina a operario
+  const mapeo = {};
+  for (const [maquina, grupoId] of Object.entries({
+    101: "grupo0", 102: "grupo0",
+    103: "grupo1", 104: "grupo1",
+    105: "grupo2", 106: "grupo2",
+    107: "grupo3", 108: "grupo3"
+  })) {
+    const idx = gruposOrden.indexOf(grupoId);
+    const operarioId = asignacionRotada[idx];
+    const operario = operarios.find(op => op.id === operarioId);
+    mapeo[maquina] = operario ? operario.nombre : "Desconocido";
+  }
+  
+  return mapeo;
 };
 
 export const CODIGOS_EXCLUIDOS = [

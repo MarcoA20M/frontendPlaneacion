@@ -71,6 +71,8 @@ export default function ProduccionScreen() {
         return guardado ? JSON.parse(guardado) : null;
     });
 
+
+
     // --- EFECTOS ---
     useEffect(() => {
         const handleClickAfuera = (event) => {
@@ -88,6 +90,24 @@ export default function ProduccionScreen() {
             cargarDatosPorFecha(fechaCargaBD);
         }
     }, [fechaCargaBD, cargarDatosPorFecha]);
+
+
+    // EFECTO PARA ACTUALIZAR CUANDO CAMBIA LA CONFIGURACIÓN DE OPERARIOS
+    useEffect(() => {
+        const handleVinilicaUpdate = () => {
+            // Forzar actualización de la UI cuando cambia la configuración
+            setFechaRotacion(prev => new Date(prev));
+        };
+
+        window.addEventListener("vinilicaConfigUpdated", handleVinilicaUpdate);
+        window.addEventListener("rotacionActualizada", handleVinilicaUpdate);
+
+        return () => {
+            window.removeEventListener("vinilicaConfigUpdated", handleVinilicaUpdate);
+            window.removeEventListener("rotacionActualizada", handleVinilicaUpdate);
+        };
+    }, []);
+
 
     const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
@@ -202,7 +222,7 @@ export default function ProduccionScreen() {
                             <div className="planificador-semanal">
                                 <button onClick={semanaAnterior}>◀</button>
                                 <div className="fecha-actual-view">
-                                    <strong>Semana Rotación:</strong> {fechaRotacion.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                    <strong>Semana: </strong> {fechaRotacion.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                                 </div>
                                 <button onClick={semanaSiguiente}>▶</button>
                                 <button className="btn-hoy-reset" onClick={irAHoyRotacion}>Hoy</button>
@@ -306,6 +326,7 @@ export default function ProduccionScreen() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                 <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}</h2>
                                 <ResumenOperarios
+                                    key={`resumen-${fechaRotacion.toISOString()}`}
                                     tipoPintura={tipoPintura}
                                     rondas={rondas}
                                     cargasEsmaltes={cargasEsmaltesAsignadas}
@@ -332,6 +353,8 @@ export default function ProduccionScreen() {
                                 </div>
                             )}
                         </div>
+
+
 
                         {/* CALENDARIO SELECTOR DE FECHA - PARA CARGAR DATOS DE LA BD */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -362,8 +385,9 @@ export default function ProduccionScreen() {
 
                     {tipoPintura === "Vinílica" ? (
                         <TableroVinilica
+                            key={fechaRotacion.toISOString()}  // ← ESTO ES CRUCIAL
                             rondas={rondas}
-                            fechaTrabajo={fechaRotacion}  // ← Usa fechaRotacion para cambiar nombres de operadores
+                            fechaTrabajo={fechaRotacion}
                             handleDrop={handlers.handleDrop}
                             setCargaSeleccionada={setCargaSeleccionada}
                             setMostrarDetalle={setMostrarDetalle}

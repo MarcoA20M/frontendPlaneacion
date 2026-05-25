@@ -1,0 +1,71 @@
+
+/* --- FILAS CEBRADAS --- */
+/* Pinta las filas pares (2, 4, 6...) de un color grisáceo muy sutil */
+.tabla-inventario-tecnica tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Efecto al pasar el mouse (opcional pero recomendado) */
+.tabla-inventario-tecnica tbody tr:hover {
+    background-color: rgba(0, 229, 255, 0.08);
+    transition: background-color 0.2s ease;
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 35px;
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.label-mini {
+    display: block;
+    font-size: 8px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    font-weight: normal;
+    color: #ffffff;
+}
+
+/* Estados de Color */
+.status-danger {
+    color: #ff5252;
+    background-color: rgba(255, 82, 82, 0.15);
+    border-color: #ff5252;
+}
+
+.status-warning {
+    color: #ffca28;
+    background-color: rgba(255, 202, 40, 0.1);
+    border-color: #ffca28;
+}
+
+.status-success {
+    color: #00ff88;
+    background-color: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+}
+
+/* Celdas resaltadas (Existencia y Nuevo Inv) */
+.col-highlight {
+    background-color: rgba(0, 229, 255, 0.05);
+    font-weight: bold;
+    border-left: 1px solid rgba(0, 229, 255, 0.1);
+    border-right: 1px solid rgba(0, 229, 255, 0.1);
+}
+
+.col-envase {
+    color: #00e5ff;
+    font-weight: bold;
+}
+
+.col-produccion-active { color: #ffffff; }
+.col-produccion-inactive { color: #555555; }
+
+.col-caja-cerrada {
+    opacity: 0.7;
+}

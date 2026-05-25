@@ -1,0 +1,287 @@
+
+.rondas-panel {
+  margin-top: 40px;
+  width: 95%;
+  margin-left: -8%;
+}
+
+.rondas-panel h2 {
+  margin-bottom: 65px;
+  font-size: 24px;
+  color: #00c0ff;
+  letter-spacing: 1px;
+  margin-left: 140px;
+  margin-top: 100px;
+}
+
+/* Tabla completa */
+.tabla-rondas {
+  width: 110%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Reducido para evitar exceso de espacio entre filas */
+}
+
+/* Filas */
+.fila-ronda {
+  display: grid;
+  grid-template-columns: 240px repeat(6, 1fr);
+  gap: 12px;
+  align-items: stretch; /* Obliga a todas las celdas de la fila a tener la misma altura */
+}
+
+/* Header */
+.fila-ronda.header {
+  font-weight: 700;
+  font-size: 16px;
+  color: #00ffcc;
+}
+
+.fila-ronda.header div {
+  text-align: center;
+}
+
+/* Etiqueta izquierda */
+.etiqueta-ronda {
+  font-weight: 700;
+  font-size: 16px;
+  color: #00ffcc;
+  text-align: right;
+  padding-right: 15px;
+}
+
+/* Celdas */
+.celda-ronda {
+  height: 155px;
+  height: auto;      /* CRECIMIENTO DINÁMICO: La celda se estira si hay 2+ cards */
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  flex-direction: column; /* APILADO VERTICAL: Evita que las cards se choquen de lado */
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;             /* Espacio entre la card de Maquila y de Línea */
+  padding: 10px 1px;     /* Espacio interno */
+  overflow: visible !important;
+  position: relative;
+} 
+
+
+.etiqueta-ronda {
+  display: flex;
+  flex-direction: column; /* Alineación vertical */
+  justify-content: center;
+  align-items: flex-end; /* Alineado a la derecha */
+  padding-right: 20px;
+  border-right: 2px solid rgba(0, 255, 204, 0.3); /* Guía visual */
+}
+
+.contenedor-especiales-premium {
+  position: relative; /* Contenedor de referencia para el panel */
+  margin-top: 20px; /* Reducido drásticamente de 190px */
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.1);
+  overflow: visible; /* Cambiado de hidden a visible */
+  z-index: 1000; /* Para que flote sobre otros elementos */
+}
+
+.header-especial {
+  padding: 8px 15px; /* Reducido de 12px 18px */
+  background: rgba(255, 152, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 8px 8px 0 0;
+}
+
+
+.titulo-especial {
+  display: flex;
+  align-items: center;
+  color: #ff9800;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.alarma-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff4400;
+  border-radius: 50%;
+  margin-right: 12px;
+  animation: pulse-orange 1.5s infinite;
+}
+
+@keyframes pulse-orange {
+  0% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 68, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0); }
+}
+
+.toggle-view-btn {
+  background: #ff9800;
+  color: #000;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle-view-btn:hover { background: #fff; }
+
+/* Grid de Tarjetas */
+.grid-especial-premium {
+  position: absolute; /* Sacamos el grid del flujo normal */
+  top: 100%; /* Justo debajo del header */
+  left: 0;
+  right: 0;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  background: #0a0a0a;
+  border-radius: 0 0 8px 8px;
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  border-top: none;
+  z-index: 999;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  max-height: 400px; /* Altura máxima antes de scroll */
+  overflow-y: auto; /* Scroll si hay muchas tarjetas */
+}
+
+
+/* Tarjeta V2 */
+.card-especial-v2 {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px;
+  transition: transform 0.2s;
+}
+
+.card-especial-v2:hover {
+  border-color: #ff9800;
+  transform: translateY(-2px);
+}
+
+.card-header-ex {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.code-badge {
+  background: #ff9800;
+  color: #000;
+  padding: 2px 6px;
+  font-weight: 900;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+.litros-badge {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.card-body-ex {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Contenedor de los botones de operarios */
+.resumen-operarios {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+/* Botón de Operario (Copiado de tu .btn-family-explorer) */
+.card-op {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.card-op:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Estado Activo (Cuando el operario está seleccionado) */
+.card-op.active {
+  background: #00e5ff; 
+  color: #002b36;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+  border-color: transparent;
+}
+
+.op-total-badge {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+}
+
+.card-op.active .op-total-badge {
+  background: rgba(0, 43, 54, 0.2);
+}
+
+/* --- BOTÓN QUITAR FILTRO --- */
+.btn-limpiar-filtro {
+  background: rgba(255, 152, 0, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #ff9800;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.btn-limpiar-filtro:hover {
+  background: rgba(255, 152, 0, 0.25);
+  border-color: #ff9800;
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}

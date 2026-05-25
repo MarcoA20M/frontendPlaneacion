@@ -1,0 +1,75 @@
+
+
+.card-mini-body {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge-litros {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: #ff9800; 
+  color: white;
+  width: 58px;
+  
+  font-size: 13px; /* Bajamos un poco para asegurar que no se salga */
+
+}
+
+.mini-label {
+  font-size: 11px;
+  color: #00f2ff; 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mini-codigo {
+  font-size: 20px; /* Un poco más grande para llenar el espacio */
+  font-weight: 900;
+  color: #ffffff; 
+  line-height: 1.1;
+  margin: 0;
+}
+
+.mini-divider {
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  margin: 10px 0;
+  width: 80%; /* No llega al final para no chocar con el badge */
+}
+
+/* FOOTER POSICIONADO ABAJO A LA DERECHA */
+
+
+/* Asegura que el contenedor del drag no rompa el diseño */
+.celda-ronda > div[draggable="true"] {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-mini {
+  position: relative;
+  background: rgba(45, 10, 85, 0.9); 
+  border-left: 6px solid #bc13fe; 
+  border-radius: 12px;
+  width: 98%; 
+  height: 130px; /* Ajustado para que quepa mejor en la celda */
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-sizing: border-box;
+  box-shadow: 0 0 20px rgba(188, 19, 254, 0.25);
+  overflow: visible; 
+  transition: transform 0.2s ease; /* Efecto suave al mover */
+}
+
+/* Efecto visual mientras arrastras */
+.card-mini:active {
+  cursor: grabbing;
+  opacity: 0.7;
+  transform: scale(0.95);
+}

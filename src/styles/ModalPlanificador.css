@@ -1,0 +1,93 @@
+/* Overlay con fondo desenfocado */
+.pl-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
+}
+
+/* Contenedor del Modal */
+.pl-modal-container {
+    background: #111;
+    width: 95%; max-width: 650px;
+    border: 1px solid #00e5ff;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+    display: flex; flex-direction: column;
+    max-height: 80vh;
+    animation: plFadeIn 0.3s ease-out;
+}
+
+@keyframes plFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.pl-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #222;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.pl-header-left { display: flex; align-items: center; gap: 12px; }
+.pl-header-icon { font-size: 1.5rem; }
+.pl-header-left h2 { margin: 0; color: #00e5ff; font-size: 1.1rem; }
+.pl-header-left p { margin: 0; color: #666; font-size: 0.8rem; }
+
+.pl-btn-x {
+    background: none; border: none; color: #444; font-size: 1.8rem;
+    cursor: pointer; line-height: 1;
+}
+.pl-btn-x:hover { color: #ff4444; }
+
+/* Cuerpo y Tabla */
+.pl-modal-body { padding: 0; overflow: hidden; }
+.pl-table-scroll { max-height: 450px; overflow-y: auto; }
+
+.pl-table { width: 100%; border-collapse: collapse; }
+.pl-table th {
+    background: #1a1a1a; color: #00e5ff; text-align: left;
+    padding: 12px; font-size: 0.75rem; text-transform: uppercase;
+    position: sticky; top: 0;
+}
+
+.pl-table td { padding: 12px; border-bottom: 1px solid #222; color: #ddd; font-size: 0.85rem; }
+.pl-row-critical { background: rgba(255, 68, 68, 0.05); }
+
+.pl-col-min { width: 40px; color: #555; }
+.pl-col-bold { font-weight: bold; color: #fff; }
+
+/* Tags y Botones */
+.pl-status-tag {
+    padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;
+}
+.tag-red { background: #ff4444; color: #000; }
+.tag-green { background: #00c851; color: #000; }
+
+.pl-btn-load {
+    background: #00e5ff; color: #000; border: none;
+    padding: 5px 12px; border-radius: 4px; font-weight: bold;
+    cursor: pointer; font-size: 0.75rem;
+}
+.pl-btn-load:hover { background: #fff; }
+
+.pl-text-center { text-align: center; }
+
+/* Footer */
+.pl-modal-footer {
+    padding: 15px 20px; border-top: 1px solid #222;
+    display: flex; justify-content: space-between;
+}
+
+.pl-btn-clear {
+    background: transparent; color: #ff4444; border: 1px solid #ff4444;
+    padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
+}
+
+.pl-btn-close-modal {
+    background: #333; color: #fff; border: none;
+    padding: 8px 20px; border-radius: 4px; cursor: pointer;
+}

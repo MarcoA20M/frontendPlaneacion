@@ -11,14 +11,14 @@ export default function OperariosScreen() {
     const [operariosVinilica, setOperariosVinilica] = useState(() => {
         const guardado = localStorage.getItem("operarios_vinilica");
         return guardado ? JSON.parse(guardado) : [
-            { id: 1, nombre: "Pedro", puesto: "Operario de Máquinas", activo: true },
-            { id: 2, nombre: "Carlos", puesto: "Operario de Máquinas", activo: true },
-            { id: 3, nombre: "Yunior", puesto: "Operario de Máquinas", activo: true },
-            { id: 4, nombre: "Luis", puesto: "Operario de Máquinas", activo: true }
+            { id: 1, nombre: "Pedro", puesto: "Preparador", activo: true },
+            { id: 2, nombre: "Carlos", puesto: "Preparador", activo: true },
+            { id: 3, nombre: "Yunior", puesto: "Preparador", activo: true },
+            { id: 4, nombre: "Luis", puesto: "Preparador", activo: true }
         ];
     });
 
-    // Estado para asignación BASE (sin rotación aplicada)
+    // Estado para asignación BASE
     const [configGruposBase, setConfigGruposBase] = useState(() => {
         const guardado = localStorage.getItem("config_grupos_base_vinilica");
         return guardado ? JSON.parse(guardado) : {
@@ -45,7 +45,7 @@ export default function OperariosScreen() {
         };
     });
 
-    // Estado para la rotación actual (cuántas semanas se ha rotado)
+    // Estado para la rotación actual
     const [semanasRotadas, setSemanasRotadas] = useState(() => {
         const guardado = localStorage.getItem("semanas_rotadas_vinilica");
         return guardado ? parseInt(guardado) : 0;
@@ -63,20 +63,27 @@ export default function OperariosScreen() {
         ];
     });
 
-    // Función para calcular la configuración actual basada en las semanas rotadas
+    // Flag para evitar bucles infinitos de actualización
+    const [actualizandoDesdeSelector, setActualizandoDesdeSelector] = useState(false);
+    const [actualizandoDesdeDrag, setActualizandoDesdeDrag] = useState(false);
+
+    // Función para calcular la configuración actual basada en el orden de los operarios
     const calcularConfigActual = () => {
         const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
-        const asignacionBase = gruposOrden.map(g => configGruposBase[g].operarioId);
 
-        // Aplicar rotación según semanasRotadas
+        const asignacionBase = gruposOrden.map((grupo, idx) => {
+            if (idx < operariosVinilica.length) {
+                return operariosVinilica[idx].id;
+            }
+            return configGruposBase[grupo]?.operarioId || null;
+        });
+
         const rotacionAplicada = [...asignacionBase];
         for (let i = 0; i < semanasRotadas; i++) {
-            // Rotar hacia la derecha (el último pasa al primero)
             const ultimo = rotacionAplicada.pop();
             rotacionAplicada.unshift(ultimo);
         }
 
-        // Construir la configuración actual
         const configActual = {};
         gruposOrden.forEach((grupo, idx) => {
             configActual[grupo] = {
@@ -88,23 +95,21 @@ export default function OperariosScreen() {
         return configActual;
     };
 
-    // Estado derivado: configuración actual con rotación aplicada
     const [configGrupos, setConfigGrupos] = useState(() => calcularConfigActual());
 
-    // Guardar cambios cuando cambien las semanas rotadas o la configuración base
+    // Actualizar cuando cambie el orden de operarios o la rotación
     useEffect(() => {
         const nuevaConfig = calcularConfigActual();
         setConfigGrupos(nuevaConfig);
-    }, [semanasRotadas, configGruposBase]);
+    }, [semanasRotadas, configGruposBase, operariosVinilica]);
 
-    // Guardar todo en localStorage
+    // Guardar en localStorage
     useEffect(() => {
         localStorage.setItem("operarios_vinilica", JSON.stringify(operariosVinilica));
         localStorage.setItem("config_grupos_base_vinilica", JSON.stringify(configGruposBase));
         localStorage.setItem("semanas_rotadas_vinilica", semanasRotadas.toString());
         localStorage.setItem("otros_operarios", JSON.stringify(otrosOperarios));
 
-        // Notificar a otros componentes
         window.dispatchEvent(new CustomEvent("vinilicaConfigUpdated", {
             detail: {
                 operarios: operariosVinilica,
@@ -114,9 +119,8 @@ export default function OperariosScreen() {
         }));
     }, [operariosVinilica, configGruposBase, semanasRotadas, otrosOperarios, configGrupos]);
 
-    // Guardar configuración en un formato más accesible para api.js
+    // Guardar para API
     useEffect(() => {
-        // Guardar la configuración actual en un formato especial para api.js
         const configParaAPI = {
             operarios: operariosVinilica.map(op => ({ id: op.id, nombre: op.nombre })),
             gruposBase: configGruposBase,
@@ -129,6 +133,104 @@ export default function OperariosScreen() {
     const mostrarMensaje = (texto, tipo = "success") => {
         setMensaje({ texto, tipo });
         setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
+    };
+
+    // ========== FUNCIÓN PARA REORDENAR LA TABLA SEGÚN LOS SELECTORES ==========
+    const reordenarTablaDesdeSelectores = (nuevosGruposBase) => {
+        if (actualizandoDesdeDrag) return;
+
+        setActualizandoDesdeSelector(true);
+
+        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+        const ordenDesdeSelectores = gruposOrden.map(grupo => nuevosGruposBase[grupo]?.operarioId).filter(id => id !== null && id !== undefined);
+
+        const operariosMap = new Map();
+        operariosVinilica.forEach(op => operariosMap.set(op.id, op));
+
+        const nuevosOperariosOrdenados = [];
+        const idsUsados = new Set();
+
+        ordenDesdeSelectores.forEach(id => {
+            if (operariosMap.has(id) && !idsUsados.has(id)) {
+                nuevosOperariosOrdenados.push(operariosMap.get(id));
+                idsUsados.add(id);
+            }
+        });
+
+        operariosVinilica.forEach(op => {
+            if (!idsUsados.has(op.id)) {
+                nuevosOperariosOrdenados.push(op);
+            }
+        });
+
+        const idsActuales = operariosVinilica.map(op => op.id).join(',');
+        const idsNuevos = nuevosOperariosOrdenados.map(op => op.id).join(',');
+
+        if (idsActuales !== idsNuevos) {
+            setOperariosVinilica(nuevosOperariosOrdenados);
+            setSemanasRotadas(0);
+        }
+
+        setTimeout(() => {
+            setActualizandoDesdeSelector(false);
+        }, 50);
+    };
+
+    // ========== DRAG AND DROP ==========
+    const [dragIndex, setDragIndex] = useState(null);
+
+    const handleDragStart = (e, index) => {
+        setDragIndex(index);
+        e.dataTransfer.effectAllowed = "move";
+        e.target.style.opacity = "0.5";
+    };
+
+    const handleDragEnd = (e) => {
+        e.target.style.opacity = "";
+        setDragIndex(null);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    const handleDrop = (e, dropIndex) => {
+        e.preventDefault();
+
+        if (dragIndex === null || dragIndex === dropIndex) {
+            return;
+        }
+
+        setActualizandoDesdeDrag(true);
+
+        const nuevosOperarios = [...operariosVinilica];
+        const temp = nuevosOperarios[dragIndex];
+        nuevosOperarios[dragIndex] = nuevosOperarios[dropIndex];
+        nuevosOperarios[dropIndex] = temp;
+
+        setOperariosVinilica(nuevosOperarios);
+
+        const nuevosGruposBase = { ...configGruposBase };
+        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+
+        gruposOrden.forEach((grupo, idx) => {
+            if (idx < nuevosOperarios.length) {
+                nuevosGruposBase[grupo] = {
+                    ...nuevosGruposBase[grupo],
+                    operarioId: nuevosOperarios[idx].id
+                };
+            }
+        });
+
+        setConfigGruposBase(nuevosGruposBase);
+        setSemanasRotadas(0);
+
+        mostrarMensaje(`🔄 ${nuevosOperarios[dragIndex].nombre} ↔ ${nuevosOperarios[dropIndex].nombre}`, "success");
+
+        setTimeout(() => {
+            setActualizandoDesdeDrag(false);
+        }, 50);
     };
 
     // ========== CRUD OPERARIOS VINÍLICA ==========
@@ -145,7 +247,7 @@ export default function OperariosScreen() {
         setOperariosVinilica([...operariosVinilica, {
             id: nuevoId,
             nombre: nombre.trim(),
-            puesto: "Operario de Máquinas",
+            puesto: "Preparador",
             activo: true
         }]);
         mostrarMensaje(`✅ "${nombre}" agregado correctamente`);
@@ -166,15 +268,28 @@ export default function OperariosScreen() {
     const eliminarOperarioVinilica = (id) => {
         const operario = operariosVinilica.find(op => op.id === id);
         if (window.confirm(`¿Eliminar a "${operario.nombre}" de Vinílicas?`)) {
-            setOperariosVinilica(prev => prev.filter(op => op.id !== id));
-            // Desasignar de grupos base
+            const nuevosOperarios = operariosVinilica.filter(op => op.id !== id);
+            setOperariosVinilica(nuevosOperarios);
+
             const nuevosGruposBase = { ...configGruposBase };
-            Object.keys(nuevosGruposBase).forEach(grupo => {
-                if (nuevosGruposBase[grupo].operarioId === id) {
-                    nuevosGruposBase[grupo].operarioId = null;
+            const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+
+            gruposOrden.forEach((grupo, idx) => {
+                if (idx < nuevosOperarios.length) {
+                    nuevosGruposBase[grupo] = {
+                        ...nuevosGruposBase[grupo],
+                        operarioId: nuevosOperarios[idx].id
+                    };
+                } else if (nuevosGruposBase[grupo]?.operarioId === id) {
+                    nuevosGruposBase[grupo] = {
+                        ...nuevosGruposBase[grupo],
+                        operarioId: null
+                    };
                 }
             });
+
             setConfigGruposBase(nuevosGruposBase);
+            setSemanasRotadas(0);
             mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
         }
     };
@@ -212,14 +327,19 @@ export default function OperariosScreen() {
 
     // ========== ASIGNACIÓN DE GRUPOS BASE ==========
     const asignarOperarioAGrupoBase = (grupoId, operarioId) => {
-        setConfigGruposBase(prev => ({
-            ...prev,
-            [grupoId]: { ...prev[grupoId], operarioId: parseInt(operarioId) || null }
-        }));
-        const operario = operariosVinilica.find(op => op.id === parseInt(operarioId));
-        mostrarMensaje(`📌 ${operario?.nombre || "Nadie"} asignado como base al ${configGruposBase[grupoId].nombre}`);
+        const operarioIdNum = parseInt(operarioId) || null;
 
-        // Resetear rotación al cambiar asignación base
+        const nuevosGruposBase = {
+            ...configGruposBase,
+            [grupoId]: { ...configGruposBase[grupoId], operarioId: operarioIdNum }
+        };
+
+        setConfigGruposBase(nuevosGruposBase);
+
+        const operario = operariosVinilica.find(op => op.id === operarioIdNum);
+        mostrarMensaje(`📌 ${operario?.nombre || "Nadie"} asignado al ${configGruposBase[grupoId].nombre}`);
+
+        reordenarTablaDesdeSelectores(nuevosGruposBase);
         setSemanasRotadas(0);
     };
 
@@ -227,13 +347,13 @@ export default function OperariosScreen() {
     const rotarSemanal = () => {
         const nuevasSemanas = semanasRotadas + 1;
         setSemanasRotadas(nuevasSemanas);
-        mostrarMensaje(`🔄 Rotación semanal aplicada (Semana ${nuevasSemanas})`);
+        mostrarMensaje(`🔄 Rotación aplicada (Semana ${nuevasSemanas})`);
     };
 
     const resetearRotacion = () => {
         if (window.confirm("¿Resetear la rotación a la configuración inicial?")) {
             setSemanasRotadas(0);
-            mostrarMensaje("🔄 Rotación reseteada a la configuración base");
+            mostrarMensaje("🔄 Rotación reseteada");
         }
     };
 
@@ -248,11 +368,16 @@ export default function OperariosScreen() {
         ? operariosVinilica
         : otrosOperarios.filter(op => op.area === tabActiva);
 
-    // Vista previa de rotación (próxima semana)
+    // Vista previa de rotación
     const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
     const previewRotacion = gruposOrden.map((grupo, idx) => {
-        // Calculamos cómo quedaría con una semana más de rotación
-        const asignacionBase = gruposOrden.map(g => configGruposBase[g].operarioId);
+        const asignacionBase = gruposOrden.map((g, i) => {
+            if (i < operariosVinilica.length) {
+                return operariosVinilica[i].id;
+            }
+            return configGruposBase[g]?.operarioId || null;
+        });
+
         const rotacionActual = [...asignacionBase];
         for (let i = 0; i < semanasRotadas; i++) {
             const ultimo = rotacionActual.pop();
@@ -264,7 +389,7 @@ export default function OperariosScreen() {
         rotacionSiguiente.unshift(ultimo);
 
         return {
-            grupo: configGruposBase[grupo].nombre,
+            grupo: configGruposBase[grupo]?.nombre || grupo,
             actual: getNombreOperario(rotacionActual[idx]),
             siguiente: getNombreOperario(rotacionSiguiente[idx])
         };
@@ -280,11 +405,10 @@ export default function OperariosScreen() {
                     </div>
                 )}
 
-                {/* SIDEBAR */}
                 <aside className="op-sidebar">
                     <div className="op-logo">
                         <span className="op-dot"></span>
-                        <h2>RECURSOS HUMANOS</h2>
+                        <h2>Personal Operativo Pintumex</h2>
                     </div>
 
                     <nav className="op-nav">
@@ -310,7 +434,6 @@ export default function OperariosScreen() {
                     </div>
                 </aside>
 
-                {/* CONTENIDO PRINCIPAL */}
                 <main className="op-main-content">
                     <header className="op-header">
                         <div className="op-title-group">
@@ -321,11 +444,14 @@ export default function OperariosScreen() {
 
                     <div className={`op-workspace ${tabActiva === 'vinilica' ? 'with-sidebar' : ''}`}>
 
-                        {/* TABLA DE PERSONAL */}
                         <div className="op-card table-card">
                             <div className="card-header-flex">
                                 <h3 className="op-card-title">
-                                    {tabActiva === "vinilica" ? "Operarios de Máquinas (VI-101 a VI-108)" : "Plantilla de Trabajo"}
+                                    {tabActiva === "vinilica" ? (
+                                        <>🖱️ Operarios de Máquinas (VI-101 a VI-108) <span className="drag-hint">- Arrastra para intercambiar posiciones</span></>
+                                    ) : (
+                                        "Plantilla de Trabajo"
+                                    )}
                                 </h3>
                                 <span className="count-badge">{operariosFiltrados.length} Operarios</span>
                             </div>
@@ -334,14 +460,28 @@ export default function OperariosScreen() {
                                 <table className="op-table">
                                     <thead>
                                         <tr>
+                                            {tabActiva === "vinilica" && <th style={{ width: '50px' }}>⋮⋮</th>}
                                             <th>Nombre (Editable)</th>
                                             <th>Puesto</th>
                                             <th className="txt-center">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {operariosFiltrados.map(op => (
-                                            <tr key={op.id} className="row-hover">
+                                        {operariosFiltrados.map((op, idx) => (
+                                            <tr
+                                                key={op.id}
+                                                draggable={tabActiva === "vinilica"}
+                                                onDragStart={(e) => tabActiva === "vinilica" && handleDragStart(e, idx)}
+                                                onDragEnd={handleDragEnd}
+                                                onDragOver={handleDragOver}
+                                                onDrop={(e) => tabActiva === "vinilica" && handleDrop(e, idx)}
+                                                style={{ cursor: tabActiva === "vinilica" ? "grab" : "default" }}
+                                            >
+                                                {tabActiva === "vinilica" && (
+                                                    <td className="drag-handle" style={{ textAlign: 'center', fontSize: '20px' }}>
+                                                        ⋮⋮
+                                                    </td>
+                                                )}
                                                 <td>
                                                     <input
                                                         className="op-input-edit"
@@ -358,7 +498,7 @@ export default function OperariosScreen() {
                                                 </td>
                                                 <td>
                                                     {tabActiva === "vinilica" ? (
-                                                        <span className="op-puesto-tag">Operario de Máquinas</span>
+                                                        <span className="op-puesto-tag">Preparador</span>
                                                     ) : (
                                                         <input
                                                             className="op-input-edit"
@@ -389,7 +529,6 @@ export default function OperariosScreen() {
                                 </table>
                             </div>
 
-                            {/* Formulario para agregar nuevo operario */}
                             <div className="op-add-operario">
                                 <input
                                     type="text"
@@ -434,7 +573,7 @@ export default function OperariosScreen() {
                                 </button>
                             </div>
 
-                            {/* === VISTA PREVIA DE ROTACIÓN === */}
+                            {/* VISTA PREVIA DE ROTACIÓN */}
                             {tabActiva === "vinilica" && (
                                 <div className="preview-rotacion-section">
                                     <div className="preview-rotacion-title">
@@ -466,7 +605,6 @@ export default function OperariosScreen() {
                             )}
                         </div>
 
-                        {/* CONFIGURACIÓN DE MÁQUINAS VINÍLICAS */}
                         {tabActiva === "vinilica" && (
                             <div className="op-card machinery-card">
                                 <div className="card-header-flex">
@@ -480,47 +618,58 @@ export default function OperariosScreen() {
                                         </button>
                                     </div>
                                 </div>
+
                                 <p className="card-desc">
-                                    Configuración BASE (sin rotación). Luego se aplican {semanasRotadas} rotaciones.
-                                    <br />
-                                    <strong>Estado actual:</strong> {semanasRotadas === 0 ? "Configuración base" : `Rotación aplicada (Semana ${semanasRotadas})`}
+                                    <strong>🔄 Sincronización automática:</strong> Los cambios aquí actualizan automáticamente el orden de la tabla.
                                 </p>
 
                                 <div className="op-machinery-list">
-                                    {Object.entries(configGruposBase).map(([grupoId, grupo]) => (
-                                        <div key={grupoId} className="op-machine-item">
-                                            <div className="machine-label-group">
-                                                <span className="machine-id">📌</span>
-                                                <label>{grupo.nombre}</label>
+                                    {Object.entries(configGruposBase).map(([grupoId, grupo]) => {
+                                        const grupoIndex = parseInt(grupoId.replace("grupo", ""));
+                                        const operarioPorOrden = operariosVinilica[grupoIndex];
+
+                                        return (
+                                            <div key={grupoId} className="op-machine-item">
+                                                <div className="machine-label-group">
+                                                    <span className="machine-id">📌</span>
+                                                    <label>{grupo.nombre}</label>
+                                                    {operarioPorOrden && (
+                                                        <span className="orden-indicador">
+                                                            (Posición #{grupoIndex + 1} en tabla)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <select
+                                                    className="op-select-custom"
+                                                    value={grupo.operarioId || ""}
+                                                    onChange={(e) => asignarOperarioAGrupoBase(grupoId, e.target.value)}
+                                                >
+                                                    <option value="">Sin asignar (BASE)</option>
+                                                    {operariosVinilica.map(op => (
+                                                        <option key={op.id} value={op.id}>
+                                                            {op.nombre}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <div className="operario-asignado-actual">
+                                                    👤 Base: {getNombreOperario(grupo.operarioId)}
+                                                    {operarioPorOrden && grupo.operarioId === operarioPorOrden.id && (
+                                                        <span className="match-indicador"> ✓ Coincide con orden</span>
+                                                    )}
+                                                    <br />
+                                                    
+                                                </div>
                                             </div>
-                                            <select
-                                                className="op-select-custom"
-                                                value={grupo.operarioId || ""}
-                                                onChange={(e) => asignarOperarioAGrupoBase(grupoId, e.target.value)}
-                                            >
-                                                <option value="">Sin asignar (BASE)</option>
-                                                {operariosVinilica.map(op => (
-                                                    <option key={op.id} value={op.id}>
-                                                        {op.nombre}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <div className="operario-asignado-actual">
-                                                👤 Base: {getNombreOperario(grupo.operarioId)}
-                                                <br />
-                                                <span className="rotacion-actual">
-                                                    🔄 Actual: {getNombreOperario(configGrupos[grupoId]?.operarioId)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="info-box">
-                                    ℹ️ La rotación funciona así: se guarda una configuración BASE y un contador de semanas rotadas.
-                                    Al regresar al menú, el sistema recuerda exactamente cuántas rotaciones se han aplicado.
-                                    <br /><br />
-                                    <strong>Semana actual: {semanasRotadas}</strong> rotaciones aplicadas desde la configuración base.
+                                    <strong>🔄 Sincronización Automática Bidireccional:</strong>
+                                    <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+                                        <li><strong>Arrastrar en tabla →</strong> Actualiza automáticamente los selectores</li>
+                                        <li><strong>Cambiar selector →</strong> Reordena automáticamente la tabla</li>
+                                    </ul>
                                 </div>
                             </div>
                         )}

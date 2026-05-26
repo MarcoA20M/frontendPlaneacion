@@ -25,10 +25,10 @@ const ModalInventarioBajo = ({ visible, alertas, onClose, onSelectCode, onAnaliz
     if (data) {
       setInfoCarga({ ...data, nombreEnvasado, tipo: 'ocupado' });
     } else {
-      setInfoCarga({ 
-        tipo: 'libre', 
-        nombreEnvasado, 
-        msg: `No se encontraron registros para ${nombreEnvasado} bajo el código ${codigo}.` 
+      setInfoCarga({
+        tipo: 'libre',
+        nombreEnvasado,
+        msg: `No se encontraron registros para ${nombreEnvasado} bajo el código ${codigo}.`
       });
     }
   };
@@ -36,7 +36,7 @@ const ModalInventarioBajo = ({ visible, alertas, onClose, onSelectCode, onAnaliz
   return (
     <div className="modal-overlay">
       <div className="modal-cargas inv-container">
-        
+
         {/* --- MODAL EMERGENTE (INTERNAL MODAL) --- */}
         {infoCarga && (
           <div className="emergente-info-overlay">
@@ -94,8 +94,8 @@ const ModalInventarioBajo = ({ visible, alertas, onClose, onSelectCode, onAnaliz
         <div className="tabla-seccion">
           <div className="fila-carga header-tabla-inv">
             <div className="col-codigo-header">CÓDIGO</div>
-            <div className="celda g-3 txt-left-details">DETALLES (Click en fila para verificar BD)</div>
-            <div className="celda g-1 label-small">STOCK</div>
+           <div className="celda g-3 txt-left-details descripcion-header">DESCRIPCIÓN</div>
+            <div className="celda g-1 label-small stock-header">STOCK</div>
             <div className="celda g-1 label-small">SALIDAS</div>
             <div className="celda g-1 label-small">ALCANCE</div>
           </div>
@@ -111,9 +111,9 @@ const ModalInventarioBajo = ({ visible, alertas, onClose, onSelectCode, onAnaliz
                 <div className="columna-presentaciones">
                   {grupo.presentaciones.map((p, pIdx) => {
                     const idEnvaseOriginal = p.envasado_id || p.id_envasado || p.envasado;
-                    const idParaKey = typeof idEnvaseOriginal === 'string' && idEnvaseOriginal.includes('-') 
-                                      ? parseInt(idEnvaseOriginal.split('-')[0], 10) 
-                                      : idEnvaseOriginal;
+                    const idParaKey = typeof idEnvaseOriginal === 'string' && idEnvaseOriginal.includes('-')
+                      ? parseInt(idEnvaseOriginal.split('-')[0], 10)
+                      : idEnvaseOriginal;
                     const isBuscando = buscandoId === `${grupo.codigo}-${idParaKey}`;
 
                     return (

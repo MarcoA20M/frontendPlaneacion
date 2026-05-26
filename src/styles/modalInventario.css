@@ -6,12 +6,13 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  position: relative; /* Necesario para el modal interno */
 }
 
 /* --- BLOQUE UNIFICADO (TARJETA POR CÓDIGO) --- */
 .bloque-grupo-codigo {
   display: flex;
-  background: #232339; /* Un tono ligeramente más claro que el fondo para dar profundidad */
+  background: #232339;
   margin-bottom: 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -26,7 +27,7 @@
 
 /* --- COLUMNA IZQUIERDA: EL CÓDIGO --- */
 .columna-codigo-unificada {
-  width: 110px;
+  width: 90px; /* Reducido de 110px a 75px */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,6 +35,7 @@
   background: linear-gradient(180deg, rgba(0, 192, 255, 0.08) 0%, rgba(0, 192, 255, 0.02) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
+  cursor: pointer;
 }
 
 /* Pequeña barra lateral decorativa */
@@ -48,24 +50,32 @@
   box-shadow: 0 0 10px #00c0ff;
 }
 
+
+
 .codigo-resaltado-grande {
   color: #00c0ff;
   font-family: 'Inter', sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  margin: 0; /* Ajusta margen si es necesario */
+  padding: 0; /* Ajusta padding si es necesario */
 }
 
 /* --- COLUMNA DERECHA: PRESENTACIONES --- */
 .columna-presentaciones {
   flex: 1;
+  min-width: 0; /* Permite que el contenido se encoja correctamente */
 }
 
+/* Para la fila del inventario */
 .sub-fila-inventario {
   display: flex;
   align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  cursor: help;
+  gap: 16px; /* Espacio entre elementos */
 }
 
 .sub-fila-inventario:last-child {
@@ -77,18 +87,29 @@
   color: #e2e8f0;
   font-size: 12.5px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 20px; 
+  overflow: visible; /* Cambiado de 'hidden' a 'visible' */
+  text-overflow: clip; /* Cambiado de 'ellipsis' a 'clip' */
+  padding-left: 0; /* Reducido de 20px */
+  flex: 2; /* Ocupa más espacio relativo */
+  white-space: normal; /* Permite que el texto haga wrap si es necesario */
+  word-break: break-word; /* Rompe palabras largas si es necesario */
+  min-width: 160px; /* Ancho mínimo para la descripción */
+  line-height: 1.4; /* Mejora legibilidad */
 }
 
 .dato-existencia, .dato-salidas {
-  font-family: 'Roboto Mono', monospace; /* Números alineados */
+  font-family: 'Roboto Mono', monospace;
   font-size: 15px;
 }
 
-.dato-existencia { color: #fff; font-weight: 600; }
-.dato-salidas { color: #94a3b8; }
+.dato-existencia { 
+  color: #fff; 
+  font-weight: 600; 
+}
+
+.dato-salidas { 
+  color: #94a3b8; 
+}
 
 /* --- BADGES DE ALCANCE PULIDOS --- */
 .badge-alcance-final {
@@ -134,30 +155,26 @@
   transform: rotate(15deg) scale(1.1);
 }
 
-
-
 .contenedor-info-producto {
   display: flex;
   align-items: center;
-  gap: 12px; /* Espacio entre el badge y el nombre */
+  gap: 30px; /* Aumentado de 12px a 16px */
+  flex: 1; /* Ocupa todo el espacio disponible */
 }
 
 .badge-envasado {
   background: rgba(0, 255, 204, 0.1);
   color: #00ffcc;
   border: 1px solid rgba(0, 255, 204, 0.3);
-  padding: 15px 15px;
+  padding: 15px 20px; /* Aumentado el padding horizontal de 15px a 20px */
   border-radius: 4px;
   font-family: 'Roboto Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  min-width: 40px;
+  min-width: 90px; /* Aumentado de 40px a 60px */
   text-align: center;
   text-shadow: 0 0 5px rgba(0, 255, 204, 0.2);
 }
-
-
-
 
 /* Efecto hover en la fila para resaltar el envasado */
 .sub-fila-inventario:hover .badge-envasado {
@@ -165,152 +182,18 @@
   color: #1b1b2f;
 }
 
-
-/* --- CSS ORIGINAL REINTEGRADO --- */
-
-.inv-container {
-  width: 950px !important;
-  background: #1b1b2f !important;
-  border: 1px solid rgba(0, 192, 255, 0.15);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  position: relative; /* Necesario para el modal interno */
-}
-
-.bloque-grupo-codigo {
-  display: flex;
-  background: #232339;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.bloque-grupo-codigo:hover {
-  border-color: rgba(0, 192, 255, 0.4);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
-}
-
-.columna-codigo-unificada {
-  width: 110px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, rgba(0, 192, 255, 0.08) 0%, rgba(0, 192, 255, 0.02) 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative;
-  cursor: pointer;
-}
-
-.columna-codigo-unificada::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  height: 40%;
-  width: 3px;
-  background: #00c0ff;
-  border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 10px #00c0ff;
-}
-
-.codigo-resaltado-grande {
-  color: #00c0ff;
-  font-family: 'Inter', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
-
-.columna-presentaciones {
-  flex: 1;
-}
-
-.sub-fila-inventario {
-  display: flex;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  cursor: help;
-}
-
-.sub-fila-inventario:last-child {
-  border-bottom: none;
-}
-
-.nombre-producto-inv {
-  color: #e2e8f0;
-  font-size: 12.5px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 20px; 
-}
-
-.dato-existencia, .dato-salidas {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 15px;
-}
-
-.dato-existencia { color: #fff; font-weight: 600; }
-.dato-salidas { color: #94a3b8; }
-
-.badge-alcance-final {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge-alcance-final.crítico {
-  background: rgba(255, 95, 126, 0.1);
-  color: #ff5f7e;
-  border: 1px solid rgba(255, 95, 126, 0.2);
-}
-
-.badge-alcance-final.estancado {
-  background: rgba(246, 173, 85, 0.1);
-  color: #f6ad55;
-  border: 1px solid rgba(246, 173, 85, 0.2);
-}
-
-.contenedor-info-producto {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.badge-envasado {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-  border: 1px solid rgba(0, 255, 204, 0.3);
-  padding: 15px 15px; /* Tu padding original */
-  border-radius: 4px;
-  font-family: 'Roboto Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  min-width: 40px;
-  text-align: center;
-  text-shadow: 0 0 5px rgba(0, 255, 204, 0.2);
-}
-
-.sub-fila-inventario:hover .badge-envasado {
-  background: #00ffcc;
-  color: #1b1b2f;
-}
-
 /* --- ESTILOS DEL MODAL EMERGENTE INTERNO --- */
-
 .emergente-info-overlay {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(10, 10, 20, 0.8);
   backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.2s ease-out;
 }
@@ -321,39 +204,184 @@
   border: 1px solid rgba(0, 192, 255, 0.3);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
   animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.emergente-info-card.ocupado { border-left: 4px solid #00c0ff; }
-.emergente-info-card.libre { border-left: 4px solid #00ffcc; }
+.emergente-info-card.ocupado { 
+  border-left: 4px solid #00c0ff; 
+}
 
-.emergente-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.emergente-header h3 { margin: 0; font-size: 13px; color: #64748b; letter-spacing: 1px; }
-.close-mini-btn { background: none; border: none; color: #64748b; font-size: 24px; cursor: pointer; }
+.emergente-info-card.libre { 
+  border-left: 4px solid #00ffcc; 
+}
 
-.emergente-titulo-prod { color: #00c0ff; font-weight: 800; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
-.emergente-dato { display: flex; justify-content: space-between; margin-bottom: 8px; color: #e2e8f0; font-size: 14px; }
-.txt-highlight { color: #00ffcc; }
-.emergente-footer-aviso { color: #ff5f7e; font-size: 12px; font-weight: bold; text-align: center; margin-top: 20px; background: rgba(255, 95, 126, 0.1); padding: 10px; border-radius: 6px; }
+.emergente-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 20px; 
+}
 
-.btn-emergente-cerrar { width: 100%; margin-top: 20px; padding: 12px; background: #232339; border: 1px solid #00c0ff; color: #00c0ff; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-.btn-emergente-cerrar:hover { background: #00c0ff; color: #1b1b2f; }
+.emergente-header h3 { 
+  margin: 0; 
+  font-size: 13px; 
+  color: #64748b; 
+  letter-spacing: 1px; 
+}
 
-/* --- CLASES DE APOYO (REPLACING INLINE) --- */
-.header-tabla-inv { background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0; }
-.col-codigo-header { width: 110px; text-align: center; color: #64748b; font-size: 11px; font-weight: 700; }
-.txt-left-details { text-align: left; padding-left: 20px; color: #64748b; font-size: 12px; }
-.label-small { color: #64748b; font-size: 11px; }
-.footer-inv-flex { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
-.label-excel-btn { cursor: pointer; margin: 0; display: flex; align-items: center; gap: 8px; }
-.txt-cyan { color: #00c0ff; }
-.txt-green { color: #00ffcc; }
+.close-mini-btn { 
+  background: none; 
+  border: none; 
+  color: #64748b; 
+  font-size: 24px; 
+  cursor: pointer; 
+}
 
-.hint-programar { font-size: 9px; color: #00c0ff; font-weight: bold; margin-top: 4px; opacity: 0.7; text-align: center; }
-.verificando { animation: pulse 1.5s infinite; pointer-events: none; background: rgba(0, 192, 255, 0.2) !important; }
+.emergente-titulo-prod { 
+  color: #00c0ff; 
+  font-weight: 800; 
+  font-size: 18px; 
+  margin-bottom: 15px; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+  padding-bottom: 10px; 
+}
 
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.emergente-dato { 
+  display: flex; 
+  justify-content: space-between; 
+  margin-bottom: 8px; 
+  color: #e2e8f0; 
+  font-size: 14px; 
+}
 
+.txt-highlight { 
+  color: #00ffcc; 
+}
+
+.emergente-footer-aviso { 
+  color: #ff5f7e; 
+  font-size: 12px; 
+  font-weight: bold; 
+  text-align: center; 
+  margin-top: 20px; 
+  background: rgba(255, 95, 126, 0.1); 
+  padding: 10px; 
+  border-radius: 6px; 
+}
+
+.btn-emergente-cerrar { 
+  width: 100%; 
+  margin-top: 20px; 
+  padding: 12px; 
+  background: #232339; 
+  border: 1px solid #00c0ff; 
+  color: #00c0ff; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: bold; 
+  transition: 0.2s; 
+}
+
+.btn-emergente-cerrar:hover { 
+  background: #00c0ff; 
+  color: #1b1b2f; 
+}
+
+/* --- CLASES DE APOYO --- */
+.header-tabla-inv { 
+  
+  background: transparent; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+  padding: 10px 0; 
+}
+
+.col-codigo-header {
+  width: 99px; /* Debe coincidir con el ancho de la columna de códigos */
+  text-align: center; /* left, center, right */
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  padding-left: 0; /* Mover a la derecha */
+  padding-right: 0; /* Mover a la izquierda */
+}
+
+
+
+
+.txt-left-details { 
+  text-align: left; 
+  padding-left: 20px; 
+  color: #64748b; 
+  font-size: 12px; 
+}
+
+.label-small { 
+  color: #64748b; 
+  font-size: 11px; 
+}
+
+.footer-inv-flex { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 2px; 
+}
+
+.label-excel-btn { 
+  cursor: pointer; 
+  margin: 0; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+}
+
+.txt-cyan { 
+  color: #00c0ff; 
+}
+
+.txt-green { 
+  color: #00ffcc; 
+}
+
+.hint-programar { 
+  font-size: 9px; 
+  color: #00c0ff; 
+  font-weight: bold; 
+  margin-top: 4px; 
+  opacity: 0.7; 
+  text-align: center; 
+}
+
+.verificando { 
+  animation: pulse 1.5s infinite; 
+  pointer-events: none; 
+  background: rgba(0, 192, 255, 0.2) !important; 
+}
+
+/* --- ANIMACIONES --- */
+@keyframes pulse { 
+  0% { opacity: 1; } 
+  50% { opacity: 0.6; } 
+  100% { opacity: 1; } 
+}
+
+@keyframes fadeIn { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
+
+@keyframes scaleUp { 
+  from { transform: scale(0.8); opacity: 0; } 
+  to { transform: scale(1); opacity: 1; } 
+}
+
+/* Opción 1: Mover a la izquierda */
+.stock-header {
+  padding-left: 0 !important;
+  margin-left: -55px !important;
+}
+
+.descripcion-header {
+  padding-left: 180px !important; /* Aumenta el padding */
+}

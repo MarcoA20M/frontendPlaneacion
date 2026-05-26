@@ -9,6 +9,7 @@ import OperariosScreen from "./screens/OperariosScreen"; // <-- IMPORTANTE
 // Componentes de Familias
 import { VistaFamiliasScreen } from "./components/VistaFamiliasScreen";
 import { VistaProductosFamilia } from "./components/ExploradorFamilias";
+import CodigosScreen from "./screens/CodigosScreen";
 
 // Wrapper para el detalle de familias
 function FamiliaDetalleWrapper() {
@@ -31,7 +32,9 @@ export default function App() {
         
         {/* Rutas de Mantenimiento */}
         <Route path="/mantenimiento" element={<MantenimientoScreen />} />
-        <Route path="/mantenimiento/operarios" element={<OperariosScreen />} /> {/* <-- NUEVA RUTA */}
+        <Route path="/mantenimiento/operarios" element={<OperariosScreen />} /> 
+        <Route path="/mantenimiento/codigos" element={<CodigosScreen />} /> 
+
 
         {/* RUTAS: Explorador de Familias */}
         <Route path="/familias" element={

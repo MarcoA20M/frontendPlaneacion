@@ -6,7 +6,7 @@ export default function OperariosScreen() {
     const navigate = useNavigate();
     const [tabActiva, setTabActiva] = useState("vinilica");
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
-    
+
     // Estado para operarios de Vinílica
     const [operariosVinilica, setOperariosVinilica] = useState(() => {
         const guardado = localStorage.getItem("operarios_vinilica");
@@ -17,40 +17,40 @@ export default function OperariosScreen() {
             { id: 4, nombre: "Luis", puesto: "Operario de Máquinas", activo: true }
         ];
     });
-    
+
     // Estado para asignación BASE (sin rotación aplicada)
     const [configGruposBase, setConfigGruposBase] = useState(() => {
         const guardado = localStorage.getItem("config_grupos_base_vinilica");
         return guardado ? JSON.parse(guardado) : {
-            grupo0: { 
-                operarioId: 1, 
-                maquinas: [101, 102], 
-                nombre: "Grupo 0 (VI-101, VI-102)" 
+            grupo0: {
+                operarioId: 1,
+                maquinas: [101, 102],
+                nombre: "Grupo 0 (VI-101, VI-102)"
             },
-            grupo1: { 
-                operarioId: 2, 
-                maquinas: [103, 104], 
-                nombre: "Grupo 1 (VI-103, VI-104)" 
+            grupo1: {
+                operarioId: 2,
+                maquinas: [103, 104],
+                nombre: "Grupo 1 (VI-103, VI-104)"
             },
-            grupo2: { 
-                operarioId: 3, 
-                maquinas: [105, 106], 
-                nombre: "Grupo 2 (VI-105, VI-106)" 
+            grupo2: {
+                operarioId: 3,
+                maquinas: [105, 106],
+                nombre: "Grupo 2 (VI-105, VI-106)"
             },
-            grupo3: { 
-                operarioId: 4, 
-                maquinas: [107, 108], 
-                nombre: "Grupo 3 (VI-107, VI-108)" 
+            grupo3: {
+                operarioId: 4,
+                maquinas: [107, 108],
+                nombre: "Grupo 3 (VI-107, VI-108)"
             }
         };
     });
-    
+
     // Estado para la rotación actual (cuántas semanas se ha rotado)
     const [semanasRotadas, setSemanasRotadas] = useState(() => {
         const guardado = localStorage.getItem("semanas_rotadas_vinilica");
         return guardado ? parseInt(guardado) : 0;
     });
-    
+
     // Estado para otros operarios
     const [otrosOperarios, setOtrosOperarios] = useState(() => {
         const guardado = localStorage.getItem("otros_operarios");
@@ -62,12 +62,12 @@ export default function OperariosScreen() {
             { id: 104, nombre: "Beto", puesto: "Mezclador", area: "esmaltes" }
         ];
     });
-    
+
     // Función para calcular la configuración actual basada en las semanas rotadas
     const calcularConfigActual = () => {
         const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
         const asignacionBase = gruposOrden.map(g => configGruposBase[g].operarioId);
-        
+
         // Aplicar rotación según semanasRotadas
         const rotacionAplicada = [...asignacionBase];
         for (let i = 0; i < semanasRotadas; i++) {
@@ -75,7 +75,7 @@ export default function OperariosScreen() {
             const ultimo = rotacionAplicada.pop();
             rotacionAplicada.unshift(ultimo);
         }
-        
+
         // Construir la configuración actual
         const configActual = {};
         gruposOrden.forEach((grupo, idx) => {
@@ -84,53 +84,53 @@ export default function OperariosScreen() {
                 operarioId: rotacionAplicada[idx]
             };
         });
-        
+
         return configActual;
     };
-    
+
     // Estado derivado: configuración actual con rotación aplicada
     const [configGrupos, setConfigGrupos] = useState(() => calcularConfigActual());
-    
+
     // Guardar cambios cuando cambien las semanas rotadas o la configuración base
     useEffect(() => {
         const nuevaConfig = calcularConfigActual();
         setConfigGrupos(nuevaConfig);
     }, [semanasRotadas, configGruposBase]);
-    
+
     // Guardar todo en localStorage
     useEffect(() => {
         localStorage.setItem("operarios_vinilica", JSON.stringify(operariosVinilica));
         localStorage.setItem("config_grupos_base_vinilica", JSON.stringify(configGruposBase));
         localStorage.setItem("semanas_rotadas_vinilica", semanasRotadas.toString());
         localStorage.setItem("otros_operarios", JSON.stringify(otrosOperarios));
-        
+
         // Notificar a otros componentes
         window.dispatchEvent(new CustomEvent("vinilicaConfigUpdated", {
-            detail: { 
-                operarios: operariosVinilica, 
-                grupos: configGrupos, 
-                semanasRotadas 
+            detail: {
+                operarios: operariosVinilica,
+                grupos: configGrupos,
+                semanasRotadas
             }
         }));
     }, [operariosVinilica, configGruposBase, semanasRotadas, otrosOperarios, configGrupos]);
 
     // Guardar configuración en un formato más accesible para api.js
-useEffect(() => {
-  // Guardar la configuración actual en un formato especial para api.js
-  const configParaAPI = {
-    operarios: operariosVinilica.map(op => ({ id: op.id, nombre: op.nombre })),
-    gruposBase: configGruposBase,
-    semanasRotadas: semanasRotadas,
-    ultimaActualizacion: new Date().toISOString()
-  };
-  localStorage.setItem("configuracion_rotacion_api", JSON.stringify(configParaAPI));
-}, [operariosVinilica, configGruposBase, semanasRotadas]);
-    
+    useEffect(() => {
+        // Guardar la configuración actual en un formato especial para api.js
+        const configParaAPI = {
+            operarios: operariosVinilica.map(op => ({ id: op.id, nombre: op.nombre })),
+            gruposBase: configGruposBase,
+            semanasRotadas: semanasRotadas,
+            ultimaActualizacion: new Date().toISOString()
+        };
+        localStorage.setItem("configuracion_rotacion_api", JSON.stringify(configParaAPI));
+    }, [operariosVinilica, configGruposBase, semanasRotadas]);
+
     const mostrarMensaje = (texto, tipo = "success") => {
         setMensaje({ texto, tipo });
         setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
     };
-    
+
     // ========== CRUD OPERARIOS VINÍLICA ==========
     const agregarOperarioVinilica = (nombre) => {
         if (!nombre.trim()) {
@@ -142,27 +142,27 @@ useEffect(() => {
             return;
         }
         const nuevoId = Math.max(...operariosVinilica.map(op => op.id), 0) + 1;
-        setOperariosVinilica([...operariosVinilica, { 
-            id: nuevoId, 
-            nombre: nombre.trim(), 
+        setOperariosVinilica([...operariosVinilica, {
+            id: nuevoId,
+            nombre: nombre.trim(),
             puesto: "Operario de Máquinas",
-            activo: true 
+            activo: true
         }]);
         mostrarMensaje(`✅ "${nombre}" agregado correctamente`);
     };
-    
+
     const editarOperarioVinilica = (id, nuevoNombre) => {
         if (!nuevoNombre.trim()) return;
         if (operariosVinilica.some(op => op.nombre.toLowerCase() === nuevoNombre.toLowerCase() && op.id !== id)) {
             mostrarMensaje(`❌ "${nuevoNombre}" ya existe`, "error");
             return;
         }
-        setOperariosVinilica(prev => prev.map(op => 
+        setOperariosVinilica(prev => prev.map(op =>
             op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
         ));
         mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
     };
-    
+
     const eliminarOperarioVinilica = (id) => {
         const operario = operariosVinilica.find(op => op.id === id);
         if (window.confirm(`¿Eliminar a "${operario.nombre}" de Vinílicas?`)) {
@@ -178,7 +178,7 @@ useEffect(() => {
             mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
         }
     };
-    
+
     // ========== CRUD OTROS OPERARIOS ==========
     const agregarOtroOperario = (nombre, puesto, area) => {
         if (!nombre.trim()) {
@@ -194,14 +194,14 @@ useEffect(() => {
         }]);
         mostrarMensaje(`✅ "${nombre}" agregado a ${area}`);
     };
-    
+
     const editarOtroOperario = (id, campo, valor) => {
-        setOtrosOperarios(prev => prev.map(op => 
+        setOtrosOperarios(prev => prev.map(op =>
             op.id === id ? { ...op, [campo]: valor } : op
         ));
         mostrarMensaje(`✏️ Actualizado`);
     };
-    
+
     const eliminarOtroOperario = (id) => {
         const operario = otrosOperarios.find(op => op.id === id);
         if (window.confirm(`¿Eliminar a "${operario.nombre}"?`)) {
@@ -209,7 +209,7 @@ useEffect(() => {
             mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
         }
     };
-    
+
     // ========== ASIGNACIÓN DE GRUPOS BASE ==========
     const asignarOperarioAGrupoBase = (grupoId, operarioId) => {
         setConfigGruposBase(prev => ({
@@ -218,36 +218,36 @@ useEffect(() => {
         }));
         const operario = operariosVinilica.find(op => op.id === parseInt(operarioId));
         mostrarMensaje(`📌 ${operario?.nombre || "Nadie"} asignado como base al ${configGruposBase[grupoId].nombre}`);
-        
+
         // Resetear rotación al cambiar asignación base
         setSemanasRotadas(0);
     };
-    
+
     // ========== ROTACIÓN SEMANAL ==========
     const rotarSemanal = () => {
         const nuevasSemanas = semanasRotadas + 1;
         setSemanasRotadas(nuevasSemanas);
         mostrarMensaje(`🔄 Rotación semanal aplicada (Semana ${nuevasSemanas})`);
     };
-    
+
     const resetearRotacion = () => {
         if (window.confirm("¿Resetear la rotación a la configuración inicial?")) {
             setSemanasRotadas(0);
             mostrarMensaje("🔄 Rotación reseteada a la configuración base");
         }
     };
-    
+
     // ========== UTILIDADES ==========
     const getNombreOperario = (id) => {
         if (!id) return "Sin asignar";
         const operario = operariosVinilica.find(op => op.id === id);
         return operario ? operario.nombre : "Desconocido";
     };
-    
-    const operariosFiltrados = tabActiva === "vinilica" 
-        ? operariosVinilica 
+
+    const operariosFiltrados = tabActiva === "vinilica"
+        ? operariosVinilica
         : otrosOperarios.filter(op => op.area === tabActiva);
-    
+
     // Vista previa de rotación (próxima semana)
     const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
     const previewRotacion = gruposOrden.map((grupo, idx) => {
@@ -258,58 +258,58 @@ useEffect(() => {
             const ultimo = rotacionActual.pop();
             rotacionActual.unshift(ultimo);
         }
-        
+
         const rotacionSiguiente = [...rotacionActual];
         const ultimo = rotacionSiguiente.pop();
         rotacionSiguiente.unshift(ultimo);
-        
+
         return {
             grupo: configGruposBase[grupo].nombre,
             actual: getNombreOperario(rotacionActual[idx]),
             siguiente: getNombreOperario(rotacionSiguiente[idx])
         };
     });
-    
+
     return (
         <div className="op-screen-container">
             <div className="op-glass-panel">
-                
+
                 {mensaje.texto && (
                     <div className={`op-toast ${mensaje.tipo}`}>
                         {mensaje.texto}
                     </div>
                 )}
-                
+
                 {/* SIDEBAR */}
                 <aside className="op-sidebar">
                     <div className="op-logo">
                         <span className="op-dot"></span>
                         <h2>RECURSOS HUMANOS</h2>
                     </div>
-                    
+
                     <nav className="op-nav">
                         <div className="nav-label">SECCIONES</div>
-                        <button 
+                        <button
                             className={`op-nav-btn ${tabActiva === "vinilica" ? "active" : ""}`}
                             onClick={() => setTabActiva("vinilica")}
                         >
                             <span className="nav-icon">💧</span> Vinílicas (Máquinas)
                         </button>
-                        <button 
+                        <button
                             className={`op-nav-btn ${tabActiva === "esmaltes" ? "active" : ""}`}
                             onClick={() => setTabActiva("esmaltes")}
                         >
                             <span className="nav-icon">✨</span> Esmaltes
                         </button>
                     </nav>
-                    
+
                     <div className="sidebar-footer">
                         <button className="op-btn-exit" onClick={() => navigate("/mantenimiento")}>
                             ↩ Regresar a Menú
                         </button>
                     </div>
                 </aside>
-                
+
                 {/* CONTENIDO PRINCIPAL */}
                 <main className="op-main-content">
                     <header className="op-header">
@@ -318,9 +318,9 @@ useEffect(() => {
                             <p>Gestión dinámica de personal y rotación semanal</p>
                         </div>
                     </header>
-                    
+
                     <div className={`op-workspace ${tabActiva === 'vinilica' ? 'with-sidebar' : ''}`}>
-                        
+
                         {/* TABLA DE PERSONAL */}
                         <div className="op-card table-card">
                             <div className="card-header-flex">
@@ -329,7 +329,7 @@ useEffect(() => {
                                 </h3>
                                 <span className="count-badge">{operariosFiltrados.length} Operarios</span>
                             </div>
-                            
+
                             <div className="op-table-wrapper">
                                 <table className="op-table">
                                     <thead>
@@ -343,7 +343,7 @@ useEffect(() => {
                                         {operariosFiltrados.map(op => (
                                             <tr key={op.id} className="row-hover">
                                                 <td>
-                                                    <input 
+                                                    <input
                                                         className="op-input-edit"
                                                         value={op.nombre}
                                                         onChange={(e) => {
@@ -360,7 +360,7 @@ useEffect(() => {
                                                     {tabActiva === "vinilica" ? (
                                                         <span className="op-puesto-tag">Operario de Máquinas</span>
                                                     ) : (
-                                                        <input 
+                                                        <input
                                                             className="op-input-edit"
                                                             value={op.puesto}
                                                             onChange={(e) => editarOtroOperario(op.id, "puesto", e.target.value)}
@@ -369,8 +369,8 @@ useEffect(() => {
                                                     )}
                                                 </td>
                                                 <td className="txt-center">
-                                                    <button 
-                                                        className="op-action-btn delete" 
+                                                    <button
+                                                        className="op-action-btn delete"
                                                         onClick={() => {
                                                             if (tabActiva === "vinilica") {
                                                                 eliminarOperarioVinilica(op.id);
@@ -388,11 +388,11 @@ useEffect(() => {
                                     </tbody>
                                 </table>
                             </div>
-                            
+
                             {/* Formulario para agregar nuevo operario */}
                             <div className="op-add-operario">
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     id="nuevoNombre"
                                     placeholder="Nuevo operario..."
                                     onKeyPress={(e) => {
@@ -410,8 +410,8 @@ useEffect(() => {
                                     }}
                                 />
                                 {tabActiva !== "vinilica" && (
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         id="nuevoPuesto"
                                         placeholder="Puesto..."
                                         style={{ width: '150px' }}
@@ -433,7 +433,7 @@ useEffect(() => {
                                     + Agregar
                                 </button>
                             </div>
-                            
+
                             {/* === VISTA PREVIA DE ROTACIÓN === */}
                             {tabActiva === "vinilica" && (
                                 <div className="preview-rotacion-section">
@@ -465,7 +465,7 @@ useEffect(() => {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* CONFIGURACIÓN DE MÁQUINAS VINÍLICAS */}
                         {tabActiva === "vinilica" && (
                             <div className="op-card machinery-card">
@@ -482,10 +482,10 @@ useEffect(() => {
                                 </div>
                                 <p className="card-desc">
                                     Configuración BASE (sin rotación). Luego se aplican {semanasRotadas} rotaciones.
-                                    <br/>
+                                    <br />
                                     <strong>Estado actual:</strong> {semanasRotadas === 0 ? "Configuración base" : `Rotación aplicada (Semana ${semanasRotadas})`}
                                 </p>
-                                
+
                                 <div className="op-machinery-list">
                                     {Object.entries(configGruposBase).map(([grupoId, grupo]) => (
                                         <div key={grupoId} className="op-machine-item">
@@ -493,7 +493,7 @@ useEffect(() => {
                                                 <span className="machine-id">📌</span>
                                                 <label>{grupo.nombre}</label>
                                             </div>
-                                            <select 
+                                            <select
                                                 className="op-select-custom"
                                                 value={grupo.operarioId || ""}
                                                 onChange={(e) => asignarOperarioAGrupoBase(grupoId, e.target.value)}
@@ -507,7 +507,7 @@ useEffect(() => {
                                             </select>
                                             <div className="operario-asignado-actual">
                                                 👤 Base: {getNombreOperario(grupo.operarioId)}
-                                                <br/>
+                                                <br />
                                                 <span className="rotacion-actual">
                                                     🔄 Actual: {getNombreOperario(configGrupos[grupoId]?.operarioId)}
                                                 </span>
@@ -515,11 +515,11 @@ useEffect(() => {
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <div className="info-box">
                                     ℹ️ La rotación funciona así: se guarda una configuración BASE y un contador de semanas rotadas.
                                     Al regresar al menú, el sistema recuerda exactamente cuántas rotaciones se han aplicado.
-                                    <br/><br/>
+                                    <br /><br />
                                     <strong>Semana actual: {semanasRotadas}</strong> rotaciones aplicadas desde la configuración base.
                                 </div>
                             </div>

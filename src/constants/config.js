@@ -39,7 +39,31 @@ const calcularSemanasDiferencia = (fechaReferencia, fechaAnclaje) => {
   return Math.floor(diferenciaMilis / (7 * 24 * 60 * 60 * 1000));
 };
 
-// Función principal - AHORA USA LA FECHA QUE RECIBE
+// ========== NUEVA FUNCIÓN PARA OBTENER CÓDIGOS EXCLUIDOS DINÁMICOS ==========
+export const getCodigosExcluidos = () => {
+  try {
+    const guardados = localStorage.getItem("codigos_excluidos");
+    if (guardados) {
+      const codigos = JSON.parse(guardados);
+      if (Array.isArray(codigos) && codigos.length > 0) {
+        return codigos;
+      }
+    }
+  } catch (error) {
+    console.error("Error al leer códigos excluidos:", error);
+  }
+  
+  // Códigos por defecto si no hay nada guardado
+  return [
+    "890", "912", "908", "100", "852", "852IF", "802IF", "803", "803IF",
+    "812", "812IF", "813", "813IF", "820", "821", "822", "823", "824",
+    "825", "826", "853", "853IF", "854IF", "862", "862IF", "863", "863IF",
+    "870", "870IF", "900", "902", "904", "906", "910", "914", "916", "918",
+    "920", "922", "924"
+  ];
+};
+
+// Función principal - USA LA FECHA QUE RECIBE
 export const getOperarioPorMaquina = (idMaquina, fechaRef = new Date()) => {
   // 1. Mapeo de máquinas a su grupo
   const grupos = {
@@ -121,12 +145,15 @@ export const getConfiguracionRotacionActual = (fechaRef = new Date()) => {
   return mapeo;
 };
 
-export const CODIGOS_EXCLUIDOS = [
-  "890", "912", "908", "100", "852", "852IF", "802IF", "803", "803IF", 
-  "812", "812IF", "813", "813IF", "820", "821", "822", "823", "824",
-  "825", "826", "853", "853IF", "854IF", "862", "862IF", "863", "863IF",
-  "870","870IF", "900", "902", "904", "906", "910", "914", "916", "918", "920", "922", "924"
-];
+// EXPORTAR LA FUNCIÓN EN VEZ DE LA CONSTANTE
+// Esto mantiene compatibilidad con el código existente
+export const CODIGOS_EXCLUIDOS = getCodigosExcluidos();
+
+// Función para verificar si un código está excluido (útil para búsquedas)
+export const isCodigoExcluido = (codigo) => {
+  const excluidos = getCodigosExcluidos();
+  return excluidos.includes(codigo.toString().toUpperCase());
+};
 
 export const litrosPorEnvasado = (id) => (id >= 100 ? id / 1000 : id);
 export const litrosATexto = (l) => (l === 0.25 ? "1/4 L" : l === 0.5 ? "1/2 L" : l === 0.75 ? "3/4 L" : l === 1 ? "1 L" : `${l} L`);

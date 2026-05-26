@@ -7,37 +7,38 @@ export default function MantenimientoScreen() {
     const [estadoServidores] = useState("OPTIMO");
 
     const herramientas = [
-        { 
-            id: 1, 
-            titulo: "Operarios", 
-            desc: "Administrar y controlar actividades de personal operativo", 
-            icono: "👥", 
+        {
+            id: 1,
+            titulo: "Operarios",
+            desc: "Administrar y controlar actividades de personal operativo",
+            icono: "👥",
             accion: "Consultar",
             path: "/mantenimiento/operarios" // Ruta destino
         },
-        { 
-            id: 2, 
-            titulo: "Administrar Críticos", 
-            desc: "Administración de consumos de materias primas", 
-            icono: "⚡", 
+        {
+            id: 2,
+            titulo: "Administrar Críticos",
+            desc: "Administración de consumos de materias primas",
+            icono: "⚡",
             accion: "Consultar",
-            path: "/mantenimiento/criticos" 
+            path: "/mantenimiento/criticos"
         },
-        { 
-            id: 3, 
-            titulo: "Reportes", 
-            desc: "Control de reportes de producción", 
-            icono: "📊", 
+        {
+            id: 3,
+            titulo: "Reportes",
+            desc: "Control de reportes de producción",
+            icono: "📊",
             accion: "Consultar",
-            path: "/mantenimiento/reportes" 
+            path: "/mantenimiento/reportes"
         },
-        { 
-            id: 4, 
-            titulo: "Control de códigos", 
-            desc: "Agrega, Actualizar o Eliminar pinturas", 
-            icono: "🔑", 
+        // Asegúrate que la ruta para códigos sea correcta
+        {
+            id: 4,
+            titulo: "Control de códigos",
+            desc: "Agrega, Actualizar o Eliminar pinturas",
+            icono: "🔑",
             accion: "Consultar",
-            path: "/mantenimiento/codigos" 
+            path: "/mantenimiento/codigos"
         }
     ];
 
@@ -64,8 +65,8 @@ export default function MantenimientoScreen() {
                                         <p>{h.desc}</p>
                                     </div>
                                     {/* Evento de navegación añadido aquí */}
-                                    <button 
-                                        className="h-btn-accion" 
+                                    <button
+                                        className="h-btn-accion"
                                         onClick={() => navigate(h.path)}
                                     >
                                         {h.accion}

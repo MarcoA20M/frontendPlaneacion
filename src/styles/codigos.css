@@ -1,0 +1,831 @@
+/* CodigosScreen.css - Barra lateral morada */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.cod-screen-container {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
+    display: flex;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.cod-glass-panel {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+}
+
+/* ===== SIDEBAR MORADA ===== */
+.cod-sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #2a0a3e 0%, #1a0a2e 100%);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(192, 0, 255, 0.3);
+    box-shadow: 4px 0 25px rgba(128, 0, 255, 0.2);
+}
+
+.cod-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(192, 0, 255, 0.3);
+}
+
+.cod-dot {
+    width: 10px;
+    height: 10px;
+    background: #c000ff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #c000ff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+.cod-logo h2 {
+    color: #fff;
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.nav-label {
+    color: #a855f7;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.cod-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.cod-nav-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 16px;
+    color: #c4b5fd;
+    text-align: left;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.cod-nav-btn:hover {
+    background: rgba(192, 0, 255, 0.15);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.cod-nav-btn.active {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.25), rgba(128, 0, 255, 0.15));
+    color: #e879f9;
+    border-left: 2px solid #c000ff;
+}
+
+.nav-icon {
+    font-size: 20px;
+}
+
+.sidebar-footer {
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: auto;
+}
+
+.stats-mini {
+    background: rgba(192, 0, 255, 0.12);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+}
+
+.stats-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #e879f9;
+}
+
+.stats-label {
+    font-size: 10px;
+    color: #a855f7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== MAIN CONTENT ===== */
+.cod-main-content {
+    flex-grow: 1;
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.cod-main-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cod-main-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+
+.cod-main-content::-webkit-scrollbar-thumb {
+    background: #c000ff;
+    border-radius: 3px;
+}
+
+/* ===== HEADER ===== */
+.cod-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+}
+
+.cod-title-group h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #f0f0f0;
+    margin: 0;
+}
+
+.cod-title-group p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+/* ===== WORKSPACE ===== */
+.cod-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ===== CARDS ===== */
+.cod-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cod-card:hover {
+    border-color: rgba(192, 0, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(128, 0, 255, 0.2);
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.cod-card-title {
+    color: #e879f9;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    font-weight: 700;
+}
+
+.count-badge {
+    background: linear-gradient(90deg, #c000ff 0%, #7c00b3 100%);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #c000ff;
+    box-shadow: 0 0 0 3px rgba(192, 0, 255, 0.2);
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-filter {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #ff5f7e;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.clear-filter:hover {
+    color: #ff007f;
+}
+
+/* ===== ADD CODIGO BAR ===== */
+.add-codigo-bar {
+    display: flex;
+    gap: 12px;
+}
+
+.add-codigo-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-family: monospace;
+    transition: all 0.2s ease;
+}
+
+.add-codigo-bar input:focus {
+    outline: none;
+    border-color: #c000ff;
+    box-shadow: 0 0 0 3px rgba(192, 0, 255, 0.2);
+}
+
+.add-codigo-bar button {
+    padding: 12px 28px;
+    background: linear-gradient(90deg, #c000ff 0%, #7c00b3 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-codigo-bar button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(192, 0, 255, 0.4);
+}
+
+/* ===== TABLA ===== */
+.cod-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.cod-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cod-table th {
+    text-align: left;
+    color: #e879f9;
+    font-size: 11px;
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.cod-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+.cod-table tbody tr:hover {
+    background: rgba(192, 0, 255, 0.08);
+    border-radius: 8px;
+}
+
+.codigo-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #d8b4fe;
+}
+
+.edit-input {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #c000ff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    width: 120px;
+}
+
+.edit-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(192, 0, 255, 0.3);
+}
+
+/* ===== BADGES ===== */
+.badge-if, .badge-normal {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-if {
+    background: rgba(255, 95, 126, 0.15);
+    color: #ff5f7e;
+    border: 1px solid rgba(255, 95, 126, 0.3);
+}
+
+.badge-normal {
+    background: rgba(0, 255, 204, 0.15);
+    color: #00ffcc;
+    border: 1px solid rgba(0, 255, 204, 0.3);
+}
+
+/* ===== ACTION BUTTONS ===== */
+.actions-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.action-btn.edit {
+    color: #c000ff;
+}
+
+.action-btn.edit:hover {
+    background: #c000ff;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.action-btn.delete {
+    color: #ff5f7e;
+}
+
+.action-btn.delete:hover {
+    background: #ff5f7e;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.action-btn.save {
+    color: #2ecc71;
+}
+
+.action-btn.save:hover {
+    background: #2ecc71;
+    color: #000;
+    transform: scale(1.05);
+}
+
+.action-btn.cancel {
+    color: #95a5a6;
+}
+
+.action-btn.cancel:hover {
+    background: #95a5a6;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 3px solid #c000ff;
+}
+
+.info-box strong {
+    color: #e879f9;
+}
+
+/* ===== TOAST ===== */
+.cod-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #2ecc71 0%, #1d6f42 100%);
+    color: #fff;
+    z-index: 1000;
+    animation: slideInRight 0.3s ease;
+    font-weight: 500;
+    font-size: 13px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cod-toast.error {
+    background: linear-gradient(90deg, #ec2334 0%, #af0e16 100%);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .cod-main-content {
+        padding: 24px;
+    }
+    
+    .cod-sidebar {
+        width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cod-sidebar {
+        width: 70px;
+        padding: 20px 12px;
+    }
+    
+    .cod-logo h2,
+    .nav-label,
+    .cod-nav-btn span:not(.nav-icon) {
+        display: none;
+    }
+    
+    .cod-nav-btn {
+        justify-content: center;
+        padding: 12px;
+    }
+    
+    .cod-nav-btn .nav-icon {
+        font-size: 22px;
+    }
+    
+    .cod-main-content {
+        padding: 16px;
+    }
+    
+    .cod-title-group h1 {
+        font-size: 20px;
+    }
+    
+    .add-codigo-bar {
+        flex-direction: column;
+    }
+}
+
+/* Estilos adicionales para códigos especiales */
+
+.add-especial-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.add-especial-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.add-especial-bar input:focus {
+    outline: none;
+    border-color: #c000ff;
+    box-shadow: 0 0 0 3px rgba(192, 0, 255, 0.2);
+}
+
+.add-especial-bar button {
+    padding: 12px 28px;
+    background: linear-gradient(90deg, #c000ff 0%, #7c00b3 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-especial-bar button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(192, 0, 255, 0.4);
+}
+
+.edit-input-desc {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #c000ff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 13px;
+    width: 200px;
+}
+
+.edit-input-desc:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(192, 0, 255, 0.3);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.status-badge.active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.status-badge.inactive {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+.nav-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(192, 0, 255, 0.3), transparent);
+    margin: 16px 0;
+}
+
+.cod-nav-btn.quick-action {
+    font-size: 12px;
+    padding: 8px 12px;
+    opacity: 0.8;
+}
+
+.cod-nav-btn.quick-action:hover {
+    opacity: 1;
+}
+
+
+/* Estilos para submenú */
+.cod-nav-sub-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 16px 10px 32px;
+    color: #8a8a9a;
+    text-align: left;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    width: 100%;
+}
+
+.cod-nav-sub-btn:hover {
+    background: rgba(192, 0, 255, 0.08);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.cod-nav-sub-btn.active {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.15), rgba(128, 0, 255, 0.1));
+    color: #e879f9;
+    border-left: 2px solid #c000ff;
+}
+
+/* Estilos para formulario de productos */
+.add-producto-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.form-row input:focus {
+    outline: none;
+    border-color: #c000ff;
+    box-shadow: 0 0 0 3px rgba(192, 0, 255, 0.2);
+}
+
+.envasados-grid h4 {
+    color: #e879f9;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.envasados-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.envasado-input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px;
+    border-radius: 8px;
+    min-width: 70px;
+    text-align: center;
+}
+
+.envasado-input label {
+    font-size: 11px;
+    color: #a855f7;
+}
+
+.envasado-input input {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-align: center;
+}
+
+.btn-agregar-producto {
+    padding: 12px 24px;
+    background: linear-gradient(90deg, #c000ff 0%, #7c00b3 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-agregar-producto:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(192, 0, 255, 0.4);
+}
+
+/* Estilos para tabla de productos */
+.productos-table td {
+    vertical-align: top;
+}
+
+.envasados-cell {
+    min-width: 200px;
+}
+
+.envasados-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.envasado-badge {
+    background: rgba(192, 0, 255, 0.15);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: #e879f9;
+}
+
+.envasados-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.envasado-edit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.envasado-edit-item span {
+    min-width: 40px;
+    color: #a855f7;
+}
+
+.envasado-edit-item input {
+    width: 70px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #c000ff;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+}
+
+.edit-input-desc {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #c000ff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 13px;
+    width: 200px;
+}
+
+.edit-input-desc:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(192, 0, 255, 0.3);
+}

@@ -341,7 +341,7 @@ export function useProduccion() {
     }, [producto, tipoPintura, totalLitrosActuales, cantidades, ordenarCargas]);
 
     // --- EXCEL E IMPORTACIÓN ---
-    const handleImportExcel = async (e, soloRetornar = false) => {
+     const handleImportExcel = async (e, soloRetornar = false) => {
         const file = e.target.files[0];
         if (!file) return;
         if (!soloRetornar) setCargandoExcel(true);
@@ -351,6 +351,8 @@ export function useProduccion() {
             for (const item of dataRaw) {
                 if (!item.articulo) continue;
                 const res = await obtenerDatosProductoSeguro(item.articulo);
+                const lote = String(item.folio || "").toUpperCase();
+                let tipoFinal = lote.startsWith("V") ? "Vinílica" : (lote.startsWith("E") || lote.startsWith("S") ? "Esmalte" : (res.tipoPinturaId === 2 ? "Vinílica" : "Esmalte"));
                 const nueva = {
                     idTemp: Date.now() + Math.random(),
                     folio: item.folio || "S/F",
@@ -358,19 +360,13 @@ export function useProduccion() {
                     codigoProducto: res.codigo,
                     descripcion: res.descripcion,
                     litros: parseFloat(item.litros) || 0,
-                    tipo: (item.folio || "").startsWith("V") ? "Vinílica" : "Esmalte",
+                    tipo: tipoFinal,
                     nivelCubriente: res.poderCubriente || 0,
                     procesos: res.procesos || [],
-                    detallesEnvasado: item.hijas ? item.hijas.map(h => {
-                        const capacidadStr = h.articulo.split('-')[0].replace(/^0+/, '');
-                        const envasadoReal = res.envasados.find(env => Math.abs(litrosPorEnvasado(env.id) - parseFloat(capacidadStr)) < 0.1);
-                        return {
-                            id: envasadoReal ? envasadoReal.id : null,
-                            cantidad: Number(h.cantidad),
-                            formato: capacidadStr,
-                            folioIndividual: h.folio || item.folio || "S/F"
-                        };
-                    }) : [],
+                    detallesEnvasado: item.hijas ? item.hijas.map(h => ({ 
+                        cantidad: h.cantidad, 
+                        formato: h.articulo.split('-')[0]  // ← Guarda "250", "500", "1", "4", "19"
+                    })) : [],
                     operario: "",
                     maquina: "",
                     planificador: { datosPlanificador: res.datosPlanificador || [], salidas: res.salidas || 0, existencia: res.existencia || 0, alcance: res.alcance || 0 }
@@ -378,10 +374,8 @@ export function useProduccion() {
                 todasProcesadas.push(nueva);
             }
             if (soloRetornar) return todasProcesadas;
-            const normales = todasProcesadas.filter(c => !CODIGOS_EXCLUIDOS.some(ex => normalizarCodigo(ex) === normalizarCodigo(c.codigoProducto)));
-            const especiales = todasProcesadas.filter(c => CODIGOS_EXCLUIDOS.some(ex => normalizarCodigo(ex) === normalizarCodigo(c.codigoProducto)));
-            setColaCargas(prev => ordenarCargas([...prev, ...normales]));
-            setCargasEspeciales(prev => ordenarCargas([...prev, ...especiales]));
+            setColaCargas(prev => ordenarCargas([...prev, ...todasProcesadas.filter(c => !CODIGOS_EXCLUIDOS.some(ex => normalizarCodigo(ex) === normalizarCodigo(c.codigoProducto)))]));
+            setCargasEspeciales(prev => ordenarCargas([...prev, ...todasProcesadas.filter(c => CODIGOS_EXCLUIDOS.some(ex => normalizarCodigo(ex) === normalizarCodigo(c.codigoProducto)))]));
         } catch (err) { alert("Error al procesar Excel"); }
         finally { if (!soloRetornar) setCargandoExcel(false); }
     };

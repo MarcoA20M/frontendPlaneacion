@@ -31,14 +31,15 @@ export default function ProduccionScreen() {
         cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
         rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
         cargando, totalLitrosActuales,
+        generarLotesFinales,  // ← IMPORTANTE: Agregar esta línea
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
         guardarProduccionEnBD,
-        cargarDatosPorFecha  // Función para cargar cargas de la BD por fecha
+        cargarDatosPorFecha
     } = useProduccion();
 
     // --- ESTADOS DE UI Y CONTROL ---
-    const [fechaRotacion, setFechaRotacion] = useState(new Date()); // Para rotación de personal (cambia con flechas)
-    const [fechaCargaBD, setFechaCargaBD] = useState(new Date());   // Para cargar datos de la BD (cambia con date picker)
+    const [fechaRotacion, setFechaRotacion] = useState(new Date());
+    const [fechaCargaBD, setFechaCargaBD] = useState(new Date());
     const [filtroOperario, setFiltroOperario] = useState(null);
     const [modoEsmalte, setModoEsmalte] = useState(null);
     const [mostrarEspeciales, setMostrarEspeciales] = useState(false);
@@ -50,8 +51,6 @@ export default function ProduccionScreen() {
     const [menuCargasAbierto, setMenuCargasAbierto] = useState(false);
     const [menuReporteAbierto, setMenuReporteAbierto] = useState(false);
     const [progreso, setProgreso] = useState(0);
-
-    // --- ESTADOS PARA PERFIL ---
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
 
@@ -63,15 +62,11 @@ export default function ProduccionScreen() {
     const [analizandoStock, setAnalizandoStock] = useState(false);
     const [mostrarModalInventario, setMostrarModalInventario] = useState(false);
     const [familias, setFamilias] = useState([]);
-
-    // --- ESTADO PARA EL PLANIFICADOR ---
     const [mostrarModalPlanificador, setMostrarModalPlanificador] = useState(false);
     const [datosPlanificador, setDatosPlanificador] = useState(() => {
         const guardado = localStorage.getItem("planificador_data");
         return guardado ? JSON.parse(guardado) : null;
     });
-
-
 
     // --- EFECTOS ---
     useEffect(() => {
@@ -84,30 +79,23 @@ export default function ProduccionScreen() {
         return () => document.removeEventListener("mousedown", handleClickAfuera);
     }, []);
 
-    // EFECTO PARA CARGAR DATOS DE LA BD CUANDO CAMBIA LA FECHA DEL DATE PICKER
     useEffect(() => {
         if (cargarDatosPorFecha) {
             cargarDatosPorFecha(fechaCargaBD);
         }
     }, [fechaCargaBD, cargarDatosPorFecha]);
 
-
-    // EFECTO PARA ACTUALIZAR CUANDO CAMBIA LA CONFIGURACIÓN DE OPERARIOS
     useEffect(() => {
         const handleVinilicaUpdate = () => {
-            // Forzar actualización de la UI cuando cambia la configuración
             setFechaRotacion(prev => new Date(prev));
         };
-
         window.addEventListener("vinilicaConfigUpdated", handleVinilicaUpdate);
         window.addEventListener("rotacionActualizada", handleVinilicaUpdate);
-
         return () => {
             window.removeEventListener("vinilicaConfigUpdated", handleVinilicaUpdate);
             window.removeEventListener("rotacionActualizada", handleVinilicaUpdate);
         };
     }, []);
-
 
     const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
@@ -126,38 +114,23 @@ export default function ProduccionScreen() {
         };
     }, [cargasEsmaltesAsignadas, filtroOperario]);
 
-    // --- CREAR HANDLERS ---
     const handlers = useMemo(() => {
         return createProduccionHandlers({
-            tipoPintura,
-            rondas,
-            cargasEsmaltesAsignadas,
-            cargasEspeciales,
-            setRondas,
-            setCargasEsmaltesAsignadas,
-            setCargasEspeciales,
-            setAnalizandoStock,
-            setProcesandoPdf,
-            setProcesandoReporte,
+            tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
+            setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales,
+            setAnalizandoStock, setProcesandoPdf, setProcesandoReporte,
             setAlertasInventario: (nuevasAlertas) => {
                 setAlertasInventario(prev => ({
                     ...prev,
                     [tipoPintura]: nuevasAlertas
                 }));
             },
-            setProgreso,
-            setMenuCargasAbierto,
-            setMenuReporteAbierto,
-            setDatosPlanificador,
-            setMostrarModalPlanificador,
-            setMostrarModalInventario,
-            handleImportExcel,
-            ordenarCargas,
-            fechaTrabajo: fechaRotacion  // Pasamos la fecha de rotación para los handlers
+            setProgreso, setMenuCargasAbierto, setMenuReporteAbierto,
+            setDatosPlanificador, setMostrarModalPlanificador, setMostrarModalInventario,
+            handleImportExcel, ordenarCargas, fechaTrabajo: fechaRotacion
         });
     }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
 
-    // Funciones para navegar semanas de ROTACIÓN (solo cambian los nombres de los operadores)
     const semanaAnterior = () => {
         const nuevaFecha = new Date(fechaRotacion);
         nuevaFecha.setDate(nuevaFecha.getDate() - 7);
@@ -185,7 +158,6 @@ export default function ProduccionScreen() {
 
             <div className="container">
                 <div className="header-panel">
-                    {/* Perfil */}
                     <div className="perfil-container" ref={perfilRef}>
                         <div
                             className={`perfil-icono ${menuPerfilAbierto ? 'active' : ''}`}
@@ -354,9 +326,6 @@ export default function ProduccionScreen() {
                             )}
                         </div>
 
-
-
-                        {/* CALENDARIO SELECTOR DE FECHA - PARA CARGAR DATOS DE LA BD */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="calendar-picker-container" style={{
                                 display: 'flex', alignItems: 'center', background: '#1e1e1e',
@@ -385,7 +354,7 @@ export default function ProduccionScreen() {
 
                     {tipoPintura === "Vinílica" ? (
                         <TableroVinilica
-                            key={fechaRotacion.toISOString()}  // ← ESTO ES CRUCIAL
+                            key={fechaRotacion.toISOString()}
                             rondas={rondas}
                             fechaTrabajo={fechaRotacion}
                             handleDrop={handlers.handleDrop}
@@ -430,7 +399,12 @@ export default function ProduccionScreen() {
                 onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
                 onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))}
                 onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
-                onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
+                onGenerarLotes={generarLotesFinales}  // ← IMPORTANTE: Agregar esta línea
+                onSeleccionarCarga={(carga) => {
+                    setCargaSeleccionada(carga);
+                    setMostrarDetalle(true);
+                    setMostrarModal(false);
+                }}
             />
 
             <ModalInventarioBajo
@@ -466,6 +440,12 @@ export default function ProduccionScreen() {
                     setMostrarDetalle(false);
                 }}
                 onMoverEspecial={(carga) => {
+                    const cargaEspecial = {
+                        ...carga,
+                        operario: "Lázaro",
+                        maquina: "ESPECIAL",
+                        tipo: tipoPintura
+                    };
                     setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
                     setRondas(prevRondas => prevRondas.map(f => f.map(celda => {
                         if (!celda) return null;
@@ -476,8 +456,9 @@ export default function ProduccionScreen() {
                         return celda.idTemp === carga.idTemp ? null : celda;
                     })));
                     setCargasEsmaltesAsignadas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
-                    setCargasEspeciales(prev => ordenarCargas([...prev, { ...carga, operario: "Lázaro", maquina: "ESPECIAL" }]));
+                    setCargasEspeciales(prev => ordenarCargas([...prev, cargaEspecial]));
                     setMostrarDetalle(false);
+                    setMostrarEspeciales(true);
                 }}
             />
         </div>

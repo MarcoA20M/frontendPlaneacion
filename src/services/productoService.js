@@ -14,9 +14,9 @@ export const crearProducto = async (producto) => {
   return response.data;
 };
 
-// ✅ NUEVO - Actualizar producto
-export const actualizarProducto = async (codigo, producto) => {
-  const response = await axios.put(`${API_URL}/${codigo}`, producto);
+// Actualizar producto - recibe el código original en la URL
+export const actualizarProducto = async (codigoActual, producto) => {
+  const response = await axios.put(`${API_URL}/${codigoActual}`, producto);
   return response.data;
 };
 

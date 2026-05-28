@@ -1218,3 +1218,113 @@
     color: #ff5f7e;
     cursor: pointer;
 }
+
+
+
+/* Selector con fondo degradado morado */
+select.form-input {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(192, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.4);
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Opciones con estilo moderno */
+select.form-input option {
+    background: #1a1a2e;
+    color: #e879f9;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(192, 0, 255, 0.2);
+}
+
+select.form-input option:checked {
+    background: linear-gradient(90deg, #c000ff, #7c00b3);
+    color: white;
+}
+
+/* Scrollbar personalizado para el select desplegado */
+select.form-input::-webkit-scrollbar {
+    width: 8px;
+}
+
+select.form-input::-webkit-scrollbar-track {
+    background: #1a1a2e;
+    border-radius: 4px;
+}
+
+select.form-input::-webkit-scrollbar-thumb {
+    background: #c000ff;
+    border-radius: 4px;
+}
+
+select.form-input::-webkit-scrollbar-thumb:hover {
+    background: #e879f9;
+}
+
+/* Efecto de brillo láser al hacer hover */
+select.form-input:hover {
+    animation: laserGlow 1s infinite alternate;
+}
+
+@keyframes laserGlow {
+    0% {
+        border-color: rgba(192, 0, 255, 0.5);
+        box-shadow: 0 0 5px rgba(192, 0, 255, 0.3);
+    }
+    100% {
+        border-color: rgba(0, 255, 204, 0.8);
+        box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+    }
+}
+
+
+/* Tarjetas de envasados seleccionables */
+.envasado-card-selectable {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.2s;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    position: relative;
+}
+
+.envasado-card-selectable:hover {
+    transform: translateY(-2px);
+    border-color: #c000ff;
+    box-shadow: 0 8px 20px rgba(192, 0, 255, 0.2);
+}
+
+.envasado-card-selectable.selected {
+    border: 2px solid #00ffcc;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(0, 0, 0, 0.4));
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.envasado-checkbox {
+    font-size: 20px;
+    color: #00ffcc;
+    margin-top: 8px;
+}
+
+.loading-text {
+    font-size: 12px;
+    color: #a855f7;
+    margin-left: auto;
+}
+
+
+/* Estado seleccionado para la misma tarjeta */
+.envasado-card.selected {
+    border: 2px solid #00ffcc;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(192, 0, 255, 0.2));
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.envasado-checkbox {
+    font-size: 20px;
+    color: #00ffcc;
+    margin-top: 8px;
+}

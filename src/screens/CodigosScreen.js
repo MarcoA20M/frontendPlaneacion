@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { buscarProducto, crearProducto, actualizarProducto } from "../services/productoService";
+import { familiaService } from "../services/familiaService";
+import { obtenerEnvasados } from "../services/envasadoService";
 import "../styles/codigos.css";
 
 export default function CodigosScreen() {
@@ -21,6 +23,14 @@ export default function CodigosScreen() {
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
     const [loading, setLoading] = useState(false);
 
+    // Estados para Envasados disponibles
+    const [envasadosDisponibles, setEnvasadosDisponibles] = useState([]);
+    const [cargandoEnvasados, setCargandoEnvasados] = useState(false);
+
+    // Estados para Familias
+    const [familias, setFamilias] = useState([]);
+    const [cargandoFamilias, setCargandoFamilias] = useState(false);
+
     // Estados para PRODUCTOS (nuevos productos)
     const [productos, setProductos] = useState(() => {
         const guardados = localStorage.getItem("productos_vinilica");
@@ -38,14 +48,10 @@ export default function CodigosScreen() {
         descripcion: "",
         poderCubriente: "",
         tipoPinturaId: 2,
-        envasados: [
-            { litros: 0.25, cantidad: 0 },
-            { litros: 0.5, cantidad: 0 },
-            { litros: 0.75, cantidad: 0 },
-            { litros: 1, cantidad: 0 },
-            { litros: 4, cantidad: 0 },
-            { litros: 19, cantidad: 0 }
-        ]
+        familiaId: null,
+        color: "BLANCO",
+        envasadosProducto: [],
+        envasadosSeleccionados: []
     });
 
     // Estado para nuevo envase (modo edición API)
@@ -90,6 +96,45 @@ export default function CodigosScreen() {
         };
         cargarCodigos();
     }, []);
+
+    // ========== CARGAR ENVASADOS DISPONIBLES ==========
+    useEffect(() => {
+        const cargarEnvasados = async () => {
+            setCargandoEnvasados(true);
+            try {
+                const data = await obtenerEnvasados();
+                setEnvasadosDisponibles(data);
+                console.log("📦 Envasados disponibles:", data);
+            } catch (error) {
+                console.error("Error cargando envasados:", error);
+            } finally {
+                setCargandoEnvasados(false);
+            }
+        };
+        cargarEnvasados();
+    }, []);
+
+    // ========== CARGAR FAMILIAS SEGÚN SECCIÓN ACTIVA ==========
+    useEffect(() => {
+        const cargarFamilias = async () => {
+            setCargandoFamilias(true);
+            try {
+                let tipo = "";
+                if (seccionActiva === "vinilicas") {
+                    tipo = "vinilica";
+                } else if (seccionActiva === "esmaltes") {
+                    tipo = "esmalte";
+                }
+                if (tipo) {
+                    const data = await familiaService.getFamiliasPorTipo(tipo);
+                    setFamilias(data);
+                }
+            } finally {
+                setCargandoFamilias(false);
+            }
+        };
+        cargarFamilias();
+    }, [seccionActiva]);
 
     useEffect(() => {
         if (codigos.length > 0) {
@@ -150,47 +195,37 @@ export default function CodigosScreen() {
         try {
             const producto = await buscarProducto(codigoBusqueda.trim());
             console.log("✅ Producto encontrado:", producto);
+
             setProductoEditandoId(producto.codigo);
+            setProductoOriginal(producto);
 
             const envasadosAPI = producto.envasados || [];
-            console.log("📦 Envasados de API:", envasadosAPI);
-
-            const envasadosFormateados = [];
-
-            if (envasadosAPI.length > 0) {
-                envasadosAPI.forEach(env => {
-                    const articuloParts = env.articulo.split('-');
-                    let litros = parseInt(articuloParts[0]);
-
-                    // Mapeo especial para códigos específicos
-                    if (litros === 500) litros = 0.5;
-                    if (litros === 250) litros = 0.25;
-                    if (litros === 750) litros = 0.75;
-
-                    envasadosFormateados.push({
-                        litros: litros,
-                        cantidad: 1,
-                        articulo: env.articulo,
-                        id: env.id
-                    });
-                });
-            }
-
-            // Ordenar por litros (menor a mayor)
-            envasadosFormateados.sort((a, b) => a.litros - b.litros);
-
-            console.log("📦 Envasados formateados:", envasadosFormateados);
+            const envasadosFormateados = envasadosAPI.map(env => {
+                const articuloParts = env.articulo.split('-');
+                let litros = parseInt(articuloParts[0]);
+                if (litros === 500) litros = 0.5;
+                if (litros === 250) litros = 0.25;
+                if (litros === 750) litros = 0.75;
+                return {
+                    litros: litros,
+                    cantidad: 1,
+                    articulo: env.articulo,
+                    id: env.id
+                };
+            }).sort((a, b) => a.litros - b.litros);
 
             setFormProducto({
                 codigo: producto.codigo,
                 descripcion: producto.descripcion,
                 poderCubriente: producto.poderCubriente || "",
                 tipoPinturaId: producto.tipoPinturaId || 2,
-                envasados: envasadosFormateados
+                familiaId: producto.familiaId,
+                color: producto.color || "BLANCO",
+                envasadosProducto: envasadosFormateados,
+                envasadosSeleccionados: []
             });
 
             setModoEdicionAPI(true);
-            setProductoEditandoId(producto.codigo);
             setCodigoBusqueda("");
             setMostrarFormNuevoEnvase(false);
 
@@ -213,8 +248,17 @@ export default function CodigosScreen() {
         const litros = parseFloat(nuevoEnvase.litros);
         const articulo = nuevoEnvase.articulo.trim() || generarArticulo(litros, formProducto.codigo);
 
-        if (formProducto.envasados.some(e => e.litros === litros)) {
+        const yaExiste = [...formProducto.envasadosProducto, ...formProducto.envasadosSeleccionados]
+            .some(e => e.litros === litros);
+        
+        if (yaExiste) {
             mostrarMensaje(`Ya existe un envase de ${litros} litros`, "error");
+            return;
+        }
+
+        const envasadoEncontrado = envasadosDisponibles.find(e => e.id === litros);
+        if (!envasadoEncontrado) {
+            mostrarMensaje(`No existe un envase de ${litros} litros en el catálogo`, "error");
             return;
         }
 
@@ -222,81 +266,102 @@ export default function CodigosScreen() {
             litros: litros,
             cantidad: 1,
             articulo: articulo,
+            id: envasadoEncontrado.id,
             esNuevo: true
         };
 
-        const nuevosEnvasados = [...formProducto.envasados, nuevoEnvaseObj];
-        nuevosEnvasados.sort((a, b) => a.litros - b.litros);
-
-        setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
+        setFormProducto({
+            ...formProducto,
+            envasadosSeleccionados: [...formProducto.envasadosSeleccionados, nuevoEnvaseObj]
+        });
         setNuevoEnvase({ litros: "", articulo: "" });
         setMostrarFormNuevoEnvase(false);
         mostrarMensaje(`Envase de ${litros} litros agregado`, "success");
     };
 
-    // ========== ELIMINAR ENVASE ==========
-    const eliminarEnvase = (litros) => {
+    // ========== ELIMINAR ENVASE EXISTENTE ==========
+    const eliminarEnvaseExistente = (litros) => {
         if (window.confirm(`¿Eliminar el envase de ${litros} litros?`)) {
-            const nuevosEnvasados = formProducto.envasados.filter(e => e.litros !== litros);
-            setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
-            mostrarMensaje(`Envase de ${litros} litros eliminado`, "success");
+            const nuevosEnvasadosProducto = formProducto.envasadosProducto.filter(e => e.litros !== litros);
+            setFormProducto({ ...formProducto, envasadosProducto: nuevosEnvasadosProducto });
+            mostrarMensaje(`Envase de ${litros} litros eliminado del producto`, "success");
         }
     };
 
-   const guardarProductoEnAPI = async () => {
-    if (!formProducto.codigo.trim()) {
-        mostrarMensaje("Ingresa un código de producto válido", "error");
-        return;
-    }
-    if (!formProducto.descripcion.trim()) {
-        mostrarMensaje("Ingresa una descripción del producto", "error");
-        return;
-    }
+    // ========== ELIMINAR ENVASE SELECCIONADO ==========
+    const eliminarEnvaseSeleccionado = (litros) => {
+        const nuevosSeleccionados = formProducto.envasadosSeleccionados.filter(e => e.litros !== litros);
+        setFormProducto({ ...formProducto, envasadosSeleccionados: nuevosSeleccionados });
+        mostrarMensaje(`Envase de ${litros} litros removido`, "success");
+    };
 
-    setLoading(true);
-
-    try {
-        // TEMPORAL: enviar array vacío para envasados hasta resolver el backend
-        const envasadosParaAPI = []; 
-
-        let poder = formProducto.poderCubriente;
-        if (poder === "" || poder === undefined) {
-            poder = null;
-        } else {
-            poder = parseInt(poder);
-            if (isNaN(poder)) poder = null;
+    // ========== GUARDAR PRODUCTO EN API ==========
+    const guardarProductoEnAPI = async () => {
+        if (!formProducto.codigo.trim()) {
+            mostrarMensaje("Ingresa un código de producto válido", "error");
+            return;
+        }
+        if (!formProducto.descripcion.trim()) {
+            mostrarMensaje("Ingresa una descripción del producto", "error");
+            return;
         }
 
-        const productoParaAPI = {
-            codigo: formProducto.codigo.trim().toUpperCase(),
-            descripcion: formProducto.descripcion,
-            poderCubriente: poder,
-            tipoPinturaId: 2,
-            familiaId: 17, // Agrega este campo si tu backend lo requiere
-            envasados: envasadosParaAPI // Vacío
-        };
+        setLoading(true);
 
-        console.log("📦 Enviando a API:", productoParaAPI);
+        try {
+            const codigo = formProducto.codigo.trim().toUpperCase();
+            const familiaId = formProducto.familiaId;
 
-        let resultado;
-        if (modoEdicionAPI && productoEditandoId) {
-            resultado = await actualizarProducto(formProducto.codigo, productoParaAPI);
-            mostrarMensaje(`✅ Producto "${formProducto.codigo}" actualizado en la API`, "success");
-        } else {
-            resultado = await crearProducto(productoParaAPI);
-            mostrarMensaje(`✅ Producto "${formProducto.codigo}" creado en la API`, "success");
+            const todosLosEnvasados = [...formProducto.envasadosProducto, ...formProducto.envasadosSeleccionados];
+
+            if (todosLosEnvasados.length === 0) {
+                mostrarMensaje("El producto debe tener al menos un envase", "error");
+                setLoading(false);
+                return;
+            }
+
+            let poder = formProducto.poderCubriente;
+            if (poder === "" || poder === undefined) {
+                poder = null;
+            } else {
+                poder = parseInt(poder);
+                if (isNaN(poder)) poder = null;
+            }
+
+            const envasadosParaAPI = todosLosEnvasados.map(envase => ({
+                envasadoId: envase.id,
+                articulo: envase.articulo || `${String(envase.id).padStart(3, '0')}-${codigo}`,
+                descripcion: `${formProducto.descripcion} BOTE ${envase.litros} L`
+            }));
+
+            const productoParaAPI = {
+                codigo: codigo,
+                descripcion: formProducto.descripcion,
+                poderCubriente: poder,
+                tipoPinturaId: 2,
+                familiaId: familiaId,
+                color: formProducto.color,
+                envasados: envasadosParaAPI
+            };
+
+            let resultado;
+            if (modoEdicionAPI && productoEditandoId) {
+                resultado = await actualizarProducto(codigo, productoParaAPI);
+                mostrarMensaje(`✅ Producto "${codigo}" actualizado`, "success");
+            } else {
+                resultado = await crearProducto(productoParaAPI);
+                mostrarMensaje(`✅ Producto "${codigo}" creado en la API`, "success");
+            }
+
+            limpiarFormulario();
+        } catch (error) {
+            console.error("❌ Error guardando producto:", error);
+            const mensajeError = error.response?.data?.error || error.response?.data?.message || error.message;
+            mostrarMensaje(`❌ ${mensajeError}`, "error");
+        } finally {
+            setLoading(false);
         }
-
-        console.log("Respuesta:", resultado);
-        limpiarFormulario();
-    } catch (error) {
-        console.error("❌ Error guardando producto:", error);
-        const mensajeError = error.response?.data?.error || error.response?.data?.message || error.message;
-        mostrarMensaje(`❌ ${mensajeError}`, "error");
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     // ========== LIMPIAR FORMULARIO ==========
     const limpiarFormulario = () => {
@@ -305,14 +370,10 @@ export default function CodigosScreen() {
             descripcion: "",
             poderCubriente: "",
             tipoPinturaId: 2,
-            envasados: [
-                { litros: 0.25, cantidad: 0 },
-                { litros: 0.5, cantidad: 0 },
-                { litros: 0.75, cantidad: 0 },
-                { litros: 1, cantidad: 0 },
-                { litros: 4, cantidad: 0 },
-                { litros: 19, cantidad: 0 }
-            ]
+            familiaId: null,
+            color: "BLANCO",
+            envasadosProducto: [],
+            envasadosSeleccionados: []
         });
         setModoEdicionAPI(false);
         setProductoEditandoId(null);
@@ -385,15 +446,6 @@ export default function CodigosScreen() {
     const codigosFiltrados = codigos.filter(codigo =>
         codigo.toLowerCase().includes(filtro.toLowerCase())
     );
-
-    // ========== CRUD PRODUCTOS LOCALES EN TABLA ==========
-    const eliminarProducto = (id) => {
-        const producto = productos.find(p => p.id === id);
-        if (window.confirm(`¿Eliminar el producto "${producto.codigo}"?`)) {
-            setProductos(productos.filter(p => p.id !== id));
-            mostrarMensaje(`Producto "${producto.codigo}" eliminado`);
-        }
-    };
 
     const iniciarEdicionProducto = (producto) => {
         setEditandoProducto({ ...producto });
@@ -519,7 +571,7 @@ export default function CodigosScreen() {
         }
     };
 
-    // Renderizado condicional según la sección activa
+    // ========== RENDERIZADO PRINCIPAL ==========
     const renderContenido = () => {
         if (seccionActiva === "vinilicas") {
             if (subSeccionVinilicas === "excluidos") {
@@ -696,9 +748,10 @@ export default function CodigosScreen() {
                                             placeholder="Ej: PROD-001"
                                             value={formProducto.codigo}
                                             onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
+                                            disabled={modoEdicionAPI}
                                         />
                                         <span className="input-hint">
-                                            {modoEdicionAPI ? "Puedes modificar el código" : "Código único identificador"}
+                                            {modoEdicionAPI ? "El código no se puede modificar" : "Código único identificador"}
                                         </span>
                                     </div>
 
@@ -720,38 +773,118 @@ export default function CodigosScreen() {
                                     </div>
                                 </div>
 
-                                {modoEdicionAPI && formProducto.poderCubriente && (
-                                    <div className="info-box-producto-api">
-                                        <div className="info-row">
-                                            <span>💪 Poder Cubriente:</span>
-                                            <strong>{formProducto.poderCubriente}</strong>
+                                <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">💪</span>
+                                            Poder Cubriente
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="form-input"
+                                            placeholder="Ej: 36"
+                                            value={formProducto.poderCubriente}
+                                            onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
+                                        />
+                                        <span className="input-hint">
+                                            Poder cubriente del producto (m² por litro)
+                                        </span>
+                                    </div>
+
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">🏷️</span>
+                                            Familia
+                                        </label>
+                                        <select
+                                            className="form-input select-familia"
+                                            value={formProducto.familiaId || ""}
+                                            onChange={(e) => setFormProducto({ ...formProducto, familiaId: e.target.value ? parseInt(e.target.value) : null })}
+                                            disabled={cargandoFamilias}
+                                        >
+                                            <option value="">-- Seleccionar familia --</option>
+                                            {familias.map(familia => (
+                                                <option key={familia.id} value={familia.id}>
+                                                    {familia.nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <span className="input-hint">
+                                            {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Campo COLOR */}
+                                <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">🎨</span>
+                                            Color
+                                        </label>
+                                        <select
+                                            className="form-input"
+                                            value={formProducto.color}
+                                            onChange={(e) => setFormProducto({ ...formProducto, color: e.target.value })}
+                                        >
+                                            <option value="BLANCO">BLANCO</option>
+                                            <option value="TRANSPARENTE">TRANSPARENTE</option>
+                                            <option value="NEGRO">NEGRO</option>
+                                            <option value="ROJO">ROJO</option>
+                                            <option value="AZUL">AZUL</option>
+                                            <option value="VERDE">VERDE</option>
+                                            <option value="AMARILLO">AMARILLO</option>
+                                        </select>
+                                        <span className="input-hint">Color del producto</span>
+                                    </div>
+                                </div>
+
+                                {/* ENVASADOS EXISTENTES DEL PRODUCTO */}
+                                {modoEdicionAPI && formProducto.envasadosProducto.length > 0 && (
+                                    <div className="envasados-section">
+                                        <div className="envasados-header">
+                                            <span className="envasados-icon">📦</span>
+                                            <h4>Envasados del Producto</h4>
+                                            <span className="envasados-badge">
+                                                {formProducto.envasadosProducto.length} envases
+                                            </span>
                                         </div>
-                                        <div className="info-row">
-                                            <span>🏷️ Tipo Pintura ID:</span>
-                                            <strong>{formProducto.tipoPinturaId}</strong>
+                                        <div className="envasados-grid-modern">
+                                            {formProducto.envasadosProducto.map((env, idx) => (
+                                                <div key={idx} className="envasado-card">
+                                                    <div className="envasado-litros">{env.litros} <span>L</span></div>
+                                                    {env.articulo && <div className="envasado-articulo">{env.articulo}</div>}
+                                                    <div className="envasado-acciones-top">
+                                                        <button
+                                                            className="btn-eliminar-envase-icon"
+                                                            onClick={() => eliminarEnvaseExistente(env.litros)}
+                                                            title="Eliminar envase"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
 
-                                {/* ENVASADOS EDITABLES */}
+                                {/* ENVASADOS SELECCIONABLES PARA AGREGAR */}
                                 <div className="envasados-section">
                                     <div className="envasados-header">
                                         <span className="envasados-icon">📦</span>
-                                        <h4>Configuración de Envasados</h4>
+                                        <h4>Agregar Envasados</h4>
                                         <span className="envasados-badge">
-                                            {modoEdicionAPI ? `Desde API (${formProducto.envasados.length} envases)` : "Cantidades disponibles"}
+                                            {formProducto.envasadosSeleccionados.length} seleccionados
                                         </span>
-                                        {modoEdicionAPI && (
-                                            <button
-                                                className="btn-agregar-envase"
-                                                onClick={() => setMostrarFormNuevoEnvase(!mostrarFormNuevoEnvase)}
-                                            >
-                                                + Agregar Envase
-                                            </button>
-                                        )}
+                                        <button
+                                            className="btn-agregar-envase"
+                                            onClick={() => setMostrarFormNuevoEnvase(!mostrarFormNuevoEnvase)}
+                                        >
+                                            + Agregar Envase
+                                        </button>
                                     </div>
 
-                                    {/* Formulario para nuevo envase */}
                                     {mostrarFormNuevoEnvase && (
                                         <div className="nuevo-envase-form">
                                             <div className="nuevo-envase-inputs">
@@ -779,53 +912,58 @@ export default function CodigosScreen() {
                                     )}
 
                                     <div className="envasados-grid-modern">
-                                        {formProducto.envasados.map((env, idx) => (
-                                            <div key={idx} className="envasado-card">
-                                                {modoEdicionAPI && (
-                                                    <div className="envasado-acciones-top">
-                                                        <button
-                                                            className="btn-eliminar-envase-icon"
-                                                            onClick={() => eliminarEnvase(env.litros)}
-                                                            title="Eliminar envase"
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                )}
-                                                <div className="envasado-litros">{env.litros} <span>L</span></div>
-                                                {modoEdicionAPI && env.articulo && (
-                                                    <div className="envasado-articulo">{env.articulo}</div>
-                                                )}
-                                                {!modoEdicionAPI && (
-                                                    <>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            className="envasado-input-modern"
-                                                            value={env.cantidad}
-                                                            placeholder="0"
-                                                            onChange={(e) => {
-                                                                const nuevosEnvasados = [...formProducto.envasados];
-                                                                nuevosEnvasados[idx].cantidad = parseInt(e.target.value) || 0;
-                                                                setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
-                                                            }}
-                                                        />
-                                                        <div className="envasado-unidad">unidades</div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        ))}
+                                        {envasadosDisponibles.map((envase) => {
+                                            const yaTiene = formProducto.envasadosProducto.some(e => e.id === envase.id);
+                                            const estaSeleccionado = formProducto.envasadosSeleccionados.some(e => e.id === envase.id);
+                                            
+                                            if (yaTiene) return null;
+                                            
+                                            return (
+                                                <div
+                                                    key={envase.id}
+                                                    className={`envasado-card ${estaSeleccionado ? 'selected' : ''}`}
+                                                    onClick={() => {
+                                                        let nuevosSeleccionados;
+                                                        if (estaSeleccionado) {
+                                                            nuevosSeleccionados = formProducto.envasadosSeleccionados.filter(e => e.id !== envase.id);
+                                                        } else {
+                                                            const nuevoEnvaseObj = {
+                                                                id: envase.id,
+                                                                litros: envase.id,
+                                                                cantidad: 1,
+                                                                articulo: `${String(envase.id).padStart(3, '0')}-${formProducto.codigo || 'XXX'}`,
+                                                            };
+                                                            nuevosSeleccionados = [...formProducto.envasadosSeleccionados, nuevoEnvaseObj];
+                                                        }
+                                                        setFormProducto({ ...formProducto, envasadosSeleccionados: nuevosSeleccionados });
+                                                    }}
+                                                >
+                                                    <div className="envasado-litros">{envase.id} <span>L</span></div>
+                                                    {estaSeleccionado && <div className="envasado-checkbox">✓</div>}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
 
-                                    {formProducto.envasados.length === 0 && modoEdicionAPI && (
-                                        <div className="envasados-empty">
-                                            ⚠️ No hay envases configurados. Haz clic en "+ Agregar Envase" para añadir.
-                                        </div>
-                                    )}
-
-                                    {modoEdicionAPI && formProducto.envasados.length > 0 && (
-                                        <div className="envasados-api-note">
-                                            💡 Puedes eliminar envases con el botón 🗑️ o agregar nuevos
+                                    {formProducto.envasadosSeleccionados.length > 0 && (
+                                        <div className="envasados-seleccionados-list">
+                                            <h4>Envasados a agregar:</h4>
+                                            <div className="envasados-grid-modern">
+                                                {formProducto.envasadosSeleccionados.map((env, idx) => (
+                                                    <div key={idx} className="envasado-card">
+                                                        <div className="envasado-litros">{env.litros} <span>L</span></div>
+                                                        <div className="envasado-acciones-top">
+                                                            <button
+                                                                className="btn-eliminar-envase-icon"
+                                                                onClick={() => eliminarEnvaseSeleccionado(env.litros)}
+                                                                title="Remover"
+                                                            >
+                                                                ✖
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -839,122 +977,6 @@ export default function CodigosScreen() {
                                     {loading ? "Guardando..." : (modoEdicionAPI ? "Actualizar en API" : "Crear Producto en API")}
                                     {!loading && !modoEdicionAPI && <span className="btn-arrow">→</span>}
                                 </button>
-                            </div>
-                        </div>
-
-                        {/* TABLA DE PRODUCTOS LOCALES (respaldo) */}
-                        <div className="cod-card table-card">
-                            <div className="card-header-flex">
-                                <h3 className="cod-card-title">📦 PRODUCTOS LOCALES (respaldo)</h3>
-                                <span className="count-badge">{productos.length} productos</span>
-                            </div>
-
-                            <div className="search-box" style={{ marginBottom: '16px' }}>
-                                <input
-                                    type="text"
-                                    placeholder="Filtrar productos locales..."
-                                    value={filtroProductos}
-                                    onChange={(e) => setFiltroProductos(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="cod-table-wrapper">
-                                <table className="cod-table productos-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Código</th>
-                                            <th>Descripción</th>
-                                            <th>Envasados</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {productosFiltrados.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="4" className="empty-state">
-                                                    {filtroProductos ? "No se encontraron productos" : "No hay productos locales registrados"}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            productosFiltrados.map((producto) => (
-                                                <tr key={producto.id}>
-                                                    <td>
-                                                        {editandoProducto?.id === producto.id ? (
-                                                            <input
-                                                                type="text"
-                                                                className="edit-input"
-                                                                value={editandoProducto.codigo}
-                                                                onChange={(e) => setEditandoProducto({ ...editandoProducto, codigo: e.target.value.toUpperCase() })}
-                                                            />
-                                                        ) : (
-                                                            <span className="codigo-value">{producto.codigo}</span>
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        {editandoProducto?.id === producto.id ? (
-                                                            <input
-                                                                type="text"
-                                                                className="edit-input-desc"
-                                                                value={editandoProducto.descripcion}
-                                                                onChange={(e) => setEditandoProducto({ ...editandoProducto, descripcion: e.target.value })}
-                                                            />
-                                                        ) : (
-                                                            <span>{producto.descripcion}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="envasados-cell">
-                                                        {editandoProducto?.id === producto.id ? (
-                                                            <div className="envasados-edit">
-                                                                {producto.envasados.map((env, idx) => (
-                                                                    <div key={idx} className="envasado-edit-item">
-                                                                        <span>{env.litros}L:</span>
-                                                                        <input
-                                                                            type="number"
-                                                                            min="0"
-                                                                            value={editandoProducto.envasados.find(e => e.litros === env.litros)?.cantidad || 0}
-                                                                            onChange={(e) => {
-                                                                                const nuevosEnvasados = editandoProducto.envasados.map(ev =>
-                                                                                    ev.litros === env.litros ? { ...ev, cantidad: parseInt(e.target.value) || 0 } : ev
-                                                                                );
-                                                                                setEditandoProducto({ ...editandoProducto, envasados: nuevosEnvasados });
-                                                                            }}
-                                                                        />
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="envasados-list">
-                                                                {producto.envasados?.map((env, idx) => (
-                                                                    <span key={idx} className="envasado-badge">
-                                                                        {env.litros}L: {env.cantidad}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td className="actions-cell">
-                                                        {editandoProducto?.id === producto.id ? (
-                                                            <>
-                                                                <button className="action-btn save" onClick={guardarEdicionProducto}>💾</button>
-                                                                <button className="action-btn cancel" onClick={() => setEditandoProducto(null)}>✖</button>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <button className="action-btn edit" onClick={() => iniciarEdicionProducto(producto)}>✏️</button>
-                                                                <button className="action-btn delete" onClick={() => eliminarProducto(producto.id)}>🗑️</button>
-                                                            </>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="info-box">
-                                <strong>ℹ️ Nota:</strong> Los productos guardados en la API se reflejarán al buscarlos nuevamente.
-                                Esta tabla es solo para productos guardados localmente (respaldo).
                             </div>
                         </div>
                     </>

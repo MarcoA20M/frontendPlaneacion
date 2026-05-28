@@ -1,10 +1,22 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/productos";
-const ENVASADOS_URL = "http://localhost:8080/api/envasados"; // La ruta de tu nuevo Controller
+const ENVASADOS_URL = "http://localhost:8080/api/envasados";
 
 export const buscarProducto = async (codigo) => {
   const response = await axios.get(`${API_URL}/${codigo}`);
+  return response.data;
+};
+
+// ✅ NUEVO - Crear producto
+export const crearProducto = async (producto) => {
+  const response = await axios.post(`${API_URL}`, producto);
+  return response.data;
+};
+
+// ✅ NUEVO - Actualizar producto
+export const actualizarProducto = async (codigo, producto) => {
+  const response = await axios.put(`${API_URL}/${codigo}`, producto);
   return response.data;
 };
 
@@ -14,9 +26,12 @@ export const productoService = {
     return res.data;
   },
 
-  // ESTA ES LA FUNCIÓN QUE NECESITAS LLAMAR
   getEnvasadosPorProducto: async (productoId) => {
     const res = await axios.get(`${ENVASADOS_URL}/producto/${productoId}`);
     return res.data;
-  }
+  },
+
+  // ✅ Agregar al service
+  crearProducto: crearProducto,
+  actualizarProducto: actualizarProducto
 };

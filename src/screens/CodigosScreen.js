@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { buscarProducto, crearProducto, actualizarProducto } from "../services/productoService";
 import "../styles/codigos.css";
 
 export default function CodigosScreen() {
     const navigate = useNavigate();
-    
+
     // Estado para la pestaña activa en la barra lateral
     const [seccionActiva, setSeccionActiva] = useState("vinilicas");
-    
+
     // Estado para el submenú de Vinílicas
     const [subSeccionVinilicas, setSubSeccionVinilicas] = useState("excluidos");
-    
+
     // Estados para Códigos Excluidos (Vinílicas)
     const [codigos, setCodigos] = useState([]);
     const [nuevoCodigo, setNuevoCodigo] = useState("");
@@ -18,16 +19,25 @@ export default function CodigosScreen() {
     const [editandoValor, setEditandoValor] = useState("");
     const [filtro, setFiltro] = useState("");
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
-    
+    const [loading, setLoading] = useState(false);
+
     // Estados para PRODUCTOS (nuevos productos)
     const [productos, setProductos] = useState(() => {
         const guardados = localStorage.getItem("productos_vinilica");
         return guardados ? JSON.parse(guardados) : [];
     });
-    
-    const [nuevoProducto, setNuevoProducto] = useState({
+
+    // Estado para saber si estamos editando un producto de API
+    const [modoEdicionAPI, setModoEdicionAPI] = useState(false);
+    const [productoEditandoId, setProductoEditandoId] = useState(null);
+    const [productoOriginal, setProductoOriginal] = useState(null);
+
+    // Estado del formulario de producto (unificado)
+    const [formProducto, setFormProducto] = useState({
         codigo: "",
         descripcion: "",
+        poderCubriente: "",
+        tipoPinturaId: 2,
         envasados: [
             { litros: 0.25, cantidad: 0 },
             { litros: 0.5, cantidad: 0 },
@@ -37,10 +47,15 @@ export default function CodigosScreen() {
             { litros: 19, cantidad: 0 }
         ]
     });
-    
+
+    // Estado para nuevo envase (modo edición API)
+    const [nuevoEnvase, setNuevoEnvase] = useState({ litros: "", articulo: "" });
+    const [mostrarFormNuevoEnvase, setMostrarFormNuevoEnvase] = useState(false);
+
     const [editandoProducto, setEditandoProducto] = useState(null);
     const [filtroProductos, setFiltroProductos] = useState("");
-    
+    const [codigoBusqueda, setCodigoBusqueda] = useState("");
+
     // Estados para Códigos Especiales (Esmaltes)
     const [codigosEspeciales, setCodigosEspeciales] = useState(() => {
         const guardados = localStorage.getItem("codigos_especiales");
@@ -50,7 +65,7 @@ export default function CodigosScreen() {
             { id: 3, codigo: "ESP-003", descripcion: "Urgente Producción", activo: true },
         ];
     });
-    
+
     const [nuevoEspecial, setNuevoEspecial] = useState({ codigo: "", descripcion: "" });
     const [editandoEspecial, setEditandoEspecial] = useState(null);
     const [filtroEspeciales, setFiltroEspeciales] = useState("");
@@ -85,7 +100,7 @@ export default function CodigosScreen() {
         }
     }, [codigos]);
 
-    // ========== PRODUCTOS (VINÍLICAS) ==========
+    // ========== PRODUCTOS (VINÍLICAS - LOCAL) ==========
     useEffect(() => {
         if (productos.length > 0) {
             localStorage.setItem("productos_vinilica", JSON.stringify(productos));
@@ -107,6 +122,205 @@ export default function CodigosScreen() {
         setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
     };
 
+    // Función para formatear litros a string de 3 dígitos
+    const formatearLitros = (litros) => {
+        if (litros === 0.5) return "050";
+        if (litros === 0.25) return "025";
+        if (litros === 0.75) return "075";
+        const str = litros.toString();
+        return str.padStart(3, '0');
+    };
+
+    // Función para generar artículo
+    const generarArticulo = (litros, codigoProducto) => {
+        const litrosStr = formatearLitros(litros);
+        return `${litrosStr}-${codigoProducto}`;
+    };
+
+    // ========== FUNCIÓN PARA BUSCAR PRODUCTO EN API Y CARGAR EN FORMULARIO ==========
+    const buscarYCargarProducto = async () => {
+        if (!codigoBusqueda.trim()) {
+            mostrarMensaje("Ingresa un código para buscar", "error");
+            return;
+        }
+
+        setLoading(true);
+        console.log("🔍 Buscando producto en API:", codigoBusqueda);
+
+        try {
+            const producto = await buscarProducto(codigoBusqueda.trim());
+            console.log("✅ Producto encontrado:", producto);
+            setProductoEditandoId(producto.codigo);
+
+            const envasadosAPI = producto.envasados || [];
+            console.log("📦 Envasados de API:", envasadosAPI);
+
+            const envasadosFormateados = [];
+
+            if (envasadosAPI.length > 0) {
+                envasadosAPI.forEach(env => {
+                    const articuloParts = env.articulo.split('-');
+                    let litros = parseInt(articuloParts[0]);
+
+                    // Mapeo especial para códigos específicos
+                    if (litros === 500) litros = 0.5;
+                    if (litros === 250) litros = 0.25;
+                    if (litros === 750) litros = 0.75;
+
+                    envasadosFormateados.push({
+                        litros: litros,
+                        cantidad: 1,
+                        articulo: env.articulo,
+                        id: env.id
+                    });
+                });
+            }
+
+            // Ordenar por litros (menor a mayor)
+            envasadosFormateados.sort((a, b) => a.litros - b.litros);
+
+            console.log("📦 Envasados formateados:", envasadosFormateados);
+
+            setFormProducto({
+                codigo: producto.codigo,
+                descripcion: producto.descripcion,
+                poderCubriente: producto.poderCubriente || "",
+                tipoPinturaId: producto.tipoPinturaId || 2,
+                envasados: envasadosFormateados
+            });
+
+            setModoEdicionAPI(true);
+            setProductoEditandoId(producto.codigo);
+            setCodigoBusqueda("");
+            setMostrarFormNuevoEnvase(false);
+
+            mostrarMensaje(`Producto "${producto.codigo}" cargado para editar`, "success");
+        } catch (error) {
+            console.error("❌ Error buscando producto:", error);
+            mostrarMensaje(`No se encontró el producto "${codigoBusqueda}"`, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ========== AGREGAR NUEVO ENVASE ==========
+    const agregarEnvase = () => {
+        if (!nuevoEnvase.litros || nuevoEnvase.litros <= 0) {
+            mostrarMensaje("Ingresa una cantidad de litros válida", "error");
+            return;
+        }
+
+        const litros = parseFloat(nuevoEnvase.litros);
+        const articulo = nuevoEnvase.articulo.trim() || generarArticulo(litros, formProducto.codigo);
+
+        if (formProducto.envasados.some(e => e.litros === litros)) {
+            mostrarMensaje(`Ya existe un envase de ${litros} litros`, "error");
+            return;
+        }
+
+        const nuevoEnvaseObj = {
+            litros: litros,
+            cantidad: 1,
+            articulo: articulo,
+            esNuevo: true
+        };
+
+        const nuevosEnvasados = [...formProducto.envasados, nuevoEnvaseObj];
+        nuevosEnvasados.sort((a, b) => a.litros - b.litros);
+
+        setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
+        setNuevoEnvase({ litros: "", articulo: "" });
+        setMostrarFormNuevoEnvase(false);
+        mostrarMensaje(`Envase de ${litros} litros agregado`, "success");
+    };
+
+    // ========== ELIMINAR ENVASE ==========
+    const eliminarEnvase = (litros) => {
+        if (window.confirm(`¿Eliminar el envase de ${litros} litros?`)) {
+            const nuevosEnvasados = formProducto.envasados.filter(e => e.litros !== litros);
+            setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
+            mostrarMensaje(`Envase de ${litros} litros eliminado`, "success");
+        }
+    };
+
+   const guardarProductoEnAPI = async () => {
+    if (!formProducto.codigo.trim()) {
+        mostrarMensaje("Ingresa un código de producto válido", "error");
+        return;
+    }
+    if (!formProducto.descripcion.trim()) {
+        mostrarMensaje("Ingresa una descripción del producto", "error");
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        // TEMPORAL: enviar array vacío para envasados hasta resolver el backend
+        const envasadosParaAPI = []; 
+
+        let poder = formProducto.poderCubriente;
+        if (poder === "" || poder === undefined) {
+            poder = null;
+        } else {
+            poder = parseInt(poder);
+            if (isNaN(poder)) poder = null;
+        }
+
+        const productoParaAPI = {
+            codigo: formProducto.codigo.trim().toUpperCase(),
+            descripcion: formProducto.descripcion,
+            poderCubriente: poder,
+            tipoPinturaId: 2,
+            familiaId: 17, // Agrega este campo si tu backend lo requiere
+            envasados: envasadosParaAPI // Vacío
+        };
+
+        console.log("📦 Enviando a API:", productoParaAPI);
+
+        let resultado;
+        if (modoEdicionAPI && productoEditandoId) {
+            resultado = await actualizarProducto(formProducto.codigo, productoParaAPI);
+            mostrarMensaje(`✅ Producto "${formProducto.codigo}" actualizado en la API`, "success");
+        } else {
+            resultado = await crearProducto(productoParaAPI);
+            mostrarMensaje(`✅ Producto "${formProducto.codigo}" creado en la API`, "success");
+        }
+
+        console.log("Respuesta:", resultado);
+        limpiarFormulario();
+    } catch (error) {
+        console.error("❌ Error guardando producto:", error);
+        const mensajeError = error.response?.data?.error || error.response?.data?.message || error.message;
+        mostrarMensaje(`❌ ${mensajeError}`, "error");
+    } finally {
+        setLoading(false);
+    }
+};
+
+    // ========== LIMPIAR FORMULARIO ==========
+    const limpiarFormulario = () => {
+        setFormProducto({
+            codigo: "",
+            descripcion: "",
+            poderCubriente: "",
+            tipoPinturaId: 2,
+            envasados: [
+                { litros: 0.25, cantidad: 0 },
+                { litros: 0.5, cantidad: 0 },
+                { litros: 0.75, cantidad: 0 },
+                { litros: 1, cantidad: 0 },
+                { litros: 4, cantidad: 0 },
+                { litros: 19, cantidad: 0 }
+            ]
+        });
+        setModoEdicionAPI(false);
+        setProductoEditandoId(null);
+        setProductoOriginal(null);
+        setMostrarFormNuevoEnvase(false);
+        setNuevoEnvase({ litros: "", articulo: "" });
+    };
+
     // ========== CRUD CÓDIGOS EXCLUIDOS ==========
     const agregarCodigo = () => {
         if (!nuevoCodigo.trim()) {
@@ -115,7 +329,7 @@ export default function CodigosScreen() {
         }
 
         const codigoUpper = nuevoCodigo.trim().toUpperCase();
-        
+
         if (codigos.includes(codigoUpper)) {
             mostrarMensaje(`El código "${codigoUpper}" ya existe`, "error");
             return;
@@ -146,19 +360,19 @@ export default function CodigosScreen() {
 
         const nuevoValor = editandoValor.trim().toUpperCase();
         const indice = codigos.indexOf(editandoId);
-        
+
         if (indice !== -1) {
             if (codigos.includes(nuevoValor) && nuevoValor !== editandoId) {
                 mostrarMensaje(`El código "${nuevoValor}" ya existe`, "error");
                 return;
             }
-            
+
             const nuevosCodigos = [...codigos];
             nuevosCodigos[indice] = nuevoValor;
             setCodigos(nuevosCodigos);
             mostrarMensaje(`Código actualizado a "${nuevoValor}"`);
         }
-        
+
         setEditandoId(null);
         setEditandoValor("");
     };
@@ -168,53 +382,11 @@ export default function CodigosScreen() {
         setEditandoValor("");
     };
 
-    const codigosFiltrados = codigos.filter(codigo => 
+    const codigosFiltrados = codigos.filter(codigo =>
         codigo.toLowerCase().includes(filtro.toLowerCase())
     );
 
-    // ========== CRUD PRODUCTOS ==========
-    const agregarProducto = () => {
-        if (!nuevoProducto.codigo.trim()) {
-            mostrarMensaje("Ingresa un código de producto válido", "error");
-            return;
-        }
-        
-        if (!nuevoProducto.descripcion.trim()) {
-            mostrarMensaje("Ingresa una descripción del producto", "error");
-            return;
-        }
-        
-        const codigoUpper = nuevoProducto.codigo.trim().toUpperCase();
-        
-        if (productos.some(p => p.codigo === codigoUpper)) {
-            mostrarMensaje(`El producto "${codigoUpper}" ya existe`, "error");
-            return;
-        }
-        
-        const nuevoId = Math.max(...productos.map(p => p.id), 0) + 1;
-        setProductos([...productos, {
-            id: nuevoId,
-            codigo: codigoUpper,
-            descripcion: nuevoProducto.descripcion,
-            envasados: nuevoProducto.envasados.filter(e => e.cantidad > 0)
-        }]);
-        
-        setNuevoProducto({
-            codigo: "",
-            descripcion: "",
-            envasados: [
-                { litros: 0.25, cantidad: 0 },
-                { litros: 0.5, cantidad: 0 },
-                { litros: 0.75, cantidad: 0 },
-                { litros: 1, cantidad: 0 },
-                { litros: 4, cantidad: 0 },
-                { litros: 19, cantidad: 0 }
-            ]
-        });
-        
-        mostrarMensaje(`Producto "${codigoUpper}" agregado correctamente`);
-    };
-    
+    // ========== CRUD PRODUCTOS LOCALES EN TABLA ==========
     const eliminarProducto = (id) => {
         const producto = productos.find(p => p.id === id);
         if (window.confirm(`¿Eliminar el producto "${producto.codigo}"?`)) {
@@ -222,46 +394,34 @@ export default function CodigosScreen() {
             mostrarMensaje(`Producto "${producto.codigo}" eliminado`);
         }
     };
-    
+
     const iniciarEdicionProducto = (producto) => {
         setEditandoProducto({ ...producto });
     };
-    
+
     const guardarEdicionProducto = () => {
         if (!editandoProducto.codigo.trim()) {
             mostrarMensaje("El código no puede estar vacío", "error");
             return;
         }
-        
+
         const codigoUpper = editandoProducto.codigo.trim().toUpperCase();
-        
+
         if (productos.some(p => p.codigo === codigoUpper && p.id !== editandoProducto.id)) {
             mostrarMensaje(`El producto "${codigoUpper}" ya existe`, "error");
             return;
         }
-        
-        setProductos(productos.map(p => 
-            p.id === editandoProducto.id 
+
+        setProductos(productos.map(p =>
+            p.id === editandoProducto.id
                 ? { ...p, codigo: codigoUpper, descripcion: editandoProducto.descripcion, envasados: editandoProducto.envasados }
                 : p
         ));
         setEditandoProducto(null);
         mostrarMensaje(`Producto actualizado correctamente`);
     };
-    
-    const actualizarEnvasadoProducto = (id, litros, cantidad) => {
-        setProductos(productos.map(p => {
-            if (p.id === id) {
-                const nuevosEnvasados = p.envasados.map(e => 
-                    e.litros === litros ? { ...e, cantidad: parseInt(cantidad) || 0 } : e
-                );
-                return { ...p, envasados: nuevosEnvasados };
-            }
-            return p;
-        }));
-    };
-    
-    const productosFiltrados = productos.filter(producto => 
+
+    const productosFiltrados = productos.filter(producto =>
         producto.codigo.toLowerCase().includes(filtroProductos.toLowerCase()) ||
         producto.descripcion.toLowerCase().includes(filtroProductos.toLowerCase())
     );
@@ -274,7 +434,7 @@ export default function CodigosScreen() {
         }
 
         const codigoUpper = nuevoEspecial.codigo.trim().toUpperCase();
-        
+
         if (codigosEspeciales.some(c => c.codigo === codigoUpper)) {
             mostrarMensaje(`El código especial "${codigoUpper}" ya existe`, "error");
             return;
@@ -310,14 +470,14 @@ export default function CodigosScreen() {
         }
 
         const codigoUpper = editandoEspecial.codigo.trim().toUpperCase();
-        
+
         if (codigosEspeciales.some(c => c.codigo === codigoUpper && c.id !== editandoEspecial.id)) {
             mostrarMensaje(`El código especial "${codigoUpper}" ya existe`, "error");
             return;
         }
 
-        setCodigosEspeciales(codigosEspeciales.map(c => 
-            c.id === editandoEspecial.id 
+        setCodigosEspeciales(codigosEspeciales.map(c =>
+            c.id === editandoEspecial.id
                 ? { ...c, codigo: codigoUpper, descripcion: editandoEspecial.descripcion }
                 : c
         ));
@@ -329,13 +489,13 @@ export default function CodigosScreen() {
         setEditandoEspecial(null);
     };
 
-    const codigosEspecialesFiltrados = codigosEspeciales.filter(esp => 
+    const codigosEspecialesFiltrados = codigosEspeciales.filter(esp =>
         esp.codigo.toLowerCase().includes(filtroEspeciales.toLowerCase()) ||
         esp.descripcion.toLowerCase().includes(filtroEspeciales.toLowerCase())
     );
 
     const toggleActivoEspecial = (id) => {
-        setCodigosEspeciales(codigosEspeciales.map(c => 
+        setCodigosEspeciales(codigosEspeciales.map(c =>
             c.id === id ? { ...c, activo: !c.activo } : c
         ));
         const especial = codigosEspeciales.find(c => c.id === id);
@@ -344,7 +504,7 @@ export default function CodigosScreen() {
 
     // Función para obtener el título según la subsección
     const getTituloVinilicas = () => {
-        switch(subSeccionVinilicas) {
+        switch (subSeccionVinilicas) {
             case "productos": return "📦 Gestión de Productos";
             case "excluidos": return "🚫 Códigos Excluidos";
             default: return "Gestión Vinílicas";
@@ -352,8 +512,8 @@ export default function CodigosScreen() {
     };
 
     const getDescripcionVinilicas = () => {
-        switch(subSeccionVinilicas) {
-            case "productos": return "Agrega, edita o elimina productos con sus respectivos envasados";
+        switch (subSeccionVinilicas) {
+            case "productos": return "Busca productos de la API, edita envasados y guarda cambios localmente";
             case "excluidos": return "Administra los códigos que NO deben aparecer en producción";
             default: return "";
         }
@@ -472,71 +632,230 @@ export default function CodigosScreen() {
             } else if (subSeccionVinilicas === "productos") {
                 return (
                     <>
+                        {/* SEARCH BOX PARA BUSCAR EN API */}
                         <div className="cod-card">
-                            <div className="search-box">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar producto por código o descripción..."
-                                    value={filtroProductos}
-                                    onChange={(e) => setFiltroProductos(e.target.value)}
-                                />
-                                {filtroProductos && (
-                                    <button onClick={() => setFiltroProductos("")} className="clear-filter">
-                                        ✖
+                            <div className="search-box-wrapper">
+                                <div className="search-box-with-button">
+                                    <input
+                                        type="text"
+                                        placeholder="🔍 Buscar producto en API por código (ej: 500)..."
+                                        value={codigoBusqueda}
+                                        onChange={(e) => setCodigoBusqueda(e.target.value.toUpperCase())}
+                                        onKeyPress={(e) => e.key === 'Enter' && buscarYCargarProducto()}
+                                    />
+                                    <button
+                                        className="btn-buscar-producto"
+                                        onClick={buscarYCargarProducto}
+                                        disabled={loading}
+                                    >
+                                        {loading ? "⏳ Buscando..." : "🔍 Buscar y Cargar"}
                                     </button>
-                                )}
+                                    {modoEdicionAPI && (
+                                        <button
+                                            className="btn-limpiar-formulario"
+                                            onClick={limpiarFormulario}
+                                        >
+                                            ✖ Limpiar
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="busqueda-info">
+                                    <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Formulario para agregar nuevo producto */}
-                        <div className="cod-card">
-                            <h3 className="cod-card-title" style={{ marginBottom: '20px' }}>➕ NUEVO PRODUCTO</h3>
-                            <div className="add-producto-form">
-                                <div className="form-row">
-                                    <input
-                                        type="text"
-                                        placeholder="Código del producto..."
-                                        value={nuevoProducto.codigo}
-                                        onChange={(e) => setNuevoProducto({ ...nuevoProducto, codigo: e.target.value.toUpperCase() })}
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Descripción..."
-                                        value={nuevoProducto.descripcion}
-                                        onChange={(e) => setNuevoProducto({ ...nuevoProducto, descripcion: e.target.value })}
-                                    />
+                        {/* FORMULARIO UNIFICADO DE PRODUCTO */}
+                        <div className="cod-card producto-form-card">
+                            <div className="form-header">
+                                <div className="form-header-icon">
+                                    {modoEdicionAPI ? "✏️" : "✨"}
                                 </div>
-                                <div className="envasados-grid">
-                                    <h4>Envasados disponibles:</h4>
-                                    <div className="envasados-row">
-                                        {nuevoProducto.envasados.map((env, idx) => (
-                                            <div key={idx} className="envasado-input">
-                                                <label>{env.litros} L</label>
+                                <div>
+                                    <h3 className="form-title">
+                                        {modoEdicionAPI ? `Editando Producto API: ${formProducto.codigo}` : "Crear Nuevo Producto"}
+                                    </h3>
+                                    <p className="form-subtitle">
+                                        {modoEdicionAPI
+                                            ? "Modifica los envasados y guarda los cambios en la API."
+                                            : "Completa los datos del producto y sus envases - Se guardará en la API"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="add-producto-form">
+                                <div className="form-grid-2">
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">🔖</span>
+                                            Código del producto
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="Ej: PROD-001"
+                                            value={formProducto.codigo}
+                                            onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
+                                        />
+                                        <span className="input-hint">
+                                            {modoEdicionAPI ? "Puedes modificar el código" : "Código único identificador"}
+                                        </span>
+                                    </div>
+
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">📝</span>
+                                            Descripción
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="Ej: Pintura Vinílica Premium"
+                                            value={formProducto.descripcion}
+                                            onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
+                                        />
+                                        <span className="input-hint">
+                                            {modoEdicionAPI ? "Puedes modificar la descripción" : "Nombre o descripción del producto"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {modoEdicionAPI && formProducto.poderCubriente && (
+                                    <div className="info-box-producto-api">
+                                        <div className="info-row">
+                                            <span>💪 Poder Cubriente:</span>
+                                            <strong>{formProducto.poderCubriente}</strong>
+                                        </div>
+                                        <div className="info-row">
+                                            <span>🏷️ Tipo Pintura ID:</span>
+                                            <strong>{formProducto.tipoPinturaId}</strong>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ENVASADOS EDITABLES */}
+                                <div className="envasados-section">
+                                    <div className="envasados-header">
+                                        <span className="envasados-icon">📦</span>
+                                        <h4>Configuración de Envasados</h4>
+                                        <span className="envasados-badge">
+                                            {modoEdicionAPI ? `Desde API (${formProducto.envasados.length} envases)` : "Cantidades disponibles"}
+                                        </span>
+                                        {modoEdicionAPI && (
+                                            <button
+                                                className="btn-agregar-envase"
+                                                onClick={() => setMostrarFormNuevoEnvase(!mostrarFormNuevoEnvase)}
+                                            >
+                                                + Agregar Envase
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Formulario para nuevo envase */}
+                                    {mostrarFormNuevoEnvase && (
+                                        <div className="nuevo-envase-form">
+                                            <div className="nuevo-envase-inputs">
                                                 <input
                                                     type="number"
-                                                    min="0"
-                                                    value={env.cantidad}
-                                                    onChange={(e) => {
-                                                        const nuevosEnvasados = [...nuevoProducto.envasados];
-                                                        nuevosEnvasados[idx].cantidad = parseInt(e.target.value) || 0;
-                                                        setNuevoProducto({ ...nuevoProducto, envasados: nuevosEnvasados });
-                                                    }}
+                                                    step="0.01"
+                                                    placeholder="Litros (ej: 0.5, 1, 4, 19)"
+                                                    value={nuevoEnvase.litros}
+                                                    onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, litros: e.target.value })}
                                                 />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Artículo (ej: 001-500) - opcional"
+                                                    value={nuevoEnvase.articulo}
+                                                    onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, articulo: e.target.value.toUpperCase() })}
+                                                />
+                                                <button onClick={agregarEnvase} className="btn-confirmar">
+                                                    ✓ Agregar
+                                                </button>
+                                                <button onClick={() => setMostrarFormNuevoEnvase(false)} className="btn-cancelar-mini">
+                                                    ✖
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="envasados-grid-modern">
+                                        {formProducto.envasados.map((env, idx) => (
+                                            <div key={idx} className="envasado-card">
+                                                {modoEdicionAPI && (
+                                                    <div className="envasado-acciones-top">
+                                                        <button
+                                                            className="btn-eliminar-envase-icon"
+                                                            onClick={() => eliminarEnvase(env.litros)}
+                                                            title="Eliminar envase"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                <div className="envasado-litros">{env.litros} <span>L</span></div>
+                                                {modoEdicionAPI && env.articulo && (
+                                                    <div className="envasado-articulo">{env.articulo}</div>
+                                                )}
+                                                {!modoEdicionAPI && (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            className="envasado-input-modern"
+                                                            value={env.cantidad}
+                                                            placeholder="0"
+                                                            onChange={(e) => {
+                                                                const nuevosEnvasados = [...formProducto.envasados];
+                                                                nuevosEnvasados[idx].cantidad = parseInt(e.target.value) || 0;
+                                                                setFormProducto({ ...formProducto, envasados: nuevosEnvasados });
+                                                            }}
+                                                        />
+                                                        <div className="envasado-unidad">unidades</div>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
+
+                                    {formProducto.envasados.length === 0 && modoEdicionAPI && (
+                                        <div className="envasados-empty">
+                                            ⚠️ No hay envases configurados. Haz clic en "+ Agregar Envase" para añadir.
+                                        </div>
+                                    )}
+
+                                    {modoEdicionAPI && formProducto.envasados.length > 0 && (
+                                        <div className="envasados-api-note">
+                                            💡 Puedes eliminar envases con el botón 🗑️ o agregar nuevos
+                                        </div>
+                                    )}
                                 </div>
-                                <button onClick={agregarProducto} className="btn-agregar-producto">
-                                    + Agregar Producto
+
+                                <button
+                                    onClick={guardarProductoEnAPI}
+                                    className="btn-submit-producto"
+                                    disabled={loading}
+                                >
+                                    <span className="btn-icon">{loading ? "⏳" : (modoEdicionAPI ? "💾" : "➕")}</span>
+                                    {loading ? "Guardando..." : (modoEdicionAPI ? "Actualizar en API" : "Crear Producto en API")}
+                                    {!loading && !modoEdicionAPI && <span className="btn-arrow">→</span>}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Tabla de productos */}
+                        {/* TABLA DE PRODUCTOS LOCALES (respaldo) */}
                         <div className="cod-card table-card">
                             <div className="card-header-flex">
-                                <h3 className="cod-card-title">📦 LISTA DE PRODUCTOS</h3>
-                                <span className="count-badge">{productosFiltrados.length} productos</span>
+                                <h3 className="cod-card-title">📦 PRODUCTOS LOCALES (respaldo)</h3>
+                                <span className="count-badge">{productos.length} productos</span>
+                            </div>
+
+                            <div className="search-box" style={{ marginBottom: '16px' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Filtrar productos locales..."
+                                    value={filtroProductos}
+                                    onChange={(e) => setFiltroProductos(e.target.value)}
+                                />
                             </div>
 
                             <div className="cod-table-wrapper">
@@ -553,7 +872,7 @@ export default function CodigosScreen() {
                                         {productosFiltrados.length === 0 ? (
                                             <tr>
                                                 <td colSpan="4" className="empty-state">
-                                                    {filtroProductos ? "No se encontraron productos" : "No hay productos registrados"}
+                                                    {filtroProductos ? "No se encontraron productos" : "No hay productos locales registrados"}
                                                 </td>
                                             </tr>
                                         ) : (
@@ -594,7 +913,7 @@ export default function CodigosScreen() {
                                                                             min="0"
                                                                             value={editandoProducto.envasados.find(e => e.litros === env.litros)?.cantidad || 0}
                                                                             onChange={(e) => {
-                                                                                const nuevosEnvasados = editandoProducto.envasados.map(ev => 
+                                                                                const nuevosEnvasados = editandoProducto.envasados.map(ev =>
                                                                                     ev.litros === env.litros ? { ...ev, cantidad: parseInt(e.target.value) || 0 } : ev
                                                                                 );
                                                                                 setEditandoProducto({ ...editandoProducto, envasados: nuevosEnvasados });
@@ -605,7 +924,7 @@ export default function CodigosScreen() {
                                                             </div>
                                                         ) : (
                                                             <div className="envasados-list">
-                                                                {producto.envasados.map((env, idx) => (
+                                                                {producto.envasados?.map((env, idx) => (
                                                                     <span key={idx} className="envasado-badge">
                                                                         {env.litros}L: {env.cantidad}
                                                                     </span>
@@ -634,8 +953,8 @@ export default function CodigosScreen() {
                             </div>
 
                             <div className="info-box">
-                                <strong>ℹ️ Nota:</strong> Los productos agregados aquí estarán disponibles en la búsqueda de producción.
-                                Los envasados se utilizan para calcular los litros totales.
+                                <strong>ℹ️ Nota:</strong> Los productos guardados en la API se reflejarán al buscarlos nuevamente.
+                                Esta tabla es solo para productos guardados localmente (respaldo).
                             </div>
                         </div>
                     </>
@@ -731,7 +1050,7 @@ export default function CodigosScreen() {
                                                     )}
                                                 </td>
                                                 <td>
-                                                    <button 
+                                                    <button
                                                         className={`status-badge ${especial.activo ? 'active' : 'inactive'}`}
                                                         onClick={() => toggleActivoEspecial(especial.id)}
                                                     >
@@ -766,6 +1085,7 @@ export default function CodigosScreen() {
                 </>
             );
         }
+        return null;
     };
 
     return (
@@ -784,16 +1104,15 @@ export default function CodigosScreen() {
                         <h2>GESTIÓN DE CÓDIGOS</h2>
                     </div>
 
-                    {/* Sección principal: Vinílicas y Esmaltes */}
                     <nav className="cod-nav">
                         <div className="nav-label">SECCIONES</div>
-                        <button 
+                        <button
                             className={`cod-nav-btn ${seccionActiva === "vinilicas" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("vinilicas")}
                         >
                             <span className="nav-icon">💧</span> Vinílicas
                         </button>
-                        <button 
+                        <button
                             className={`cod-nav-btn ${seccionActiva === "esmaltes" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("esmaltes")}
                         >
@@ -801,19 +1120,18 @@ export default function CodigosScreen() {
                         </button>
                     </nav>
 
-                    {/* Submenú para Vinílicas (solo visible cuando está seleccionado) */}
                     {seccionActiva === "vinilicas" && (
                         <>
                             <div className="nav-divider"></div>
                             <nav className="cod-nav">
                                 <div className="nav-label">VINÍLICAS</div>
-                                <button 
+                                <button
                                     className={`cod-nav-sub-btn ${subSeccionVinilicas === "productos" ? "active" : ""}`}
                                     onClick={() => setSubSeccionVinilicas("productos")}
                                 >
                                     <span className="nav-icon">📦</span> Agregar Productos
                                 </button>
-                                <button 
+                                <button
                                     className={`cod-nav-sub-btn ${subSeccionVinilicas === "excluidos" ? "active" : ""}`}
                                     onClick={() => setSubSeccionVinilicas("excluidos")}
                                 >
@@ -826,12 +1144,12 @@ export default function CodigosScreen() {
                     <div className="sidebar-footer">
                         <div className="stats-mini">
                             <span className="stats-number">
-                                {seccionActiva === "vinilicas" 
+                                {seccionActiva === "vinilicas"
                                     ? (subSeccionVinilicas === "productos" ? productos.length : codigos.length)
                                     : codigosEspeciales.filter(e => e.activo).length}
                             </span>
                             <span className="stats-label">
-                                {seccionActiva === "vinilicas" 
+                                {seccionActiva === "vinilicas"
                                     ? (subSeccionVinilicas === "productos" ? "Productos" : "Códigos excluidos")
                                     : "Especiales activos"}
                             </span>
@@ -847,12 +1165,12 @@ export default function CodigosScreen() {
                     <header className="cod-header">
                         <div className="cod-title-group">
                             <h1>
-                                {seccionActiva === "vinilicas" 
+                                {seccionActiva === "vinilicas"
                                     ? getTituloVinilicas()
                                     : "⭐ Códigos Especiales - Esmaltes"}
                             </h1>
                             <p>
-                                {seccionActiva === "vinilicas" 
+                                {seccionActiva === "vinilicas"
                                     ? getDescripcionVinilicas()
                                     : "Administra códigos especiales para pedidos urgentes o personalizados de Esmaltes"}
                             </p>

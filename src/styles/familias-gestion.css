@@ -1,0 +1,342 @@
+.familias-gestion-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 50%, #370c5e 100%);
+    padding: 2rem;
+}
+
+.familias-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.familias-header-bar h1 {
+    background: linear-gradient(135deg, #fff, #9b30ff, #ff1493);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.btn-volver {
+    background: rgba(155, 48, 255, 0.2);
+    border: 1px solid #9b30ff;
+    color: #9b30ff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-volver:hover {
+    background: rgba(155, 48, 255, 0.4);
+    transform: translateX(-5px);
+}
+
+.familias-filtros {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    flex: 1;
+    position: relative;
+    max-width: 400px;
+}
+
+.search-box input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(155, 48, 255, 0.4);
+    border-radius: 50px;
+    padding: 0.7rem 2rem 0.7rem 1.2rem;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #9b30ff;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+}
+
+.tipo-select {
+    background: rgba(155, 48, 255, 0.2);
+    border: 1px solid #9b30ff;
+    border-radius: 50px;
+    padding: 0.7rem 1.2rem;
+    color: white;
+    cursor: pointer;
+}
+
+.familias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.familia-card {
+    background: linear-gradient(135deg, rgba(35, 20, 55, 0.95), rgba(25, 15, 45, 0.95));
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(155, 48, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.familia-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(155, 48, 255, 0.2);
+}
+
+.imagen-area {
+    height: 200px;
+    background: linear-gradient(135deg, #2a0a4a, #1a0a2e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.imagen-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.imagen-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.imagen-area:hover .imagen-overlay {
+    opacity: 1;
+}
+
+.imagen-overlay button, .imagen-placeholder button {
+    background: rgba(155, 48, 255, 0.8);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.imagen-overlay button:hover, .imagen-placeholder button:hover {
+    background: #9b30ff;
+    transform: scale(1.05);
+}
+
+.imagen-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.placeholder-icon {
+    font-size: 4rem;
+    opacity: 0.5;
+}
+
+.info-area {
+    padding: 1.2rem;
+}
+
+.tipo-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.nombre-editable {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.nombre-editable h3 {
+    color: white;
+    font-size: 1rem;
+    margin: 0;
+    flex: 1;
+}
+
+.nombre-editable button, .editar-nombre button {
+    background: rgba(155, 48, 255, 0.2);
+    border: none;
+    color: #9b30ff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.nombre-editable button:hover, .editar-nombre button:hover {
+    background: rgba(155, 48, 255, 0.4);
+}
+
+.editar-nombre {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.editar-nombre input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #9b30ff;
+    border-radius: 8px;
+    padding: 0.5rem;
+    color: white;
+}
+
+.id-info {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    font-family: monospace;
+}
+
+.loading-container {
+    text-align: center;
+    padding: 3rem;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1rem;
+    border: 3px solid rgba(155, 48, 255, 0.2);
+    border-top-color: #9b30ff;
+    border-right-color: #ff1493;
+    border-radius: 50%;
+    animation: spin 1s infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.no-data {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+}
+
+.no-data-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-data h3 {
+    color: white;
+    margin: 0;
+}
+
+.info-footer {
+    background: rgba(35, 20, 55, 0.7);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(155, 48, 255, 0.3);
+}
+
+.info-footer ul {
+    margin: 0.5rem 0 0 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.info-footer li {
+    margin: 0.3rem 0;
+}
+
+.toast-mensaje {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+.toast-mensaje.success {
+    background: linear-gradient(135deg, #00b894, #009432);
+}
+
+.toast-mensaje.error {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .familias-gestion-container {
+        padding: 1rem;
+    }
+    
+    .familias-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .familias-filtros {
+        flex-direction: column;
+    }
+    
+    .search-box {
+        max-width: 100%;
+    }
+    
+    .familias-grid {
+        grid-template-columns: 1fr;
+    }
+}

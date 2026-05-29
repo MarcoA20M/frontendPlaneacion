@@ -31,7 +31,7 @@ export default function ProduccionScreen() {
         cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
         rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
         cargando, totalLitrosActuales,
-        generarLotesFinales,  // ← IMPORTANTE: Agregar esta línea
+        generarLotesFinales,
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
         guardarProduccionEnBD,
         cargarDatosPorFecha
@@ -67,6 +67,28 @@ export default function ProduccionScreen() {
         const guardado = localStorage.getItem("planificador_data");
         return guardado ? JSON.parse(guardado) : null;
     });
+
+    // --- Cargar Familias desde la API ---
+    useEffect(() => {
+        const cargarFamilias = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/familias');
+                if (response.ok) {
+                    const data = await response.json();
+                    setFamilias(data);
+                    console.log('Familias cargadas:', data);
+                } else {
+                    console.error('Error al cargar familias:', response.status);
+                    setFamilias([]);
+                }
+            } catch (error) {
+                console.error('Error de conexión al cargar familias:', error);
+                setFamilias([]);
+            }
+        };
+        
+        cargarFamilias();
+    }, []);
 
     // --- EFECTOS ---
     useEffect(() => {
@@ -348,7 +370,17 @@ export default function ProduccionScreen() {
                                     }}
                                 />
                             </div>
-                            <button className="btn-family-explorer" onClick={() => navigate("/familias")}>🏷️ FAMILIAS</button>
+                            <button 
+                                className="btn-family-explorer" 
+                                onClick={() => navigate("/familias", { 
+                                    state: { 
+                                        familias: familias,
+                                        tipoPintura: tipoPintura 
+                                    } 
+                                })}
+                            >
+                                🏷️ FAMILIAS
+                            </button>
                         </div>
                     </div>
 
@@ -399,7 +431,7 @@ export default function ProduccionScreen() {
                 onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
                 onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))}
                 onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
-                onGenerarLotes={generarLotesFinales}  // ← IMPORTANTE: Agregar esta línea
+                onGenerarLotes={generarLotesFinales}
                 onSeleccionarCarga={(carga) => {
                     setCargaSeleccionada(carga);
                     setMostrarDetalle(true);

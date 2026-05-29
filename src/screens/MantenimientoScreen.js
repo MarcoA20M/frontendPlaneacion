@@ -15,8 +15,17 @@ export default function MantenimientoScreen() {
             accion: "Consultar",
             path: "/mantenimiento/operarios" // Ruta destino
         },
+
         {
             id: 2,
+            titulo: "Control de códigos",
+            desc: "Agrega, Actualizar o Eliminar pinturas",
+            icono: "🔑",
+            accion: "Consultar",
+            path: "/mantenimiento/codigos"
+        },
+        {
+            id: 3,
             titulo: "Administrar Críticos",
             desc: "Administración de consumos de materias primas",
             icono: "⚡",
@@ -24,22 +33,14 @@ export default function MantenimientoScreen() {
             path: "/mantenimiento/criticos"
         },
         {
-            id: 3,
+            id: 4,
             titulo: "Reportes",
             desc: "Control de reportes de producción",
             icono: "📊",
             accion: "Consultar",
             path: "/mantenimiento/reportes"
-        },
-        // Asegúrate que la ruta para códigos sea correcta
-        {
-            id: 4,
-            titulo: "Control de códigos",
-            desc: "Agrega, Actualizar o Eliminar pinturas",
-            icono: "🔑",
-            accion: "Consultar",
-            path: "/mantenimiento/codigos"
         }
+       
     ];
 
     return (

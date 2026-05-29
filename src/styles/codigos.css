@@ -1,5 +1,446 @@
 /* ========== CODIGOS SCREEN - ESTILOS MORADA NEÓN (PANTALLA COMPLETA) ========== */
+/* Estilos para la gestión de familias dentro del panel */
+.familias-gestion-container {
+    width: 100%;
+}
 
+.familias-grid-doble {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Lista de familias */
+.familias-lista {
+    background: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+    border-radius: 20px;
+    border: 1px solid rgba(155, 48, 255, 0.2);
+    overflow: hidden;
+}
+
+.lista-titulo {
+    padding: 1rem;
+    margin: 0;
+    color: white;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.lista-items {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.familia-item-lista {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.familia-item-lista:hover {
+    background: rgba(155, 48, 255, 0.15);
+}
+
+.familia-item-lista.active {
+    background: linear-gradient(135deg, rgba(155, 48, 255, 0.3), rgba(255, 20, 147, 0.15));
+    border-left: 3px solid #9b30ff;
+}
+
+.item-imagen-mini {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.item-imagen-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mini-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.item-info-mini {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-nombre {
+    display: block;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-tipo {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.item-id {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+/* Panel de edición */
+.familias-edicion-panel {
+    background: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+    border-radius: 20px;
+    border: 1px solid rgba(155, 48, 255, 0.2);
+    padding: 1.5rem;
+}
+
+.empty-seleccion {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-seleccion h3 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.empty-seleccion p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.edicion-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.edicion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
+}
+
+.edicion-header h2 {
+    color: white;
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tipo-badge-edicion {
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.edicion-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.edicion-campo label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.imagen-edicion {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.imagen-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2a0a4a, #1a0a2e);
+    border: 2px solid rgba(155, 48, 255, 0.3);
+}
+
+.imagen-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-vacio {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.preview-vacio span {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.preview-vacio p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.imagen-botones {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.btn-subir-imagen, .btn-eliminar-imagen {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-subir-imagen {
+    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
+    color: white;
+}
+
+.btn-subir-imagen:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(155, 48, 255, 0.5);
+}
+
+.btn-eliminar-imagen {
+    background: rgba(255, 20, 147, 0.2);
+    border: 1px solid #ff1493;
+    color: #ff1493;
+}
+
+.btn-eliminar-imagen:hover {
+    background: rgba(255, 20, 147, 0.4);
+}
+
+.nombre-actual {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.nombre-valor {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #9b30ff;
+    background: rgba(155, 48, 255, 0.1);
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+}
+
+.btn-editar, .btn-guardar, .btn-cancelar {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-editar {
+    background: rgba(155, 48, 255, 0.2);
+    border: 1px solid #9b30ff;
+    color: #9b30ff;
+}
+
+.btn-editar:hover {
+    background: rgba(155, 48, 255, 0.4);
+}
+
+.btn-guardar {
+    background: linear-gradient(135deg, #00b894, #009432);
+    color: white;
+}
+
+.btn-cancelar {
+    background: rgba(255, 20, 147, 0.2);
+    border: 1px solid #ff1493;
+    color: #ff1493;
+}
+
+.nombre-edicion {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.nombre-edicion input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #9b30ff;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.nombre-edicion input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(155, 48, 255, 0.3);
+}
+
+.info-grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.info-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.info-valor {
+    color: white;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.preview-campo {
+    background: rgba(155, 48, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+.preview-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 0.8rem;
+}
+
+.preview-imagen-mini {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.preview-imagen-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-mini-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.preview-info-mini {
+    flex: 1;
+}
+
+.preview-nombre-mini {
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.preview-tipo-mini {
+    font-size: 0.7rem;
+    color: #9b30ff;
+}
+
+.preview-id-mini {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: monospace;
+}
+
+.tipo-filtro-select {
+    background: rgba(155, 48, 255, 0.2);
+    border: 1px solid #9b30ff;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.tipo-filtro-select option {
+    background: #2a0a4a;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 3rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .familias-grid-doble {
+        grid-template-columns: 1fr;
+    }
+    
+    .familias-lista {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+}
 * {
     margin: 0;
     padding: 0;

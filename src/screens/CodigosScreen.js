@@ -1,8 +1,10 @@
+// src/screens/CodigosScreen.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { buscarProducto, crearProducto, actualizarProducto } from "../services/productoService";
 import { familiaService } from "../services/familiaService";
 import { obtenerEnvasados } from "../services/envasadoService";
+import FamiliasGestionScreen from "../screens/FamiliasGestionScreen";
 import "../styles/codigos.css";
 
 export default function CodigosScreen() {
@@ -27,7 +29,7 @@ export default function CodigosScreen() {
     const [envasadosDisponibles, setEnvasadosDisponibles] = useState([]);
     const [cargandoEnvasados, setCargandoEnvasados] = useState(false);
 
-    // Estados para Familias
+    // Estados para Familias (para el select de productos)
     const [familias, setFamilias] = useState([]);
     const [cargandoFamilias, setCargandoFamilias] = useState(false);
 
@@ -250,7 +252,7 @@ export default function CodigosScreen() {
 
         const yaExiste = [...formProducto.envasadosProducto, ...formProducto.envasadosSeleccionados]
             .some(e => e.litros === litros);
-        
+
         if (yaExiste) {
             mostrarMensaje(`Ya existe un envase de ${litros} litros`, "error");
             return;
@@ -571,541 +573,547 @@ export default function CodigosScreen() {
         }
     };
 
-    // ========== RENDERIZADO PRINCIPAL ==========
-    const renderContenido = () => {
-        if (seccionActiva === "vinilicas") {
-            if (subSeccionVinilicas === "excluidos") {
-                return (
-                    <>
-                        <div className="cod-card">
-                            <div className="search-box">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar código excluido..."
-                                    value={filtro}
-                                    onChange={(e) => setFiltro(e.target.value)}
-                                />
-                                {filtro && (
-                                    <button onClick={() => setFiltro("")} className="clear-filter">
-                                        ✖
-                                    </button>
-                                )}
-                            </div>
+    // ========== RENDER DE VINÍLICAS - EXCLUIDOS ==========
+    const renderVinilicasExcluidos = () => (
+        <>
+            <div className="cod-card">
+                <div className="search-box">
+                    <input
+                        type="text"
+                        placeholder="Buscar código excluido..."
+                        value={filtro}
+                        onChange={(e) => setFiltro(e.target.value)}
+                    />
+                    {filtro && (
+                        <button onClick={() => setFiltro("")} className="clear-filter">
+                            ✖
+                        </button>
+                    )}
+                </div>
 
-                            <div className="add-codigo-bar">
-                                <input
-                                    type="text"
-                                    placeholder="Nuevo código excluido (ej: 999 o 999IF)..."
-                                    value={nuevoCodigo}
-                                    onChange={(e) => setNuevoCodigo(e.target.value.toUpperCase())}
-                                    onKeyPress={(e) => e.key === 'Enter' && agregarCodigo()}
-                                />
-                                <button onClick={agregarCodigo}>
-                                    + Agregar Código
-                                </button>
-                            </div>
-                        </div>
+                <div className="add-codigo-bar">
+                    <input
+                        type="text"
+                        placeholder="Nuevo código excluido (ej: 999 o 999IF)..."
+                        value={nuevoCodigo}
+                        onChange={(e) => setNuevoCodigo(e.target.value.toUpperCase())}
+                        onKeyPress={(e) => e.key === 'Enter' && agregarCodigo()}
+                    />
+                    <button onClick={agregarCodigo}>
+                        + Agregar Código
+                    </button>
+                </div>
+            </div>
 
-                        <div className="cod-card table-card">
-                            <div className="card-header-flex">
-                                <h3 className="cod-card-title">📋 CÓDIGOS EXCLUIDOS</h3>
-                                <span className="count-badge">{codigosFiltrados.length} códigos</span>
-                            </div>
+            <div className="cod-card table-card">
+                <div className="card-header-flex">
+                    <h3 className="cod-card-title">📋 CÓDIGOS EXCLUIDOS</h3>
+                    <span className="count-badge">{codigosFiltrados.length} códigos</span>
+                </div>
 
-                            <div className="cod-table-wrapper">
-                                <table className="cod-table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Código</th>
-                                            <th>Tipo</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {codigosFiltrados.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="4" className="empty-state">
-                                                    {filtro ? "No se encontraron códigos" : "No hay códigos excluidos"}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            codigosFiltrados.map((codigo, index) => (
-                                                <tr key={codigo}>
-                                                    <td>{index + 1}</td>
-                                                    <td>
-                                                        {editandoId === codigo ? (
-                                                            <input
-                                                                type="text"
-                                                                className="edit-input"
-                                                                value={editandoValor}
-                                                                onChange={(e) => setEditandoValor(e.target.value.toUpperCase())}
-                                                                onKeyPress={(e) => e.key === 'Enter' && guardarEdicion()}
-                                                                autoFocus
-                                                            />
-                                                        ) : (
-                                                            <span className="codigo-value">{codigo}</span>
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        {codigo.includes('IF') ? (
-                                                            <span className="badge-if">⚠️ Con IF</span>
-                                                        ) : (
-                                                            <span className="badge-normal">✓ Normal</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="actions-cell">
-                                                        {editandoId === codigo ? (
-                                                            <>
-                                                                <button className="action-btn save" onClick={guardarEdicion}>💾</button>
-                                                                <button className="action-btn cancel" onClick={cancelarEdicion}>✖</button>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <button className="action-btn edit" onClick={() => iniciarEdicion(codigo)}>✏️</button>
-                                                                <button className="action-btn delete" onClick={() => eliminarCodigo(codigo)}>🗑️</button>
-                                                            </>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="info-box">
-                                <strong>ℹ️ Nota:</strong> Los códigos excluidos no aparecerán en la búsqueda de producción.
-                                Los códigos con <strong>"IF"</strong> son versiones especiales.
-                            </div>
-                        </div>
-                    </>
-                );
-            } else if (subSeccionVinilicas === "productos") {
-                return (
-                    <>
-                        {/* SEARCH BOX PARA BUSCAR EN API */}
-                        <div className="cod-card">
-                            <div className="search-box-wrapper">
-                                <div className="search-box-with-button">
-                                    <input
-                                        type="text"
-                                        placeholder="🔍 Buscar producto en API por código (ej: 500)..."
-                                        value={codigoBusqueda}
-                                        onChange={(e) => setCodigoBusqueda(e.target.value.toUpperCase())}
-                                        onKeyPress={(e) => e.key === 'Enter' && buscarYCargarProducto()}
-                                    />
-                                    <button
-                                        className="btn-buscar-producto"
-                                        onClick={buscarYCargarProducto}
-                                        disabled={loading}
-                                    >
-                                        {loading ? "⏳ Buscando..." : "🔍 Buscar y Cargar"}
-                                    </button>
-                                    {modoEdicionAPI && (
-                                        <button
-                                            className="btn-limpiar-formulario"
-                                            onClick={limpiarFormulario}
-                                        >
-                                            ✖ Limpiar
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="busqueda-info">
-                                    <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* FORMULARIO UNIFICADO DE PRODUCTO */}
-                        <div className="cod-card producto-form-card">
-                            <div className="form-header">
-                                <div className="form-header-icon">
-                                    {modoEdicionAPI ? "✏️" : "✨"}
-                                </div>
-                                <div>
-                                    <h3 className="form-title">
-                                        {modoEdicionAPI ? `Editando Producto API: ${formProducto.codigo}` : "Crear Nuevo Producto"}
-                                    </h3>
-                                    <p className="form-subtitle">
-                                        {modoEdicionAPI
-                                            ? "Modifica los envasados y guarda los cambios en la API."
-                                            : "Completa los datos del producto y sus envases - Se guardará en la API"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="add-producto-form">
-                                <div className="form-grid-2">
-                                    <div className="input-group">
-                                        <label className="input-label">
-                                            <span className="label-icon">🔖</span>
-                                            Código del producto
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            placeholder="Ej: PROD-001"
-                                            value={formProducto.codigo}
-                                            onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
-                                            disabled={modoEdicionAPI}
-                                        />
-                                        <span className="input-hint">
-                                            {modoEdicionAPI ? "El código no se puede modificar" : "Código único identificador"}
-                                        </span>
-                                    </div>
-
-                                    <div className="input-group">
-                                        <label className="input-label">
-                                            <span className="label-icon">📝</span>
-                                            Descripción
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            placeholder="Ej: Pintura Vinílica Premium"
-                                            value={formProducto.descripcion}
-                                            onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
-                                        />
-                                        <span className="input-hint">
-                                            {modoEdicionAPI ? "Puedes modificar la descripción" : "Nombre o descripción del producto"}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="form-grid-2" style={{ marginTop: '16px' }}>
-                                    <div className="input-group">
-                                        <label className="input-label">
-                                            <span className="label-icon">💪</span>
-                                            Poder Cubriente
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="form-input"
-                                            placeholder="Ej: 36"
-                                            value={formProducto.poderCubriente}
-                                            onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
-                                        />
-                                        <span className="input-hint">
-                                            Poder cubriente del producto (m² por litro)
-                                        </span>
-                                    </div>
-
-                                    <div className="input-group">
-                                        <label className="input-label">
-                                            <span className="label-icon">🏷️</span>
-                                            Familia
-                                        </label>
-                                        <select
-                                            className="form-input select-familia"
-                                            value={formProducto.familiaId || ""}
-                                            onChange={(e) => setFormProducto({ ...formProducto, familiaId: e.target.value ? parseInt(e.target.value) : null })}
-                                            disabled={cargandoFamilias}
-                                        >
-                                            <option value="">-- Seleccionar familia --</option>
-                                            {familias.map(familia => (
-                                                <option key={familia.id} value={familia.id}>
-                                                    {familia.nombre}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <span className="input-hint">
-                                            {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Campo COLOR */}
-                                <div className="form-grid-2" style={{ marginTop: '16px' }}>
-                                    <div className="input-group">
-                                        <label className="input-label">
-                                            <span className="label-icon">🎨</span>
-                                            Color
-                                        </label>
-                                        <select
-                                            className="form-input"
-                                            value={formProducto.color}
-                                            onChange={(e) => setFormProducto({ ...formProducto, color: e.target.value })}
-                                        >
-                                            <option value="BLANCO">BLANCO</option>
-                                            <option value="TRANSPARENTE">TRANSPARENTE</option>
-                                            <option value="NEGRO">NEGRO</option>
-                                            <option value="ROJO">ROJO</option>
-                                            <option value="AZUL">AZUL</option>
-                                            <option value="VERDE">VERDE</option>
-                                            <option value="AMARILLO">AMARILLO</option>
-                                        </select>
-                                        <span className="input-hint">Color del producto</span>
-                                    </div>
-                                </div>
-
-                                {/* ENVASADOS EXISTENTES DEL PRODUCTO */}
-                                {modoEdicionAPI && formProducto.envasadosProducto.length > 0 && (
-                                    <div className="envasados-section">
-                                        <div className="envasados-header">
-                                            <span className="envasados-icon">📦</span>
-                                            <h4>Envasados del Producto</h4>
-                                            <span className="envasados-badge">
-                                                {formProducto.envasadosProducto.length} envases
-                                            </span>
-                                        </div>
-                                        <div className="envasados-grid-modern">
-                                            {formProducto.envasadosProducto.map((env, idx) => (
-                                                <div key={idx} className="envasado-card">
-                                                    <div className="envasado-litros">{env.litros} <span>L</span></div>
-                                                    {env.articulo && <div className="envasado-articulo">{env.articulo}</div>}
-                                                    <div className="envasado-acciones-top">
-                                                        <button
-                                                            className="btn-eliminar-envase-icon"
-                                                            onClick={() => eliminarEnvaseExistente(env.litros)}
-                                                            title="Eliminar envase"
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ENVASADOS SELECCIONABLES PARA AGREGAR */}
-                                <div className="envasados-section">
-                                    <div className="envasados-header">
-                                        <span className="envasados-icon">📦</span>
-                                        <h4>Agregar Envasados</h4>
-                                        <span className="envasados-badge">
-                                            {formProducto.envasadosSeleccionados.length} seleccionados
-                                        </span>
-                                        <button
-                                            className="btn-agregar-envase"
-                                            onClick={() => setMostrarFormNuevoEnvase(!mostrarFormNuevoEnvase)}
-                                        >
-                                            + Agregar Envase
-                                        </button>
-                                    </div>
-
-                                    {mostrarFormNuevoEnvase && (
-                                        <div className="nuevo-envase-form">
-                                            <div className="nuevo-envase-inputs">
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="Litros (ej: 0.5, 1, 4, 19)"
-                                                    value={nuevoEnvase.litros}
-                                                    onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, litros: e.target.value })}
-                                                />
+                <div className="cod-table-wrapper">
+                    <table className="cod-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {codigosFiltrados.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="empty-state">
+                                        {filtro ? "No se encontraron códigos" : "No hay códigos excluidos"}
+                                    </td>
+                                </tr>
+                            ) : (
+                                codigosFiltrados.map((codigo, index) => (
+                                    <tr key={codigo}>
+                                        <td>{index + 1}</td>
+                                        <td>
+                                            {editandoId === codigo ? (
                                                 <input
                                                     type="text"
-                                                    placeholder="Artículo (ej: 001-500) - opcional"
-                                                    value={nuevoEnvase.articulo}
-                                                    onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, articulo: e.target.value.toUpperCase() })}
+                                                    className="edit-input"
+                                                    value={editandoValor}
+                                                    onChange={(e) => setEditandoValor(e.target.value.toUpperCase())}
+                                                    onKeyPress={(e) => e.key === 'Enter' && guardarEdicion()}
+                                                    autoFocus
                                                 />
-                                                <button onClick={agregarEnvase} className="btn-confirmar">
-                                                    ✓ Agregar
-                                                </button>
-                                                <button onClick={() => setMostrarFormNuevoEnvase(false)} className="btn-cancelar-mini">
+                                            ) : (
+                                                <span className="codigo-value">{codigo}</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {codigo.includes('IF') ? (
+                                                <span className="badge-if">⚠️ Con IF</span>
+                                            ) : (
+                                                <span className="badge-normal">✓ Normal</span>
+                                            )}
+                                        </td>
+                                        <td className="actions-cell">
+                                            {editandoId === codigo ? (
+                                                <>
+                                                    <button className="action-btn save" onClick={guardarEdicion}>💾</button>
+                                                    <button className="action-btn cancel" onClick={cancelarEdicion}>✖</button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="action-btn edit" onClick={() => iniciarEdicion(codigo)}>✏️</button>
+                                                    <button className="action-btn delete" onClick={() => eliminarCodigo(codigo)}>🗑️</button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="info-box">
+                    <strong>ℹ️ Nota:</strong> Los códigos excluidos no aparecerán en la búsqueda de producción.
+                    Los códigos con <strong>"IF"</strong> son versiones especiales.
+                </div>
+            </div>
+        </>
+    );
+
+    // ========== RENDER DE VINÍLICAS - PRODUCTOS ==========
+    const renderVinilicasProductos = () => (
+        <>
+            <div className="cod-card">
+                <div className="search-box-wrapper">
+                    <div className="search-box-with-button">
+                        <input
+                            type="text"
+                            placeholder="🔍 Buscar producto en API por código (ej: 500)..."
+                            value={codigoBusqueda}
+                            onChange={(e) => setCodigoBusqueda(e.target.value.toUpperCase())}
+                            onKeyPress={(e) => e.key === 'Enter' && buscarYCargarProducto()}
+                        />
+                        <button
+                            className="btn-buscar-producto"
+                            onClick={buscarYCargarProducto}
+                            disabled={loading}
+                        >
+                            {loading ? "⏳ Buscando..." : "🔍 Buscar y Cargar"}
+                        </button>
+                        {modoEdicionAPI && (
+                            <button
+                                className="btn-limpiar-formulario"
+                                onClick={limpiarFormulario}
+                            >
+                                ✖ Limpiar
+                            </button>
+                        )}
+                    </div>
+                    <div className="busqueda-info">
+                        <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="cod-card producto-form-card">
+                <div className="form-header">
+                    <div className="form-header-icon">
+                        {modoEdicionAPI ? "✏️" : "✨"}
+                    </div>
+                    <div>
+                        <h3 className="form-title">
+                            {modoEdicionAPI ? `Editando Producto API: ${formProducto.codigo}` : "Crear Nuevo Producto"}
+                        </h3>
+                        <p className="form-subtitle">
+                            {modoEdicionAPI
+                                ? "Modifica los envasados y guarda los cambios en la API."
+                                : "Completa los datos del producto y sus envases - Se guardará en la API"}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="add-producto-form">
+                    <div className="form-grid-2">
+                        <div className="input-group">
+                            <label className="input-label">
+                                <span className="label-icon">🔖</span>
+                                Código del producto
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Ej: PROD-001"
+                                value={formProducto.codigo}
+                                onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
+                                disabled={modoEdicionAPI}
+                            />
+                            <span className="input-hint">
+                                {modoEdicionAPI ? "El código no se puede modificar" : "Código único identificador"}
+                            </span>
+                        </div>
+
+                        <div className="input-group">
+                            <label className="input-label">
+                                <span className="label-icon">📝</span>
+                                Descripción
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Ej: Pintura Vinílica Premium"
+                                value={formProducto.descripcion}
+                                onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
+                            />
+                            <span className="input-hint">
+                                {modoEdicionAPI ? "Puedes modificar la descripción" : "Nombre o descripción del producto"}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                        <div className="input-group">
+                            <label className="input-label">
+                                <span className="label-icon">💪</span>
+                                Poder Cubriente
+                            </label>
+                            <input
+                                type="number"
+                                className="form-input"
+                                placeholder="Ej: 36"
+                                value={formProducto.poderCubriente}
+                                onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
+                            />
+                            <span className="input-hint">
+                                Poder cubriente del producto (m² por litro)
+                            </span>
+                        </div>
+
+                        <div className="input-group">
+                            <label className="input-label">
+                                <span className="label-icon">🏷️</span>
+                                Familia
+                            </label>
+                            <select
+                                className="form-input select-familia"
+                                value={formProducto.familiaId || ""}
+                                onChange={(e) => setFormProducto({ ...formProducto, familiaId: e.target.value ? parseInt(e.target.value) : null })}
+                                disabled={cargandoFamilias}
+                            >
+                                <option value="">-- Seleccionar familia --</option>
+                                {familias.map(familia => (
+                                    <option key={familia.id} value={familia.id}>
+                                        {familia.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="input-hint">
+                                {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                        <div className="input-group">
+                            <label className="input-label">
+                                <span className="label-icon">🎨</span>
+                                Color
+                            </label>
+                            <select
+                                className="form-input"
+                                value={formProducto.color}
+                                onChange={(e) => setFormProducto({ ...formProducto, color: e.target.value })}
+                            >
+                                <option value="BLANCO">BLANCO</option>
+                                <option value="TRANSPARENTE">TRANSPARENTE</option>
+                                <option value="NEGRO">NEGRO</option>
+                                <option value="ROJO">ROJO</option>
+                                <option value="AZUL">AZUL</option>
+                                <option value="VERDE">VERDE</option>
+                                <option value="AMARILLO">AMARILLO</option>
+                            </select>
+                            <span className="input-hint">Color del producto</span>
+                        </div>
+                    </div>
+
+                    {modoEdicionAPI && formProducto.envasadosProducto.length > 0 && (
+                        <div className="envasados-section">
+                            <div className="envasados-header">
+                                <span className="envasados-icon">📦</span>
+                                <h4>Envasados del Producto</h4>
+                                <span className="envasados-badge">
+                                    {formProducto.envasadosProducto.length} envases
+                                </span>
+                            </div>
+                            <div className="envasados-grid-modern">
+                                {formProducto.envasadosProducto.map((env, idx) => (
+                                    <div key={idx} className="envasado-card">
+                                        <div className="envasado-litros">{env.litros} <span>L</span></div>
+                                        {env.articulo && <div className="envasado-articulo">{env.articulo}</div>}
+                                        <div className="envasado-acciones-top">
+                                            <button
+                                                className="btn-eliminar-envase-icon"
+                                                onClick={() => eliminarEnvaseExistente(env.litros)}
+                                                title="Eliminar envase"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="envasados-section">
+                        <div className="envasados-header">
+                            <span className="envasados-icon">📦</span>
+                            <h4>Agregar Envasados</h4>
+                            <span className="envasados-badge">
+                                {formProducto.envasadosSeleccionados.length} seleccionados
+                            </span>
+                            <button
+                                className="btn-agregar-envase"
+                                onClick={() => setMostrarFormNuevoEnvase(!mostrarFormNuevoEnvase)}
+                            >
+                                + Agregar Envase
+                            </button>
+                        </div>
+
+                        {mostrarFormNuevoEnvase && (
+                            <div className="nuevo-envase-form">
+                                <div className="nuevo-envase-inputs">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Litros (ej: 0.5, 1, 4, 19)"
+                                        value={nuevoEnvase.litros}
+                                        onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, litros: e.target.value })}
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Artículo (ej: 001-500) - opcional"
+                                        value={nuevoEnvase.articulo}
+                                        onChange={(e) => setNuevoEnvase({ ...nuevoEnvase, articulo: e.target.value.toUpperCase() })}
+                                    />
+                                    <button onClick={agregarEnvase} className="btn-confirmar">
+                                        ✓ Agregar
+                                    </button>
+                                    <button onClick={() => setMostrarFormNuevoEnvase(false)} className="btn-cancelar-mini">
+                                        ✖
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="envasados-grid-modern">
+                            {envasadosDisponibles.map((envase) => {
+                                const yaTiene = formProducto.envasadosProducto.some(e => e.id === envase.id);
+                                const estaSeleccionado = formProducto.envasadosSeleccionados.some(e => e.id === envase.id);
+
+                                if (yaTiene) return null;
+
+                                return (
+                                    <div
+                                        key={envase.id}
+                                        className={`envasado-card ${estaSeleccionado ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            let nuevosSeleccionados;
+                                            if (estaSeleccionado) {
+                                                nuevosSeleccionados = formProducto.envasadosSeleccionados.filter(e => e.id !== envase.id);
+                                            } else {
+                                                const nuevoEnvaseObj = {
+                                                    id: envase.id,
+                                                    litros: envase.id,
+                                                    cantidad: 1,
+                                                    articulo: `${String(envase.id).padStart(3, '0')}-${formProducto.codigo || 'XXX'}`,
+                                                };
+                                                nuevosSeleccionados = [...formProducto.envasadosSeleccionados, nuevoEnvaseObj];
+                                            }
+                                            setFormProducto({ ...formProducto, envasadosSeleccionados: nuevosSeleccionados });
+                                        }}
+                                    >
+                                        <div className="envasado-litros">{envase.id} <span>L</span></div>
+                                        {estaSeleccionado && <div className="envasado-checkbox">✓</div>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {formProducto.envasadosSeleccionados.length > 0 && (
+                            <div className="envasados-seleccionados-list">
+                                <h4>Envasados a agregar:</h4>
+                                <div className="envasados-grid-modern">
+                                    {formProducto.envasadosSeleccionados.map((env, idx) => (
+                                        <div key={idx} className="envasado-card">
+                                            <div className="envasado-litros">{env.litros} <span>L</span></div>
+                                            <div className="envasado-acciones-top">
+                                                <button
+                                                    className="btn-eliminar-envase-icon"
+                                                    onClick={() => eliminarEnvaseSeleccionado(env.litros)}
+                                                    title="Remover"
+                                                >
                                                     ✖
                                                 </button>
                                             </div>
                                         </div>
-                                    )}
-
-                                    <div className="envasados-grid-modern">
-                                        {envasadosDisponibles.map((envase) => {
-                                            const yaTiene = formProducto.envasadosProducto.some(e => e.id === envase.id);
-                                            const estaSeleccionado = formProducto.envasadosSeleccionados.some(e => e.id === envase.id);
-                                            
-                                            if (yaTiene) return null;
-                                            
-                                            return (
-                                                <div
-                                                    key={envase.id}
-                                                    className={`envasado-card ${estaSeleccionado ? 'selected' : ''}`}
-                                                    onClick={() => {
-                                                        let nuevosSeleccionados;
-                                                        if (estaSeleccionado) {
-                                                            nuevosSeleccionados = formProducto.envasadosSeleccionados.filter(e => e.id !== envase.id);
-                                                        } else {
-                                                            const nuevoEnvaseObj = {
-                                                                id: envase.id,
-                                                                litros: envase.id,
-                                                                cantidad: 1,
-                                                                articulo: `${String(envase.id).padStart(3, '0')}-${formProducto.codigo || 'XXX'}`,
-                                                            };
-                                                            nuevosSeleccionados = [...formProducto.envasadosSeleccionados, nuevoEnvaseObj];
-                                                        }
-                                                        setFormProducto({ ...formProducto, envasadosSeleccionados: nuevosSeleccionados });
-                                                    }}
-                                                >
-                                                    <div className="envasado-litros">{envase.id} <span>L</span></div>
-                                                    {estaSeleccionado && <div className="envasado-checkbox">✓</div>}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {formProducto.envasadosSeleccionados.length > 0 && (
-                                        <div className="envasados-seleccionados-list">
-                                            <h4>Envasados a agregar:</h4>
-                                            <div className="envasados-grid-modern">
-                                                {formProducto.envasadosSeleccionados.map((env, idx) => (
-                                                    <div key={idx} className="envasado-card">
-                                                        <div className="envasado-litros">{env.litros} <span>L</span></div>
-                                                        <div className="envasado-acciones-top">
-                                                            <button
-                                                                className="btn-eliminar-envase-icon"
-                                                                onClick={() => eliminarEnvaseSeleccionado(env.litros)}
-                                                                title="Remover"
-                                                            >
-                                                                ✖
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                    ))}
                                 </div>
-
-                                <button
-                                    onClick={guardarProductoEnAPI}
-                                    className="btn-submit-producto"
-                                    disabled={loading}
-                                >
-                                    <span className="btn-icon">{loading ? "⏳" : (modoEdicionAPI ? "💾" : "➕")}</span>
-                                    {loading ? "Guardando..." : (modoEdicionAPI ? "Actualizar en API" : "Crear Producto en API")}
-                                    {!loading && !modoEdicionAPI && <span className="btn-arrow">→</span>}
-                                </button>
                             </div>
-                        </div>
-                    </>
-                );
+                        )}
+                    </div>
+
+                    <button
+                        onClick={guardarProductoEnAPI}
+                        className="btn-submit-producto"
+                        disabled={loading}
+                    >
+                        <span className="btn-icon">{loading ? "⏳" : (modoEdicionAPI ? "💾" : "➕")}</span>
+                        {loading ? "Guardando..." : (modoEdicionAPI ? "Actualizar en API" : "Crear Producto en API")}
+                        {!loading && !modoEdicionAPI && <span className="btn-arrow">→</span>}
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+
+    // ========== RENDER DE ESMALTES ==========
+    const renderEsmaltes = () => (
+        <>
+            <div className="cod-card">
+                <div className="search-box">
+                    <input
+                        type="text"
+                        placeholder="Buscar código especial..."
+                        value={filtroEspeciales}
+                        onChange={(e) => setFiltroEspeciales(e.target.value)}
+                    />
+                    {filtroEspeciales && (
+                        <button onClick={() => setFiltroEspeciales("")} className="clear-filter">
+                            ✖
+                        </button>
+                    )}
+                </div>
+
+                <div className="add-especial-bar">
+                    <input
+                        type="text"
+                        placeholder="Código especial (ej: ESP-001)..."
+                        value={nuevoEspecial.codigo}
+                        onChange={(e) => setNuevoEspecial({ ...nuevoEspecial, codigo: e.target.value.toUpperCase() })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Descripción..."
+                        value={nuevoEspecial.descripcion}
+                        onChange={(e) => setNuevoEspecial({ ...nuevoEspecial, descripcion: e.target.value })}
+                    />
+                    <button onClick={agregarEspecial}>
+                        + Agregar Especial
+                    </button>
+                </div>
+            </div>
+
+            <div className="cod-card table-card">
+                <div className="card-header-flex">
+                    <h3 className="cod-card-title">⭐ CÓDIGOS ESPECIALES</h3>
+                    <span className="count-badge">{codigosEspecialesFiltrados.length} especiales</span>
+                </div>
+
+                <div className="cod-table-wrapper">
+                    <table className="cod-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {codigosEspecialesFiltrados.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="empty-state">
+                                        {filtroEspeciales ? "No se encontraron códigos especiales" : "No hay códigos especiales registrados"}
+                                    </td>
+                                </tr>
+                            ) : (
+                                codigosEspecialesFiltrados.map((especial, index) => (
+                                    <tr key={especial.id}>
+                                        <td>{index + 1}</td>
+                                        <td>
+                                            {editandoEspecial?.id === especial.id ? (
+                                                <input
+                                                    type="text"
+                                                    className="edit-input"
+                                                    value={editandoEspecial.codigo}
+                                                    onChange={(e) => setEditandoEspecial({ ...editandoEspecial, codigo: e.target.value.toUpperCase() })}
+                                                />
+                                            ) : (
+                                                <span className="codigo-value">{especial.codigo}</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editandoEspecial?.id === especial.id ? (
+                                                <input
+                                                    type="text"
+                                                    className="edit-input-desc"
+                                                    value={editandoEspecial.descripcion}
+                                                    onChange={(e) => setEditandoEspecial({ ...editandoEspecial, descripcion: e.target.value })}
+                                                />
+                                            ) : (
+                                                <span>{especial.descripcion}</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={`status-badge ${especial.activo ? 'active' : 'inactive'}`}
+                                                onClick={() => toggleActivoEspecial(especial.id)}
+                                            >
+                                                {especial.activo ? '✓ Activo' : '✗ Inactivo'}
+                                            </button>
+                                        </td>
+                                        <td className="actions-cell">
+                                            {editandoEspecial?.id === especial.id ? (
+                                                <>
+                                                    <button className="action-btn save" onClick={guardarEdicionEspecial}>💾</button>
+                                                    <button className="action-btn cancel" onClick={cancelarEdicionEspecial}>✖</button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="action-btn edit" onClick={() => iniciarEdicionEspecial(especial)}>✏️</button>
+                                                    <button className="action-btn delete" onClick={() => eliminarEspecial(especial.id)}>🗑️</button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="info-box">
+                    <strong>ℹ️ Nota:</strong> Los códigos especiales son para pedidos únicos o urgentes en producción de Esmaltes.
+                    Puedes activarlos/desactivarlos según sea necesario.
+                </div>
+            </div>
+        </>
+    );
+
+    // ========== RENDERIZADO PRINCIPAL ==========
+    const renderContenido = () => {
+        if (seccionActiva === "familias") {
+            return <FamiliasGestionScreen />;
+        } else if (seccionActiva === "vinilicas") {
+            if (subSeccionVinilicas === "excluidos") {
+                return renderVinilicasExcluidos();
+            } else if (subSeccionVinilicas === "productos") {
+                return renderVinilicasProductos();
             }
         } else if (seccionActiva === "esmaltes") {
-            return (
-                <>
-                    <div className="cod-card">
-                        <div className="search-box">
-                            <input
-                                type="text"
-                                placeholder="Buscar código especial..."
-                                value={filtroEspeciales}
-                                onChange={(e) => setFiltroEspeciales(e.target.value)}
-                            />
-                            {filtroEspeciales && (
-                                <button onClick={() => setFiltroEspeciales("")} className="clear-filter">
-                                    ✖
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="add-especial-bar">
-                            <input
-                                type="text"
-                                placeholder="Código especial (ej: ESP-001)..."
-                                value={nuevoEspecial.codigo}
-                                onChange={(e) => setNuevoEspecial({ ...nuevoEspecial, codigo: e.target.value.toUpperCase() })}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Descripción..."
-                                value={nuevoEspecial.descripcion}
-                                onChange={(e) => setNuevoEspecial({ ...nuevoEspecial, descripcion: e.target.value })}
-                            />
-                            <button onClick={agregarEspecial}>
-                                + Agregar Especial
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="cod-card table-card">
-                        <div className="card-header-flex">
-                            <h3 className="cod-card-title">⭐ CÓDIGOS ESPECIALES</h3>
-                            <span className="count-badge">{codigosEspecialesFiltrados.length} especiales</span>
-                        </div>
-
-                        <div className="cod-table-wrapper">
-                            <table className="cod-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Código</th>
-                                        <th>Descripción</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {codigosEspecialesFiltrados.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="5" className="empty-state">
-                                                {filtroEspeciales ? "No se encontraron códigos especiales" : "No hay códigos especiales registrados"}
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        codigosEspecialesFiltrados.map((especial, index) => (
-                                            <tr key={especial.id}>
-                                                <td>{index + 1}</td>
-                                                <td>
-                                                    {editandoEspecial?.id === especial.id ? (
-                                                        <input
-                                                            type="text"
-                                                            className="edit-input"
-                                                            value={editandoEspecial.codigo}
-                                                            onChange={(e) => setEditandoEspecial({ ...editandoEspecial, codigo: e.target.value.toUpperCase() })}
-                                                        />
-                                                    ) : (
-                                                        <span className="codigo-value">{especial.codigo}</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editandoEspecial?.id === especial.id ? (
-                                                        <input
-                                                            type="text"
-                                                            className="edit-input-desc"
-                                                            value={editandoEspecial.descripcion}
-                                                            onChange={(e) => setEditandoEspecial({ ...editandoEspecial, descripcion: e.target.value })}
-                                                        />
-                                                    ) : (
-                                                        <span>{especial.descripcion}</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <button
-                                                        className={`status-badge ${especial.activo ? 'active' : 'inactive'}`}
-                                                        onClick={() => toggleActivoEspecial(especial.id)}
-                                                    >
-                                                        {especial.activo ? '✓ Activo' : '✗ Inactivo'}
-                                                    </button>
-                                                </td>
-                                                <td className="actions-cell">
-                                                    {editandoEspecial?.id === especial.id ? (
-                                                        <>
-                                                            <button className="action-btn save" onClick={guardarEdicionEspecial}>💾</button>
-                                                            <button className="action-btn cancel" onClick={cancelarEdicionEspecial}>✖</button>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <button className="action-btn edit" onClick={() => iniciarEdicionEspecial(especial)}>✏️</button>
-                                                            <button className="action-btn delete" onClick={() => eliminarEspecial(especial.id)}>🗑️</button>
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="info-box">
-                            <strong>ℹ️ Nota:</strong> Los códigos especiales son para pedidos únicos o urgentes en producción de Esmaltes.
-                            Puedes activarlos/desactivarlos según sea necesario.
-                        </div>
-                    </div>
-                </>
-            );
+            return renderEsmaltes();
         }
         return null;
     };
@@ -1128,6 +1136,7 @@ export default function CodigosScreen() {
 
                     <nav className="cod-nav">
                         <div className="nav-label">SECCIONES</div>
+
                         <button
                             className={`cod-nav-btn ${seccionActiva === "vinilicas" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("vinilicas")}
@@ -1139,6 +1148,13 @@ export default function CodigosScreen() {
                             onClick={() => setSeccionActiva("esmaltes")}
                         >
                             <span className="nav-icon">✨</span> Esmaltes
+                        </button>
+
+                        <button
+                            className={`cod-nav-btn ${seccionActiva === "familias" ? "active" : ""}`}
+                            onClick={() => setSeccionActiva("familias")}
+                        >
+                            <span className="nav-icon">🏷️</span> Familias
                         </button>
                     </nav>
 
@@ -1187,14 +1203,18 @@ export default function CodigosScreen() {
                     <header className="cod-header">
                         <div className="cod-title-group">
                             <h1>
-                                {seccionActiva === "vinilicas"
-                                    ? getTituloVinilicas()
-                                    : "⭐ Códigos Especiales - Esmaltes"}
+                                {seccionActiva === "familias"
+                                    ? "🏷️ Gestión de Familias"
+                                    : seccionActiva === "vinilicas"
+                                        ? getTituloVinilicas()
+                                        : "⭐ Códigos Especiales - Esmaltes"}
                             </h1>
                             <p>
-                                {seccionActiva === "vinilicas"
-                                    ? getDescripcionVinilicas()
-                                    : "Administra códigos especiales para pedidos urgentes o personalizados de Esmaltes"}
+                                {seccionActiva === "familias"
+                                    ? "Administra las familias de productos: edita nombres y sube imágenes"
+                                    : seccionActiva === "vinilicas"
+                                        ? getDescripcionVinilicas()
+                                        : "Administra códigos especiales para pedidos urgentes o personalizados de Esmaltes"}
                             </p>
                         </div>
                     </header>

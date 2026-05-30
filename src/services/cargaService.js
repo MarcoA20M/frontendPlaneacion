@@ -1,39 +1,69 @@
+// src/services/cargaService.js
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/cargas";
 
-// ✅ REGISTRAR: Envía la lista de cargas y recibe los lotes generados
 export const registrarCarga = (cargas) =>
   axios.post(API_URL, cargas).then((res) => res.data);
 
-// ✅ ELIMINAR: Llama al reacomodo en el Backend
 export const eliminarCarga = (id) =>
   axios.delete(`${API_URL}/${id}`).then((res) => res.data);
 
-// ✅ CONSULTAR POR FECHA: Trae lo guardado en una fecha específica
-// Si no se envía fecha, por defecto intenta traer lo de hoy
-export const obtenerCargasPorFecha = (fechaInput) => {
+export const obtenerCargasPorFecha = async (fechaInput) => {
   let fechaFormateada;
 
   if (fechaInput instanceof Date) {
-    // Extraer componentes locales manualmente
     const year = fechaInput.getFullYear();
     const month = String(fechaInput.getMonth() + 1).padStart(2, '0');
     const day = String(fechaInput.getDate()).padStart(2, '0');
     fechaFormateada = `${year}-${month}-${day}`;
   } else {
-    // Si ya es un string "YYYY-MM-DD", lo usamos directo
     fechaFormateada = fechaInput.split('T')[0];
   }
   
-  return axios.get(`${API_URL}/fecha`, {
+  const response = await axios.get(`${API_URL}/fecha`, {
     params: { fecha: fechaFormateada }
-  }).then((res) => res.data);
+  });
+  
+  // 🔴 IMPORTANTE: Mapear correctamente todos los campos, especialmente 'maquina'
+  const datosNormalizados = response.data.map(reg => {
+    // DEBUG: Ver qué viene del backend
+    console.log("🔍 Registro original del backend:", {
+      folio: reg.folio,
+      maquina: reg.maquina,
+      operario: reg.operario,
+      tipo: reg.tipo
+    });
+    
+    return {
+      id: reg.id,
+      producto: reg.producto || reg.producto_id,
+      producto_id: reg.producto_id || reg.producto,
+      envasadoId: reg.envasadoId || reg.envasado_id || reg.envasado,
+      envasado_id: reg.envasado_id || reg.envasadoId,
+      cantidad: reg.cantidad,
+      litros: reg.litros,
+      tipo: reg.tipo,
+      folio: reg.folio,
+      folioHija: reg.folioHija || reg.folio_hija,
+      operario: reg.operario || "",
+      // 🔴 CLAVE: Asegurar que la máquina se captura correctamente
+      maquina: reg.maquina ? String(reg.maquina) : "",
+      fecha: reg.fecha,
+      descripcion: reg.descripcion || "",
+      poderCubriente: reg.poderCubriente || reg.nivelCubriente || 0,
+      procesos: reg.procesos || []
+    };
+  });
+  
+  console.log("📦 Primer registro normalizado:", datosNormalizados[0]);
+  console.log("   - maquina:", datosNormalizados[0]?.maquina);
+  console.log("   - operario:", datosNormalizados[0]?.operario);
+  
+  return datosNormalizados;
 };
 
-// Mantenemos obtenerCargasHoy como un alias por si lo usas en otro lado
 export const obtenerCargasHoy = () => obtenerCargasPorFecha(new Date());
-
 
 export const verificarCargaReciente = async (codigo, envasadoId) => {
   const fechas = [];
@@ -48,28 +78,20 @@ export const verificarCargaReciente = async (codigo, envasadoId) => {
     const resultados = await Promise.all(promesas);
     const todas = resultados.flat();
 
-    console.log("--- DEBUG BASE DE DATOS ---");
-    console.log("Total registros traídos:", todas.length);
-    console.log("Buscando Producto:", codigo, "| Envasado ID:", envasadoId);
-
-   const coincidencias = todas.filter((reg) => {
-  // Obtenemos los valores de la BD
-  const regProducto = reg.producto || reg.producto_id;
-  const regEnvasado = reg.envasado || reg.envasado_id;
-  
-  // Comparamos convirtiendo a Número para evitar el problema de "004" vs "4"
-  const match = Number(regProducto) === Number(codigo) && 
-                Number(regEnvasado) === Number(envasadoId);
-  
-  return match;
-});
+    const coincidencias = todas.filter((reg) => {
+      const regProducto = reg.producto || reg.producto_id;
+      const regEnvasado = reg.envasadoId || reg.envasado_id;
+      
+      const match = Number(regProducto) === Number(codigo) && 
+                    Number(regEnvasado) === Number(envasadoId);
+      
+      return match;
+    });
 
     if (coincidencias.length > 0) {
-      console.log("✅ Coincidencias encontradas:", coincidencias);
       return {
         existe: true,
         fecha: coincidencias[0].fecha,
-        // Usamos folioHija (camelCase) como viste en tu consola
         folios: coincidencias.map((c) => c.folioHija || c.folio_hija || c.folio).join(", "),
         operarios: [...new Set(coincidencias.map((c) => c.operario))].join(", "),
         total: coincidencias.reduce((acc, curr) => acc + Number(curr.cantidad || 0), 0),
@@ -77,10 +99,12 @@ export const verificarCargaReciente = async (codigo, envasadoId) => {
       };
     }
 
-    console.log("❌ No hubo coincidencias exactas.");
     return null;
   } catch (error) {
     console.error("Error en servicio:", error);
     return null;
   }
+  
 };
+
+

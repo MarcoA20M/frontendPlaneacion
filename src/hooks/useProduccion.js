@@ -40,6 +40,18 @@ const generarFolioAutomatico = (tipo, cola, rondas, esmaltes, especiales) => {
     return `${prefijo}${nuevoIndice}`;
 };
 
+// Función para formatear artículo
+const formatearArticulo = (envasadoId) => {
+    const idNum = Number(envasadoId);
+    if (idNum === 0.5 || idNum === 500) return "500";
+    if (idNum === 0.25 || idNum === 250) return "250";
+    if (idNum === 0.75 || idNum === 750) return "750";
+    if (idNum === 1) return "001";
+    if (idNum === 4) return "004";
+    if (idNum === 19) return "019";
+    return String(idNum).padStart(3, '0');
+};
+
 export function useProduccion() {
     const [codigo, setCodigo] = useState("");
     const [producto, setProducto] = useState(null);
@@ -57,98 +69,249 @@ export function useProduccion() {
     const CODIGOS_BASES = ["BBE20", "BBE30", "BAL40", "BNE10", "BSP10"];
     const IGUALADORES = ["Gaspar", "Alberto", "Pedro"];
 
-    // --- FUNCIÓN CRÍTICA CORREGIDA: CARGAR DATOS DE BD ---
-    const cargarDatosPorFecha = useCallback(async (fechaInput) => {
-        try {
-            setBuscandoFecha(true);
-            setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
+    // --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD RESPETANDO ÓRDENES ---
+    // --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD RESPETANDO MÁQUINA Y OPERARIO ---
+// --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD ---
+const cargarDatosPorFecha = useCallback(async (fechaInput) => {
+    try {
+        setBuscandoFecha(true);
+        
+        // Inicializar rondas vacías
+        const nuevasRondas = Array.from({ length: 8 }, () => Array(6).fill(null));
+        const nuevosEsmaltes = [];
+        const nuevasEspeciales = [];
+
+        const fechaString = typeof fechaInput === 'string'
+            ? fechaInput.split('T')[0]
+            : fechaInput.toISOString().split('T')[0];
+
+        const datos = await obtenerCargasPorFecha(fechaString);
+        if (!datos || datos.length === 0) {
+            setRondas(nuevasRondas);
             setCargasEsmaltesAsignadas([]);
-            setColaCargas([]);
             setCargasEspeciales([]);
+            return;
+        }
 
-            const fechaString = typeof fechaInput === 'string'
-                ? fechaInput.split('T')[0]
-                : fechaInput.toISOString().split('T')[0];
+        // 🔴 MAPA DE OPERARIO A MÁQUINA
+        const mapaOperarioMaquina = {
+            "Isaac": 101,
+            "Juan": 102,
+            "Pedro": 103,
+            "Luis": 104,
+            "Carlos": 105,  // Carlos debe ir a máquina 105
+            "Javier": 106,
+            "Miguel": 107,
+            "Roberto": 108,
+            "Aldo": 101,
+            "Germán": 104,
+            "Gaspar": 105,
+            "Alberto": 106
+        };
 
-            const datos = await obtenerCargasPorFecha(fechaString);
-            if (!datos || datos.length === 0) return;
-
-            const nuevasRondas = Array.from({ length: 8 }, () => Array(6).fill(null));
-            const nuevosEsmaltes = [];
-            const nuevasEspeciales = [];
-            const mapaCargasBD = {};
-
-            datos.forEach(reg => {
-                // 1. Agrupación por Folio Madre
-                if (!mapaCargasBD[reg.folio]) {
-                    const folioLower = String(reg.folio || '').toLowerCase();
-                    const esVinilica = reg.tipo === 'V' || folioLower.startsWith('v');
-
-                    mapaCargasBD[reg.folio] = {
-                        id: reg.id,
-                        idTemp: reg.id + "-" + Math.random(),
-                        folio: reg.folio,
-                        codigoProducto: reg.producto || "S/C",
-                        descripcion: reg.descripcion || "Recuperado",
-                        litros: Number(reg.litros),
-                        tipo: esVinilica ? "Vinílica" : "Esmalte",
-                        operario: reg.operario,
-                        maquina: String(reg.maquina || "").replace(/\D/g, ""),
-                        nivelCubriente: reg.poderCubriente || 0,
-                        detallesEnvasado: [],
-                        procesos: reg.procesos || []
-                    };
+        // 1. Agrupar por folio madre
+        const mapaCargasBD = {};
+        
+        datos.forEach(reg => {
+            const folioMadre = reg.folio;
+            
+            if (!mapaCargasBD[folioMadre]) {
+                const folioLower = String(folioMadre || '').toLowerCase();
+                const esVinilica = reg.tipo === 'V' || folioLower.startsWith('v');
+                const esEspecial = CODIGOS_EXCLUIDOS.some(ex => 
+                    normalizarCodigo(ex) === normalizarCodigo(reg.producto || "")
+                );
+                
+                // 🔴 OBTENER MÁQUINA: Si viene vacía, asignar por operario
+                let maquinaGuardada = String(reg.maquina || "").replace(/\D/g, "");
+                const operarioGuardado = reg.operario || "";
+                
+                // Si no tiene máquina, asignar según el operario
+                if (!maquinaGuardada && operarioGuardado) {
+                    maquinaGuardada = String(mapaOperarioMaquina[operarioGuardado] || "");
+                    console.log(`🔧 Asignando máquina por operario: ${operarioGuardado} → ${maquinaGuardada}`);
                 }
-
-                // 2. LÓGICA DIRECTA: Usamos el ID de la base de datos como formato (1, 500, 19, etc.)
-                mapaCargasBD[reg.folio].detallesEnvasado.push({
-                    id: reg.envasadoId,
-                    cantidad: reg.cantidad,
-                    formato: String(reg.envasadoId || ""), 
-                    folioIndividual: reg.folioHija
-                });
+                
+                // Si sigue sin máquina, asignar 101 por defecto
+                if (!maquinaGuardada) {
+                    maquinaGuardada = "101";
+                    console.log(`⚠️ Sin máquina ni operario, asignando 101 por defecto`);
+                }
+                
+                console.log(`📌 Creando carga madre: ${folioMadre}`);
+                console.log(`   - maquina guardada: "${maquinaGuardada}"`);
+                console.log(`   - operario: "${operarioGuardado}"`);
+                
+                mapaCargasBD[folioMadre] = {
+                    idBD: reg.id,
+                    idTemp: `${folioMadre}-${Date.now()}-${Math.random()}`,
+                    folio: folioMadre,
+                    codigoProducto: reg.producto || "S/C",
+                    descripcion: reg.descripcion || "Sin descripción",
+                    litros: 0,
+                    tipo: esVinilica ? "Vinílica" : "Esmalte",
+                    operario: operarioGuardado,
+                    maquina: maquinaGuardada,
+                    nivelCubriente: reg.poderCubriente || 0,
+                    detallesEnvasado: [],
+                    procesos: reg.procesos || [],
+                    esEspecial: esEspecial,
+                    textoMaquina: `VI-${maquinaGuardada} ${operarioGuardado}`,
+                    textoOperario: operarioGuardado
+                };
+            }
+            
+            // Agregar detalle de envasado
+            const envasadoId = Number(reg.envasadoId || reg.envasado_id);
+            const formatoCorrecto = formatearArticulo(envasadoId);
+            const litrosUnitario = litrosPorEnvasado(envasadoId);
+            
+            mapaCargasBD[folioMadre].detallesEnvasado.push({
+                id: envasadoId,
+                cantidad: Number(reg.cantidad),
+                formato: formatoCorrecto,
+                folioIndividual: reg.folioHija || reg.folio_hija,
+                litros: litrosUnitario
             });
+            
+            // Sumar litros totales
+            mapaCargasBD[folioMadre].litros += Number(reg.cantidad) * litrosUnitario;
+        });
 
-            // Acomodo en el tablero
-            Object.values(mapaCargasBD).forEach(carga => {
-                if (carga.tipo === "Vinílica") {
-                    const m = parseInt(carga.maquina);
-                    let fila = m - 101;
-                    let asignada = false;
+        console.log("📦 TOTAL CARGAS MADRE:", Object.keys(mapaCargasBD).length);
+        
+        // 2. Separar por tipo
+        const cargasVinilicas = [];
+        const cargasEsmaltesTemp = [];
+        
+        Object.values(mapaCargasBD).forEach(carga => {
+            if (carga.esEspecial) {
+                nuevasEspeciales.push(carga);
+            } else if (carga.tipo === "Vinílica") {
+                cargasVinilicas.push(carga);
+            } else {
+                cargasEsmaltesTemp.push(carga);
+            }
+        });
 
-                    if (fila >= 0 && fila < 8) {
-                        const col = nuevasRondas[fila].indexOf(null);
-                        if (col !== -1) {
-                            nuevasRondas[fila][col] = carga;
-                            asignada = true;
-                        }
+        console.log("📦 VINÍLICAS:", cargasVinilicas.length);
+        cargasVinilicas.forEach(c => console.log(`   - ${c.folio}: máquina="${c.maquina}", operario="${c.operario}"`));
+
+        // 3. ORDENAR VINÍLICAS POR MÁQUINA
+      // 3. ORDENAR VINÍLICAS POR MÁQUINA
+// 3. ORDENAR VINÍLICAS POR MÁQUINA Y DENTRO POR FOLIO (o por fecha)
+cargasVinilicas.sort((a, b) => {
+    const maqA = parseInt(a.maquina) || 999;
+    const maqB = parseInt(b.maquina) || 999;
+    if (maqA !== maqB) return maqA - maqB;
+    // Dentro de la misma máquina, ordenar por folio (numérico)
+    const numA = parseInt(a.folio?.replace(/[^0-9]/g, '') || 0);
+    const numB = parseInt(b.folio?.replace(/[^0-9]/g, '') || 0);
+    return numA - numB;
+});
+
+        // 4. COLOCAR CADA CARGA EN SU MÁQUINA CORRESPONDIENTE
+        for (const carga of cargasVinilicas) {
+            const maquinaNum = parseInt(carga.maquina);
+            
+            console.log(`🔧 Procesando: ${carga.folio} | máquina="${carga.maquina}" | maquinaNum=${maquinaNum}`);
+            
+            let filaDestino = -1;
+            
+            if (!isNaN(maquinaNum) && maquinaNum >= 101 && maquinaNum <= 108) {
+                filaDestino = maquinaNum - 101;
+                console.log(`   ✅ Máquina específica: ${maquinaNum} → fila ${filaDestino}`);
+            } else {
+                console.log(`   ❌ Máquina inválida: "${carga.maquina}"`);
+                // No asignar, se irá a especiales
+            }
+            
+            // Asignar a la fila correspondiente
+            if (filaDestino >= 0 && filaDestino < 8) {
+                let columnaAsignada = -1;
+                for (let col = 0; col < 6; col++) {
+                    if (nuevasRondas[filaDestino][col] === null) {
+                        columnaAsignada = col;
+                        break;
                     }
-
-                    if (!asignada) {
-                        for (let f = 0; f < 8; f++) {
-                            const c = nuevasRondas[f].indexOf(null);
-                            if (c !== -1) {
-                                nuevasRondas[f][c] = { ...carga, maquina: 101 + f };
+                }
+                
+                if (columnaAsignada !== -1) {
+                    nuevasRondas[filaDestino][columnaAsignada] = carga;
+                    console.log(`   ✅ Asignada a fila ${filaDestino}, col ${columnaAsignada}`);
+                } else {
+                    console.log(`   ⚠️ Fila ${filaDestino} llena, buscando espacio...`);
+                    let asignada = false;
+                    for (let f = 0; f < 8 && !asignada; f++) {
+                        for (let c = 0; c < 6 && !asignada; c++) {
+                            if (nuevasRondas[f][c] === null) {
+                                nuevasRondas[f][c] = { ...carga, maquina: String(101 + f) };
+                                nuevasRondas[f][c].textoMaquina = `VI-${101 + f} ${carga.operario}`;
                                 asignada = true;
-                                break;
+                                console.log(`   📦 Reubicada en máquina ${101 + f}`);
                             }
                         }
                     }
                     if (!asignada) nuevasEspeciales.push(carga);
-                } else {
-                    nuevosEsmaltes.push(carga);
                 }
-            });
-
-            setRondas(nuevasRondas);
-            setCargasEsmaltesAsignadas(nuevosEsmaltes);
-            setCargasEspeciales(nuevasEspeciales);
-        } catch (error) {
-            console.error("Error al cargar fecha:", error);
-        } finally {
-            setBuscandoFecha(false);
+            } else {
+                // Máquina inválida, buscar cualquier espacio
+                console.log(`   ❌ Máquina inválida: "${carga.maquina}"`);
+                let asignada = false;
+                for (let f = 0; f < 8 && !asignada; f++) {
+                    for (let c = 0; c < 6 && !asignada; c++) {
+                        if (nuevasRondas[f][c] === null) {
+                            nuevasRondas[f][c] = { ...carga, maquina: String(101 + f) };
+                            nuevasRondas[f][c].textoMaquina = `VI-${101 + f} ${carga.operario}`;
+                            asignada = true;
+                            console.log(`   📦 Asignada a máquina ${101 + f} por defecto`);
+                        }
+                    }
+                }
+                if (!asignada) nuevasEspeciales.push(carga);
+            }
         }
-    }, []);
+
+        // 5. Esmaltes
+        const esmaltesOrdenados = [...cargasEsmaltesTemp].sort((a, b) => {
+            const cubA = a.nivelCubriente || 0;
+            const cubB = b.nivelCubriente || 0;
+            if (cubA !== cubB) return cubA - cubB;
+            return String(a.folio).localeCompare(String(b.folio));
+        });
+
+        esmaltesOrdenados.forEach(carga => {
+            if (!carga.operario || carga.operario === "") {
+                carga.operario = "Aldo";
+                carga.textoMaquina = `ESM-001 ${carga.operario}`;
+            } else {
+                carga.textoMaquina = `ESM-001 ${carga.operario}`;
+            }
+            nuevosEsmaltes.push(carga);
+        });
+
+        // 6. Actualizar estados
+        setRondas(nuevasRondas);
+        setCargasEsmaltesAsignadas(ordenarCargas(nuevosEsmaltes));
+        setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+        setColaCargas([]);
+        
+        console.log("📦 DISTRIBUCIÓN FINAL:");
+        for (let i = 0; i < 8; i++) {
+            const maquina = 101 + i;
+            const cargasEnFila = nuevasRondas[i].filter(c => c !== null);
+            if (cargasEnFila.length > 0) {
+                console.log(`   Máquina ${maquina} (Ronda ${i+1}): ${cargasEnFila.length} cargas`);
+                cargasEnFila.forEach(c => console.log(`      - ${c.folio} | operario: ${c.operario}`));
+            }
+        }
+        
+    } catch (error) {
+        console.error("Error al cargar fecha:", error);
+    } finally {
+        setBuscandoFecha(false);
+    }
+}, []);
 
     useEffect(() => {
         cargarDatosPorFecha(new Date().toISOString().split('T')[0]);
@@ -188,37 +351,55 @@ export function useProduccion() {
         : 0, [producto, cantidades]);
 
     // --- ACCIONES DE BD ---
-    const guardarProduccionEnBD = async () => {
-        const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-        if (todas.length === 0) return alert("No hay cargas para guardar.");
-        
-        const registrosParaBD = [];
-        todas.forEach(carga => {
-            if (carga.detallesEnvasado) {
-                carga.detallesEnvasado.forEach(detalle => {
-                    if (detalle.cantidad > 0 && detalle.id) {
-                        registrosParaBD.push({
-                            codigoProducto: String(carga.codigoProducto),
-                            envasadoId: Number(detalle.id),
-                            cantidad: Number(detalle.cantidad),
-                            litros: Number(carga.litros),
-                            tipo: carga.tipo === "Vinílica" ? "V" : "E",
-                            folio: carga.folio,
-                            folioHija: detalle.folioIndividual,
-                            operario: carga.operario || "Sin asignar",
-                            maquina: String(carga.maquina || "")
-                        });
+   const guardarProduccionEnBD = async () => {
+    const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
+    if (todas.length === 0) return alert("No hay cargas para guardar.");
+    
+    const registrosParaBD = [];
+    todas.forEach(carga => {
+        if (carga.detallesEnvasado) {
+            carga.detallesEnvasado.forEach(detalle => {
+                if (detalle.cantidad > 0 && detalle.id) {
+                    // 🔴 Asegurar que la máquina se guarda correctamente
+                    let maquinaGuardar = "";
+                    if (carga.maquina) {
+                        maquinaGuardar = String(carga.maquina);
+                    } else if (carga.maquinaAsignada) {
+                        maquinaGuardar = String(carga.maquinaAsignada);
+                    } else if (carga.textoMaquina) {
+                        // Extraer número de máquina del texto "VI-101 Isaac"
+                        const match = carga.textoMaquina.match(/VI-(\d+)/);
+                        if (match) maquinaGuardar = match[1];
                     }
-                });
-            }
-        });
-        try {
-            setGuardandoBD(true);
-            await registrarCarga(registrosParaBD);
-            alert("Guardado con éxito");
-        } catch (error) { alert("Error al conectar con el servidor."); }
-        finally { setGuardandoBD(false); }
-    };
+                    
+                    registrosParaBD.push({
+                        codigoProducto: String(carga.codigoProducto),
+                        envasadoId: Number(detalle.id),
+                        cantidad: Number(detalle.cantidad),
+                        litros: Number(carga.litros),
+                        tipo: carga.tipo === "Vinílica" ? "V" : "E",
+                        folio: carga.folio,
+                        folioHija: detalle.folioIndividual,
+                        operario: carga.operario || "Sin asignar",
+                        maquina: maquinaGuardar
+                    });
+                }
+            });
+        }
+    });
+    
+    console.log("📦 Registros a guardar:", registrosParaBD.map(r => ({ folio: r.folio, maquina: r.maquina, operario: r.operario })));
+    
+    try {
+        setGuardandoBD(true);
+        await registrarCarga(registrosParaBD);
+        alert("Guardado con éxito");
+    } catch (error) { 
+        console.error("Error al guardar:", error);
+        alert("Error al conectar con el servidor."); 
+    }
+    finally { setGuardandoBD(false); }
+};
 
     const handleEliminarCargaBD = async (idBD, idTemp) => {
         if (!idBD) {
@@ -319,7 +500,7 @@ export function useProduccion() {
                 return {
                     id: envId,
                     cantidad: Number(cantidades[envId]),
-                    formato: litraje === 0.5 ? "500" : litraje === 0.25 ? "250" : `${litraje}`.replace('.', ''),
+                    formato: formatearArticulo(litraje),
                     folioIndividual: "PENDIENTE"
                 };
             }),

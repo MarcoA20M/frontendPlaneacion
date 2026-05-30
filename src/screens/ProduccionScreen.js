@@ -18,6 +18,9 @@ import ModalInventarioBajo from "../components/ModalInventarioBajo";
 import ModalPlanificador from "../components/ModalPlanificador";
 import InfoInventarioProducto from "../components/InfoInventarioProducto";
 
+// Importar la imagen
+import logoPintu from "../assets/PINTU.jpg";
+
 // Estilos
 import "../styles/styles.css";
 import "../styles/rondas.css";
@@ -67,6 +70,11 @@ export default function ProduccionScreen() {
         const guardado = localStorage.getItem("planificador_data");
         return guardado ? JSON.parse(guardado) : null;
     });
+
+    // Función para volver al menú principal
+    const volverAlMenuPrincipal = () => {
+        navigate("/");
+    };
 
     // --- Cargar Familias desde la API ---
     useEffect(() => {
@@ -205,8 +213,16 @@ export default function ProduccionScreen() {
                         )}
                     </div>
 
+                    {/* TÍTULO CON IMAGEN CLICKEABLE */}
                     <div className="titulo-app">
-                        <h1>Gestión de Pinturas</h1>
+                        <div className="logo-clickeable" onClick={volverAlMenuPrincipal} style={{ cursor: 'pointer' }}>
+                            <img 
+                                src={logoPintu} 
+                                alt="Logo Pinturas" 
+                                className="logo-titulo"
+                                style={{ height: '50px', width: 'auto', marginRight: '15px' }}
+                            />
+                        </div>
                         {datosPlanificador && (
                             <button className="badge-planificador-btn" onClick={() => setMostrarModalPlanificador(true)}>
                                 📅

@@ -15,7 +15,10 @@ export default function CodigosScreen() {
 
     // Estado para el submenú de Vinílicas
     const [subSeccionVinilicas, setSubSeccionVinilicas] = useState("excluidos");
-
+    
+    // Estado para la imagen de la familia seleccionada
+    const [imagenFamiliaSeleccionada, setImagenFamiliaSeleccionada] = useState(null);
+    
     // Estados para Códigos Excluidos (Vinílicas)
     const [codigos, setCodigos] = useState([]);
     const [nuevoCodigo, setNuevoCodigo] = useState("");
@@ -77,6 +80,24 @@ export default function CodigosScreen() {
     const [nuevoEspecial, setNuevoEspecial] = useState({ codigo: "", descripcion: "" });
     const [editandoEspecial, setEditandoEspecial] = useState(null);
     const [filtroEspeciales, setFiltroEspeciales] = useState("");
+
+    // ========== EFECTO PARA CARGAR IMAGEN DE FAMILIA ==========
+    useEffect(() => {
+        const cargarImagenFamilia = async () => {
+            if (formProducto.familiaId) {
+                try {
+                    const imgUrl = familiaService.getImagenUrl(formProducto.familiaId);
+                    setImagenFamiliaSeleccionada(imgUrl);
+                } catch (error) {
+                    console.error("Error cargando imagen de familia:", error);
+                    setImagenFamiliaSeleccionada(null);
+                }
+            } else {
+                setImagenFamiliaSeleccionada(null);
+            }
+        };
+        cargarImagenFamilia();
+    }, [formProducto.familiaId]);
 
     // ========== CÓDIGOS EXCLUIDOS (VINÍLICAS) ==========
     useEffect(() => {
@@ -346,12 +367,11 @@ export default function CodigosScreen() {
                 envasados: envasadosParaAPI
             };
 
-            let resultado;
             if (modoEdicionAPI && productoEditandoId) {
-                resultado = await actualizarProducto(codigo, productoParaAPI);
+                await actualizarProducto(codigo, productoParaAPI);
                 mostrarMensaje(`✅ Producto "${codigo}" actualizado`, "success");
             } else {
-                resultado = await crearProducto(productoParaAPI);
+                await crearProducto(productoParaAPI);
                 mostrarMensaje(`✅ Producto "${codigo}" creado en la API`, "success");
             }
 
@@ -681,161 +701,216 @@ export default function CodigosScreen() {
         </>
     );
 
-    // ========== RENDER DE VINÍLICAS - PRODUCTOS ==========
-    const renderVinilicasProductos = () => (
-        <>
-            <div className="cod-card">
-                <div className="search-box-wrapper">
-                    <div className="search-box-with-button">
-                        <input
-                            type="text"
-                            placeholder="🔍 Buscar producto en API por código (ej: 500)..."
-                            value={codigoBusqueda}
-                            onChange={(e) => setCodigoBusqueda(e.target.value.toUpperCase())}
-                            onKeyPress={(e) => e.key === 'Enter' && buscarYCargarProducto()}
-                        />
-                        <button
-                            className="btn-buscar-producto"
-                            onClick={buscarYCargarProducto}
-                            disabled={loading}
-                        >
-                            {loading ? "⏳ Buscando..." : "🔍 Buscar y Cargar"}
-                        </button>
-                        {modoEdicionAPI && (
+    // ========== RENDER DE VINÍLICAS - PRODUCTOS (CON LAYOUT MEJORADO) ==========
+    const renderVinilicasProductos = () => {
+        const familiaActual = familias.find(f => f.id === formProducto.familiaId);
+        
+        return (
+            <>
+                <div className="cod-card">
+                    <div className="search-box-wrapper">
+                        <div className="search-box-with-button">
+                            <input
+                                type="text"
+                                placeholder="🔍 Buscar producto en API por código (ej: 500)..."
+                                value={codigoBusqueda}
+                                onChange={(e) => setCodigoBusqueda(e.target.value.toUpperCase())}
+                                onKeyPress={(e) => e.key === 'Enter' && buscarYCargarProducto()}
+                            />
                             <button
-                                className="btn-limpiar-formulario"
-                                onClick={limpiarFormulario}
+                                className="btn-buscar-producto"
+                                onClick={buscarYCargarProducto}
+                                disabled={loading}
                             >
-                                ✖ Limpiar
+                                {loading ? "⏳ Buscando..." : "🔍 Buscar y Cargar"}
                             </button>
-                        )}
-                    </div>
-                    <div className="busqueda-info">
-                        <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="cod-card producto-form-card">
-                <div className="form-header">
-                    <div className="form-header-icon">
-                        {modoEdicionAPI ? "✏️" : "✨"}
-                    </div>
-                    <div>
-                        <h3 className="form-title">
-                            {modoEdicionAPI ? `Editando Producto API: ${formProducto.codigo}` : "Crear Nuevo Producto"}
-                        </h3>
-                        <p className="form-subtitle">
-                            {modoEdicionAPI
-                                ? "Modifica los envasados y guarda los cambios en la API."
-                                : "Completa los datos del producto y sus envases - Se guardará en la API"}
-                        </p>
+                            {modoEdicionAPI && (
+                                <button
+                                    className="btn-limpiar-formulario"
+                                    onClick={limpiarFormulario}
+                                >
+                                    ✖ Limpiar
+                                </button>
+                            )}
+                        </div>
+                        <div className="busqueda-info">
+                            <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="add-producto-form">
-                    <div className="form-grid-2">
-                        <div className="input-group">
-                            <label className="input-label">
-                                <span className="label-icon">🔖</span>
-                                Código del producto
-                            </label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                placeholder="Ej: PROD-001"
-                                value={formProducto.codigo}
-                                onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
-                                disabled={modoEdicionAPI}
-                            />
-                            <span className="input-hint">
-                                {modoEdicionAPI ? "El código no se puede modificar" : "Código único identificador"}
-                            </span>
+                <div className="cod-card producto-form-card">
+                    <div className="form-header">
+                        <div className="form-header-icon">
+                            {modoEdicionAPI ? "✏️" : "✨"}
                         </div>
-
-                        <div className="input-group">
-                            <label className="input-label">
-                                <span className="label-icon">📝</span>
-                                Descripción
-                            </label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                placeholder="Ej: Pintura Vinílica Premium"
-                                value={formProducto.descripcion}
-                                onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
-                            />
-                            <span className="input-hint">
-                                {modoEdicionAPI ? "Puedes modificar la descripción" : "Nombre o descripción del producto"}
-                            </span>
+                        <div>
+                            <h3 className="form-title">
+                                {modoEdicionAPI ? `Editando Producto API: ${formProducto.codigo}` : "Crear Nuevo Producto"}
+                            </h3>
+                            <p className="form-subtitle">
+                                {modoEdicionAPI
+                                    ? "Modifica los envasados y guarda los cambios en la API."
+                                    : "Completa los datos del producto y sus envases - Se guardará en la API"}
+                            </p>
                         </div>
                     </div>
 
-                    <div className="form-grid-2" style={{ marginTop: '16px' }}>
-                        <div className="input-group">
-                            <label className="input-label">
-                                <span className="label-icon">💪</span>
-                                Poder Cubriente
-                            </label>
-                            <input
-                                type="number"
-                                className="form-input"
-                                placeholder="Ej: 36"
-                                value={formProducto.poderCubriente}
-                                onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
-                            />
-                            <span className="input-hint">
-                                Poder cubriente del producto (m² por litro)
-                            </span>
+                    {/* LAYOUT DE DOS COLUMNAS: IMAGEN | FORMULARIO */}
+                    <div className="producto-layout-doble">
+                        {/* COLUMNA IZQUIERDA - IMAGEN DE LA FAMILIA */}
+                        <div className="producto-columna-imagen">
+                            {formProducto.familiaId && imagenFamiliaSeleccionada ? (
+                                <div className="familia-imagen-destacada">
+                                    <div className="imagen-destacada-titulo">
+                                        <span className="icono">🖼️</span>
+                                        <span>Imagen de la familia</span>
+                                    </div>
+                                    <div className="imagen-destacada-contenedor">
+                                        <img
+                                            src={imagenFamiliaSeleccionada}
+                                            alt={familiaActual?.nombre || "Familia"}
+                                            className="imagen-destacada-foto"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="imagen-destacada-info">
+                                        <div className="info-familia-nombre">
+                                            {familiaActual?.nombre || "Familia seleccionada"}
+                                        </div>
+                                        <div className="info-familia-tipo">
+                                            {familiaActual?.tipo === "Vinílica" ? "💧 Vinílica" : "✨ Esmalte"}
+                                        </div>
+                                        <div className="info-familia-consejo">
+                                            💡 La imagen se asocia automáticamente
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="familia-imagen-placeholder">
+                                    <div className="placeholder-icono">🏷️</div>
+                                    <div className="placeholder-texto">
+                                        {formProducto.familiaId ? "Cargando imagen..." : "Selecciona una familia"}
+                                    </div>
+                                    <div className="placeholder-subtexto">
+                                        {formProducto.familiaId ? "Espere un momento" : "La imagen aparecerá aquí"}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="input-group">
-                            <label className="input-label">
-                                <span className="label-icon">🏷️</span>
-                                Familia
-                            </label>
-                            <select
-                                className="form-input select-familia"
-                                value={formProducto.familiaId || ""}
-                                onChange={(e) => setFormProducto({ ...formProducto, familiaId: e.target.value ? parseInt(e.target.value) : null })}
-                                disabled={cargandoFamilias}
-                            >
-                                <option value="">-- Seleccionar familia --</option>
-                                {familias.map(familia => (
-                                    <option key={familia.id} value={familia.id}>
-                                        {familia.nombre}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className="input-hint">
-                                {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
-                            </span>
+                        {/* COLUMNA DERECHA - FORMULARIO */}
+                        <div className="producto-columna-formulario">
+                            <div className="form-grid-2">
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">🔖</span>
+                                        Código del producto
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Ej: PROD-001"
+                                        value={formProducto.codigo}
+                                        onChange={(e) => setFormProducto({ ...formProducto, codigo: e.target.value.toUpperCase() })}
+                                        disabled={modoEdicionAPI}
+                                    />
+                                    <span className="input-hint">
+                                        {modoEdicionAPI ? "El código no se puede modificar" : "Código único identificador"}
+                                    </span>
+                                </div>
+
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">📝</span>
+                                        Descripción
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Ej: Pintura Vinílica Premium"
+                                        value={formProducto.descripcion}
+                                        onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
+                                    />
+                                    <span className="input-hint">
+                                        {modoEdicionAPI ? "Puedes modificar la descripción" : "Nombre o descripción del producto"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">💪</span>
+                                        Poder Cubriente
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Ej: 36"
+                                        value={formProducto.poderCubriente}
+                                        onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
+                                    />
+                                    <span className="input-hint">
+                                        Poder cubriente del producto (m² por litro)
+                                    </span>
+                                </div>
+
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">🏷️</span>
+                                        Familia
+                                    </label>
+                                    <select
+                                        className="form-input select-familia"
+                                        value={formProducto.familiaId || ""}
+                                        onChange={(e) => {
+                                            setFormProducto({ ...formProducto, familiaId: e.target.value ? parseInt(e.target.value) : null });
+                                            setImagenFamiliaSeleccionada(null);
+                                        }}
+                                        disabled={cargandoFamilias}
+                                    >
+                                        <option value="">-- Seleccionar familia --</option>
+                                        {familias.map(familia => (
+                                            <option key={familia.id} value={familia.id}>
+                                                {familia.nombre} {familia.tipo === "Vinílica" ? "💧" : "✨"}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="input-hint">
+                                        {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">🎨</span>
+                                        Color
+                                    </label>
+                                    <select
+                                        className="form-input"
+                                        value={formProducto.color}
+                                        onChange={(e) => setFormProducto({ ...formProducto, color: e.target.value })}
+                                    >
+                                        <option value="BLANCO">BLANCO</option>
+                                        <option value="TRANSPARENTE">TRANSPARENTE</option>
+                                        <option value="NEGRO">NEGRO</option>
+                                        <option value="ROJO">ROJO</option>
+                                        <option value="AZUL">AZUL</option>
+                                        <option value="VERDE">VERDE</option>
+                                        <option value="AMARILLO">AMARILLO</option>
+                                    </select>
+                                    <span className="input-hint">Color del producto</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="form-grid-2" style={{ marginTop: '16px' }}>
-                        <div className="input-group">
-                            <label className="input-label">
-                                <span className="label-icon">🎨</span>
-                                Color
-                            </label>
-                            <select
-                                className="form-input"
-                                value={formProducto.color}
-                                onChange={(e) => setFormProducto({ ...formProducto, color: e.target.value })}
-                            >
-                                <option value="BLANCO">BLANCO</option>
-                                <option value="TRANSPARENTE">TRANSPARENTE</option>
-                                <option value="NEGRO">NEGRO</option>
-                                <option value="ROJO">ROJO</option>
-                                <option value="AZUL">AZUL</option>
-                                <option value="VERDE">VERDE</option>
-                                <option value="AMARILLO">AMARILLO</option>
-                            </select>
-                            <span className="input-hint">Color del producto</span>
-                        </div>
-                    </div>
-
+                    {/* ENVASADOS - Sección completa debajo */}
                     {modoEdicionAPI && formProducto.envasadosProducto.length > 0 && (
                         <div className="envasados-section">
                             <div className="envasados-header">
@@ -973,9 +1048,9 @@ export default function CodigosScreen() {
                         {!loading && !modoEdicionAPI && <span className="btn-arrow">→</span>}
                     </button>
                 </div>
-            </div>
-        </>
-    );
+            </>
+        );
+    };
 
     // ========== RENDER DE ESMALTES ==========
     const renderEsmaltes = () => (
@@ -1167,7 +1242,7 @@ export default function CodigosScreen() {
                                     className={`cod-nav-sub-btn ${subSeccionVinilicas === "productos" ? "active" : ""}`}
                                     onClick={() => setSubSeccionVinilicas("productos")}
                                 >
-                                    <span className="nav-icon">📦</span> Agregar Productos
+                                    <span className="nav-icon">📦</span> Agregar o Modificar Productos
                                 </button>
                                 <button
                                     className={`cod-nav-sub-btn ${subSeccionVinilicas === "excluidos" ? "active" : ""}`}

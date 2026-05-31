@@ -5,6 +5,8 @@ import "../styles/operarios.css";
 export default function OperariosScreen() {
     const navigate = useNavigate();
     const [tabActiva, setTabActiva] = useState("vinilica");
+    // 🔴 NUEVO: Estado para la subsección dentro de Vinílicas
+    const [subSeccionVinilica, setSubSeccionVinilica] = useState("maquinas");
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
 
     // Estado para operarios de Vinílica
@@ -51,7 +53,7 @@ export default function OperariosScreen() {
         return guardado ? parseInt(guardado) : 0;
     });
 
-    // Estado para otros operarios
+    // Estado para otros operarios (Esmaltes)
     const [otrosOperarios, setOtrosOperarios] = useState(() => {
         const guardado = localStorage.getItem("otros_operarios");
         return guardado ? JSON.parse(guardado) : [
@@ -60,6 +62,14 @@ export default function OperariosScreen() {
             { id: 102, nombre: "Javier", puesto: "Ayudante", area: "esmaltes" },
             { id: 103, nombre: "Ricardo", puesto: "Preparador", area: "esmaltes" },
             { id: 104, nombre: "Beto", puesto: "Mezclador", area: "esmaltes" }
+        ];
+    });
+
+    // Estado para operarios especiales (Impermeabilizantes)
+    const [operariosEspeciales, setOperariosEspeciales] = useState(() => {
+        const guardado = localStorage.getItem("operarios_especiales");
+        return guardado ? JSON.parse(guardado) : [
+            { id: 1, nombre: "Lazaro", puesto: "Impermeabilizantes", activo: true }
         ];
     });
 
@@ -109,6 +119,7 @@ export default function OperariosScreen() {
         localStorage.setItem("config_grupos_base_vinilica", JSON.stringify(configGruposBase));
         localStorage.setItem("semanas_rotadas_vinilica", semanasRotadas.toString());
         localStorage.setItem("otros_operarios", JSON.stringify(otrosOperarios));
+        localStorage.setItem("operarios_especiales", JSON.stringify(operariosEspeciales));
 
         window.dispatchEvent(new CustomEvent("vinilicaConfigUpdated", {
             detail: {
@@ -117,7 +128,14 @@ export default function OperariosScreen() {
                 semanasRotadas
             }
         }));
-    }, [operariosVinilica, configGruposBase, semanasRotadas, otrosOperarios, configGrupos]);
+        
+        // Disparar evento para operarios especiales
+        window.dispatchEvent(new CustomEvent("operariosEspecialesUpdated", {
+            detail: {
+                operarios: operariosEspeciales
+            }
+        }));
+    }, [operariosVinilica, configGruposBase, semanasRotadas, otrosOperarios, operariosEspeciales, configGrupos]);
 
     // Guardar para API
     useEffect(() => {
@@ -294,7 +312,7 @@ export default function OperariosScreen() {
         }
     };
 
-    // ========== CRUD OTROS OPERARIOS ==========
+    // ========== CRUD OTROS OPERARIOS (ESMALTES) ==========
     const agregarOtroOperario = (nombre, puesto, area) => {
         if (!nombre.trim()) {
             mostrarMensaje("❌ El nombre no puede estar vacío", "error");
@@ -323,6 +341,54 @@ export default function OperariosScreen() {
             setOtrosOperarios(prev => prev.filter(op => op.id !== id));
             mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
         }
+    };
+
+    // ========== CRUD OPERARIOS ESPECIALES (IMPERMEABILIZANTES) ==========
+    const agregarOperarioEspecial = (nombre) => {
+        if (!nombre.trim()) {
+            mostrarMensaje("❌ El nombre no puede estar vacío", "error");
+            return;
+        }
+        if (operariosEspeciales.some(op => op.nombre.toLowerCase() === nombre.toLowerCase())) {
+            mostrarMensaje(`❌ "${nombre}" ya existe en especiales`, "error");
+            return;
+        }
+        const nuevoId = Math.max(...operariosEspeciales.map(op => op.id), 0) + 1;
+        setOperariosEspeciales([...operariosEspeciales, {
+            id: nuevoId,
+            nombre: nombre.trim(),
+            puesto: "Impermeabilizantes",
+            activo: true
+        }]);
+        mostrarMensaje(`✅ "${nombre}" agregado a Operarios Especiales`);
+    };
+
+    const editarOperarioEspecial = (id, nuevoNombre) => {
+        if (!nuevoNombre.trim()) return;
+        if (operariosEspeciales.some(op => op.nombre.toLowerCase() === nuevoNombre.toLowerCase() && op.id !== id)) {
+            mostrarMensaje(`❌ "${nuevoNombre}" ya existe en especiales`, "error");
+            return;
+        }
+        setOperariosEspeciales(prev => prev.map(op =>
+            op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
+        ));
+        mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
+    };
+
+    const eliminarOperarioEspecial = (id) => {
+        const operario = operariosEspeciales.find(op => op.id === id);
+        if (window.confirm(`¿Eliminar a "${operario.nombre}" de Operarios Especiales?`)) {
+            setOperariosEspeciales(prev => prev.filter(op => op.id !== id));
+            mostrarMensaje(`🗑️ "${operario.nombre}" eliminado de Especiales`);
+        }
+    };
+
+    const toggleActivoEspecial = (id) => {
+        setOperariosEspeciales(prev => prev.map(op =>
+            op.id === id ? { ...op, activo: !op.activo } : op
+        ));
+        const operario = operariosEspeciales.find(op => op.id === id);
+        mostrarMensaje(`${operario?.activo ? '🔴' : '🟢'} "${operario?.nombre}" ${operario?.activo ? 'desactivado' : 'activado'}`);
     };
 
     // ========== ASIGNACIÓN DE GRUPOS BASE ==========
@@ -364,9 +430,11 @@ export default function OperariosScreen() {
         return operario ? operario.nombre : "Desconocido";
     };
 
-    const operariosFiltrados = tabActiva === "vinilica"
-        ? operariosVinilica
-        : otrosOperarios.filter(op => op.area === tabActiva);
+    const operariosFiltrados = () => {
+        if (tabActiva === "vinilica") return operariosVinilica;
+        if (tabActiva === "esmaltes") return otrosOperarios.filter(op => op.area === tabActiva);
+        return [];
+    };
 
     // Vista previa de rotación
     const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
@@ -395,6 +463,294 @@ export default function OperariosScreen() {
         };
     });
 
+    // Obtener el operario especial activo para mostrar
+    const operarioEspecialActivo = operariosEspeciales.find(op => op.activo)?.nombre || "Lazaro";
+
+    // Renderizar contenido según la subsección seleccionada
+    const renderContenidoVinilica = () => {
+        if (subSeccionVinilica === "maquinas") {
+            return (
+                <>
+                    <div className="op-card table-card">
+                        <div className="card-header-flex">
+                            <h3 className="op-card-title">
+                                🖱️ Operarios de Máquinas (VI-101 a VI-108) 
+                                <span className="drag-hint">- Arrastra para intercambiar posiciones</span>
+                            </h3>
+                            <span className="count-badge">{operariosFiltrados().length} Operarios</span>
+                        </div>
+
+                        <div className="op-table-wrapper">
+                            <table className="op-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '50px' }}>⋮⋮</th>
+                                        <th>Nombre (Editable)</th>
+                                        <th>Puesto</th>
+                                        <th className="txt-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {operariosFiltrados().map((op, idx) => (
+                                        <tr
+                                            key={op.id}
+                                            draggable={true}
+                                            onDragStart={(e) => handleDragStart(e, idx)}
+                                            onDragEnd={handleDragEnd}
+                                            onDragOver={handleDragOver}
+                                            onDrop={(e) => handleDrop(e, idx)}
+                                            style={{ cursor: "grab" }}
+                                        >
+                                            <td className="drag-handle" style={{ textAlign: 'center', fontSize: '20px' }}>
+                                                ⋮⋮
+                                            </td>
+                                            <td>
+                                                <input
+                                                    className="op-input-edit"
+                                                    value={op.nombre}
+                                                    onChange={(e) => editarOperarioVinilica(op.id, e.target.value)}
+                                                    placeholder="Nombre del operario..."
+                                                />
+                                            </td>
+                                            <td>
+                                                <span className="op-puesto-tag">Preparador</span>
+                                            </td>
+                                            <td className="txt-center">
+                                                <button
+                                                    className="op-action-btn delete"
+                                                    onClick={() => eliminarOperarioVinilica(op.id)}
+                                                    title="Eliminar"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="op-add-operario">
+                            <input
+                                type="text"
+                                id="nuevoNombre"
+                                placeholder="Nuevo operario..."
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const input = document.getElementById('nuevoNombre');
+                                        if (input.value) {
+                                            agregarOperarioVinilica(input.value);
+                                            input.value = '';
+                                        }
+                                    }
+                                }}
+                            />
+                            <button onClick={() => {
+                                const nombre = document.getElementById('nuevoNombre');
+                                if (nombre.value) {
+                                    agregarOperarioVinilica(nombre.value);
+                                    nombre.value = '';
+                                }
+                            }}>
+                                + Agregar
+                            </button>
+                        </div>
+
+                        {/* VISTA PREVIA DE ROTACIÓN */}
+                        <div className="preview-rotacion-section">
+                            <div className="preview-rotacion-title">
+                                <span>🔄</span>
+                                <h4>Vista Previa de Rotación Semanal</h4>
+                                <span className="semanas-rotadas-badge">
+                                    Semanas rotadas: {semanasRotadas}
+                                </span>
+                            </div>
+                            <table className="preview-rotacion-table">
+                                <thead>
+                                    <tr>
+                                        <th>Grupo</th>
+                                        <th>Operario Actual</th>
+                                        <th>→ Próxima Semana</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {previewRotacion.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td>{item.grupo}</td>
+                                            <td>{item.actual}</td>
+                                            <td className="next-week">→ {item.siguiente}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="op-card machinery-card">
+                        <div className="card-header-flex">
+                            <h3 className="op-card-title">⚙️ Configuración Base y Rotación</h3>
+                            <div className="rotacion-buttons">
+                                <button className="btn-rotar" onClick={rotarSemanal}>
+                                    🔄 Rotar Semana (+1)
+                                </button>
+                                <button className="btn-reset" onClick={resetearRotacion}>
+                                    🔁 Resetear Rotación
+                                </button>
+                            </div>
+                        </div>
+
+                        <p className="card-desc">
+                            <strong>🔄 Sincronización automática:</strong> Los cambios aquí actualizan automáticamente el orden de la tabla.
+                        </p>
+
+                        <div className="op-machinery-list">
+                            {Object.entries(configGruposBase).map(([grupoId, grupo]) => {
+                                const grupoIndex = parseInt(grupoId.replace("grupo", ""));
+                                const operarioPorOrden = operariosVinilica[grupoIndex];
+
+                                return (
+                                    <div key={grupoId} className="op-machine-item">
+                                        <div className="machine-label-group">
+                                            <span className="machine-id">📌</span>
+                                            <label>{grupo.nombre}</label>
+                                            {operarioPorOrden && (
+                                                <span className="orden-indicador">
+                                                    (Posición #{grupoIndex + 1} en tabla)
+                                                </span>
+                                            )}
+                                        </div>
+                                        <select
+                                            className="op-select-custom"
+                                            value={grupo.operarioId || ""}
+                                            onChange={(e) => asignarOperarioAGrupoBase(grupoId, e.target.value)}
+                                        >
+                                            <option value="">Sin asignar (BASE)</option>
+                                            {operariosVinilica.map(op => (
+                                                <option key={op.id} value={op.id}>
+                                                    {op.nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="operario-asignado-actual">
+                                            👤 Base: {getNombreOperario(grupo.operarioId)}
+                                            {operarioPorOrden && grupo.operarioId === operarioPorOrden.id && (
+                                                <span className="match-indicador"> ✓ Coincide con orden</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="info-box">
+                            <strong>🔄 Sincronización Automática Bidireccional:</strong>
+                            <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+                                <li><strong>Arrastrar en tabla →</strong> Actualiza automáticamente los selectores</li>
+                                <li><strong>Cambiar selector →</strong> Reordena automáticamente la tabla</li>
+                            </ul>
+                        </div>
+                    </div>
+                </>
+            );
+        } else {
+            return (
+                <div className="op-card especiales-card">
+                    <div className="card-header-flex">
+                        <h3 className="op-card-title">🧴 Operarios Especiales (Impermeabilizantes)</h3>
+                        <span className="count-badge">
+                            {operariosEspeciales.filter(op => op.activo).length} Activos
+                        </span>
+                    </div>
+
+                    <p className="card-desc">
+                        <strong>📌 Estos operarios se asignan automáticamente a las cargas especiales</strong> (códigos excluidos, impermeabilizantes) 
+                        en los PDFs y reportes de producción. Actualmente activo: <strong className="operario-activo">{operarioEspecialActivo}</strong>
+                    </p>
+
+                    <div className="op-table-wrapper">
+                        <table className="op-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre (Editable)</th>
+                                    <th>Puesto</th>
+                                    <th>Estado</th>
+                                    <th className="txt-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {operariosEspeciales.map((op) => (
+                                    <tr key={op.id}>
+                                        <td>
+                                            <input
+                                                className="op-input-edit"
+                                                value={op.nombre}
+                                                onChange={(e) => editarOperarioEspecial(op.id, e.target.value)}
+                                                placeholder="Nombre del operario especial..."
+                                            />
+                                        </td>
+                                        <td>
+                                            <span className="op-puesto-tag especial">{op.puesto}</span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={`status-badge ${op.activo ? 'active' : 'inactive'}`}
+                                                onClick={() => toggleActivoEspecial(op.id)}
+                                            >
+                                                {op.activo ? '✓ Activo' : '✗ Inactivo'}
+                                            </button>
+                                        </td>
+                                        <td className="txt-center">
+                                            <button
+                                                className="op-action-btn delete"
+                                                onClick={() => eliminarOperarioEspecial(op.id)}
+                                                title="Eliminar"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="op-add-operario">
+                        <input
+                            type="text"
+                            id="nuevoEspecial"
+                            placeholder="Nuevo operario especial..."
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    const input = document.getElementById('nuevoEspecial');
+                                    if (input.value) {
+                                        agregarOperarioEspecial(input.value);
+                                        input.value = '';
+                                    }
+                                }
+                            }}
+                        />
+                        <button onClick={() => {
+                            const input = document.getElementById('nuevoEspecial');
+                            if (input.value) {
+                                agregarOperarioEspecial(input.value);
+                                input.value = '';
+                            }
+                        }}>
+                            + Agregar Especial
+                        </button>
+                    </div>
+
+                    <div className="info-box">
+                        <strong>🧴 Operarios Especiales:</strong> Estos operarios se asignan automáticamente a las cargas de 
+                        impermeabilizantes (códigos excluidos) en el PDF y reportes de producción.
+                        <br /><br />
+                        <strong>💡 Nota:</strong> Solo puede haber <strong>UN operario activo</strong> a la vez. Si activas uno, los demás se desactivarán automáticamente.
+                    </div>
+                </div>
+            );
+        }
+    };
+
     return (
         <div className="op-screen-container">
             <div className="op-glass-panel">
@@ -415,9 +771,12 @@ export default function OperariosScreen() {
                         <div className="nav-label">SECCIONES</div>
                         <button
                             className={`op-nav-btn ${tabActiva === "vinilica" ? "active" : ""}`}
-                            onClick={() => setTabActiva("vinilica")}
+                            onClick={() => {
+                                setTabActiva("vinilica");
+                                setSubSeccionVinilica("maquinas"); // Resetear a máquinas al cambiar
+                            }}
                         >
-                            <span className="nav-icon">💧</span> Vinílicas (Máquinas)
+                            <span className="nav-icon">💧</span> Vinílicas
                         </button>
                         <button
                             className={`op-nav-btn ${tabActiva === "esmaltes" ? "active" : ""}`}
@@ -426,6 +785,28 @@ export default function OperariosScreen() {
                             <span className="nav-icon">✨</span> Esmaltes
                         </button>
                     </nav>
+
+                    {/* 🔴 SUBMENÚ DE VINÍLICAS - Solo aparece cuando Vinílicas está activa */}
+                    {tabActiva === "vinilica" && (
+                        <>
+                            <div className="nav-divider"></div>
+                            <nav className="op-nav">
+                                <div className="nav-label">VINÍLICAS</div>
+                                <button
+                                    className={`op-nav-sub-btn ${subSeccionVinilica === "maquinas" ? "active" : ""}`}
+                                    onClick={() => setSubSeccionVinilica("maquinas")}
+                                >
+                                    <span className="nav-icon">⚙️</span> Operarios de Máquinas
+                                </button>
+                                <button
+                                    className={`op-nav-sub-btn ${subSeccionVinilica === "especiales" ? "active" : ""}`}
+                                    onClick={() => setSubSeccionVinilica("especiales")}
+                                >
+                                    <span className="nav-icon">🧴</span> Operarios Especiales
+                                </button>
+                            </nav>
+                        </>
+                    )}
 
                     <div className="sidebar-footer">
                         <button className="op-btn-exit" onClick={() => navigate("/mantenimiento")}>
@@ -437,239 +818,99 @@ export default function OperariosScreen() {
                 <main className="op-main-content">
                     <header className="op-header">
                         <div className="op-title-group">
-                            <h1>Panel de Operarios: {tabActiva === "vinilica" ? "VINÍLICAS" : "ESMALTES"}</h1>
-                            <p>Gestión dinámica de personal y rotación semanal</p>
+                            <h1>
+                                {tabActiva === "vinilica" 
+                                    ? (subSeccionVinilica === "maquinas" 
+                                        ? "💧 Operarios de Máquinas - Vinílicas" 
+                                        : "🧴 Operarios Especiales - Impermeabilizantes")
+                                    : "✨ Operarios - Esmaltes"}
+                            </h1>
+                            <p>
+                                {tabActiva === "vinilica" 
+                                    ? (subSeccionVinilica === "maquinas"
+                                        ? "Gestión de operarios para máquinas VI-101 a VI-108 y rotación semanal"
+                                        : "Gestión de operarios para cargas especiales (impermeabilizantes, códigos excluidos)")
+                                    : "Gestión de personal para área de esmaltes"}
+                            </p>
                         </div>
                     </header>
 
                     <div className={`op-workspace ${tabActiva === 'vinilica' ? 'with-sidebar' : ''}`}>
+                        {tabActiva === "vinilica" ? (
+                            renderContenidoVinilica()
+                        ) : (
+                            <div className="op-card table-card">
+                                <div className="card-header-flex">
+                                    <h3 className="op-card-title">Plantilla de Trabajo - Esmaltes</h3>
+                                    <span className="count-badge">{operariosFiltrados().length} Operarios</span>
+                                </div>
 
-                        <div className="op-card table-card">
-                            <div className="card-header-flex">
-                                <h3 className="op-card-title">
-                                    {tabActiva === "vinilica" ? (
-                                        <>🖱️ Operarios de Máquinas (VI-101 a VI-108) <span className="drag-hint">- Arrastra para intercambiar posiciones</span></>
-                                    ) : (
-                                        "Plantilla de Trabajo"
-                                    )}
-                                </h3>
-                                <span className="count-badge">{operariosFiltrados.length} Operarios</span>
-                            </div>
-
-                            <div className="op-table-wrapper">
-                                <table className="op-table">
-                                    <thead>
-                                        <tr>
-                                            {tabActiva === "vinilica" && <th style={{ width: '50px' }}>⋮⋮</th>}
-                                            <th>Nombre (Editable)</th>
-                                            <th>Puesto</th>
-                                            <th className="txt-center">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {operariosFiltrados.map((op, idx) => (
-                                            <tr
-                                                key={op.id}
-                                                draggable={tabActiva === "vinilica"}
-                                                onDragStart={(e) => tabActiva === "vinilica" && handleDragStart(e, idx)}
-                                                onDragEnd={handleDragEnd}
-                                                onDragOver={handleDragOver}
-                                                onDrop={(e) => tabActiva === "vinilica" && handleDrop(e, idx)}
-                                                style={{ cursor: tabActiva === "vinilica" ? "grab" : "default" }}
-                                            >
-                                                {tabActiva === "vinilica" && (
-                                                    <td className="drag-handle" style={{ textAlign: 'center', fontSize: '20px' }}>
-                                                        ⋮⋮
+                                <div className="op-table-wrapper">
+                                    <table className="op-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre (Editable)</th>
+                                                <th>Puesto</th>
+                                                <th className="txt-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {operariosFiltrados().map((op) => (
+                                                <tr key={op.id}>
+                                                    <td>
+                                                        <input
+                                                            className="op-input-edit"
+                                                            value={op.nombre}
+                                                            onChange={(e) => editarOtroOperario(op.id, "nombre", e.target.value)}
+                                                            placeholder="Nombre del operario..."
+                                                        />
                                                     </td>
-                                                )}
-                                                <td>
-                                                    <input
-                                                        className="op-input-edit"
-                                                        value={op.nombre}
-                                                        onChange={(e) => {
-                                                            if (tabActiva === "vinilica") {
-                                                                editarOperarioVinilica(op.id, e.target.value);
-                                                            } else {
-                                                                editarOtroOperario(op.id, "nombre", e.target.value);
-                                                            }
-                                                        }}
-                                                        placeholder="Nombre del operario..."
-                                                    />
-                                                </td>
-                                                <td>
-                                                    {tabActiva === "vinilica" ? (
-                                                        <span className="op-puesto-tag">Preparador</span>
-                                                    ) : (
+                                                    <td>
                                                         <input
                                                             className="op-input-edit"
                                                             value={op.puesto}
                                                             onChange={(e) => editarOtroOperario(op.id, "puesto", e.target.value)}
                                                             placeholder="Puesto..."
                                                         />
-                                                    )}
-                                                </td>
-                                                <td className="txt-center">
-                                                    <button
-                                                        className="op-action-btn delete"
-                                                        onClick={() => {
-                                                            if (tabActiva === "vinilica") {
-                                                                eliminarOperarioVinilica(op.id);
-                                                            } else {
-                                                                eliminarOtroOperario(op.id);
-                                                            }
-                                                        }}
-                                                        title="Eliminar"
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                    </td>
+                                                    <td className="txt-center">
+                                                        <button
+                                                            className="op-action-btn delete"
+                                                            onClick={() => eliminarOtroOperario(op.id)}
+                                                            title="Eliminar"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                            <div className="op-add-operario">
-                                <input
-                                    type="text"
-                                    id="nuevoNombre"
-                                    placeholder="Nuevo operario..."
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const input = document.getElementById('nuevoNombre');
-                                            if (input.value) {
-                                                if (tabActiva === "vinilica") {
-                                                    agregarOperarioVinilica(input.value);
-                                                } else {
-                                                    agregarOtroOperario(input.value, "Nuevo Puesto", tabActiva);
-                                                }
-                                                input.value = '';
-                                            }
-                                        }
-                                    }}
-                                />
-                                {tabActiva !== "vinilica" && (
+                                <div className="op-add-operario">
+                                    <input
+                                        type="text"
+                                        id="nuevoNombreEsmalte"
+                                        placeholder="Nuevo operario..."
+                                    />
                                     <input
                                         type="text"
                                         id="nuevoPuesto"
                                         placeholder="Puesto..."
                                         style={{ width: '150px' }}
                                     />
-                                )}
-                                <button onClick={() => {
-                                    const nombre = document.getElementById('nuevoNombre');
-                                    const puesto = document.getElementById('nuevoPuesto');
-                                    if (nombre.value) {
-                                        if (tabActiva === "vinilica") {
-                                            agregarOperarioVinilica(nombre.value);
-                                        } else {
-                                            agregarOtroOperario(nombre.value, puesto?.value || "Nuevo Puesto", tabActiva);
+                                    <button onClick={() => {
+                                        const nombre = document.getElementById('nuevoNombreEsmalte');
+                                        const puesto = document.getElementById('nuevoPuesto');
+                                        if (nombre.value) {
+                                            agregarOtroOperario(nombre.value, puesto?.value || "Nuevo Puesto", "esmaltes");
+                                            nombre.value = '';
+                                            if (puesto) puesto.value = '';
                                         }
-                                        nombre.value = '';
-                                        if (puesto) puesto.value = '';
-                                    }
-                                }}>
-                                    + Agregar
-                                </button>
-                            </div>
-
-                            {/* VISTA PREVIA DE ROTACIÓN */}
-                            {tabActiva === "vinilica" && (
-                                <div className="preview-rotacion-section">
-                                    <div className="preview-rotacion-title">
-                                        <span>🔄</span>
-                                        <h4>Vista Previa de Rotación Semanal</h4>
-                                        <span className="semanas-rotadas-badge">
-                                            Semanas rotadas: {semanasRotadas}
-                                        </span>
-                                    </div>
-                                    <table className="preview-rotacion-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Grupo</th>
-                                                <th>Operario Actual</th>
-                                                <th>→ Próxima Semana</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {previewRotacion.map((item, idx) => (
-                                                <tr key={idx}>
-                                                    <td>{item.grupo}</td>
-                                                    <td>{item.actual}</td>
-                                                    <td className="next-week">→ {item.siguiente}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-
-                        {tabActiva === "vinilica" && (
-                            <div className="op-card machinery-card">
-                                <div className="card-header-flex">
-                                    <h3 className="op-card-title">⚙️ Configuración Base y Rotación</h3>
-                                    <div className="rotacion-buttons">
-                                        <button className="btn-rotar" onClick={rotarSemanal}>
-                                            🔄 Rotar Semana (+1)
-                                        </button>
-                                        <button className="btn-reset" onClick={resetearRotacion}>
-                                            🔁 Resetear Rotación
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <p className="card-desc">
-                                    <strong>🔄 Sincronización automática:</strong> Los cambios aquí actualizan automáticamente el orden de la tabla.
-                                </p>
-
-                                <div className="op-machinery-list">
-                                    {Object.entries(configGruposBase).map(([grupoId, grupo]) => {
-                                        const grupoIndex = parseInt(grupoId.replace("grupo", ""));
-                                        const operarioPorOrden = operariosVinilica[grupoIndex];
-
-                                        return (
-                                            <div key={grupoId} className="op-machine-item">
-                                                <div className="machine-label-group">
-                                                    <span className="machine-id">📌</span>
-                                                    <label>{grupo.nombre}</label>
-                                                    {operarioPorOrden && (
-                                                        <span className="orden-indicador">
-                                                            (Posición #{grupoIndex + 1} en tabla)
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <select
-                                                    className="op-select-custom"
-                                                    value={grupo.operarioId || ""}
-                                                    onChange={(e) => asignarOperarioAGrupoBase(grupoId, e.target.value)}
-                                                >
-                                                    <option value="">Sin asignar (BASE)</option>
-                                                    {operariosVinilica.map(op => (
-                                                        <option key={op.id} value={op.id}>
-                                                            {op.nombre}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <div className="operario-asignado-actual">
-                                                    👤 Base: {getNombreOperario(grupo.operarioId)}
-                                                    {operarioPorOrden && grupo.operarioId === operarioPorOrden.id && (
-                                                        <span className="match-indicador"> ✓ Coincide con orden</span>
-                                                    )}
-                                                    <br />
-                                                    
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="info-box">
-                                    <strong>🔄 Sincronización Automática Bidireccional:</strong>
-                                    <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
-                                        <li><strong>Arrastrar en tabla →</strong> Actualiza automáticamente los selectores</li>
-                                        <li><strong>Cambiar selector →</strong> Reordena automáticamente la tabla</li>
-                                    </ul>
+                                    }}>
+                                        + Agregar
+                                    </button>
                                 </div>
                             </div>
                         )}

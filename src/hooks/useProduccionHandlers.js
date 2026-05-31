@@ -8,6 +8,21 @@ import { exportarReporte } from "../services/excelService";
 import { bitacoraService } from "../services/bitacoraService";
 import { tableroUtils } from "../utils/tableroUtils";
 
+// 🔴 Función auxiliar para obtener el operario especial activo
+const getOperarioEspecialActivo = () => {
+    try {
+        const guardado = localStorage.getItem("operarios_especiales");
+        if (guardado) {
+            const operarios = JSON.parse(guardado);
+            const activo = operarios.find(op => op.activo === true);
+            if (activo) return activo.nombre;
+        }
+    } catch (error) {
+        console.error("Error al obtener operario especial:", error);
+    }
+    return "Lazaro"; // Valor por defecto
+};
+
 export const useProduccionHandlers = (produccion, ui) => {
     // Extraer TODAS las funciones setter necesarias de producción
     const {
@@ -18,8 +33,9 @@ export const useProduccionHandlers = (produccion, ui) => {
         handleImportExcel,
         setRondas,
         setCargasEsmaltesAsignadas,
-        setCargasEspeciales, // AGREGAR ESTO
-        ordenarCargas // Si se usa en ModalDetalleCarga
+        setCargasEspeciales,
+        ordenarCargas,
+        setColaCargas  // Necesario para algunas funciones
     } = produccion;
 
     const {
@@ -176,6 +192,9 @@ export const useProduccionHandlers = (produccion, ui) => {
             const datosExcel = await handleImportExcel(e, true);
             if (!datosExcel || datosExcel.length === 0) return alert("Excel sin datos");
             
+            // 🔴 Obtener operario especial activo
+            const operarioEspecial = getOperarioEspecialActivo();
+            
             const reporteSincronizado = datosExcel.map(item => {
                 let maq = "NO ASIGNADA", ope = "PENDIENTE";
                 const folioBusqueda = String(item.folio).trim().toUpperCase();
@@ -208,7 +227,8 @@ export const useProduccionHandlers = (produccion, ui) => {
                 );
                 if (matchEsp) { 
                     maq = "ESPECIAL"; 
-                    ope = "LÁZARO"; 
+                    // 🔴 Usar el operario especial activo en lugar de "LÁZARO" hardcodeado
+                    ope = operarioEspecial; 
                 }
                 
                 return { ...item, maquina: maq, operario: ope };
@@ -297,13 +317,15 @@ export const useProduccionHandlers = (produccion, ui) => {
         setCargasEspeciales(nE);
     }, [rondas, cargasEspeciales, fechaTrabajo, setRondas, setCargasEspeciales]);
 
-    // Handler para ModalDetalleCarga - Mover a especial
+    // 🔴 Handler para ModalDetalleCarga - Mover a especial (MODIFICADO)
     const handleMoverEspecial = useCallback((carga) => {
-        // Esta función debe ser usada en ModalDetalleCarga
-        // Necesitas también setColaCargas y setCargasEsmaltesAsignadas
-        const { setColaCargas, setCargasEsmaltesAsignadas } = produccion;
+        const operarioEspecial = getOperarioEspecialActivo();
         
-        setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+        // Si existe setColaCargas, usarlo
+        if (setColaCargas) {
+            setColaCargas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+        }
+        
         setRondas(prevRondas => prevRondas.map(f => f.map(celda => {
             if (!celda) return null;
             if (Array.isArray(celda)) {
@@ -312,15 +334,25 @@ export const useProduccionHandlers = (produccion, ui) => {
             }
             return celda.idTemp === carga.idTemp ? null : celda;
         })));
-        setCargasEsmaltesAsignadas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
-        setCargasEspeciales(prev => ordenarCargas([...prev, { ...carga, operario: "Lázaro", maquina: "ESPECIAL" }]));
-    }, [setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales, ordenarCargas, produccion]);
+        
+        if (setCargasEsmaltesAsignadas) {
+            setCargasEsmaltesAsignadas(prev => prev.filter(c => c.idTemp !== carga.idTemp));
+        }
+        
+        // 🔴 Usar el operario especial activo en lugar de "Lázaro" hardcodeado
+        setCargasEspeciales(prev => ordenarCargas([...prev, { 
+            ...carga, 
+            operario: operarioEspecial, 
+            maquina: "ESPECIAL" 
+        }]));
+    }, [setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales, ordenarCargas, setColaCargas]);
 
     // Handler para ModalDetalleCarga - Eliminar carga
     const handleEliminarCarga = useCallback((c) => {
-        const { setColaCargas } = produccion;
+        if (setColaCargas) {
+            setColaCargas(prev => prev.filter(item => item.idTemp !== c.idTemp));
+        }
         
-        setColaCargas(prev => prev.filter(item => item.idTemp !== c.idTemp));
         setRondas(prev => prev.map(f => f.map(celda => {
             if (!celda) return null;
             if (Array.isArray(celda)) {
@@ -329,15 +361,21 @@ export const useProduccionHandlers = (produccion, ui) => {
             }
             return celda.idTemp === c.idTemp ? null : celda;
         })));
-        setCargasEsmaltesAsignadas(prev => prev.filter(item => item.idTemp !== c.idTemp));
+        
+        if (setCargasEsmaltesAsignadas) {
+            setCargasEsmaltesAsignadas(prev => prev.filter(item => item.idTemp !== c.idTemp));
+        }
+        
         setCargasEspeciales(prev => prev.filter(item => item.idTemp !== c.idTemp));
-    }, [setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales, produccion]);
+    }, [setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales, setColaCargas]);
 
     // Handler para ModalDetalleCarga - Cambiar operario
     const handleCambiarOperario = useCallback((id, nuevoOperario) => {
-        setCargasEsmaltesAsignadas(prev =>
-            prev.map(c => c.idTemp === id ? { ...c, operario: nuevoOperario } : c)
-        );
+        if (setCargasEsmaltesAsignadas) {
+            setCargasEsmaltesAsignadas(prev =>
+                prev.map(c => c.idTemp === id ? { ...c, operario: nuevoOperario } : c)
+            );
+        }
     }, [setCargasEsmaltesAsignadas]);
 
     return {

@@ -1,5 +1,241 @@
 /* ========== FAMILIAS GESTION SCREEN - ESTILOS ESPECÍFICOS ========== */
+/* ===== ESTILOS PARA TEXTO BLANCO EN FAMILIAS ===== */
 
+/* Texto del tipo de familia en la lista */
+.item-tipo {
+    font-size: 10px;
+    color: #ffffff !important;  /* Fuerza color blanco */
+    background: rgba(192, 0, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+/* Texto del ID de familia */
+.item-id {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin-top: 4px;
+    font-family: monospace;
+}
+
+/* Nombre de la familia en la lista */
+.item-nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff !important;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Texto en el panel de edición - Tipo badge */
+.tipo-badge-edicion {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #9b30ff, #7c00b3);
+}
+
+/* Texto de las etiquetas (labels) en edición */
+.edicion-campo label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e879f9 !important;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+/* Información adicional - ID y Tipo */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(192, 0, 255, 0.2);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #a855f7 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-valor {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff !important;
+    font-family: monospace;
+}
+
+/* Vista previa mini */
+.preview-card-mini {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(192, 0, 255, 0.25);
+}
+
+.preview-info-mini {
+    flex: 1;
+}
+
+.preview-nombre-mini {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff !important;
+    margin-bottom: 4px;
+}
+
+.preview-tipo-mini {
+    font-size: 11px;
+    font-weight: 500;
+    color: #e879f9 !important;
+    margin-bottom: 4px;
+}
+
+.preview-id-mini {
+    font-size: 10px;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Texto en el área de selección vacía */
+.empty-seleccion h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff !important;
+    margin-bottom: 8px;
+}
+
+.empty-seleccion p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin-bottom: 20px;
+}
+
+/* Texto del loading spinner */
+.loading-spinner p {
+    color: #ffffff !important;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* Texto en el modal de agregar familia */
+.modal-content h3 {
+    color: #ffffff !important;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.form-group label {
+    color: #e879f9 !important;
+    font-size: 12px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* Texto en el info-box */
+.info-box strong {
+    color: #e879f9 !important;
+}
+
+.info-box ul li {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+/* Texto del título de la lista */
+.lista-titulo {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e879f9 !important;
+    margin: 0;
+}
+
+.lista-count {
+    font-size: 11px;
+    background: rgba(192, 0, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: #ffffff !important;
+}
+
+/* Texto del encabezado de edición */
+.edicion-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff !important;
+    margin: 0;
+}
+
+/* Texto de las notas informativas */
+.info-nota {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+.info-nota.peligro {
+    color: #ff5f7e !important;
+    background: rgba(255, 95, 126, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+/* Texto en preview vacío */
+.preview-vacio p {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* Placeholder en miniatura */
+.preview-mini-placeholder {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #c000ff, #7c00b3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff !important;
+}
+
+.mini-placeholder {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #c000ff, #7c00b3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff !important;
+}
 .familias-gestion-container {
     width: 100%;
 }

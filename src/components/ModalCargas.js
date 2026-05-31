@@ -1,51 +1,128 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "../styles/modalCargas.css";
 import { reporteModalService } from "../services/reporteModalService";
 
-function ModalCargas({ 
-  visible, 
-  cargas, 
-  producto, 
-  onClose, 
-  onGuardar, 
-  onEliminarCarga, 
-  onSeleccionarCarga, 
+function ModalCargas({
+  visible,
+  cargas,
+  producto,
+  onClose,
+  onGuardar,
+  onEliminarCarga,
+  onSeleccionarCarga,
   onVaciarTodo,
-  onGenerarLotes // <--- Nueva prop necesaria para numerar
+  onGenerarLotes
 }) {
   const [filtroMarca, setFiltroMarca] = useState("TODOS");
+  const [familias, setFamilias] = useState([]);
 
-  // 1. Clasificación por marcas y conteo
+  // Cargar familias desde el backend
+  useEffect(() => {
+    const cargarFamilias = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/familias');
+        if (response.ok) {
+          const data = await response.json();
+          setFamilias(data);
+          console.log('Familias cargadas:', data);
+        }
+      } catch (error) {
+        console.error('Error al cargar familias:', error);
+      }
+    };
+    
+    if (visible) {
+      cargarFamilias();
+    }
+  }, [visible]);
+
+  // Función para normalizar texto (quitar acentos, mayúsculas)
+  const normalizarTexto = (texto) => {
+    if (!texto) return "";
+    return texto
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  };
+
+  // Palabras clave por familia para mejorar coincidencias
+  const palabrasClavePorFamilia = {
+    "PINTURA SEÑALAMIENTO": ["TRAFICO", "TRÁFICO", "SEÑALAMIENTO"],
+    "BARNIZ SPAR": ["BARNIZ", "SPAR", "BARNI-SPAR"],
+    "ESMALUX": ["ESMALUX"],
+    "TRANSIKAR": ["TRANSIKAR"],
+    "TRANSITEX": ["TRANSITEX"],
+    "ESMAFLEX": ["ESMAFLEX"],
+    "PINTAMAR": ["PINTAMAR"],
+    "DRYLUX": ["DRYLUX"],
+    "ACAPULCO": ["ACAPULCO"],
+    "SUPERVIN": ["SUPERVIN"],
+    "VINET": ["VINET"],
+    "CH14": ["CH14"],
+    "CLASIKA": ["CLASIKA"],
+    "OMAR": ["OMAR"],
+    "KOLORTEX": ["KOLORTEX"],
+    "AQUAMAR": ["AQUAMAR"],
+    "SELLADOR ENTINTABLE": ["SELLADOR ENTINTABLE", "SELLADOR"],
+    "SELLAVIN": ["SELLAVIN"]
+  };
+
+  // Función mejorada para encontrar la familia
+  const encontrarFamilia = (codigoProducto, descripcion) => {
+    const codigoUpper = normalizarTexto(codigoProducto);
+    const descripcionUpper = normalizarTexto(descripcion);
+    const textoCompleto = `${descripcionUpper} ${codigoUpper}`;
+    
+    // 1. Verificar si es BASE
+    if (codigoUpper.includes("BBE") || codigoUpper.includes("BAL") || 
+        codigoUpper.includes("BNE") || codigoUpper.includes("BSP")) {
+      return "BASES";
+    }
+    
+    // 2. Buscar por palabras clave
+    for (const familia of familias) {
+      const nombreFamilia = normalizarTexto(familia.nombre);
+      
+      // Coincidencia exacta por nombre
+      if (textoCompleto.includes(nombreFamilia)) {
+        return familia.nombre;
+      }
+      
+      // Coincidencia por palabras clave
+      const palabrasClave = palabrasClavePorFamilia[familia.nombre] || [];
+      for (const palabra of palabrasClave) {
+        if (textoCompleto.includes(normalizarTexto(palabra))) {
+          return familia.nombre;
+        }
+      }
+    }
+    
+    // 3. Búsqueda por coincidencia parcial (último recurso)
+    for (const familia of familias) {
+      const nombreFamilia = normalizarTexto(familia.nombre);
+      const palabrasFamilia = nombreFamilia.split(" ");
+      
+      for (const palabra of palabrasFamilia) {
+        if (palabra.length > 3 && textoCompleto.includes(palabra)) {
+          return familia.nombre;
+        }
+      }
+    }
+    
+    return "OTRAS";
+  };
+
+  // 1. Clasificación por marcas usando la tabla familias
   const { cargasClasificadas, marcasDisponibles } = useMemo(() => {
     if (!cargas) return { cargasClasificadas: [], marcasDisponibles: [] };
 
     const procesadas = cargas.map(c => {
-      const texto = (c.descripcion + " " + c.codigoProducto).toUpperCase();
-      let marca = "OTRAS";
-      if (texto.includes("KOLORTEX")) marca = "KOLORTEX";
-      else if (texto.includes("VINET")) marca = "VINET";
-      else if (texto.includes("OMAR")) marca = "OMAR";
-      else if (texto.includes("SUPERVIN")) marca = "SUPERVIN";
-      else if (texto.includes("ACAPULCO")) marca = "ACAPULCO";
-      else if (texto.includes("AQUAMAR")) marca = "AQUAMAR";
-      else if (texto.includes("CH14")) marca = "CH14";
-      else if (texto.includes("CLASIKA")) marca = "CLASIKA";
-      else if (texto.includes("ESMALUX")) marca = "ESMALUX";
-      else if (texto.includes("BARNI-SPAR")) marca = "BARNIZ SPAR";
-      else if (texto.includes("BASES")) marca = "BASES";
-      else if (texto.includes("ESMAFLEX")) marca = "ESMAFLEX";
-      else if (texto.includes("SELLAVIN")) marca = "SELLAVIN";
-      else if (texto.includes("SELLADOR ENTINTABLE")) marca = "SELLADOR ENTINTABLE";
-      else if (texto.includes("TRANSIKAR")) marca = "TRANSIKAR";
-      else if (texto.includes("TRANSITEX")) marca = "TRANSITEX";
-      else if (texto.includes("PINTAMAR")) marca = "PINTAMAR";
-      else if (texto.includes("DRYLUX")) marca = "DRYLUX";
-      else if (texto.includes("MAQUILA")) marca = "MAQUILAS";
-
+      const marca = encontrarFamilia(c.codigoProducto, c.descripcion);
       return { ...c, marcaComercial: marca };
     });
 
-    // Mantener orden por cubriente (ya viene del hook, pero aseguramos visualmente)
+    // Mantener orden por cubriente
     procesadas.sort((a, b) => (a.nivelCubriente || 0) - (b.nivelCubriente || 0));
 
     const marcasMap = {};
@@ -56,18 +133,16 @@ function ModalCargas({
     });
 
     return { cargasClasificadas: procesadas, marcasDisponibles: Object.values(marcasMap) };
-  }, [cargas]);
+  }, [cargas, familias]);
 
-  // 2. Filtro de vista
   const cargasVisibles = useMemo(() => {
     return filtroMarca === "TODOS"
       ? cargasClasificadas
       : cargasClasificadas.filter(c => c.marcaComercial === filtroMarca);
   }, [filtroMarca, cargasClasificadas]);
 
-  // 3. Validación: ¿Hay algo sin número de lote?
-  const hayPendientes = useMemo(() => 
-    cargasClasificadas.some(c => c.folio === "PENDIENTE"), 
+  const hayPendientes = useMemo(() =>
+    cargasClasificadas.some(c => c.folio === "PENDIENTE"),
     [cargasClasificadas]
   );
 
@@ -88,22 +163,20 @@ function ModalCargas({
             <h2>Gestión de Cargas</h2>
             <span className="badge-contador">{cargasClasificadas.length} en espera</span>
           </div>
-          
+
           <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            
-            {/* BOTÓN PARA ASIGNAR LOTES (CORRELATIVO) */}
             <button
               onClick={onGenerarLotes}
               disabled={!hayPendientes || cargasClasificadas.length === 0}
-              style={{ 
-                backgroundColor: hayPendientes ? '#f39c12' : '#7f8c8d', 
-                color: 'white', 
-                border: 'none', 
-                padding: '2px 1px', 
-                borderRadius: '5px', 
-                cursor: hayPendientes ? 'pointer' : 'default', 
-                fontWeight: 'bold', 
-                fontSize: '0.8rem' 
+              style={{
+                backgroundColor: hayPendientes ? '#f39c12' : '#7f8c8d',
+                color: 'white',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '5px',
+                cursor: hayPendientes ? 'pointer' : 'default',
+                fontWeight: 'bold',
+                fontSize: '0.8rem'
               }}
             >
               🔢 Asignar Lotes
@@ -111,7 +184,6 @@ function ModalCargas({
 
             <button
               onClick={() => handleDescarga('pdf')}
-              title="Descargar PDF"
               style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
             >
               📄 PDF
@@ -130,7 +202,7 @@ function ModalCargas({
               disabled={cargasClasificadas.length === 0 || hayPendientes}
               title={hayPendientes ? "Asigna los lotes antes de guardar" : "Guardar en programación"}
               onClick={() => { onGuardar(cargasClasificadas); onClose(); }}
-              style={{ 
+              style={{
                 opacity: (cargasClasificadas.length === 0 || hayPendientes) ? 0.5 : 1,
                 cursor: (cargasClasificadas.length === 0 || hayPendientes) ? 'not-allowed' : 'pointer'
               }}
@@ -208,11 +280,11 @@ function ModalCargas({
                     <div className="celda nro">{i + 1}</div>
                     <div className="celda g-2">{c.codigoProducto}</div>
                     <div className="celda g-2">{c.tipo || "N/A"}</div>
-                    <div 
-                      className="celda g-2" 
-                      style={{ 
-                        fontWeight: 'bold', 
-                        color: c.folio === "PENDIENTE" ? "#e67e22" : "#2ecc71" 
+                    <div
+                      className="celda g-2"
+                      style={{
+                        fontWeight: 'bold',
+                        color: c.folio === "PENDIENTE" ? "#e67e22" : "#2ecc71"
                       }}
                     >
                       {c.folio}

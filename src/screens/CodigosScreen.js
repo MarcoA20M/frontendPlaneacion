@@ -11,11 +11,8 @@ export default function CodigosScreen() {
     const navigate = useNavigate();
 
     // Estado para la pestaña activa en la barra lateral
-    const [seccionActiva, setSeccionActiva] = useState("vinilicas");
+    const [seccionActiva, setSeccionActiva] = useState("productos");
 
-    // Estado para el submenú de Vinílicas
-    const [subSeccionVinilicas, setSubSeccionVinilicas] = useState("excluidos");
-    
     // Estado para la imagen de la familia seleccionada
     const [imagenFamiliaSeleccionada, setImagenFamiliaSeleccionada] = useState(null);
     
@@ -35,12 +32,6 @@ export default function CodigosScreen() {
     // Estados para Familias (para el select de productos)
     const [familias, setFamilias] = useState([]);
     const [cargandoFamilias, setCargandoFamilias] = useState(false);
-
-    // Estados para PRODUCTOS (nuevos productos)
-    const [productos, setProductos] = useState(() => {
-        const guardados = localStorage.getItem("productos_vinilica");
-        return guardados ? JSON.parse(guardados) : [];
-    });
 
     // Estado para saber si estamos editando un producto de API
     const [modoEdicionAPI, setModoEdicionAPI] = useState(false);
@@ -63,8 +54,6 @@ export default function CodigosScreen() {
     const [nuevoEnvase, setNuevoEnvase] = useState({ litros: "", articulo: "" });
     const [mostrarFormNuevoEnvase, setMostrarFormNuevoEnvase] = useState(false);
 
-    const [editandoProducto, setEditandoProducto] = useState(null);
-    const [filtroProductos, setFiltroProductos] = useState("");
     const [codigoBusqueda, setCodigoBusqueda] = useState("");
 
     // Estados para Códigos Especiales (Esmaltes)
@@ -137,27 +126,25 @@ export default function CodigosScreen() {
         cargarEnvasados();
     }, []);
 
-    // ========== CARGAR FAMILIAS SEGÚN SECCIÓN ACTIVA ==========
+    // ========== CARGAR FAMILIAS (TODAS, SIN FILTRO) ==========
     useEffect(() => {
         const cargarFamilias = async () => {
             setCargandoFamilias(true);
             try {
-                let tipo = "";
-                if (seccionActiva === "vinilicas") {
-                    tipo = "vinilica";
-                } else if (seccionActiva === "esmaltes") {
-                    tipo = "esmalte";
-                }
-                if (tipo) {
-                    const data = await familiaService.getFamiliasPorTipo(tipo);
+                const response = await fetch('http://localhost:8080/api/familias');
+                if (response.ok) {
+                    const data = await response.json();
                     setFamilias(data);
+                    console.log("📋 Todas las familias cargadas:", data);
                 }
+            } catch (error) {
+                console.error("Error cargando familias:", error);
             } finally {
                 setCargandoFamilias(false);
             }
         };
         cargarFamilias();
-    }, [seccionActiva]);
+    }, []);
 
     useEffect(() => {
         if (codigos.length > 0) {
@@ -167,13 +154,6 @@ export default function CodigosScreen() {
             }));
         }
     }, [codigos]);
-
-    // ========== PRODUCTOS (VINÍLICAS - LOCAL) ==========
-    useEffect(() => {
-        if (productos.length > 0) {
-            localStorage.setItem("productos_vinilica", JSON.stringify(productos));
-        }
-    }, [productos]);
 
     // ========== CÓDIGOS ESPECIALES (ESMALTES) ==========
     useEffect(() => {
@@ -205,7 +185,7 @@ export default function CodigosScreen() {
         return `${litrosStr}-${codigoProducto}`;
     };
 
-    // ========== FUNCIÓN PARA BUSCAR PRODUCTO EN API Y CARGAR EN FORMULARIO ==========
+    // ========== FUNCIÓN PARA BUSCAR PRODUCTO EN API ==========
     const buscarYCargarProducto = async () => {
         if (!codigoBusqueda.trim()) {
             mostrarMensaje("Ingresa un código para buscar", "error");
@@ -361,7 +341,7 @@ export default function CodigosScreen() {
                 codigo: codigo,
                 descripcion: formProducto.descripcion,
                 poderCubriente: poder,
-                tipoPinturaId: 2,
+                tipoPinturaId: formProducto.tipoPinturaId,
                 familiaId: familiaId,
                 color: formProducto.color,
                 envasados: envasadosParaAPI
@@ -469,37 +449,6 @@ export default function CodigosScreen() {
         codigo.toLowerCase().includes(filtro.toLowerCase())
     );
 
-    const iniciarEdicionProducto = (producto) => {
-        setEditandoProducto({ ...producto });
-    };
-
-    const guardarEdicionProducto = () => {
-        if (!editandoProducto.codigo.trim()) {
-            mostrarMensaje("El código no puede estar vacío", "error");
-            return;
-        }
-
-        const codigoUpper = editandoProducto.codigo.trim().toUpperCase();
-
-        if (productos.some(p => p.codigo === codigoUpper && p.id !== editandoProducto.id)) {
-            mostrarMensaje(`El producto "${codigoUpper}" ya existe`, "error");
-            return;
-        }
-
-        setProductos(productos.map(p =>
-            p.id === editandoProducto.id
-                ? { ...p, codigo: codigoUpper, descripcion: editandoProducto.descripcion, envasados: editandoProducto.envasados }
-                : p
-        ));
-        setEditandoProducto(null);
-        mostrarMensaje(`Producto actualizado correctamente`);
-    };
-
-    const productosFiltrados = productos.filter(producto =>
-        producto.codigo.toLowerCase().includes(filtroProductos.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(filtroProductos.toLowerCase())
-    );
-
     // ========== CRUD CÓDIGOS ESPECIALES ==========
     const agregarEspecial = () => {
         if (!nuevoEspecial.codigo.trim()) {
@@ -576,133 +525,8 @@ export default function CodigosScreen() {
         mostrarMensaje(`Código especial "${especial.codigo}" ${especial.activo ? 'desactivado' : 'activado'}`);
     };
 
-    // Función para obtener el título según la subsección
-    const getTituloVinilicas = () => {
-        switch (subSeccionVinilicas) {
-            case "productos": return "📦 Gestión de Productos";
-            case "excluidos": return "🚫 Códigos Excluidos";
-            default: return "Gestión Vinílicas";
-        }
-    };
-
-    const getDescripcionVinilicas = () => {
-        switch (subSeccionVinilicas) {
-            case "productos": return "Busca productos de la API, edita envasados y guarda cambios localmente";
-            case "excluidos": return "Administra los códigos que NO deben aparecer en producción";
-            default: return "";
-        }
-    };
-
-    // ========== RENDER DE VINÍLICAS - EXCLUIDOS ==========
-    const renderVinilicasExcluidos = () => (
-        <>
-            <div className="cod-card">
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Buscar código excluido..."
-                        value={filtro}
-                        onChange={(e) => setFiltro(e.target.value)}
-                    />
-                    {filtro && (
-                        <button onClick={() => setFiltro("")} className="clear-filter">
-                            ✖
-                        </button>
-                    )}
-                </div>
-
-                <div className="add-codigo-bar">
-                    <input
-                        type="text"
-                        placeholder="Nuevo código excluido (ej: 999 o 999IF)..."
-                        value={nuevoCodigo}
-                        onChange={(e) => setNuevoCodigo(e.target.value.toUpperCase())}
-                        onKeyPress={(e) => e.key === 'Enter' && agregarCodigo()}
-                    />
-                    <button onClick={agregarCodigo}>
-                        + Agregar Código
-                    </button>
-                </div>
-            </div>
-
-            <div className="cod-card table-card">
-                <div className="card-header-flex">
-                    <h3 className="cod-card-title">📋 CÓDIGOS EXCLUIDOS</h3>
-                    <span className="count-badge">{codigosFiltrados.length} códigos</span>
-                </div>
-
-                <div className="cod-table-wrapper">
-                    <table className="cod-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Código</th>
-                                <th>Tipo</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {codigosFiltrados.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="empty-state">
-                                        {filtro ? "No se encontraron códigos" : "No hay códigos excluidos"}
-                                    </td>
-                                </tr>
-                            ) : (
-                                codigosFiltrados.map((codigo, index) => (
-                                    <tr key={codigo}>
-                                        <td>{index + 1}</td>
-                                        <td>
-                                            {editandoId === codigo ? (
-                                                <input
-                                                    type="text"
-                                                    className="edit-input"
-                                                    value={editandoValor}
-                                                    onChange={(e) => setEditandoValor(e.target.value.toUpperCase())}
-                                                    onKeyPress={(e) => e.key === 'Enter' && guardarEdicion()}
-                                                    autoFocus
-                                                />
-                                            ) : (
-                                                <span className="codigo-value">{codigo}</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            {codigo.includes('IF') ? (
-                                                <span className="badge-if">⚠️ Con IF</span>
-                                            ) : (
-                                                <span className="badge-normal">✓ Normal</span>
-                                            )}
-                                        </td>
-                                        <td className="actions-cell">
-                                            {editandoId === codigo ? (
-                                                <>
-                                                    <button className="action-btn save" onClick={guardarEdicion}>💾</button>
-                                                    <button className="action-btn cancel" onClick={cancelarEdicion}>✖</button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button className="action-btn edit" onClick={() => iniciarEdicion(codigo)}>✏️</button>
-                                                    <button className="action-btn delete" onClick={() => eliminarCodigo(codigo)}>🗑️</button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="info-box">
-                    <strong>ℹ️ Nota:</strong> Los códigos excluidos no aparecerán en la búsqueda de producción.
-                    Los códigos con <strong>"IF"</strong> son versiones especiales.
-                </div>
-            </div>
-        </>
-    );
-
-    // ========== RENDER DE VINÍLICAS - PRODUCTOS (CON LAYOUT MEJORADO) ==========
-    const renderVinilicasProductos = () => {
+    // ========== RENDER DE PRODUCTOS (GENERAL) ==========
+    const renderProductos = () => {
         const familiaActual = familias.find(f => f.id === formProducto.familiaId);
         
         return (
@@ -734,7 +558,7 @@ export default function CodigosScreen() {
                             )}
                         </div>
                         <div className="busqueda-info">
-                            <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios localmente</span>
+                            <span className="busqueda-hint">💡 Busca productos en la API. Podrás editar envasados y guardar cambios</span>
                         </div>
                     </div>
                 </div>
@@ -830,7 +654,7 @@ export default function CodigosScreen() {
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Ej: Pintura Vinílica Premium"
+                                        placeholder="Ej: Pintura Premium"
                                         value={formProducto.descripcion}
                                         onChange={(e) => setFormProducto({ ...formProducto, descripcion: e.target.value })}
                                     />
@@ -840,7 +664,7 @@ export default function CodigosScreen() {
                                 </div>
                             </div>
 
-                            <div className="form-grid-2" style={{ marginTop: '16px' }}>
+                            <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '16px' }}>
                                 <div className="input-group">
                                     <label className="input-label">
                                         <span className="label-icon">💪</span>
@@ -853,9 +677,21 @@ export default function CodigosScreen() {
                                         value={formProducto.poderCubriente}
                                         onChange={(e) => setFormProducto({ ...formProducto, poderCubriente: e.target.value })}
                                     />
-                                    <span className="input-hint">
-                                        Poder cubriente del producto (m² por litro)
-                                    </span>
+                                </div>
+
+                                <div className="input-group">
+                                    <label className="input-label">
+                                        <span className="label-icon">🏷️</span>
+                                        Tipo de Pintura
+                                    </label>
+                                    <select
+                                        className="form-input"
+                                        value={formProducto.tipoPinturaId}
+                                        onChange={(e) => setFormProducto({ ...formProducto, tipoPinturaId: parseInt(e.target.value) })}
+                                    >
+                                        <option value="1">Esmalte</option>
+                                        <option value="2">Vinílica</option>
+                                    </select>
                                 </div>
 
                                 <div className="input-group">
@@ -879,9 +715,6 @@ export default function CodigosScreen() {
                                             </option>
                                         ))}
                                     </select>
-                                    <span className="input-hint">
-                                        {cargandoFamilias ? "Cargando familias..." : "Familia a la que pertenece el producto"}
-                                    </span>
                                 </div>
                             </div>
 
@@ -904,7 +737,6 @@ export default function CodigosScreen() {
                                         <option value="VERDE">VERDE</option>
                                         <option value="AMARILLO">AMARILLO</option>
                                     </select>
-                                    <span className="input-hint">Color del producto</span>
                                 </div>
                             </div>
                         </div>
@@ -1052,8 +884,116 @@ export default function CodigosScreen() {
         );
     };
 
-    // ========== RENDER DE ESMALTES ==========
-    const renderEsmaltes = () => (
+    // ========== RENDER DE VINÍLICAS - EXCLUIDOS ==========
+    const renderVinilicasExcluidos = () => (
+        <>
+            <div className="cod-card">
+                <div className="search-box">
+                    <input
+                        type="text"
+                        placeholder="Buscar código excluido..."
+                        value={filtro}
+                        onChange={(e) => setFiltro(e.target.value)}
+                    />
+                    {filtro && (
+                        <button onClick={() => setFiltro("")} className="clear-filter">
+                            ✖
+                        </button>
+                    )}
+                </div>
+
+                <div className="add-codigo-bar">
+                    <input
+                        type="text"
+                        placeholder="Nuevo código excluido (ej: 999 o 999IF)..."
+                        value={nuevoCodigo}
+                        onChange={(e) => setNuevoCodigo(e.target.value.toUpperCase())}
+                        onKeyPress={(e) => e.key === 'Enter' && agregarCodigo()}
+                    />
+                    <button onClick={agregarCodigo}>
+                        + Agregar Código
+                    </button>
+                </div>
+            </div>
+
+            <div className="cod-card table-card">
+                <div className="card-header-flex">
+                    <h3 className="cod-card-title">📋 CÓDIGOS EXCLUIDOS</h3>
+                    <span className="count-badge">{codigosFiltrados.length} códigos</span>
+                </div>
+
+                <div className="cod-table-wrapper">
+                    <table className="cod-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {codigosFiltrados.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="empty-state">
+                                        {filtro ? "No se encontraron códigos" : "No hay códigos excluidos"}
+                                    </td>
+                                </tr>
+                            ) : (
+                                codigosFiltrados.map((codigo, index) => (
+                                    <tr key={codigo}>
+                                        <td>{index + 1}</td>
+                                        <td>
+                                            {editandoId === codigo ? (
+                                                <input
+                                                    type="text"
+                                                    className="edit-input"
+                                                    value={editandoValor}
+                                                    onChange={(e) => setEditandoValor(e.target.value.toUpperCase())}
+                                                    onKeyPress={(e) => e.key === 'Enter' && guardarEdicion()}
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <span className="codigo-value">{codigo}</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {codigo.includes('IF') ? (
+                                                <span className="badge-if">⚠️ Con IF</span>
+                                            ) : (
+                                                <span className="badge-normal">✓ Normal</span>
+                                            )}
+                                        </td>
+                                        <td className="actions-cell">
+                                            {editandoId === codigo ? (
+                                                <>
+                                                    <button className="action-btn save" onClick={guardarEdicion}>💾</button>
+                                                    <button className="action-btn cancel" onClick={cancelarEdicion}>✖</button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="action-btn edit" onClick={() => iniciarEdicion(codigo)}>✏️</button>
+                                                    <button className="action-btn delete" onClick={() => eliminarCodigo(codigo)}>🗑️</button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="info-box">
+                    <strong>ℹ️ Nota:</strong> Los códigos excluidos no aparecerán en la búsqueda de producción.
+                    Los códigos con <strong>"IF"</strong> son versiones especiales.
+                </div>
+            </div>
+        </>
+    );
+
+    // ========== RENDER DE ESMALTES - ESPECIALES ==========
+    const renderEsmaltesEspeciales = () => (
         <>
             <div className="cod-card">
                 <div className="search-box">
@@ -1179,18 +1119,18 @@ export default function CodigosScreen() {
 
     // ========== RENDERIZADO PRINCIPAL ==========
     const renderContenido = () => {
-        if (seccionActiva === "familias") {
-            return <FamiliasGestionScreen />;
-        } else if (seccionActiva === "vinilicas") {
-            if (subSeccionVinilicas === "excluidos") {
+        switch (seccionActiva) {
+            case "productos":
+                return renderProductos();
+            case "vinilicas":
                 return renderVinilicasExcluidos();
-            } else if (subSeccionVinilicas === "productos") {
-                return renderVinilicasProductos();
-            }
-        } else if (seccionActiva === "esmaltes") {
-            return renderEsmaltes();
+            case "esmaltes":
+                return renderEsmaltesEspeciales();
+            case "familias":
+                return <FamiliasGestionScreen />;
+            default:
+                return renderProductos();
         }
-        return null;
     };
 
     return (
@@ -1213,11 +1153,19 @@ export default function CodigosScreen() {
                         <div className="nav-label">SECCIONES</div>
 
                         <button
+                            className={`cod-nav-btn ${seccionActiva === "productos" ? "active" : ""}`}
+                            onClick={() => setSeccionActiva("productos")}
+                        >
+                            <span className="nav-icon">📦</span> Agregar o Modificar codigos
+                        </button>
+
+                        <button
                             className={`cod-nav-btn ${seccionActiva === "vinilicas" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("vinilicas")}
                         >
                             <span className="nav-icon">💧</span> Vinílicas
                         </button>
+
                         <button
                             className={`cod-nav-btn ${seccionActiva === "esmaltes" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("esmaltes")}
@@ -1233,38 +1181,21 @@ export default function CodigosScreen() {
                         </button>
                     </nav>
 
-                    {seccionActiva === "vinilicas" && (
-                        <>
-                            <div className="nav-divider"></div>
-                            <nav className="cod-nav">
-                                <div className="nav-label">VINÍLICAS</div>
-                                <button
-                                    className={`cod-nav-sub-btn ${subSeccionVinilicas === "productos" ? "active" : ""}`}
-                                    onClick={() => setSubSeccionVinilicas("productos")}
-                                >
-                                    <span className="nav-icon">📦</span> Agregar o Modificar Productos
-                                </button>
-                                <button
-                                    className={`cod-nav-sub-btn ${subSeccionVinilicas === "excluidos" ? "active" : ""}`}
-                                    onClick={() => setSubSeccionVinilicas("excluidos")}
-                                >
-                                    <span className="nav-icon">🚫</span> Códigos Excluidos
-                                </button>
-                            </nav>
-                        </>
-                    )}
-
                     <div className="sidebar-footer">
                         <div className="stats-mini">
                             <span className="stats-number">
-                                {seccionActiva === "vinilicas"
-                                    ? (subSeccionVinilicas === "productos" ? productos.length : codigos.length)
-                                    : codigosEspeciales.filter(e => e.activo).length}
+                                {seccionActiva === "productos" 
+                                    ? "API" 
+                                    : seccionActiva === "vinilicas" 
+                                        ? codigos.length 
+                                        : codigosEspeciales.filter(e => e.activo).length}
                             </span>
                             <span className="stats-label">
-                                {seccionActiva === "vinilicas"
-                                    ? (subSeccionVinilicas === "productos" ? "Productos" : "Códigos excluidos")
-                                    : "Especiales activos"}
+                                {seccionActiva === "productos" 
+                                    ? "Productos" 
+                                    : seccionActiva === "vinilicas" 
+                                        ? "Excluidos" 
+                                        : "Especiales activos"}
                             </span>
                         </div>
                         <button className="cod-btn-exit" onClick={() => navigate("/mantenimiento")}>
@@ -1278,18 +1209,22 @@ export default function CodigosScreen() {
                     <header className="cod-header">
                         <div className="cod-title-group">
                             <h1>
-                                {seccionActiva === "familias"
-                                    ? "🏷️ Gestión de Familias"
-                                    : seccionActiva === "vinilicas"
-                                        ? getTituloVinilicas()
-                                        : "⭐ Códigos Especiales - Esmaltes"}
+                                {seccionActiva === "productos" 
+                                    ? "📦 Gestión de Productos" 
+                                    : seccionActiva === "vinilicas" 
+                                        ? "💧 Códigos Excluidos - Vinílicas"
+                                        : seccionActiva === "esmaltes"
+                                            ? "✨ Códigos Especiales - Esmaltes"
+                                            : "🏷️ Gestión de Familias"}
                             </h1>
                             <p>
-                                {seccionActiva === "familias"
-                                    ? "Administra las familias de productos: edita nombres y sube imágenes"
-                                    : seccionActiva === "vinilicas"
-                                        ? getDescripcionVinilicas()
-                                        : "Administra códigos especiales para pedidos urgentes o personalizados de Esmaltes"}
+                                {seccionActiva === "productos" 
+                                    ? "Crea o modifica productos (tanto Vinílicas como Esmaltes) y sus envases"
+                                    : seccionActiva === "vinilicas" 
+                                        ? "Administra los códigos que NO deben aparecer en producción de Vinílicas"
+                                        : seccionActiva === "esmaltes"
+                                            ? "Administra códigos especiales para pedidos urgentes o personalizados"
+                                            : "Administra las familias de productos: edita nombres y sube imágenes"}
                             </p>
                         </div>
                     </header>

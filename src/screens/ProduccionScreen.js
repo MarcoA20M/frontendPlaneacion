@@ -17,6 +17,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 import ModalInventarioBajo from "../components/ModalInventarioBajo";
 import ModalPlanificador from "../components/ModalPlanificador";
 import InfoInventarioProducto from "../components/InfoInventarioProducto";
+import ModalResumenConsumo from "../components/ModalResumenConsumo";
 
 // Importar la imagen
 import logoPintu from "../assets/PINTU.jpg";
@@ -119,6 +120,12 @@ export default function ProduccionScreen() {
         }
     };
 
+    // Función para guardar y cerrar
+    const handleGuardarYcerrar = () => {
+        setMostrarModalResumen(false);
+        guardarProduccionEnBD();
+    };
+
     // --- EFECTOS ---
     useEffect(() => {
         const handleClickAfuera = (event) => {
@@ -198,10 +205,71 @@ export default function ProduccionScreen() {
         setFechaRotacion(new Date());
     };
 
-    // Calcular total de cargas para mostrar en el botón
+    // Calcular total de cargas y litros para mostrar en el modal
     const totalCargas = useMemo(() => {
         return [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales].length;
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
+
+    const totalLitrosProducir = useMemo(() => {
+        return [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales]
+            .reduce((sum, c) => sum + (c.litros || 0), 0).toFixed(2);
+    }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
+
+
+// Calcular cargas con su consumo individual (para la vista por carga)
+const cargasConConsumo = useMemo(() => {
+    const todasLasCargas = [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
+    
+    console.log("=== CARGAS CON CONSUMO ===");
+    console.log("Todas las cargas:", todasLasCargas);
+    
+    return todasLasCargas.map((carga, index) => {
+        // Obtener el número de lote (folio)
+        const numeroLote = carga.folio || carga.lote || carga.numeroLote || `Carga-${index + 1}`;
+        
+        // Obtener el código del producto
+        const codigo = carga.codigo || carga.codigoProducto || `PROD-${index + 1}`;
+        
+        // Obtener la descripción
+        const descripcion = carga.descripcion || carga.nombre || "Sin descripción";
+        
+        // Obtener los litros
+        const litros = carga.litros || 0;
+        
+        // IMPORTANTE: El consumo de materia prima DEBE venir del cálculo de la fórmula
+        // Si tu carga tiene un campo consumoTotal, úsalo
+        // Si no, necesitas calcularlo basado en los materiales que usa
+        let consumoTotal = carga.consumoTotal || 0;
+        
+        // Si no tiene consumoTotal pero tiene materiasPrimas, calcular
+        if (consumoTotal === 0 && carga.materiasPrimas && Array.isArray(carga.materiasPrimas)) {
+            consumoTotal = carga.materiasPrimas.reduce((sum, mp) => sum + (mp.consumo || mp.cantidad || 0), 0);
+        }
+        
+        // Obtener las materias primas de la carga (si las tiene)
+        const materiasPrimas = carga.materiasPrimas || [];
+        
+        console.log(`Carga ${index + 1}:`, {
+            codigo,
+            numeroLote,
+            litros,
+            consumoTotal,
+            descripcion
+        });
+        
+        return {
+            id: carga.idTemp || carga.id || index,
+            codigo: codigo,
+            numeroLote: numeroLote,
+            descripcion: descripcion,
+            litros: litros,
+            consumoTotal: consumoTotal,
+            tipo: carga.tipo || "Desconocido",
+            operario: carga.operario || "N/A",
+            materiasPrimas: materiasPrimas
+        };
+    });
+}, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
     return (
         <div className="app">
@@ -372,8 +440,7 @@ export default function ProduccionScreen() {
                                     onFiltrar={setFiltroOperario}
                                     filtroActivo={filtroOperario}
                                 />
-                                {/* Botón de Resumen de Consumo estilo card-op */}
-                                <button 
+                                <button
                                     className="card-op resumen-consumo-btn"
                                     onClick={handleVerResumenGlobal}
                                     style={{
@@ -548,93 +615,17 @@ export default function ProduccionScreen() {
                 }}
             />
 
-            {/* Modal Resumen de Consumo Global */}
-            {mostrarModalResumen && (
-                <div className="modal-overlay" onClick={() => setMostrarModalResumen(false)}>
-                    <div className="modal-content modal-resumen-global" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>📊 Resumen de Consumo de Materia Prima</h3>
-                            <button className="modal-close" onClick={() => setMostrarModalResumen(false)}>✖</button>
-                        </div>
-                        <div className="modal-body">
-                            {cargandoResumen ? (
-                                <div className="loading-resumen">
-                                    <div className="spinner-neon"></div>
-                                    <p>Calculando consumo total...</p>
-                                </div>
-                            ) : resumenGlobal.length === 0 ? (
-                                <div className="sin-consumo-global">
-                                    <span>📋</span>
-                                    <p>No hay cargas en el tablero o no tienen fórmulas definidas</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="resumen-totales-global">
-                                        <div className="total-cargas-global">
-                                            <span>Total de cargas:</span>
-                                            <strong>{totalCargas}</strong>
-                                        </div>
-                                        <div className="total-litros-global">
-                                            <span>Total a producir:</span>
-                                            <strong>{
-                                                [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales]
-                                                    .reduce((sum, c) => sum + (c.litros || 0), 0).toFixed(2)
-                                            } L</strong>
-                                        </div>
-                                    </div>
-                                    <div className="tabla-resumen-global">
-                                        <table className="tabla-consumo-global">
-                                            <thead>
-                                                <tr>
-                                                    <th>Código</th>
-                                                    <th>Materia Prima</th>
-                                                    <th>Tipo</th>
-                                                    <th>Consumo Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {resumenGlobal.map((item, idx) => (
-                                                    <tr key={idx} className={item.consumoTotal > 1000 ? 'alto-consumo' : ''}>
-                                                        <td><code>{item.codigo}</code></td>
-                                                        <td>{item.nombre}</td>
-                                                        <td>
-                                                            <span className={`tipo-badge-global ${item.tipo?.toLowerCase()}`}>
-                                                                {item.tipo}
-                                                            </span>
-                                                        </td>
-                                                        <td className="consumo-celda-global">
-                                                            <strong>{item.consumoTotal.toFixed(2)} L</strong>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                            <tfoot>
-                                                <tr className="total-row">
-                                                    <td colSpan="3"><strong>Total general:</strong></td>
-                                                    <td className="total-celda">
-                                                        <strong>{resumenGlobal.reduce((sum, c) => sum + c.consumoTotal, 0).toFixed(2)} L</strong>
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                    <div className="aviso-consumo-global">
-                                        <span>⚠️</span>
-                                        <small>Este consumo se restará automáticamente del inventario al guardar la producción</small>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-cerrar" onClick={() => setMostrarModalResumen(false)}>Cerrar</button>
-                            <button className="btn-guardar" onClick={() => {
-                                setMostrarModalResumen(false);
-                                guardarProduccionEnBD();
-                            }}>Confirmar y Guardar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Modal Resumen de Consumo Global con todas las funcionalidades */}
+            <ModalResumenConsumo
+                visible={mostrarModalResumen}
+                cargando={cargandoResumen}
+                resumenGlobal={resumenGlobal}
+                cargasConConsumo={cargasConConsumo}
+                totalCargas={totalCargas}
+                totalLitros={totalLitrosProducir}
+                onClose={() => setMostrarModalResumen(false)}
+                onGuardar={handleGuardarYcerrar}
+            />
         </div>
     );
 }

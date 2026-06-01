@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { litrosPorEnvasado, litrosATexto } from "../constants/config";
+import { formulasService } from "../services/formulasService";
 import "../styles/InfoInventarioProducto.css";
 
 const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitrosActuales }) => {
@@ -62,19 +63,13 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
                 </td>
                 <td className="col-caja-cerrada">{d.cajaCerrada}</td>
                 <td>{d.salidas}</td>
-                
-                {/* EXISTENCIA RESALTADA */}
                 <td className="col-highlight">{d.existencia}</td>
-                
                 <td>
                     <div className="badge-container">
                         <span className={`badge-status ${alcanceClass}`}>{d.alcanceActual}</span>
                     </div>
                 </td>
-
-                {/* NUEVO INV RESALTADO */}
                 <td className="col-highlight">{d.nuevoInv}</td>
-
                 <td>
                     <div className="badge-container">
                         <span className={`badge-status ${diasEstClass}`}>{d.diasEstStr}</span>
@@ -130,6 +125,7 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
 
     return (
         <div className="layout-dinamico-produccion">
+            {/* Panel de Envasados */}
             <div className="envases-section">
                 {renderColumnaEnvasado()}
                 <div className="contador-litros-wrapper">
@@ -138,6 +134,8 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
                     </div>
                 </div>
             </div>
+
+            {/* Tabla de Inventario */}
             <div className="inventario-column">
                 <table className="tabla-inventario-tecnica">
                     <thead>

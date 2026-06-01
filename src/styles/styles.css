@@ -1022,3 +1022,29 @@ body, html {
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* ===== BOTÓN CALCULAR CONSUMO EN BÚSQUEDA ===== */
+.btn-calcular-consumo-busqueda {
+  background: linear-gradient(90deg, #9b59b6, #8e44ad);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-calcular-consumo-busqueda:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.4);
+}
+
+.btn-calcular-consumo-busqueda:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

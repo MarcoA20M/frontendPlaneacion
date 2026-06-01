@@ -15,7 +15,7 @@ export default function CodigosScreen() {
 
     // Estado para la imagen de la familia seleccionada
     const [imagenFamiliaSeleccionada, setImagenFamiliaSeleccionada] = useState(null);
-    
+
     // Estados para Códigos Excluidos (Vinílicas)
     const [codigos, setCodigos] = useState([]);
     const [nuevoCodigo, setNuevoCodigo] = useState("");
@@ -24,6 +24,9 @@ export default function CodigosScreen() {
     const [filtro, setFiltro] = useState("");
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
     const [loading, setLoading] = useState(false);
+
+    // Estado para controlar el dropdown de procesos
+    const [mostrarDropdownProcesos, setMostrarDropdownProcesos] = useState(false);
 
     // Estados para Envasados disponibles
     const [envasadosDisponibles, setEnvasadosDisponibles] = useState([]);
@@ -47,12 +50,18 @@ export default function CodigosScreen() {
         familiaId: null,
         color: "BLANCO",
         envasadosProducto: [],
-        envasadosSeleccionados: []
+        envasadosSeleccionados: [],
+        procesos: []
     });
 
     // Estado para nuevo envase (modo edición API)
     const [nuevoEnvase, setNuevoEnvase] = useState({ litros: "", articulo: "" });
     const [mostrarFormNuevoEnvase, setMostrarFormNuevoEnvase] = useState(false);
+
+    // Estado para gestión de procesos
+    const [nuevoProceso, setNuevoProceso] = useState({ paso: "", descripcion: "" });
+    const [mostrarFormNuevoProceso, setMostrarFormNuevoProceso] = useState(false);
+    const [editandoProceso, setEditandoProceso] = useState(null);
 
     const [codigoBusqueda, setCodigoBusqueda] = useState("");
 
@@ -69,6 +78,14 @@ export default function CodigosScreen() {
     const [nuevoEspecial, setNuevoEspecial] = useState({ codigo: "", descripcion: "" });
     const [editandoEspecial, setEditandoEspecial] = useState(null);
     const [filtroEspeciales, setFiltroEspeciales] = useState("");
+
+    // Procesos predefinidos para Esmaltes
+    const procesosPredefinidos = [
+        { paso: 1, descripcion: "MOLIENDA" },
+        { paso: 2, descripcion: "PREPARADO" },
+        { paso: 3, descripcion: "TERMINADO" },
+        { paso: 4, descripcion: "IGUALACIÓN" },
+    ];
 
     // ========== EFECTO PARA CARGAR IMAGEN DE FAMILIA ==========
     useEffect(() => {
@@ -108,6 +125,17 @@ export default function CodigosScreen() {
         };
         cargarCodigos();
     }, []);
+
+    // Cerrar dropdown al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (mostrarDropdownProcesos && !e.target.closest('.procesos-select-container')) {
+                setMostrarDropdownProcesos(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [mostrarDropdownProcesos]);
 
     // ========== CARGAR ENVASADOS DISPONIBLES ==========
     useEffect(() => {
@@ -217,6 +245,13 @@ export default function CodigosScreen() {
                 };
             }).sort((a, b) => a.litros - b.litros);
 
+            const procesosAPI = producto.procesos || [];
+            const procesosFormateados = procesosAPI.map(proc => ({
+                id: proc.id,
+                paso: proc.paso,
+                descripcion: proc.descripcion
+            })).sort((a, b) => a.paso - b.paso);
+
             setFormProducto({
                 codigo: producto.codigo,
                 descripcion: producto.descripcion,
@@ -225,12 +260,14 @@ export default function CodigosScreen() {
                 familiaId: producto.familiaId,
                 color: producto.color || "BLANCO",
                 envasadosProducto: envasadosFormateados,
-                envasadosSeleccionados: []
+                envasadosSeleccionados: [],
+                procesos: procesosFormateados
             });
 
             setModoEdicionAPI(true);
             setCodigoBusqueda("");
             setMostrarFormNuevoEnvase(false);
+            setMostrarFormNuevoProceso(false);
 
             mostrarMensaje(`Producto "${producto.codigo}" cargado para editar`, "success");
         } catch (error) {
@@ -298,6 +335,35 @@ export default function CodigosScreen() {
         mostrarMensaje(`Envase de ${litros} litros removido`, "success");
     };
 
+    // ========== CRUD DE PROCESOS ==========
+    const eliminarProceso = (paso, descripcion) => {
+        if (window.confirm(`¿Eliminar el proceso "${descripcion}"?`)) {
+            const nuevosProcesos = formProducto.procesos.filter(p => p.paso !== paso);
+            setFormProducto({ ...formProducto, procesos: nuevosProcesos });
+            mostrarMensaje(`Proceso "${descripcion}" eliminado`, "success");
+        }
+    };
+
+    // Función para toggle de proceso (seleccionar/deseleccionar)
+    const toggleProceso = (proceso) => {
+        const yaSeleccionado = formProducto.procesos.some(p => p.descripcion === proceso.descripcion);
+        
+        if (yaSeleccionado) {
+            const nuevosProcesos = formProducto.procesos.filter(p => p.descripcion !== proceso.descripcion);
+            setFormProducto({ ...formProducto, procesos: nuevosProcesos });
+            mostrarMensaje(`Proceso "${proceso.descripcion}" removido`, "info");
+        } else {
+            const nuevoProceso = {
+                id: Date.now() + Math.random(),
+                paso: proceso.paso,
+                descripcion: proceso.descripcion
+            };
+            const nuevosProcesos = [...formProducto.procesos, nuevoProceso].sort((a, b) => a.paso - b.paso);
+            setFormProducto({ ...formProducto, procesos: nuevosProcesos });
+            mostrarMensaje(`Proceso "${proceso.descripcion}" agregado`, "success");
+        }
+    };
+
     // ========== GUARDAR PRODUCTO EN API ==========
     const guardarProductoEnAPI = async () => {
         if (!formProducto.codigo.trim()) {
@@ -337,6 +403,11 @@ export default function CodigosScreen() {
                 descripcion: `${formProducto.descripcion} BOTE ${envase.litros} L`
             }));
 
+            const procesosParaAPI = formProducto.procesos.map(proc => ({
+                paso: proc.paso,
+                descripcion: proc.descripcion
+            }));
+
             const productoParaAPI = {
                 codigo: codigo,
                 descripcion: formProducto.descripcion,
@@ -344,7 +415,8 @@ export default function CodigosScreen() {
                 tipoPinturaId: formProducto.tipoPinturaId,
                 familiaId: familiaId,
                 color: formProducto.color,
-                envasados: envasadosParaAPI
+                envasados: envasadosParaAPI,
+                procesos: procesosParaAPI
             };
 
             if (modoEdicionAPI && productoEditandoId) {
@@ -375,13 +447,17 @@ export default function CodigosScreen() {
             familiaId: null,
             color: "BLANCO",
             envasadosProducto: [],
-            envasadosSeleccionados: []
+            envasadosSeleccionados: [],
+            procesos: []
         });
         setModoEdicionAPI(false);
         setProductoEditandoId(null);
         setProductoOriginal(null);
         setMostrarFormNuevoEnvase(false);
+        setMostrarFormNuevoProceso(false);
         setNuevoEnvase({ litros: "", articulo: "" });
+        setNuevoProceso({ paso: "", descripcion: "" });
+        setEditandoProceso(null);
     };
 
     // ========== CRUD CÓDIGOS EXCLUIDOS ==========
@@ -528,7 +604,7 @@ export default function CodigosScreen() {
     // ========== RENDER DE PRODUCTOS (GENERAL) ==========
     const renderProductos = () => {
         const familiaActual = familias.find(f => f.id === formProducto.familiaId);
-        
+
         return (
             <>
                 <div className="cod-card">
@@ -738,6 +814,64 @@ export default function CodigosScreen() {
                                         <option value="AMARILLO">AMARILLO</option>
                                     </select>
                                 </div>
+
+                                {/* Selector de Procesos - Solo para Esmaltes */}
+                                {formProducto.tipoPinturaId === 1 && (
+                                    <div className="input-group">
+                                        <label className="input-label">
+                                            <span className="label-icon">⚙️</span>
+                                            Procesos
+                                        </label>
+                                        <div className="procesos-select-container">
+                                            <div 
+                                                className="procesos-select-trigger"
+                                                onClick={() => setMostrarDropdownProcesos(!mostrarDropdownProcesos)}
+                                            >
+                                                <div className="procesos-select-values">
+                                                    {formProducto.procesos.length === 0 ? (
+                                                        <span className="placeholder">Selecciona los procesos...</span>
+                                                    ) : (
+                                                        <div className="procesos-tags">
+                                                            {formProducto.procesos.map(p => (
+                                                                <span key={p.paso} className="proceso-tag-mini">
+                                                                    {p.descripcion}
+                                                                    <button 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            eliminarProceso(p.paso, p.descripcion);
+                                                                        }}
+                                                                    >✖</button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="dropdown-arrow">▼</span>
+                                            </div>
+                                            
+                                            {mostrarDropdownProcesos && (
+                                                <div className="procesos-dropdown">
+                                                    {procesosPredefinidos.map((proceso) => {
+                                                        const estaSeleccionado = formProducto.procesos.some(p => p.descripcion === proceso.descripcion);
+                                                        return (
+                                                            <div
+                                                                key={proceso.paso}
+                                                                className={`proceso-option ${estaSeleccionado ? 'selected' : ''}`}
+                                                                onClick={() => toggleProceso(proceso)}
+                                                            >
+                                                                <span className="proceso-option-check">
+                                                                    {estaSeleccionado ? '✓' : '○'}
+                                                                </span>
+                                                                <span className="proceso-option-text">{proceso.descripcion}</span>
+                                                                <span className="proceso-option-paso">P{proceso.paso}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1156,7 +1290,7 @@ export default function CodigosScreen() {
                             className={`cod-nav-btn ${seccionActiva === "productos" ? "active" : ""}`}
                             onClick={() => setSeccionActiva("productos")}
                         >
-                            <span className="nav-icon">📦</span> Agregar o Modificar codigos
+                            <span className="nav-icon">📦</span> Agregar o Modificar códigos
                         </button>
 
                         <button
@@ -1184,17 +1318,17 @@ export default function CodigosScreen() {
                     <div className="sidebar-footer">
                         <div className="stats-mini">
                             <span className="stats-number">
-                                {seccionActiva === "productos" 
-                                    ? "API" 
-                                    : seccionActiva === "vinilicas" 
-                                        ? codigos.length 
+                                {seccionActiva === "productos"
+                                    ? "API"
+                                    : seccionActiva === "vinilicas"
+                                        ? codigos.length
                                         : codigosEspeciales.filter(e => e.activo).length}
                             </span>
                             <span className="stats-label">
-                                {seccionActiva === "productos" 
-                                    ? "Productos" 
-                                    : seccionActiva === "vinilicas" 
-                                        ? "Excluidos" 
+                                {seccionActiva === "productos"
+                                    ? "Productos"
+                                    : seccionActiva === "vinilicas"
+                                        ? "Excluidos"
                                         : "Especiales activos"}
                             </span>
                         </div>
@@ -1209,18 +1343,18 @@ export default function CodigosScreen() {
                     <header className="cod-header">
                         <div className="cod-title-group">
                             <h1>
-                                {seccionActiva === "productos" 
-                                    ? "📦 Gestión de Productos" 
-                                    : seccionActiva === "vinilicas" 
+                                {seccionActiva === "productos"
+                                    ? "📦 Gestión de Productos"
+                                    : seccionActiva === "vinilicas"
                                         ? "💧 Códigos Excluidos - Vinílicas"
                                         : seccionActiva === "esmaltes"
                                             ? "✨ Códigos Especiales - Esmaltes"
                                             : "🏷️ Gestión de Familias"}
                             </h1>
                             <p>
-                                {seccionActiva === "productos" 
-                                    ? "Crea o modifica productos (tanto Vinílicas como Esmaltes) y sus envases"
-                                    : seccionActiva === "vinilicas" 
+                                {seccionActiva === "productos"
+                                    ? "Crea o modifica productos (tanto Vinílicas como Esmaltes), sus envases y procesos"
+                                    : seccionActiva === "vinilicas"
                                         ? "Administra los códigos que NO deben aparecer en producción de Vinílicas"
                                         : seccionActiva === "esmaltes"
                                             ? "Administra códigos especiales para pedidos urgentes o personalizados"

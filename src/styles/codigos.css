@@ -1248,3 +1248,162 @@ select.form-input option {
     border-radius: 6px;
     font-family: monospace;
 }
+
+
+
+/* ========== SELECTOR DE PROCESOS (DROPDOWN) ========== */
+.procesos-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.procesos-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 48px;
+}
+
+.procesos-select-trigger:hover {
+    border-color: rgba(192, 0, 255, 0.4);
+    background: rgba(192, 0, 255, 0.05);
+}
+
+.procesos-select-values {
+    flex: 1;
+}
+
+.placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+}
+
+.procesos-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.proceso-tag-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 16px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #e879f9;
+}
+
+.proceso-tag-mini button {
+    background: rgba(255, 95, 126, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+    color: #ff5f7e;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.proceso-tag-mini button:hover {
+    background: #ff5f7e;
+    color: white;
+}
+
+.dropdown-arrow {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+.procesos-select-trigger.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.procesos-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 12px;
+    z-index: 100;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.procesos-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.procesos-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.procesos-dropdown::-webkit-scrollbar-thumb {
+    background: #c000ff;
+    border-radius: 3px;
+}
+
+.proceso-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.proceso-option:hover {
+    background: rgba(192, 0, 255, 0.15);
+}
+
+.proceso-option.selected {
+    background: rgba(192, 0, 255, 0.25);
+}
+
+.proceso-option-check {
+    width: 20px;
+    font-size: 14px;
+    color: #e879f9;
+}
+
+.proceso-option-text {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.proceso-option.selected .proceso-option-text {
+    color: #e879f9;
+}
+
+.proceso-option-paso {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.proceso-option.selected .proceso-option-paso {
+    background: rgba(192, 0, 255, 0.3);
+    color: #e879f9;
+}

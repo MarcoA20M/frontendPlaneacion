@@ -37,7 +37,8 @@ export default function ProduccionScreen() {
         generarLotesFinales,
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
         guardarProduccionEnBD,
-        cargarDatosPorFecha
+        cargarDatosPorFecha,
+        calcularConsumoGlobal
     } = useProduccion();
 
     // --- ESTADOS DE UI Y CONTROL ---
@@ -71,6 +72,11 @@ export default function ProduccionScreen() {
         return guardado ? JSON.parse(guardado) : null;
     });
 
+    // Estados para resumen de consumo
+    const [mostrarModalResumen, setMostrarModalResumen] = useState(false);
+    const [resumenGlobal, setResumenGlobal] = useState([]);
+    const [cargandoResumen, setCargandoResumen] = useState(false);
+
     // Función para volver al menú principal
     const volverAlMenuPrincipal = () => {
         navigate("/");
@@ -94,9 +100,24 @@ export default function ProduccionScreen() {
                 setFamilias([]);
             }
         };
-        
+
         cargarFamilias();
     }, []);
+
+    // Función para ver resumen global de consumo
+    const handleVerResumenGlobal = async () => {
+        setCargandoResumen(true);
+        setMostrarModalResumen(true);
+        try {
+            const resumen = await calcularConsumoGlobal();
+            setResumenGlobal(resumen);
+        } catch (error) {
+            console.error("Error calculando resumen global:", error);
+            alert("Error al calcular el resumen de consumo");
+        } finally {
+            setCargandoResumen(false);
+        }
+    };
 
     // --- EFECTOS ---
     useEffect(() => {
@@ -177,6 +198,11 @@ export default function ProduccionScreen() {
         setFechaRotacion(new Date());
     };
 
+    // Calcular total de cargas para mostrar en el botón
+    const totalCargas = useMemo(() => {
+        return [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales].length;
+    }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
+
     return (
         <div className="app">
             <LoadingOverlay
@@ -213,12 +239,11 @@ export default function ProduccionScreen() {
                         )}
                     </div>
 
-                    {/* TÍTULO CON IMAGEN CLICKEABLE */}
                     <div className="titulo-app">
                         <div className="logo-clickeable" onClick={volverAlMenuPrincipal} style={{ cursor: 'pointer' }}>
-                            <img 
-                                src={logoPintu} 
-                                alt="Logo Pinturas" 
+                            <img
+                                src={logoPintu}
+                                alt="Logo Pinturas"
                                 className="logo-titulo"
                                 style={{ height: '50px', width: 'auto', marginRight: '15px' }}
                             />
@@ -254,6 +279,8 @@ export default function ProduccionScreen() {
                     cargasEspeciales={cargasEspeciales.filter(c => c.tipo === tipoPintura)}
                     mostrarEspeciales={mostrarEspeciales} setMostrarEspeciales={setMostrarEspeciales}
                     onSeleccionarCarga={(c) => { setCargaSeleccionada(c); setMostrarDetalle(true); }}
+                    cantidades={cantidades}
+                    totalLitrosActuales={totalLitrosActuales}
                 />
 
                 <div className="producto-panel">
@@ -333,7 +360,7 @@ export default function ProduccionScreen() {
                 <div className="main-board-section">
                     <div className="panel-header-actions">
                         <div className="header-left-side" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                                 <h2 className="tablero-titulo">TABLERO {tipoPintura.toUpperCase()}</h2>
                                 <ResumenOperarios
                                     key={`resumen-${fechaRotacion.toISOString()}`}
@@ -345,6 +372,17 @@ export default function ProduccionScreen() {
                                     onFiltrar={setFiltroOperario}
                                     filtroActivo={filtroOperario}
                                 />
+                                {/* Botón de Resumen de Consumo estilo card-op */}
+                                <button 
+                                    className="card-op resumen-consumo-btn"
+                                    onClick={handleVerResumenGlobal}
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(192, 0, 255, 0.15), rgba(128, 0, 255, 0.1))',
+                                        border: '1px solid rgba(192, 0, 255, 0.3)'
+                                    }}
+                                >
+                                    📊 Consumo ({totalCargas})
+                                </button>
                             </div>
                             {tipoPintura === "Esmalte" && (
                                 <div className="resumen-operarios" style={{ display: 'flex', gap: '8px' }}>
@@ -386,13 +424,13 @@ export default function ProduccionScreen() {
                                     }}
                                 />
                             </div>
-                            <button 
-                                className="btn-family-explorer" 
-                                onClick={() => navigate("/familias", { 
-                                    state: { 
+                            <button
+                                className="btn-family-explorer"
+                                onClick={() => navigate("/familias", {
+                                    state: {
                                         familias: familias,
-                                        tipoPintura: tipoPintura 
-                                    } 
+                                        tipoPintura: tipoPintura
+                                    }
                                 })}
                             >
                                 🏷️ FAMILIAS
@@ -509,6 +547,94 @@ export default function ProduccionScreen() {
                     setMostrarEspeciales(true);
                 }}
             />
+
+            {/* Modal Resumen de Consumo Global */}
+            {mostrarModalResumen && (
+                <div className="modal-overlay" onClick={() => setMostrarModalResumen(false)}>
+                    <div className="modal-content modal-resumen-global" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>📊 Resumen de Consumo de Materia Prima</h3>
+                            <button className="modal-close" onClick={() => setMostrarModalResumen(false)}>✖</button>
+                        </div>
+                        <div className="modal-body">
+                            {cargandoResumen ? (
+                                <div className="loading-resumen">
+                                    <div className="spinner-neon"></div>
+                                    <p>Calculando consumo total...</p>
+                                </div>
+                            ) : resumenGlobal.length === 0 ? (
+                                <div className="sin-consumo-global">
+                                    <span>📋</span>
+                                    <p>No hay cargas en el tablero o no tienen fórmulas definidas</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="resumen-totales-global">
+                                        <div className="total-cargas-global">
+                                            <span>Total de cargas:</span>
+                                            <strong>{totalCargas}</strong>
+                                        </div>
+                                        <div className="total-litros-global">
+                                            <span>Total a producir:</span>
+                                            <strong>{
+                                                [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales]
+                                                    .reduce((sum, c) => sum + (c.litros || 0), 0).toFixed(2)
+                                            } L</strong>
+                                        </div>
+                                    </div>
+                                    <div className="tabla-resumen-global">
+                                        <table className="tabla-consumo-global">
+                                            <thead>
+                                                <tr>
+                                                    <th>Código</th>
+                                                    <th>Materia Prima</th>
+                                                    <th>Tipo</th>
+                                                    <th>Consumo Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {resumenGlobal.map((item, idx) => (
+                                                    <tr key={idx} className={item.consumoTotal > 1000 ? 'alto-consumo' : ''}>
+                                                        <td><code>{item.codigo}</code></td>
+                                                        <td>{item.nombre}</td>
+                                                        <td>
+                                                            <span className={`tipo-badge-global ${item.tipo?.toLowerCase()}`}>
+                                                                {item.tipo}
+                                                            </span>
+                                                        </td>
+                                                        <td className="consumo-celda-global">
+                                                            <strong>{item.consumoTotal.toFixed(2)} L</strong>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr className="total-row">
+                                                    <td colSpan="3"><strong>Total general:</strong></td>
+                                                    <td className="total-celda">
+                                                        <strong>{resumenGlobal.reduce((sum, c) => sum + c.consumoTotal, 0).toFixed(2)} L</strong>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div className="aviso-consumo-global">
+                                        <span>⚠️</span>
+                                        <small>Este consumo se restará automáticamente del inventario al guardar la producción</small>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-cerrar" onClick={() => setMostrarModalResumen(false)}>Cerrar</button>
+                            <button className="btn-guardar" onClick={() => {
+                                setMostrarModalResumen(false);
+                                guardarProduccionEnBD();
+                            }}>Confirmar y Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

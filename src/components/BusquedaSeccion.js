@@ -1,33 +1,174 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PanelEspeciales from "./PanelEspeciales";
+import { formulasService } from "../services/formulasService";
 
 export default function BusquedaSeccion({ 
   codigo, setCodigo, consultar, producto, cargasEspeciales, 
-  mostrarEspeciales, setMostrarEspeciales, onSeleccionarCarga 
+  mostrarEspeciales, setMostrarEspeciales, onSeleccionarCarga,
+  cantidades, totalLitrosActuales
 }) {
+  const [consumoMaterias, setConsumoMaterias] = useState([]);
+  const [cargandoConsumo, setCargandoConsumo] = useState(false);
+  const [mostrarConsumo, setMostrarConsumo] = useState(false);
+
+  // 🔴 Función para calcular consumo
+  const calcularConsumo = async () => {
+    if (!producto || !producto.codigo || totalLitrosActuales === 0) {
+      setConsumoMaterias([]);
+      return;
+    }
+
+    setCargandoConsumo(true);
+    
+    try {
+      const formulas = await formulasService.listarPorProducto(producto.codigo);
+      
+      if (formulas && formulas.length > 0) {
+        const consumos = formulas.map(f => {
+          let materiaCodigo = "-";
+          let materiaNombre = "-";
+          let materiaTipo = "-";
+          
+          if (f.materiaPrima) {
+            materiaCodigo = f.materiaPrima.codigo || "-";
+            materiaNombre = f.materiaPrima.nombre || "-";
+            materiaTipo = f.materiaPrima.tipo || "-";
+          } else if (f.materiaPrimaCodigo) {
+            materiaCodigo = f.materiaPrimaCodigo;
+            materiaNombre = f.materiaPrimaNombre || "-";
+            materiaTipo = f.materiaPrimaTipo || "-";
+          }
+          
+          const cantidadPorLitroReal = f.cantidadPorLitro / 800;
+          const consumoTotal = cantidadPorLitroReal * totalLitrosActuales;
+          
+          return {
+            codigo: materiaCodigo,
+            nombre: materiaNombre,
+            tipo: materiaTipo,
+            consumoTotal: consumoTotal,
+            consumoTotalFormateado: consumoTotal.toFixed(2)
+          };
+        }).filter(c => c.consumoTotal > 0 && c.codigo !== "-");
+        
+        setConsumoMaterias(consumos);
+      } else {
+        setConsumoMaterias([]);
+      }
+    } catch (error) {
+      console.error("Error calculando consumo:", error);
+      setConsumoMaterias([]);
+    } finally {
+      setCargandoConsumo(false);
+    }
+  };
+
+  // 🔴 EFECTO: Recalcular cada vez que cambien las cantidades o los litros (solo si el panel está visible)
+  useEffect(() => {
+    if (mostrarConsumo && producto && totalLitrosActuales > 0) {
+      calcularConsumo();
+    }
+  }, [totalLitrosActuales, producto, mostrarConsumo]); // 🔴 Se ejecuta cuando cambian estos valores
+
+  // 🔴 Toggle mostrar/ocultar
+  const handleToggleConsumo = () => {
+    if (!mostrarConsumo) {
+      // Al abrir, calcular inmediatamente
+      calcularConsumo();
+    }
+    setMostrarConsumo(!mostrarConsumo);
+  };
+
+  const handleOcultarConsumo = () => {
+    setMostrarConsumo(false);
+  };
+
   return (
     <div className="busqueda-con-descripcion">
       <div className="busqueda">
-        <input placeholder="Código de producto..." value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+        <input 
+          placeholder="Código de producto..." 
+          value={codigo} 
+          onChange={(e) => setCodigo(e.target.value)} 
+          onKeyPress={(e) => e.key === 'Enter' && consultar()}
+        />
         <button onClick={consultar}>Buscar</button>
+        
+        {/* Botón Toggle */}
+        {producto && (
+          <button 
+            className={`btn-calcular-consumo-busqueda ${mostrarConsumo ? 'active' : ''}`}
+            onClick={handleToggleConsumo}
+            disabled={cargandoConsumo}
+            title={mostrarConsumo ? "Ocultar consumo" : "Ver consumo de materia prima"}
+          >
+            {mostrarConsumo ? "🔒" : "🏭"}
+          </button>
+        )}
       </div>
       
       {producto && (
         <div className="descripcion-producto">
           <div className="nombre-producto">{producto.descripcion}</div>
           <div className="poder-cubriente">Poder Cubriente: <span>{producto.poderCubriente || "N/A"}</span></div>
+          
           <div className="procesos-info">
             <strong>Ruta:</strong>
             <div className="lista-procesos-tags">
               {producto.procesos?.map((p) => (
-                <div key={p.paso} className="proceso-item"><span className="paso-nro">{p.paso}</span><span className="paso-desc">{p.descripcion}</span></div>
+                <div key={p.paso} className="proceso-item">
+                  <span className="paso-nro">{p.paso}</span>
+                  <span className="paso-desc">{p.descripcion}</span>
+                </div>
               ))}
             </div>
           </div>
+
+          {/* Panel de Consumo */}
+          {mostrarConsumo && (
+            <div className="consumo-preview-mini">
+              <div className="consumo-header-mini">
+                <span className="consumo-icon">⚗️</span>
+                <strong>Consumo de Materia Prima</strong>
+                <span className="consumo-badge-mini">{consumoMaterias.length} materias</span>
+                <button className="btn-cerrar-consumo-mini" onClick={handleOcultarConsumo}>✖</button>
+              </div>
+              
+              {cargandoConsumo ? (
+                <div className="consumo-loading-mini">
+                  <div className="spinner-mini"></div>
+                  <span>Calculando...</span>
+                </div>
+              ) : consumoMaterias.length > 0 ? (
+                <>
+                  <div className="consumo-lista-mini">
+                    {consumoMaterias.map((item, idx) => (
+                      <div key={idx} className="consumo-item-mini">
+                        <code>{item.codigo}</code>
+                        <span>{item.nombre}</span>
+                        <span className={`tipo-mini ${item.tipo?.toLowerCase()}`}>{item.tipo}</span>
+                        <strong>{item.consumoTotalFormateado} L</strong>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="consumo-total-mini">
+                    <span>Total a consumir:</span>
+                    <strong>{consumoMaterias.reduce((sum, c) => sum + c.consumoTotal, 0).toFixed(2)} L</strong>
+                  </div>
+                  <div className="consumo-nota-mini">
+                    <small>💡 Basado en {totalLitrosActuales.toFixed(2)} L de producción</small>
+                  </div>
+                </>
+              ) : (
+                <div className="sin-consumo-mini">
+                  <span>📋</span>
+                  <p>No hay fórmula definida para este producto</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
-
-
 
       <PanelEspeciales
         cargasEspeciales={cargasEspeciales}

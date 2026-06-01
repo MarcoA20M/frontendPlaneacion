@@ -321,20 +321,7 @@
   font-size: 11px; 
 }
 
-.footer-inv-flex { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 2px; 
-}
 
-.label-excel-btn { 
-  cursor: pointer; 
-  margin: 0; 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-}
 
 .txt-cyan { 
   color: #00c0ff; 
@@ -385,3 +372,37 @@
 .descripcion-header {
   padding-left: 180px !important; /* Aumenta el padding */
 }
+
+
+/* --- FOOTER - SOLO REDUCIR EL RECTÁNGULO, MANTENIENDO EL DISEÑO ORIGINAL --- */
+.footer-inv-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px !important;  /* Solo reduje el padding vertical de 2px a 6px */
+  background: rgb(rgb(27, 27, 47));
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 0;
+}
+
+.modal-footer .btn-guardar {
+  background: linear-gradient(90deg, #c000ff 0%, #7c00b3 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 24px !important;
+  border-radius: 12px !important;
+  font-size: 0.85rem !important;
+}
+
+
+.footer-inv-flex {
+  display: flex;
+  justify-content: space-between !important;  /* Mantiene separados */
+  align-items: center;
+  padding: 6px 16px !important;
+  background: #1b1b2f;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 0;
+}
+
+

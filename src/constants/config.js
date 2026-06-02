@@ -101,7 +101,7 @@ export const getOperarioPorMaquina = (idMaquina, fechaRef = new Date()) => {
   });
   
   // Calcular semanas rotadas desde la fecha de anclaje
-  const fechaAnclaje = new Date(2026, 0, 6);
+  const fechaAnclaje = new Date(2026, 0, 5);
   const semanasCalculadas = calcularSemanasDiferencia(fechaRef, fechaAnclaje);
   
   // Usar las semanas guardadas si la fecha es "hoy" (o si quieres priorizar el botón)

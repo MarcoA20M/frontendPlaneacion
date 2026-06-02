@@ -1,6 +1,6 @@
 // src/screens/FormulasScreen.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import { productoService } from "../services/productoService";
 import { formulasService } from "../services/formulasService";
@@ -8,7 +8,8 @@ import "../styles/criticos.css";
 
 export default function FormulasScreen() {
     const navigate = useNavigate();
-    const [loadingContent, setLoadingContent] = useState(true); // 🔴 Solo para el contenido
+    const location = useLocation();
+    const [loadingContent, setLoadingContent] = useState(true);
     const [productos, setProductos] = useState([]);
     const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [materiasPrimas, setMateriasPrimas] = useState([]);
@@ -16,8 +17,7 @@ export default function FormulasScreen() {
     const [formulas, setFormulas] = useState([]);
     const [busqueda, setBusqueda] = useState("");
     const [filtroTipo, setFiltroTipo] = useState("todos");
-    
-    // Estado para tanques (para el sidebar)
+
     const [tanques, setTanques] = useState([]);
     const [resumenDashboard, setResumenDashboard] = useState({
         totalTanques: 0,
@@ -25,13 +25,19 @@ export default function FormulasScreen() {
         alerta: 0,
         normales: 0
     });
-    const [sidebarDataLoaded, setSidebarDataLoaded] = useState(false); // 🔴 Para el sidebar
+    const [sidebarDataLoaded, setSidebarDataLoaded] = useState(false);
 
     const [nuevaMateria, setNuevaMateria] = useState({
         materiaPrimaId: "",
         cantidadPorLitro: ""
     });
     const [mostrarFormNueva, setMostrarFormNueva] = useState(false);
+
+    // Leer el parámetro 'producto' de la URL (puede ser código o ID)
+    const getProductoParamFromUrl = () => {
+        const params = new URLSearchParams(location.search);
+        return params.get('producto');
+    };
 
     const cargarDatos = async () => {
         setLoadingContent(true);
@@ -42,12 +48,42 @@ export default function FormulasScreen() {
                 materiaPrimaService.listarTodas(),
                 materiaPrimaService.getResumenDashboard()
             ]);
+            
+            console.log("📦 Productos cargados:", productosData);
+            console.log("🔧 Materias primas cargadas:", materiasData);
+            
             setProductos(productosData);
             setProductosFiltrados(productosData);
             setMateriasPrimas(materiasData);
             setTanques(tanquesData);
             setResumenDashboard(resumenData);
             setSidebarDataLoaded(true);
+
+            // 🔴 Buscar producto por código o ID desde la URL
+            const productoParam = getProductoParamFromUrl();
+            console.log("🔍 Producto solicitado desde URL:", productoParam);
+            
+            if (productoParam) {
+                // Buscar primero por código
+                let productoEncontrado = productosData.find(p => 
+                    p.codigo?.toString().toLowerCase() === productoParam.toString().toLowerCase()
+                );
+                
+                // Si no encuentra por código, buscar por ID
+                if (!productoEncontrado) {
+                    productoEncontrado = productosData.find(p => 
+                        p.id?.toString() === productoParam.toString()
+                    );
+                }
+                
+                if (productoEncontrado) {
+                    console.log("✅ Producto encontrado:", productoEncontrado.codigo, productoEncontrado.descripcion);
+                    await seleccionarProducto(productoEncontrado);
+                } else {
+                    console.log("❌ Producto no encontrado con parámetro:", productoParam);
+                }
+            }
+
         } catch (error) {
             console.error("Error cargando datos:", error);
         } finally {
@@ -55,34 +91,19 @@ export default function FormulasScreen() {
         }
     };
 
-    // Calcular inventario total para el sidebar
-    const inventarioTotal = tanques.reduce((sum, t) => sum + (t.nivelActual || 0), 0);
-    const capacidadTotal = tanques.reduce((sum, t) => sum + (t.capacidadMaxima || 0), 0);
-    const tanquesCriticos = tanques.filter(t => t.critico);
-
-    useEffect(() => {
-        let filtrados = [...productos];
-        if (busqueda) {
-            filtrados = filtrados.filter(p => 
-                p.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
-                p.descripcion?.toLowerCase().includes(busqueda.toLowerCase())
-            );
-        }
-        if (filtroTipo !== "todos") {
-            filtrados = filtrados.filter(p => {
-                if (filtroTipo === "vinilica") return p.tipoPinturaId === 2;
-                if (filtroTipo === "esmalte") return p.tipoPinturaId === 1;
-                return true;
-            });
-        }
-        setProductosFiltrados(filtrados);
-    }, [busqueda, filtroTipo, productos]);
-
     const cargarFormulas = async (productoId) => {
         try {
+            console.log("📋 Cargando fórmulas para producto ID:", productoId);
             const data = await formulasService.listarPorProducto(productoId);
+            console.log("📋 Fórmulas recibidas:", data);
+            
             const formulasConDatos = data.map(formula => {
-                if (!formula.materiaPrima && formula.materiaPrimaId) {
+                // Si la fórmula ya trae materiaPrima, usarla
+                if (formula.materiaPrima) {
+                    return formula;
+                }
+                // Si solo trae materiaPrimaId, buscar la materia prima
+                if (formula.materiaPrimaId) {
                     const materiaEncontrada = materiasPrimas.find(mp => mp.id === formula.materiaPrimaId);
                     if (materiaEncontrada) {
                         formula.materiaPrima = {
@@ -91,10 +112,14 @@ export default function FormulasScreen() {
                             nombre: materiaEncontrada.nombre,
                             tipo: materiaEncontrada.tipo
                         };
+                    } else {
+                        console.log("⚠️ Materia prima no encontrada para ID:", formula.materiaPrimaId);
                     }
                 }
                 return formula;
             });
+            
+            console.log("📋 Fórmulas procesadas:", formulasConDatos);
             setFormulas(formulasConDatos);
         } catch (error) {
             console.error("Error cargando fórmulas:", error);
@@ -103,6 +128,7 @@ export default function FormulasScreen() {
     };
 
     const seleccionarProducto = async (producto) => {
+        console.log("🎯 Seleccionando producto:", producto);
         const productoId = producto.id || producto.codigo;
         setProductoSeleccionado(producto);
         setMostrarFormNueva(false);
@@ -122,7 +148,7 @@ export default function FormulasScreen() {
                 materiaPrimaId: parseInt(nuevaMateria.materiaPrimaId),
                 cantidadPorLitro: parseFloat(nuevaMateria.cantidadPorLitro)
             });
-            
+
             alert("✅ Materia prima agregada");
             setNuevaMateria({ materiaPrimaId: "", cantidadPorLitro: "" });
             setMostrarFormNueva(false);
@@ -149,14 +175,14 @@ export default function FormulasScreen() {
             alert("Cantidad inválida");
             return;
         }
-        
+
         const formula = formulas.find(f => f.id === id);
         if (!formula) return;
-        
+
         try {
             await formulasService.actualizar(id, {
                 productoId: productoSeleccionado.id || productoSeleccionado.codigo,
-                materiaPrimaId: formula.materiaPrima.id,
+                materiaPrimaId: formula.materiaPrima?.id || formula.materiaPrimaId,
                 cantidadPorLitro: parseFloat(nuevaCantidad)
             });
             alert("✅ Cantidad actualizada");
@@ -166,18 +192,43 @@ export default function FormulasScreen() {
         }
     };
 
+    // 🔴 Navegar a trazabilidad
+    const irATrazabilidad = () => {
+        navigate("/mantenimiento/criticos?tab=trazabilidad");
+    };
+
     useEffect(() => {
         cargarDatos();
     }, []);
 
-    const materiasDisponibles = materiasPrimas.filter(mp => 
-        !formulas.some(f => f.materiaPrima?.id === mp.id)
+    useEffect(() => {
+        let filtrados = [...productos];
+        if (busqueda) {
+            filtrados = filtrados.filter(p =>
+                p.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
+                p.descripcion?.toLowerCase().includes(busqueda.toLowerCase())
+            );
+        }
+        if (filtroTipo !== "todos") {
+            filtrados = filtrados.filter(p => {
+                if (filtroTipo === "vinilica") return p.tipoPinturaId === 2;
+                if (filtroTipo === "esmalte") return p.tipoPinturaId === 1;
+                return true;
+            });
+        }
+        setProductosFiltrados(filtrados);
+    }, [busqueda, filtroTipo, productos]);
+
+    const inventarioTotal = tanques.reduce((sum, t) => sum + (t.nivelActual || 0), 0);
+    const capacidadTotal = tanques.reduce((sum, t) => sum + (t.capacidadMaxima || 0), 0);
+    const tanquesCriticos = tanques.filter(t => t.critico);
+    const materiasDisponibles = materiasPrimas.filter(mp =>
+        !formulas.some(f => (f.materiaPrima?.id === mp.id) || (f.materiaPrimaId === mp.id))
     );
 
     return (
         <div className="criticos-container">
             <div className="criticos-glass-panel">
-                {/* SIDEBAR - Siempre visible, sin loading */}
                 <aside className="criticos-sidebar">
                     <div className="sidebar-logo">
                         <span className="logo-icon">⚡</span>
@@ -186,29 +237,25 @@ export default function FormulasScreen() {
 
                     <nav className="sidebar-nav">
                         <div className="nav-label">PRINCIPAL</div>
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos")}
-                        >
+                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
                             <span className="btn-icon">📊</span>
                             Dashboard
                         </button>
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos")}
-                        >
+                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
                             <span className="btn-icon">🛢️</span>
                             Tanques
                         </button>
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos")}
-                        >
+                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
                             <span className="btn-icon">🚨</span>
                             Alertas
                             {tanquesCriticos.length > 0 && (
                                 <span className="badge-alerta">{tanquesCriticos.length}</span>
                             )}
+                        </button>
+                        {/* 🔴 BOTÓN DE TRAZABILIDAD EN EL SIDEBAR */}
+                        <button className="sidebar-btn" onClick={irATrazabilidad}>
+                            <span className="btn-icon">🔗</span>
+                            Trazabilidad
                         </button>
                     </nav>
 
@@ -216,12 +263,9 @@ export default function FormulasScreen() {
 
                     <nav className="sidebar-nav">
                         <div className="nav-label">CONFIGURACIÓN</div>
-                        <button
-                            className="sidebar-btn active"
-                            style={{ background: "rgba(192,0,255,0.2)" }}
-                        >
+                        <button className="sidebar-btn active" style={{ background: "rgba(192,0,255,0.2)" }}>
                             <span className="btn-icon">📋</span>
-                            Fórmulas
+                           Consultar codigos
                         </button>
                     </nav>
 
@@ -242,7 +286,6 @@ export default function FormulasScreen() {
                     </div>
                 </aside>
 
-                {/* CONTENIDO PRINCIPAL - Solo aquí va el loading */}
                 <main className="criticos-main">
                     {loadingContent ? (
                         <div className="loading-content">
@@ -256,10 +299,10 @@ export default function FormulasScreen() {
                                     <h1>📋 Gestión de Fórmulas</h1>
                                     <p>Define qué materias primas consume cada producto (cantidad por litro)</p>
                                 </div>
+                              
                             </header>
 
                             <div className="formulas-layout-simple">
-                                {/* Panel izquierdo - Productos */}
                                 <div className="productos-panel-simple">
                                     <div className="panel-header-simple">
                                         <h3>📦 Productos</h3>
@@ -281,18 +324,17 @@ export default function FormulasScreen() {
                                         {productosFiltrados.map(producto => (
                                             <div
                                                 key={producto.codigo}
-                                                className={`producto-simple ${productoSeleccionado?.id === producto.codigo ? 'active' : ''}`}
+                                                className={`producto-simple ${productoSeleccionado?.codigo === producto.codigo ? 'active' : ''}`}
                                                 onClick={() => seleccionarProducto(producto)}
                                             >
                                                 <div className="producto-simple-codigo">{producto.codigo}</div>
-                                                <div className="producto-simple-descripcion">{producto.descripcion}</div>
+                                                <div className="producto-simple-descripcion">{producto.descripcion || "Sin descripción"}</div>
                                                 <div className="producto-simple-tipo">{producto.tipoPinturaId === 1 ? "Esmalte" : "Vinílica"}</div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Panel derecho - Fórmulas */}
                                 <div className="formulas-panel-simple">
                                     {!productoSeleccionado ? (
                                         <div className="empty-simple">
@@ -305,7 +347,7 @@ export default function FormulasScreen() {
                                             <div className="producto-header-simple">
                                                 <div className="producto-header-info">
                                                     <span className="producto-header-codigo">{productoSeleccionado.codigo}</span>
-                                                    <span className="producto-header-descripcion">{productoSeleccionado.descripcion}</span>
+                                                    <span className="producto-header-descripcion">{productoSeleccionado.descripcion || "Sin descripción"}</span>
                                                 </div>
                                                 <button className="btn-agregar-simple" onClick={() => setMostrarFormNueva(!mostrarFormNueva)}>
                                                     {mostrarFormNueva ? "✖ Cancelar" : "+ Agregar Materia Prima"}
@@ -366,11 +408,15 @@ export default function FormulasScreen() {
                                                         <tbody>
                                                             {formulas.map(formula => (
                                                                 <tr key={formula.id}>
-                                                                    <td className="codigo-col"><code>{formula.materiaPrima?.codigo || "-"}</code></td>
-                                                                    <td><strong>{formula.materiaPrima?.nombre || "-"}</strong></td>
+                                                                    <td className="codigo-col">
+                                                                        <code>{formula.materiaPrima?.codigo || formula.materiaPrimaCodigo || "-"}</code>
+                                                                    </td>
                                                                     <td>
-                                                                        <span className={`tipo-badge-simple ${formula.materiaPrima?.tipo?.toLowerCase()}`}>
-                                                                            {formula.materiaPrima?.tipo || "-"}
+                                                                        <strong>{formula.materiaPrima?.nombre || formula.materiaPrimaNombre || "-"}</strong>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span className={`tipo-badge-simple ${(formula.materiaPrima?.tipo || formula.materiaPrimaTipo || "").toLowerCase()}`}>
+                                                                            {formula.materiaPrima?.tipo || formula.materiaPrimaTipo || "-"}
                                                                         </span>
                                                                     </td>
                                                                     <td className="cantidad-col">
@@ -385,14 +431,14 @@ export default function FormulasScreen() {
                                                                         <span className="unidad">L/L</span>
                                                                     </td>
                                                                     <td className="acciones-col">
-                                                                        <button className="btn-eliminar-simple" onClick={() => eliminarFormula(formula.id, formula.materiaPrima?.nombre)}>
+                                                                        <button className="btn-eliminar-simple" onClick={() => eliminarFormula(formula.id, formula.materiaPrima?.nombre || formula.materiaPrimaNombre)}>
                                                                             🗑️
                                                                         </button>
                                                                     </td>
-                                                                </tr>
+                                                                 </tr>
                                                             ))}
                                                         </tbody>
-                                                     </table>
+                                                    </table>
                                                 )}
                                             </div>
 

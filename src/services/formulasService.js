@@ -45,6 +45,26 @@ export const formulasService = {
         return response.json();
     },
 
+
+     getProductosQueConsumen: async (materiaPrimaId) => {
+        try {
+            // Primero obtenemos todas las fórmulas (necesitarás un endpoint para listar todas)
+            // Si no existe, puedes modificar formulasService para incluir listarTodas()
+            const response = await fetch(`http://localhost:8080/api/formulas/materia-prima/${materiaPrimaId}`);
+            if (!response.ok) throw new Error("Error al cargar productos relacionados");
+            return response.json();
+        } catch (error) {
+            console.error("Error obteniendo productos que consumen:", error);
+            return [];
+        }
+    },
+
+     calcularConsumoMensual: (formulas, produccionMensual = 1000) => {
+        return formulas.reduce((total, formula) => {
+            return total + (formula.cantidadPorLitro * produccionMensual);
+        }, 0);
+    },
+
     // Eliminar fórmula
     eliminar: async (id) => {
         const response = await fetch(`${API_URL}/${id}`, {
@@ -54,3 +74,5 @@ export const formulasService = {
         return response.json();
     }
 };
+
+

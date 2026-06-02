@@ -1609,3 +1609,268 @@
 .resumen-item strong {
     color: #ffffff !important;
 }
+
+
+/* ========== ESTILOS PARA ACCESO RÁPIDO A TRAZABILIDAD ========== */
+
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.quick-access-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(192, 0, 255, 0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-access-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192, 0, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.quick-access-card:hover::before {
+    left: 100%;
+}
+
+.quick-access-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(192, 0, 255, 0.5);
+    box-shadow: 0 5px 20px rgba(128, 0, 255, 0.25);
+    background: rgba(192, 0, 255, 0.08);
+}
+
+.quick-access-card.more {
+    background: rgba(0, 0, 0, 0.2);
+    border-style: dashed;
+    border-color: rgba(192, 0, 255, 0.3);
+}
+
+.quick-access-card.more:hover {
+    background: rgba(192, 0, 255, 0.08);
+    border-style: solid;
+}
+
+.quick-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 0 5px rgba(192, 0, 255, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.quick-access-card:hover .quick-icon {
+    transform: scale(1.1);
+}
+
+.quick-info {
+    flex: 1;
+}
+
+.quick-info strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e879f9;
+    margin-bottom: 4px;
+}
+
+.quick-info small {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.quick-arrow {
+    font-size: 20px;
+    color: #c000ff;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.quick-access-card:hover .quick-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Estilos para el botón de ver trazabilidad en las tarjetas de tanques */
+.btn-ver-trazabilidad {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.4);
+    color: #e879f9;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ver-trazabilidad:hover {
+    background: rgba(192, 0, 255, 0.3);
+    transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(192, 0, 255, 0.3);
+}
+
+/* Estilos para el botón en alertas */
+.btn-accion-trazabilidad {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.4);
+    color: #e879f9;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.btn-accion-trazabilidad:hover {
+    background: rgba(192, 0, 255, 0.3);
+    transform: scale(1.02);
+    box-shadow: 0 0 8px rgba(192, 0, 255, 0.3);
+}
+
+/* Ajuste responsive para las acciones */
+@media (max-width: 768px) {
+    .tanque-acciones {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-ver-trazabilidad {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .alerta-accion {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-accion-trazabilidad {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .quick-access-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-access-card {
+        padding: 12px;
+    }
+    
+    .quick-icon {
+        font-size: 28px;
+    }
+    
+    .quick-info strong {
+        font-size: 13px;
+    }
+    
+    .quick-info small {
+        font-size: 9px;
+    }
+}
+
+
+/* Botones del header */
+.header-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-nueva-materia-prima {
+    background: linear-gradient(90deg, #27ae60, #1d6f42);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-nueva-materia-prima:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-trazabilidad-header {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.4);
+    border-radius: 10px;
+    color: #e879f9;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-trazabilidad-header:hover {
+    background: rgba(192, 0, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(192, 0, 255, 0.3);
+}
+
+/* Modal para nueva materia prima */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.aviso-modal {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.aviso-modal small {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-guardar {
+    background: linear-gradient(90deg, #27ae60, #1d6f42);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-guardar:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}

@@ -76,20 +76,7 @@ const ModalInventarioBajo = ({ visible, alertas, onClose, onSelectCode, onAnaliz
           <button className="close-btn" onClick={onClose}>&times;</button>
         </header>
 
-        <div className="info-general">
-          <div className="info-item">
-            <span className="label">Monitoreo</span>
-            <span className="value">Stock Crítico</span>
-          </div>
-          <div className="info-item">
-            <span className="label">Actualización</span>
-            <span className="value txt-cyan">Tiempo Real</span>
-          </div>
-          <div className="info-item">
-            <span className="label">Verificación</span>
-            <span className="value txt-green">Historial por Envase</span>
-          </div>
-        </div>
+        
 
         <div className="tabla-seccion">
           <div className="fila-carga header-tabla-inv">

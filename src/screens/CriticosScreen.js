@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
+import MateriaPrimaProductos from "../components/MateriaPrimaProductos";
 import "../styles/criticos.css";
 
 export default function CriticosScreen() {
@@ -92,8 +93,6 @@ export default function CriticosScreen() {
         <div className="criticos-container">
             <div className="criticos-glass-panel">
                 {/* SIDEBAR */}
-            
-
                 <aside className="criticos-sidebar">
                     <div className="sidebar-logo">
                         <span className="logo-icon">⚡</span>
@@ -126,9 +125,16 @@ export default function CriticosScreen() {
                                 <span className="badge-alerta">{tanquesCriticos.length}</span>
                             )}
                         </button>
+                        <button
+                            className={`sidebar-btn ${seccionActiva === "trazabilidad" ? "active" : ""}`}
+                            onClick={() => setSeccionActiva("trazabilidad")}
+                        >
+                            <span className="btn-icon">🔗</span>
+                            Trazabilidad
+                        </button>
                     </nav>
 
-                    {/* 🔴 NUEVA SECCIÓN: Separador */}
+                    {/* Separador */}
                     <div className="nav-divider"></div>
 
                     <nav className="sidebar-nav">
@@ -167,19 +173,26 @@ export default function CriticosScreen() {
                                 {seccionActiva === "dashboard" && "📊 Dashboard de Materia Prima"}
                                 {seccionActiva === "tanques" && "🛢️ Gestión de Tanques"}
                                 {seccionActiva === "alertas" && "🚨 Alertas y Críticos"}
+                                {seccionActiva === "trazabilidad" && "🔗 Trazabilidad de Materias Primas"}
                             </h1>
-                            <p>Control y monitoreo de inventario de materia prima</p>
+                            <p>
+                                {seccionActiva === "trazabilidad" 
+                                    ? "Visualiza qué productos consumen cada materia prima y planifica tu inventario"
+                                    : "Control y monitoreo de inventario de materia prima"}
+                            </p>
                         </div>
-                        <div className="header-stats">
-                            <div className="stat-card-header critico">
-                                <span className="stat-num">{resumenDashboard.criticos}</span>
-                                <span className="stat-label">Críticos</span>
+                        {seccionActiva !== "trazabilidad" && (
+                            <div className="header-stats">
+                                <div className="stat-card-header critico">
+                                    <span className="stat-num">{resumenDashboard.criticos}</span>
+                                    <span className="stat-label">Críticos</span>
+                                </div>
+                                <div className="stat-card-header alerta">
+                                    <span className="stat-num">{resumenDashboard.alerta}</span>
+                                    <span className="stat-label">Alerta</span>
+                                </div>
                             </div>
-                            <div className="stat-card-header alerta">
-                                <span className="stat-num">{resumenDashboard.alerta}</span>
-                                <span className="stat-label">Alerta</span>
-                            </div>
-                        </div>
+                        )}
                     </header>
 
                     <div className="criticos-workspace">
@@ -214,6 +227,40 @@ export default function CriticosScreen() {
                                             <span className="card-value">{capacidadTotal > 0 ? ((inventarioTotal / capacidadTotal) * 100).toFixed(0) : 0}%</span>
                                             <span className="card-label">Ocupación</span>
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* Widget de acceso rápido a trazabilidad */}
+                                <div className="dashboard-section">
+                                    <h3>🔗 Acceso rápido a trazabilidad</h3>
+                                    <div className="quick-access-grid">
+                                        {tanques.slice(0, 3).map(mp => (
+                                            <div 
+                                                key={mp.id} 
+                                                className="quick-access-card"
+                                                onClick={() => setSeccionActiva("trazabilidad")}
+                                            >
+                                                <div className="quick-icon">🔍</div>
+                                                <div className="quick-info">
+                                                    <strong>{mp.nombre}</strong>
+                                                    <small>Ver qué productos lo consumen</small>
+                                                </div>
+                                                <div className="quick-arrow">→</div>
+                                            </div>
+                                        ))}
+                                        {tanques.length > 3 && (
+                                            <div 
+                                                className="quick-access-card more"
+                                                onClick={() => setSeccionActiva("trazabilidad")}
+                                            >
+                                                <div className="quick-icon">📊</div>
+                                                <div className="quick-info">
+                                                    <strong>Ver todas</strong>
+                                                    <small>{tanques.length} materias primas en total</small>
+                                                </div>
+                                                <div className="quick-arrow">→</div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -292,8 +339,33 @@ export default function CriticosScreen() {
                                                     <div className="umbral-item critico">🚨 Crítico: {tanque.umbralCritico?.toLocaleString()} {tanque.unidad}</div>
                                                 </div>
                                                 <div className="tanque-acciones">
-                                                    <button className="btn-ver-consumo">📋 Ver Historial</button>
-                                                    <button className="btn-registrar-compra" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Registrar Compra</button>
+                                                    <button 
+                                                        className="btn-ver-consumo"
+                                                        onClick={() => {
+                                                            // Aquí puedes implementar la navegación al historial
+                                                            console.log("Ver historial de", tanque.nombre);
+                                                        }}
+                                                    >
+                                                        📋 Ver Historial
+                                                    </button>
+                                                    <button 
+                                                        className="btn-registrar-compra" 
+                                                        onClick={() => { 
+                                                            setTanqueSeleccionado(tanque); 
+                                                            setMostrarModalCompra(true); 
+                                                        }}
+                                                    >
+                                                        🛒 Registrar Compra
+                                                    </button>
+                                                    <button 
+                                                        className="btn-ver-trazabilidad"
+                                                        onClick={() => {
+                                                            // Cambiar a la sección de trazabilidad
+                                                            setSeccionActiva("trazabilidad");
+                                                        }}
+                                                    >
+                                                        🔗 Ver productos que consume
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
@@ -322,6 +394,7 @@ export default function CriticosScreen() {
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-urgente" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Solicitar compra urgente</button>
+                                                    <button className="btn-accion-trazabilidad" onClick={() => setSeccionActiva("trazabilidad")}>🔗 Ver consumo</button>
                                                 </div>
                                             </div>
                                         ))}
@@ -340,6 +413,7 @@ export default function CriticosScreen() {
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-programar" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>📅 Programar pedido</button>
+                                                    <button className="btn-accion-trazabilidad" onClick={() => setSeccionActiva("trazabilidad")}>🔗 Ver consumo</button>
                                                 </div>
                                             </div>
                                         ))}
@@ -353,6 +427,11 @@ export default function CriticosScreen() {
                                     </div>
                                 )}
                             </div>
+                        )}
+
+                        {/* SECCIÓN TRAZABILIDAD */}
+                        {seccionActiva === "trazabilidad" && (
+                            <MateriaPrimaProductos />
                         )}
                     </div>
                 </main>

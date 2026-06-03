@@ -11,6 +11,8 @@ import CodigosScreen from "./screens/CodigosScreen";
 import FamiliasGestionScreen from "./screens/FamiliasGestionScreen";
 import CriticosScreen from "./screens/CriticosScreen.js";
 import FormulasScreen from "./screens/FormulasScreen.js";
+import MateriasPrimasScreen from "./screens/MateriasPrimasScreen";
+
 // Wrapper para el detalle de familias (MEJORADO)
 function FamiliaDetalleWrapper() {
   const navigate = useNavigate();
@@ -82,7 +84,8 @@ export default function App() {
         <Route path="/mantenimiento/operarios" element={<OperariosScreen />} />
         <Route path="/mantenimiento/codigos" element={<CodigosScreen />} />
         <Route path="/mantenimiento/criticos" element={<CriticosScreen />} />
-                <Route path="/mantenimiento/formulas" element={<FormulasScreen />} />
+        <Route path="/mantenimiento/formulas" element={<FormulasScreen />} />
+        <Route path="/mantenimiento/materias-primas" element={<MateriasPrimasScreen />} />
 
 
         <Route path="/mantenimiento/familias" element={<FamiliasGestionScreen />} />

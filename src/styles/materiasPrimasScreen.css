@@ -1,0 +1,140 @@
+/* src/styles/materiasPrimasManager.css */
+.mp-manager-container {
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    margin-bottom: 20px;
+}
+
+.mp-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.mp-manager-header h2 {
+    background: linear-gradient(135deg, #f0f0f0, #e879f9);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 0;
+}
+
+.mp-manager-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-nuevo-mp {
+    background: linear-gradient(90deg, #27ae60, #1d6f42);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cerrar-manager {
+    background: rgba(255, 95, 126, 0.2);
+    border: 1px solid #ff5f7e;
+    border-radius: 10px;
+    color: #ff5f7e;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.mp-manager-filtros {
+    margin-bottom: 20px;
+}
+
+.mp-manager-filtros .search-box input {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.mp-manager-tabla {
+    overflow-x: auto;
+}
+
+.mp-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mp-tabla th {
+    text-align: left;
+    padding: 12px 8px;
+    color: #a855f7;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(192, 0, 255, 0.2);
+}
+
+.mp-tabla td {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.mp-tabla tr:hover {
+    background: rgba(192, 0, 255, 0.05);
+}
+
+.tipo-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.tipo-badge-base { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+.tipo-badge-pigmento { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+.tipo-badge-solvente { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+.tipo-badge-aditivo { background: rgba(26, 188, 156, 0.2); color: #1abc9c; }
+
+.nivel-critico { color: #e74c3c; font-weight: bold; }
+.nivel-alerta { color: #f39c12; font-weight: bold; }
+.nivel-normal { color: #2ecc71; }
+
+.acciones-mp {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-editar-mp, .btn-eliminar-mp {
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-editar-mp:hover { background: rgba(192, 0, 255, 0.3); transform: scale(1.05); }
+.btn-eliminar-mp:hover { background: rgba(231, 76, 60, 0.3); transform: scale(1.05); }
+
+.loading-mp {
+    text-align: center;
+    padding: 40px;
+}
+
+.no-mp {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+}

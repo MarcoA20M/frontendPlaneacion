@@ -703,3 +703,59 @@
 }
 
 
+/* Header de insights con selector integrado */
+.insights-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.insights-header-row h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #e879f9;
+}
+
+.insights-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 3px;
+}
+
+.insight-toggle-btn {
+    padding: 4px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 16px;
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.insight-toggle-btn:hover {
+    background: rgba(192, 0, 255, 0.15);
+}
+
+.insight-toggle-btn.active {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.3), rgba(128, 0, 255, 0.2));
+    color: #e879f9;
+    box-shadow: 0 0 6px rgba(192, 0, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+    .insights-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

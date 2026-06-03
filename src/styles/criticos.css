@@ -1211,11 +1211,73 @@
 }
 
 /* Lista de productos */
+/* ========== SCROLL MEJORADO PARA LISTA DE CÓDIGOS ========== */
+
+/* Scroll para la lista de productos */
 .productos-lista-simple {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #c000ff rgba(192, 0, 255, 0.2);
 }
+
+.productos-lista-simple::-webkit-scrollbar {
+    width: 6px;
+}
+
+.productos-lista-simple::-webkit-scrollbar-track {
+    background: rgba(192, 0, 255, 0.1);
+    border-radius: 10px;
+}
+
+.productos-lista-simple::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #c000ff, #e879f9);
+    border-radius: 10px;
+}
+
+.productos-lista-simple::-webkit-scrollbar-thumb:hover {
+    background: #e879f9;
+}
+
+/* Scroll para la tabla de fórmulas */
+.formulas-tabla-simple {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c000ff rgba(192, 0, 255, 0.2);
+}
+
+.formulas-tabla-simple::-webkit-scrollbar {
+    width: 6px;
+}
+
+.formulas-tabla-simple::-webkit-scrollbar-track {
+    background: rgba(192, 0, 255, 0.1);
+    border-radius: 10px;
+}
+
+.formulas-tabla-simple::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #c000ff, #e879f9);
+    border-radius: 10px;
+}
+
+.formulas-tabla-simple::-webkit-scrollbar-thumb:hover {
+    background: #e879f9;
+}
+
+/* Asegurar que el contenedor tenga altura máxima */
+.productos-panel-simple {
+    max-height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+}
+
+.formulas-panel-simple {
+    max-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+} 
 
 .producto-simple {
     padding: 10px 12px;
@@ -1311,6 +1373,8 @@
 }
 
 /* Formulario agregar */
+/* ========== ESTILOS PARA EL FORMULARIO DE AGREGAR MATERIA PRIMA ========== */
+
 .agregar-materia-simple {
     padding: 12px 16px;
     background: rgba(0, 0, 0, 0.3);
@@ -1321,10 +1385,12 @@
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .agregar-select {
     flex: 2;
+    min-width: 180px;
     padding: 8px 12px;
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1335,12 +1401,149 @@
 
 .agregar-input {
     flex: 1;
+    min-width: 100px;
     padding: 8px 12px;
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: #fff;
     font-size: 12px;
+}
+
+.litros-base-input {
+    max-width: 100px;
+    min-width: 80px;
+}
+
+
+
+.agregar-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.agregar-ayuda {
+    margin-top: 10px;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.preview-calculo {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(46, 204, 113, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+
+.preview-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.preview-calculo strong {
+    color: #2ecc71;
+    font-size: 14px;
+}
+
+.preview-note {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 10px;
+}
+
+/* Responsive para el formulario */
+@media (max-width: 768px) {
+    .agregar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .agregar-select,
+    .agregar-input,
+    .litros-base-input,
+    .agregar-btn {
+        width: 100%;
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .agregar-btn {
+        text-align: center;
+    }
+}
+
+/* Estilo para la tabla de fórmulas */
+.equivalencia-badge {
+    background: rgba(52, 152, 219, 0.15);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    color: #3498db;
+    white-space: nowrap;
+}
+
+
+/* Ajuste del header del producto */
+.producto-header-simple {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.producto-header-info {
+    flex: 1;
+    min-width: 150px;
+}
+
+.producto-header-codigo {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e879f9;
+    font-family: monospace;
+    margin-right: 12px;
+}
+
+.producto-header-descripcion {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-agregar-simple {
+    padding: 6px 14px;
+    background: linear-gradient(90deg, #c000ff, #7c00b3);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-agregar-simple:hover {
+    transform: translateY(-1px);
+}
+
+/* Responsive del header del producto */
+@media (max-width: 600px) {
+    .producto-header-simple {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .btn-agregar-simple {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 
@@ -1873,4 +2076,284 @@
 .btn-guardar:hover {
     transform: translateY(-1px);
     filter: brightness(1.1);
+}
+/* Botones del header */
+.header-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-nueva-materia-prima {
+    background: linear-gradient(90deg, #27ae60, #1d6f42);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-nueva-materia-prima:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-trazabilidad-header {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+    border: 1px solid rgba(192, 0, 255, 0.4);
+    border-radius: 10px;
+    color: #e879f9;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-trazabilidad-header:hover {
+    background: rgba(192, 0, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(192, 0, 255, 0.3);
+}
+
+/* Modal tamaño completo para materia prima */
+.modal-mp-full {
+    max-width: 700px;
+    width: 90%;
+}
+
+.input-hint {
+    display: block;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.aviso-modal {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.aviso-modal small {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-guardar {
+    background: linear-gradient(90deg, #27ae60, #1d6f42);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-guardar:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+@media (max-width: 600px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .modal-mp-full {
+        max-width: 95%;
+    }
+    
+    .header-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-nueva-materia-prima,
+    .btn-trazabilidad-header {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+
+
+
+
+
+
+/* Input directo de litraje */
+/* .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+} */
+
+.litros-input-container {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    border-radius: 8px;
+    padding: 4px 8px;
+    gap: 6px;
+}
+
+.litros-icon {
+    font-size: 14px;
+    color: #3498db;
+}
+
+.litros-input-directo {
+    width: 70px;
+    padding: 4px 6px;
+    background: transparent;
+    border: none;
+    color: #3498db;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.litros-input-directo:focus {
+    outline: none;
+}
+
+.litros-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.consumo-calculado {
+    color: #2ecc71;
+    font-size: 13px;
+}
+
+.resumen-item.highlight {
+    background: rgba(46, 204, 113, 0.15);
+    padding: 4px 12px;
+    border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-agregar-simple,
+    .litros-input-container {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .litros-input-directo {
+        width: 100px;
+    }
+}
+
+
+/* Estilos para edición inline */
+.edit-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.edit-input {
+    width: 100px;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #2ecc71;
+    border-radius: 6px;
+    color: #2ecc71;
+    font-size: 13px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #c000ff;
+}
+
+.edit-save, .edit-cancel {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.edit-save {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.edit-save:hover {
+    background: rgba(46, 204, 113, 0.4);
+    transform: scale(1.05);
+}
+
+.edit-cancel {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.edit-cancel:hover {
+    background: rgba(231, 76, 60, 0.4);
+    transform: scale(1.05);
+}
+
+.consumo-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.consumo-display:hover {
+    background: rgba(52, 152, 219, 0.15);
+}
+
+.consumo-display:hover .edit-icon {
+    opacity: 1;
+}
+
+.edit-icon {
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: #3498db;
+}
+
+.consumo-calculado {
+    color: #2ecc71;
+    font-size: 14px;
+    font-weight: 600;
 }

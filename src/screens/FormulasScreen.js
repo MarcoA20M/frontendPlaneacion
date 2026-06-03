@@ -27,13 +27,20 @@ export default function FormulasScreen() {
     });
     const [sidebarDataLoaded, setSidebarDataLoaded] = useState(false);
 
+    // Litraje personalizado
+    const [litrosProduccion, setLitrosProduccion] = useState(800);
+
+    // Estado para edición inline
+    const [editandoId, setEditandoId] = useState(null);
+    const [editandoValor, setEditandoValor] = useState("");
+
     const [nuevaMateria, setNuevaMateria] = useState({
         materiaPrimaId: "",
-        cantidadPorLitro: ""
+        cantidad: "",
+        litrosBase: 800
     });
     const [mostrarFormNueva, setMostrarFormNueva] = useState(false);
 
-    // Leer el parámetro 'producto' de la URL (puede ser código o ID)
     const getProductoParamFromUrl = () => {
         const params = new URLSearchParams(location.search);
         return params.get('producto');
@@ -48,10 +55,7 @@ export default function FormulasScreen() {
                 materiaPrimaService.listarTodas(),
                 materiaPrimaService.getResumenDashboard()
             ]);
-            
-            console.log("📦 Productos cargados:", productosData);
-            console.log("🔧 Materias primas cargadas:", materiasData);
-            
+
             setProductos(productosData);
             setProductosFiltrados(productosData);
             setMateriasPrimas(materiasData);
@@ -59,28 +63,18 @@ export default function FormulasScreen() {
             setResumenDashboard(resumenData);
             setSidebarDataLoaded(true);
 
-            // 🔴 Buscar producto por código o ID desde la URL
             const productoParam = getProductoParamFromUrl();
-            console.log("🔍 Producto solicitado desde URL:", productoParam);
-            
             if (productoParam) {
-                // Buscar primero por código
-                let productoEncontrado = productosData.find(p => 
+                let productoEncontrado = productosData.find(p =>
                     p.codigo?.toString().toLowerCase() === productoParam.toString().toLowerCase()
                 );
-                
-                // Si no encuentra por código, buscar por ID
                 if (!productoEncontrado) {
-                    productoEncontrado = productosData.find(p => 
+                    productoEncontrado = productosData.find(p =>
                         p.id?.toString() === productoParam.toString()
                     );
                 }
-                
                 if (productoEncontrado) {
-                    console.log("✅ Producto encontrado:", productoEncontrado.codigo, productoEncontrado.descripcion);
                     await seleccionarProducto(productoEncontrado);
-                } else {
-                    console.log("❌ Producto no encontrado con parámetro:", productoParam);
                 }
             }
 
@@ -93,16 +87,12 @@ export default function FormulasScreen() {
 
     const cargarFormulas = async (productoId) => {
         try {
-            console.log("📋 Cargando fórmulas para producto ID:", productoId);
             const data = await formulasService.listarPorProducto(productoId);
-            console.log("📋 Fórmulas recibidas:", data);
             
             const formulasConDatos = data.map(formula => {
-                // Si la fórmula ya trae materiaPrima, usarla
                 if (formula.materiaPrima) {
                     return formula;
                 }
-                // Si solo trae materiaPrimaId, buscar la materia prima
                 if (formula.materiaPrimaId) {
                     const materiaEncontrada = materiasPrimas.find(mp => mp.id === formula.materiaPrimaId);
                     if (materiaEncontrada) {
@@ -112,14 +102,11 @@ export default function FormulasScreen() {
                             nombre: materiaEncontrada.nombre,
                             tipo: materiaEncontrada.tipo
                         };
-                    } else {
-                        console.log("⚠️ Materia prima no encontrada para ID:", formula.materiaPrimaId);
                     }
                 }
                 return formula;
             });
-            
-            console.log("📋 Fórmulas procesadas:", formulasConDatos);
+
             setFormulas(formulasConDatos);
         } catch (error) {
             console.error("Error cargando fórmulas:", error);
@@ -128,29 +115,45 @@ export default function FormulasScreen() {
     };
 
     const seleccionarProducto = async (producto) => {
-        console.log("🎯 Seleccionando producto:", producto);
         const productoId = producto.id || producto.codigo;
         setProductoSeleccionado(producto);
         setMostrarFormNueva(false);
-        setNuevaMateria({ materiaPrimaId: "", cantidadPorLitro: "" });
+        setNuevaMateria({ materiaPrimaId: "", cantidad: "", litrosBase: 800 });
+        setLitrosProduccion(800);
+        setEditandoId(null);
         await cargarFormulas(productoId);
     };
 
     const agregarMateriaPrima = async () => {
-        if (!nuevaMateria.materiaPrimaId || !nuevaMateria.cantidadPorLitro) {
-            alert("Selecciona una materia prima y escribe la cantidad por litro");
+        if (!nuevaMateria.materiaPrimaId || !nuevaMateria.cantidad) {
+            alert("Selecciona una materia prima y escribe la cantidad");
             return;
         }
+
+        const cantidad = parseFloat(nuevaMateria.cantidad);
+        const litrosBase = parseFloat(nuevaMateria.litrosBase);
+
+        if (isNaN(cantidad) || cantidad <= 0) {
+            alert("Ingresa una cantidad válida");
+            return;
+        }
+
+        if (isNaN(litrosBase) || litrosBase <= 0) {
+            alert("Ingresa una cantidad de litros base válida");
+            return;
+        }
+
+        const cantidadPorLitro = cantidad / litrosBase;
 
         try {
             await formulasService.crear({
                 productoId: productoSeleccionado.id || productoSeleccionado.codigo,
                 materiaPrimaId: parseInt(nuevaMateria.materiaPrimaId),
-                cantidadPorLitro: parseFloat(nuevaMateria.cantidadPorLitro)
+                cantidadPorLitro: cantidadPorLitro
             });
 
-            alert("✅ Materia prima agregada");
-            setNuevaMateria({ materiaPrimaId: "", cantidadPorLitro: "" });
+            alert(`✅ Materia prima agregada\n${cantidad} L para ${litrosBase} L de producto`);
+            setNuevaMateria({ materiaPrimaId: "", cantidad: "", litrosBase: 800 });
             setMostrarFormNueva(false);
             await cargarFormulas(productoSeleccionado.id || productoSeleccionado.codigo);
         } catch (error) {
@@ -170,31 +173,49 @@ export default function FormulasScreen() {
         }
     };
 
-    const editarCantidad = async (id, nuevaCantidad) => {
-        if (!nuevaCantidad || nuevaCantidad <= 0) {
+    // 🔴 Función para editar la cantidad para el litraje actual
+    const iniciarEdicion = (formula) => {
+        const consumoActual = formula.cantidadPorLitro * litrosProduccion;
+        setEditandoId(formula.id);
+        setEditandoValor(consumoActual.toFixed(2));
+    };
+
+    // 🔴 Guardar la edición y recalcular la cantidad por litro
+    const guardarEdicion = async (formula) => {
+        const nuevaCantidadTotal = parseFloat(editandoValor);
+        if (isNaN(nuevaCantidadTotal) || nuevaCantidadTotal < 0) {
             alert("Cantidad inválida");
+            setEditandoId(null);
             return;
         }
 
-        const formula = formulas.find(f => f.id === id);
-        if (!formula) return;
+        // Recalcular cantidad por litro basado en el litraje actual
+        const nuevaCantidadPorLitro = nuevaCantidadTotal / litrosProduccion;
 
         try {
-            await formulasService.actualizar(id, {
+            await formulasService.actualizar(formula.id, {
                 productoId: productoSeleccionado.id || productoSeleccionado.codigo,
                 materiaPrimaId: formula.materiaPrima?.id || formula.materiaPrimaId,
-                cantidadPorLitro: parseFloat(nuevaCantidad)
+                cantidadPorLitro: nuevaCantidadPorLitro
             });
-            alert("✅ Cantidad actualizada");
+            setEditandoId(null);
             await cargarFormulas(productoSeleccionado.id || productoSeleccionado.codigo);
         } catch (error) {
             alert("Error al actualizar: " + error.message);
         }
     };
 
-    // 🔴 Navegar a trazabilidad
     const irATrazabilidad = () => {
         navigate("/mantenimiento/criticos?tab=trazabilidad");
+    };
+
+    const irAGestionarMP = () => {
+        navigate("/mantenimiento/materias-primas");
+    };
+
+    // Calcular consumo según litraje
+    const calcularConsumoPorLitraje = (cantidadPorLitro, litrosDestino) => {
+        return cantidadPorLitro * litrosDestino;
     };
 
     useEffect(() => {
@@ -226,6 +247,8 @@ export default function FormulasScreen() {
         !formulas.some(f => (f.materiaPrima?.id === mp.id) || (f.materiaPrimaId === mp.id))
     );
 
+    const consumoTotal = formulas.reduce((sum, f) => sum + calcularConsumoPorLitraje(f.cantidadPorLitro, litrosProduccion), 0);
+
     return (
         <div className="criticos-container">
             <div className="criticos-glass-panel">
@@ -252,7 +275,6 @@ export default function FormulasScreen() {
                                 <span className="badge-alerta">{tanquesCriticos.length}</span>
                             )}
                         </button>
-                        {/* 🔴 BOTÓN DE TRAZABILIDAD EN EL SIDEBAR */}
                         <button className="sidebar-btn" onClick={irATrazabilidad}>
                             <span className="btn-icon">🔗</span>
                             Trazabilidad
@@ -265,7 +287,11 @@ export default function FormulasScreen() {
                         <div className="nav-label">CONFIGURACIÓN</div>
                         <button className="sidebar-btn active" style={{ background: "rgba(192,0,255,0.2)" }}>
                             <span className="btn-icon">📋</span>
-                           Consultar codigos
+                            Consultar codigos
+                        </button>
+                        <button className="sidebar-btn" onClick={irAGestionarMP} style={{ marginTop: "4px" }}>
+                            <span className="btn-icon">📦</span>
+                            Gestionar Materias Primas
                         </button>
                     </nav>
 
@@ -297,9 +323,13 @@ export default function FormulasScreen() {
                             <header className="criticos-header">
                                 <div className="header-titulo">
                                     <h1>📋 Gestión de Fórmulas</h1>
-                                    <p>Define qué materias primas consume cada producto (cantidad por litro)</p>
+                                    <p>Define qué materias primas consume cada producto</p>
                                 </div>
-                              
+                                <div className="header-buttons">
+                                    <button className="btn-trazabilidad-header" onClick={irATrazabilidad}>
+                                        🔗 Ver Trazabilidad
+                                    </button>
+                                </div>
                             </header>
 
                             <div className="formulas-layout-simple">
@@ -349,9 +379,24 @@ export default function FormulasScreen() {
                                                     <span className="producto-header-codigo">{productoSeleccionado.codigo}</span>
                                                     <span className="producto-header-descripcion">{productoSeleccionado.descripcion || "Sin descripción"}</span>
                                                 </div>
-                                                <button className="btn-agregar-simple" onClick={() => setMostrarFormNueva(!mostrarFormNueva)}>
-                                                    {mostrarFormNueva ? "✖ Cancelar" : "+ Agregar Materia Prima"}
-                                                </button>
+                                                <div className="header-actions">
+                                                    <button className="btn-agregar-simple" onClick={() => setMostrarFormNueva(!mostrarFormNueva)}>
+                                                        {mostrarFormNueva ? "✖ Cancelar" : "+ Agregar Materia Prima"}
+                                                    </button>
+                                                    {/* Input directo de litraje */}
+                                                    <div className="litros-input-container">
+                                                        <span className="litros-icon">📏</span>
+                                                        <input
+                                                            type="number"
+                                                            className="litros-input-directo"
+                                                            value={litrosProduccion}
+                                                            onChange={(e) => setLitrosProduccion(parseFloat(e.target.value) || 0)}
+                                                            step="1"
+                                                            min="1"
+                                                        />
+                                                        <span className="litros-label">L</span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {mostrarFormNueva && (
@@ -371,16 +416,24 @@ export default function FormulasScreen() {
                                                         </select>
                                                         <input
                                                             type="number"
-                                                            step="0.001"
+                                                            step="0.01"
                                                             className="agregar-input"
-                                                            placeholder="Cantidad por litro (Ej: 0.2875)"
-                                                            value={nuevaMateria.cantidadPorLitro}
-                                                            onChange={(e) => setNuevaMateria({ ...nuevaMateria, cantidadPorLitro: e.target.value })}
+                                                            placeholder="Cantidad (Ej: 230)"
+                                                            value={nuevaMateria.cantidad}
+                                                            onChange={(e) => setNuevaMateria({ ...nuevaMateria, cantidad: e.target.value })}
+                                                        />
+                                                        <input
+                                                            type="number"
+                                                            step="1"
+                                                            className="agregar-input litros-base-input"
+                                                            placeholder="Litros base (Ej: 800)"
+                                                            value={nuevaMateria.litrosBase}
+                                                            onChange={(e) => setNuevaMateria({ ...nuevaMateria, litrosBase: e.target.value })}
                                                         />
                                                         <button className="agregar-btn" onClick={agregarMateriaPrima}>➕ Agregar</button>
                                                     </div>
                                                     <div className="agregar-ayuda">
-                                                        <small>💡 Ejemplo: Si consumes 230L de materia prima por cada 800L de producto → 230/800 = 0.2875 L/L</small>
+                                                        <small>💡 Ejemplo: Si consumes 230L de materia prima para producir 800L de producto → Cantidad: 230, Litros base: 800</small>
                                                     </div>
                                                 </div>
                                             )}
@@ -401,59 +454,80 @@ export default function FormulasScreen() {
                                                                 <th>Código</th>
                                                                 <th>Materia Prima</th>
                                                                 <th>Tipo</th>
-                                                                <th>Litros / L</th>
+                                                                <th>Para {litrosProduccion} L</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {formulas.map(formula => (
-                                                                <tr key={formula.id}>
-                                                                    <td className="codigo-col">
-                                                                        <code>{formula.materiaPrima?.codigo || formula.materiaPrimaCodigo || "-"}</code>
-                                                                    </td>
-                                                                    <td>
-                                                                        <strong>{formula.materiaPrima?.nombre || formula.materiaPrimaNombre || "-"}</strong>
-                                                                    </td>
-                                                                    <td>
-                                                                        <span className={`tipo-badge-simple ${(formula.materiaPrima?.tipo || formula.materiaPrimaTipo || "").toLowerCase()}`}>
-                                                                            {formula.materiaPrima?.tipo || formula.materiaPrimaTipo || "-"}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td className="cantidad-col">
-                                                                        <input
-                                                                            type="number"
-                                                                            step="0.001"
-                                                                            className="cantidad-input"
-                                                                            value={formula.cantidadPorLitro}
-                                                                            onChange={(e) => editarCantidad(formula.id, e.target.value)}
-                                                                            onBlur={() => cargarFormulas(productoSeleccionado.id || productoSeleccionado.codigo)}
-                                                                        />
-                                                                        <span className="unidad">L/L</span>
-                                                                    </td>
-                                                                    <td className="acciones-col">
-                                                                        <button className="btn-eliminar-simple" onClick={() => eliminarFormula(formula.id, formula.materiaPrima?.nombre || formula.materiaPrimaNombre)}>
-                                                                            🗑️
-                                                                        </button>
-                                                                    </td>
-                                                                 </tr>
-                                                            ))}
+                                                            {formulas.map(formula => {
+                                                                const consumoCalculado = calcularConsumoPorLitraje(formula.cantidadPorLitro, litrosProduccion);
+                                                                return (
+                                                                    <tr key={formula.id}>
+                                                                        <td className="codigo-col">
+                                                                            <code>{formula.materiaPrima?.codigo || "-"}</code>
+                                                                        </td>
+                                                                        <td>
+                                                                            <strong>{formula.materiaPrima?.nombre || "-"}</strong>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span className={`tipo-badge-simple ${(formula.materiaPrima?.tipo || "").toLowerCase()}`}>
+                                                                                {formula.materiaPrima?.tipo || "-"}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="cantidad-col">
+                                                                            {editandoId === formula.id ? (
+                                                                                <div className="edit-container">
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        step="0.01"
+                                                                                        className="edit-input"
+                                                                                        value={editandoValor}
+                                                                                        onChange={(e) => setEditandoValor(e.target.value)}
+                                                                                        autoFocus
+                                                                                        onKeyPress={(e) => {
+                                                                                            if (e.key === 'Enter') guardarEdicion(formula);
+                                                                                            if (e.key === 'Escape') setEditandoId(null);
+                                                                                        }}
+                                                                                    />
+                                                                                    <button className="edit-save" onClick={() => guardarEdicion(formula)}>✓</button>
+                                                                                    <button className="edit-cancel" onClick={() => setEditandoId(null)}>✖</button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="consumo-display" onClick={() => iniciarEdicion(formula)}>
+                                                                                    <strong className="consumo-calculado">
+                                                                                        {consumoCalculado.toFixed(2)} {formula.materiaPrima?.unidad || 'L'}
+                                                                                    </strong>
+                                                                                    <span className="edit-icon">✏️</span>
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                        <td className="acciones-col">
+                                                                            <button className="btn-eliminar-simple" onClick={() => eliminarFormula(formula.id, formula.materiaPrima?.nombre)}>
+                                                                                🗑️
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
                                                         </tbody>
+                                                        {/* <tfoot>
+                                                            <tr className="total-row">
+                                                                <td colSpan="3"><strong>TOTAL</strong></td>
+                                                                <td><strong style={{ color: '#2ecc71', fontSize: '14px' }}>{consumoTotal.toFixed(2)} L</strong></td>
+                                                            </tr>
+                                                        </tfoot> */}
                                                     </table>
                                                 )}
                                             </div>
 
                                             <div className="resumen-simple">
                                                 <div className="resumen-item">
-                                                    <span>📊 Total materias primas:</span>
+                                                    <span>📊 Materias primas:</span>
                                                     <strong>{formulas.length}</strong>
                                                 </div>
-                                                <div className="resumen-item">
-                                                    <span>⚖️ Total consumo por 800L:</span>
-                                                    <strong>{formulas.reduce((sum, f) => sum + (f.cantidadPorLitro || 0), 0).toFixed(2)} L</strong>
-                                                </div>
-                                                <div className="resumen-item">
-                                                    <span>📦 Por litro:</span>
-                                                    <strong>{(formulas.reduce((sum, f) => sum + (f.cantidadPorLitro || 0), 0) / 800).toFixed(4)} L/L</strong>
+                                                <div className="resumen-item highlight">
+                                                    <span>🎯 Consumo total para {litrosProduccion} L:</span>
+                                                    <strong style={{ color: '#2ecc71' }}>{consumoTotal.toFixed(2)} L</strong>
                                                 </div>
                                             </div>
                                         </>

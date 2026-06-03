@@ -1,12 +1,13 @@
 // src/screens/CriticosScreen.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import MateriaPrimaProductos from "../components/MateriaPrimaProductos";
 import "../styles/criticos.css";
 
 export default function CriticosScreen() {
     const navigate = useNavigate();
+    const location = useLocation(); // 🔴 IMPORTAR useLocation
     const [loading, setLoading] = useState(true);
     const [seccionActiva, setSeccionActiva] = useState("dashboard");
     const [tanques, setTanques] = useState([]);
@@ -25,6 +26,21 @@ export default function CriticosScreen() {
         observaciones: "",
         usuario: "Admin"
     });
+
+    // 🔴 LEER PARÁMETRO 'tab' DE LA URL
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab === 'trazabilidad') {
+            setSeccionActiva('trazabilidad');
+        } else if (tab === 'dashboard') {
+            setSeccionActiva('dashboard');
+        } else if (tab === 'tanques') {
+            setSeccionActiva('tanques');
+        } else if (tab === 'alertas') {
+            setSeccionActiva('alertas');
+        }
+    }, [location.search]);
 
     // Cargar datos desde el backend
     const cargarDatos = async () => {
@@ -71,11 +87,17 @@ export default function CriticosScreen() {
             alert("Compra registrada correctamente");
             setMostrarModalCompra(false);
             setFormCompra({ cantidad: "", documentoReferencia: "", observaciones: "", usuario: "Admin" });
-            cargarDatos(); // Recargar datos
+            cargarDatos();
         } catch (error) {
             console.error("Error registrando compra:", error);
             alert("Error al registrar la compra");
         }
+    };
+
+    // 🔴 Función para cambiar sección y actualizar URL
+    const cambiarSeccion = (seccion) => {
+        setSeccionActiva(seccion);
+        navigate(`/mantenimiento/criticos?tab=${seccion}`);
     };
 
     if (loading) {
@@ -103,21 +125,21 @@ export default function CriticosScreen() {
                         <div className="nav-label">PRINCIPAL</div>
                         <button
                             className={`sidebar-btn ${seccionActiva === "dashboard" ? "active" : ""}`}
-                            onClick={() => setSeccionActiva("dashboard")}
+                            onClick={() => cambiarSeccion("dashboard")}
                         >
                             <span className="btn-icon">📊</span>
                             Dashboard
                         </button>
                         <button
                             className={`sidebar-btn ${seccionActiva === "tanques" ? "active" : ""}`}
-                            onClick={() => setSeccionActiva("tanques")}
+                            onClick={() => cambiarSeccion("tanques")}
                         >
                             <span className="btn-icon">🛢️</span>
                             Tanques
                         </button>
                         <button
                             className={`sidebar-btn ${seccionActiva === "alertas" ? "active" : ""}`}
-                            onClick={() => setSeccionActiva("alertas")}
+                            onClick={() => cambiarSeccion("alertas")}
                         >
                             <span className="btn-icon">🚨</span>
                             Alertas
@@ -127,7 +149,7 @@ export default function CriticosScreen() {
                         </button>
                         <button
                             className={`sidebar-btn ${seccionActiva === "trazabilidad" ? "active" : ""}`}
-                            onClick={() => setSeccionActiva("trazabilidad")}
+                            onClick={() => cambiarSeccion("trazabilidad")}
                         >
                             <span className="btn-icon">🔗</span>
                             Trazabilidad
@@ -144,7 +166,15 @@ export default function CriticosScreen() {
                             onClick={() => navigate("/mantenimiento/formulas")}
                         >
                             <span className="btn-icon">📋</span>
-                            Fórmulas
+                            Consultar codigos
+                        </button>
+
+                        <button
+                            className="sidebar-btn"
+                            onClick={() => navigate("/mantenimiento/materias-primas")}
+                        >
+                            <span className="btn-icon">📦</span>
+                            Gestionar Materias Primas
                         </button>
                     </nav>
 
@@ -176,7 +206,7 @@ export default function CriticosScreen() {
                                 {seccionActiva === "trazabilidad" && "🔗 Trazabilidad de Materias Primas"}
                             </h1>
                             <p>
-                                {seccionActiva === "trazabilidad" 
+                                {seccionActiva === "trazabilidad"
                                     ? "Visualiza qué productos consumen cada materia prima y planifica tu inventario"
                                     : "Control y monitoreo de inventario de materia prima"}
                             </p>
@@ -235,10 +265,10 @@ export default function CriticosScreen() {
                                     <h3>🔗 Acceso rápido a trazabilidad</h3>
                                     <div className="quick-access-grid">
                                         {tanques.slice(0, 3).map(mp => (
-                                            <div 
-                                                key={mp.id} 
+                                            <div
+                                                key={mp.id}
                                                 className="quick-access-card"
-                                                onClick={() => setSeccionActiva("trazabilidad")}
+                                                onClick={() => cambiarSeccion("trazabilidad")}
                                             >
                                                 <div className="quick-icon">🔍</div>
                                                 <div className="quick-info">
@@ -249,9 +279,9 @@ export default function CriticosScreen() {
                                             </div>
                                         ))}
                                         {tanques.length > 3 && (
-                                            <div 
+                                            <div
                                                 className="quick-access-card more"
-                                                onClick={() => setSeccionActiva("trazabilidad")}
+                                                onClick={() => cambiarSeccion("trazabilidad")}
                                             >
                                                 <div className="quick-icon">📊</div>
                                                 <div className="quick-info">
@@ -339,29 +369,27 @@ export default function CriticosScreen() {
                                                     <div className="umbral-item critico">🚨 Crítico: {tanque.umbralCritico?.toLocaleString()} {tanque.unidad}</div>
                                                 </div>
                                                 <div className="tanque-acciones">
-                                                    <button 
+                                                    <button
                                                         className="btn-ver-consumo"
                                                         onClick={() => {
-                                                            // Aquí puedes implementar la navegación al historial
                                                             console.log("Ver historial de", tanque.nombre);
                                                         }}
                                                     >
                                                         📋 Ver Historial
                                                     </button>
-                                                    <button 
-                                                        className="btn-registrar-compra" 
-                                                        onClick={() => { 
-                                                            setTanqueSeleccionado(tanque); 
-                                                            setMostrarModalCompra(true); 
+                                                    <button
+                                                        className="btn-registrar-compra"
+                                                        onClick={() => {
+                                                            setTanqueSeleccionado(tanque);
+                                                            setMostrarModalCompra(true);
                                                         }}
                                                     >
                                                         🛒 Registrar Compra
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         className="btn-ver-trazabilidad"
                                                         onClick={() => {
-                                                            // Cambiar a la sección de trazabilidad
-                                                            setSeccionActiva("trazabilidad");
+                                                            cambiarSeccion("trazabilidad");
                                                         }}
                                                     >
                                                         🔗 Ver productos que consume
@@ -394,7 +422,7 @@ export default function CriticosScreen() {
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-urgente" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Solicitar compra urgente</button>
-                                                    <button className="btn-accion-trazabilidad" onClick={() => setSeccionActiva("trazabilidad")}>🔗 Ver consumo</button>
+                                                    <button className="btn-accion-trazabilidad" onClick={() => cambiarSeccion("trazabilidad")}>🔗 Ver consumo</button>
                                                 </div>
                                             </div>
                                         ))}
@@ -413,7 +441,7 @@ export default function CriticosScreen() {
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-programar" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>📅 Programar pedido</button>
-                                                    <button className="btn-accion-trazabilidad" onClick={() => setSeccionActiva("trazabilidad")}>🔗 Ver consumo</button>
+                                                    <button className="btn-accion-trazabilidad" onClick={() => cambiarSeccion("trazabilidad")}>🔗 Ver consumo</button>
                                                 </div>
                                             </div>
                                         ))}

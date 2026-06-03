@@ -11,6 +11,18 @@ export default function BusquedaSeccion({
   const [cargandoConsumo, setCargandoConsumo] = useState(false);
   const [mostrarConsumo, setMostrarConsumo] = useState(false);
 
+  // 🔴 Lista de códigos de materia prima que queremos mostrar
+  const codigosPermitidos = [
+    'CCA10', 'CCA20', 'CCM30', 'CCM60', 'RVA50', 'RVO10', 
+    'RIE30', 'RAC30', 'RRN10', 'SXI10', 'SGA10', 'TT06', 
+    'CCP15', 'TMB10', 'RRN20', 'AMP10', 'AEA10', 'ACO20', 'ABL10'
+  ];
+
+  // 🔴 Función para verificar si un código está en la lista permitida
+  const esCodigoPermitido = (codigo) => {
+    return codigosPermitidos.includes(codigo);
+  };
+
   // 🔴 Función para calcular consumo
   const calcularConsumo = async () => {
     if (!producto || !producto.codigo || totalLitrosActuales === 0) {
@@ -39,7 +51,8 @@ export default function BusquedaSeccion({
             materiaTipo = f.materiaPrimaTipo || "-";
           }
           
-          const cantidadPorLitroReal = f.cantidadPorLitro / 800;
+          // 🔴 CORREGIDO: cantidadPorLitro ya es L/L, no dividir entre 800
+          const cantidadPorLitroReal = f.cantidadPorLitro;
           const consumoTotal = cantidadPorLitroReal * totalLitrosActuales;
           
           return {
@@ -47,11 +60,15 @@ export default function BusquedaSeccion({
             nombre: materiaNombre,
             tipo: materiaTipo,
             consumoTotal: consumoTotal,
-            consumoTotalFormateado: consumoTotal.toFixed(2)
+            consumoTotalFormateado: consumoTotal.toFixed(2),
+            esPermitido: esCodigoPermitido(materiaCodigo)
           };
         }).filter(c => c.consumoTotal > 0 && c.codigo !== "-");
         
-        setConsumoMaterias(consumos);
+        // 🔴 FILTRAR: Solo mostrar los códigos permitidos
+        const consumosFiltrados = consumos.filter(c => c.esPermitido === true);
+        
+        setConsumoMaterias(consumosFiltrados);
       } else {
         setConsumoMaterias([]);
       }
@@ -68,12 +85,11 @@ export default function BusquedaSeccion({
     if (mostrarConsumo && producto && totalLitrosActuales > 0) {
       calcularConsumo();
     }
-  }, [totalLitrosActuales, producto, mostrarConsumo]); // 🔴 Se ejecuta cuando cambian estos valores
+  }, [totalLitrosActuales, producto, mostrarConsumo]);
 
   // 🔴 Toggle mostrar/ocultar
   const handleToggleConsumo = () => {
     if (!mostrarConsumo) {
-      // Al abrir, calcular inmediatamente
       calcularConsumo();
     }
     setMostrarConsumo(!mostrarConsumo);
@@ -94,7 +110,6 @@ export default function BusquedaSeccion({
         />
         <button onClick={consultar}>Buscar</button>
         
-        {/* Botón Toggle */}
         {producto && (
           <button 
             className={`btn-calcular-consumo-busqueda ${mostrarConsumo ? 'active' : ''}`}
@@ -124,7 +139,6 @@ export default function BusquedaSeccion({
             </div>
           </div>
 
-          {/* Panel de Consumo */}
           {mostrarConsumo && (
             <div className="consumo-preview-mini">
               <div className="consumo-header-mini">
@@ -162,7 +176,7 @@ export default function BusquedaSeccion({
               ) : (
                 <div className="sin-consumo-mini">
                   <span>📋</span>
-                  <p>No hay fórmula definida para este producto</p>
+                  <p>No hay materias primas en la lista permitida para este producto</p>
                 </div>
               )}
             </div>

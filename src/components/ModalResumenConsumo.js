@@ -1,5 +1,6 @@
-// src/components/ModalResumenConsumo.js
-import React, { useState, useMemo } from "react";
+// src/components/ModalResumenConsumo.js - VERSIÓN CON SELECTOR INTEGRADO EN INSIGHTS
+import React, { useState, useMemo, useEffect } from "react";
+import { formulasService } from "../services/formulasService";
 import "../styles/modalCriticos.css";
 
 const ModalResumenConsumo = ({ 
@@ -16,33 +17,130 @@ const ModalResumenConsumo = ({
     const [filtroTipo, setFiltroTipo] = useState("todos");
     const [busqueda, setBusqueda] = useState("");
     const [detalleMateriaSeleccionada, setDetalleMateriaSeleccionada] = useState(null);
+    const [materiasConConsumoReal, setMateriasConConsumoReal] = useState([]);
+    const [materiasCompletas, setMateriasCompletas] = useState([]);
+    const [calculando, setCalculando] = useState(false);
+    
+    // Estado para controlar si mostrar solo las específicas o todas
+    const [mostrarSoloEspecificas, setMostrarSoloEspecificas] = useState(true);
 
-    // Calcular estadísticas adicionales
+    // Lista de códigos de materia prima específicos
+    const codigosPermitidos = [
+        'CCA10', 'CCA20', 'CCM30', 'CCM60', 'RVA50', 'RVO10', 
+        'RIE30', 'RAC30', 'RRN10', 'SXI10', 'SGA10', 'TT06', 
+        'CCP15', 'TMB10', 'RRN20', 'AMP10', 'AEA10', 'ACO20', 'ABL10'
+    ];
+
+    const esCodigoPermitido = (codigo) => {
+        if (!codigo) return false;
+        return codigosPermitidos.includes(codigo.toUpperCase());
+    };
+
+    useEffect(() => {
+        if (visible && cargasConConsumo.length > 0) {
+            recalcularConsumosReales();
+        } else if (visible && resumenGlobal.length > 0) {
+            const corregidos = resumenGlobal.map(item => ({
+                ...item,
+                consumoTotal: item.consumoTotal * 800,
+                consumoTotalOriginal: item.consumoTotal
+            }));
+            setMateriasCompletas(corregidos);
+            const filtrados = corregidos.filter(item => esCodigoPermitido(item.codigo));
+            setMateriasConConsumoReal(filtrados);
+        }
+    }, [visible, cargasConConsumo, resumenGlobal]);
+
+    const recalcularConsumosReales = async () => {
+        setCalculando(true);
+        try {
+            const mapaMaterias = new Map();
+            const mapaMateriasCompletas = new Map();
+            
+            for (const carga of cargasConConsumo) {
+                const codigoProducto = carga.codigo;
+                const litrosProducir = carga.litros || 0;
+                
+                if (!codigoProducto || litrosProducir === 0) continue;
+                
+                try {
+                    const formulas = await formulasService.listarPorProducto(codigoProducto);
+                    
+                    for (const formula of formulas) {
+                        const mpId = formula.materiaPrima?.id || formula.materiaPrimaId;
+                        const mpCodigo = formula.materiaPrima?.codigo || formula.materiaPrimaCodigo;
+                        const mpNombre = formula.materiaPrima?.nombre || formula.materiaPrimaNombre;
+                        const mpTipo = formula.materiaPrima?.tipo || formula.materiaPrimaTipo;
+                        const cantidadPorLitro = formula.cantidadPorLitro;
+                        
+                        const consumo = cantidadPorLitro * litrosProducir;
+                        
+                        // Todas las materias
+                        if (mapaMateriasCompletas.has(mpId)) {
+                            const existente = mapaMateriasCompletas.get(mpId);
+                            existente.consumoTotal += consumo;
+                        } else {
+                            mapaMateriasCompletas.set(mpId, {
+                                id: mpId,
+                                codigo: mpCodigo,
+                                nombre: mpNombre,
+                                tipo: mpTipo,
+                                consumoTotal: consumo
+                            });
+                        }
+                        
+                        // Solo específicas
+                        if (esCodigoPermitido(mpCodigo)) {
+                            if (mapaMaterias.has(mpId)) {
+                                const existente = mapaMaterias.get(mpId);
+                                existente.consumoTotal += consumo;
+                            } else {
+                                mapaMaterias.set(mpId, {
+                                    id: mpId,
+                                    codigo: mpCodigo,
+                                    nombre: mpNombre,
+                                    tipo: mpTipo,
+                                    consumoTotal: consumo
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener fórmulas para ${codigoProducto}:`, error);
+                }
+            }
+            
+            const resultadoCompletas = Array.from(mapaMateriasCompletas.values()).sort((a, b) => b.consumoTotal - a.consumoTotal);
+            const resultadoEspecificas = Array.from(mapaMaterias.values()).sort((a, b) => b.consumoTotal - a.consumoTotal);
+            
+            setMateriasCompletas(resultadoCompletas);
+            setMateriasConConsumoReal(resultadoEspecificas);
+        } catch (error) {
+            console.error("Error recalculando consumos:", error);
+            const filtrado = resumenGlobal.filter(item => esCodigoPermitido(item.codigo));
+            setMateriasConConsumoReal(filtrado);
+            setMateriasCompletas(resumenGlobal);
+        } finally {
+            setCalculando(false);
+        }
+    };
+
+    const datosMostrar = mostrarSoloEspecificas ? materiasConConsumoReal : materiasCompletas;
+
     const estadisticas = useMemo(() => {
-        if (!resumenGlobal || resumenGlobal.length === 0) return null;
+        if (!datosMostrar || datosMostrar.length === 0) return null;
         
-        const productoMayorConsumo = [...resumenGlobal].sort((a, b) => b.consumoTotal - a.consumoTotal)[0];
-        const totalMateriaPrima = resumenGlobal.reduce((sum, c) => sum + c.consumoTotal, 0);
+        const productoMayorConsumo = [...datosMostrar].sort((a, b) => b.consumoTotal - a.consumoTotal)[0];
+        const totalMateriaPrima = datosMostrar.reduce((sum, c) => sum + c.consumoTotal, 0);
         const eficiencia = totalLitros > 0 && totalMateriaPrima > 0 ? (totalLitros / totalMateriaPrima).toFixed(2) : 0;
-        const topMaterias = [...resumenGlobal].sort((a, b) => b.consumoTotal - a.consumoTotal).slice(0, 3);
+        const topMaterias = [...datosMostrar].sort((a, b) => b.consumoTotal - a.consumoTotal).slice(0, 3);
         
         return { productoMayorConsumo, totalMateriaPrima, eficiencia, topMaterias };
-    }, [resumenGlobal, totalLitros]);
+    }, [datosMostrar, totalLitros]);
 
-    // Calcular estadísticas de cargas
-    const estadisticasCargas = useMemo(() => {
-        if (!cargasConConsumo || cargasConConsumo.length === 0) return null;
-        
-        const cargaMayorLitraje = [...cargasConConsumo].sort((a, b) => b.litros - a.litros)[0];
-        const cargaMayorConsumo = [...cargasConConsumo].sort((a, b) => b.consumoTotal - a.consumoTotal)[0];
-        
-        return { cargaMayorLitraje, cargaMayorConsumo };
-    }, [cargasConConsumo]);
-
-    // Filtrar materias primas
     const materiasFiltradas = useMemo(() => {
-        if (!resumenGlobal || resumenGlobal.length === 0) return [];
-        let filtradas = [...resumenGlobal];
+        if (!datosMostrar || datosMostrar.length === 0) return [];
+        let filtradas = [...datosMostrar];
         if (filtroTipo !== "todos") {
             filtradas = filtradas.filter(item => item.tipo?.toLowerCase() === filtroTipo);
         }
@@ -53,34 +151,7 @@ const ModalResumenConsumo = ({
             );
         }
         return filtradas.sort((a, b) => b.consumoTotal - a.consumoTotal);
-    }, [resumenGlobal, filtroTipo, busqueda]);
-
-    // Filtrar cargas
-    const cargasFiltradas = useMemo(() => {
-        if (!cargasConConsumo || cargasConConsumo.length === 0) return [];
-        let filtradas = [...cargasConConsumo];
-        if (busqueda) {
-            filtradas = filtradas.filter(carga => 
-                carga.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
-                carga.numeroLote?.toLowerCase().includes(busqueda.toLowerCase()) ||
-                (carga.descripcion || "").toLowerCase().includes(busqueda.toLowerCase())
-            );
-        }
-        return filtradas;
-    }, [cargasConConsumo, busqueda]);
-
-    // Obtener tipos únicos para filtros
-    const tiposUnicos = useMemo(() => {
-        if (!resumenGlobal || resumenGlobal.length === 0) return [];
-        const tipos = new Set(resumenGlobal.map(item => item.tipo?.toLowerCase()).filter(Boolean));
-        return Array.from(tipos);
-    }, [resumenGlobal]);
-
-    // Calcular total de consumo de MP de todas las cargas
-    const totalConsumoMP = useMemo(() => {
-        if (!cargasConConsumo || cargasConConsumo.length === 0) return 0;
-        return cargasConConsumo.reduce((sum, carga) => sum + (carga.consumoTotal || 0), 0);
-    }, [cargasConConsumo]);
+    }, [datosMostrar, filtroTipo, busqueda]);
 
     if (!visible) return null;
 
@@ -93,21 +164,40 @@ const ModalResumenConsumo = ({
                 </div>
                 
                 <div className="modal-body">
-                    {cargando ? (
+                    {cargando || calculando ? (
                         <div className="loading-resumen">
                             <div className="spinner-neon"></div>
                             <p>Calculando consumo total...</p>
                         </div>
-                    ) : (!resumenGlobal || resumenGlobal.length === 0) && (!cargasConConsumo || cargasConConsumo.length === 0) ? (
+                    ) : (!datosMostrar || datosMostrar.length === 0) ? (
                         <div className="sin-consumo-global">
                             <span>📋</span>
                             <p>No hay cargas en el tablero o no tienen fórmulas definidas</p>
                         </div>
                     ) : (
                         <>
-                            {/* Panel de Insights */}
+                            {/* Panel de Insights CON EL SELECTOR INTEGRADO */}
                             <div className="insights-panel">
-                                <h4>🎯 Insights de Producción</h4>
+                                <div className="insights-header-row">
+                                    <h4>🎯 Insights de Producción</h4>
+                                    {/* 🔴 SELECTOR INTEGRADO - más compacto */}
+                                    <div className="insights-toggle">
+                                        <button 
+                                            className={`insight-toggle-btn ${mostrarSoloEspecificas ? 'active' : ''}`}
+                                            onClick={() => setMostrarSoloEspecificas(true)}
+                                            title="Mostrar solo las 19 materias primas principales"
+                                        >
+                                            📌 {materiasConConsumoReal.length}
+                                        </button>
+                                        <button 
+                                            className={`insight-toggle-btn ${!mostrarSoloEspecificas ? 'active' : ''}`}
+                                            onClick={() => setMostrarSoloEspecificas(false)}
+                                            title="Mostrar todas las materias primas"
+                                        >
+                                            📦 {materiasCompletas.length}
+                                        </button>
+                                    </div>
+                                </div>
                                 <div className="insights-grid">
                                     {estadisticas?.productoMayorConsumo && (
                                         <div className="insight-card">
@@ -120,35 +210,13 @@ const ModalResumenConsumo = ({
                                             </div>
                                         </div>
                                     )}
-                                    {estadisticasCargas?.cargaMayorLitraje && (
-                                        <div className="insight-card">
-                                            <div className="insight-icon">📦</div>
-                                            <div className="insight-info">
-                                                <span className="insight-label">Carga más grande</span>
-                                                <strong className="insight-value">{estadisticasCargas.cargaMayorLitraje?.codigo}</strong>
-                                                <small>{estadisticasCargas.cargaMayorLitraje?.litros} L a producir</small>
-                                                <span className="insight-meta">Lote: {estadisticasCargas.cargaMayorLitraje?.numeroLote || "N/A"}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {estadisticasCargas?.cargaMayorConsumo && estadisticasCargas.cargaMayorConsumo?.consumoTotal > 0 && (
-                                        <div className="insight-card">
-                                            <div className="insight-icon">⚡</div>
-                                            <div className="insight-info">
-                                                <span className="insight-label">Mayor consumo MP</span>
-                                                <strong className="insight-value">{estadisticasCargas.cargaMayorConsumo?.codigo}</strong>
-                                                <small>Consume {estadisticasCargas.cargaMayorConsumo?.consumoTotal?.toFixed(2)} L de MP</small>
-                                                <span className="insight-meta">Para {estadisticasCargas.cargaMayorConsumo?.litros} L producidos</span>
-                                            </div>
-                                        </div>
-                                    )}
                                     <div className="insight-card">
                                         <div className="insight-icon">📈</div>
                                         <div className="insight-info">
                                             <span className="insight-label">Eficiencia global</span>
                                             <strong className="insight-value">{estadisticas?.eficiencia || 0} L/L</strong>
                                             <small>Litros producidos / litros de MP</small>
-                                            <span className="insight-meta">Total MP: {estadisticas?.totalMateriaPrima?.toFixed(2) || totalConsumoMP.toFixed(2)} L</span>
+                                            <span className="insight-meta">Total MP: {estadisticas?.totalMateriaPrima?.toFixed(2)} L</span>
                                         </div>
                                     </div>
                                 </div>
@@ -179,28 +247,12 @@ const ModalResumenConsumo = ({
                                 )}
                             </div>
 
-                            {/* Selector de Vista */}
-                            <div className="vista-selector">
-                                <button 
-                                    className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`}
-                                    onClick={() => setVistaActiva("materias")}
-                                >
-                                    📦 Materias Primas ({resumenGlobal.length})
-                                </button>
-                                <button 
-                                    className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`}
-                                    onClick={() => setVistaActiva("cargas")}
-                                >
-                                    📋 Por Carga ({cargasConConsumo?.length || 0})
-                                </button>
-                            </div>
-
                             {/* Filtros */}
                             <div className="filtros-container">
                                 <div className="search-box-modal">
                                     <input 
                                         type="text" 
-                                        placeholder="🔍 Buscar por código, lote o nombre..."
+                                        placeholder="🔍 Buscar por código o nombre..."
                                         value={busqueda}
                                         onChange={(e) => setBusqueda(e.target.value)}
                                     />
@@ -209,29 +261,42 @@ const ModalResumenConsumo = ({
                                     )}
                                 </div>
                                 
-                                {vistaActiva === "materias" && tiposUnicos.length > 0 && (
-                                    <div className="filtro-tipos">
-                                        <button 
-                                            className={`tipo-filtro ${filtroTipo === "todos" ? "active" : ""}`}
-                                            onClick={() => setFiltroTipo("todos")}
-                                        >
-                                            Todos
-                                        </button>
-                                        {tiposUnicos.map(tipo => (
-                                            <button 
-                                                key={tipo}
-                                                className={`tipo-filtro ${filtroTipo === tipo ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo(tipo)}
-                                            >
-                                                {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                                <div className="filtro-tipos">
+                                    <button 
+                                        className={`tipo-filtro ${filtroTipo === "todos" ? "active" : ""}`}
+                                        onClick={() => setFiltroTipo("todos")}
+                                    >
+                                        Todos
+                                    </button>
+                                    <button 
+                                        className={`tipo-filtro ${filtroTipo === "base" ? "active" : ""}`}
+                                        onClick={() => setFiltroTipo("base")}
+                                    >
+                                        Base
+                                    </button>
+                                    <button 
+                                        className={`tipo-filtro ${filtroTipo === "pigmento" ? "active" : ""}`}
+                                        onClick={() => setFiltroTipo("pigmento")}
+                                    >
+                                        Pigmento
+                                    </button>
+                                    <button 
+                                        className={`tipo-filtro ${filtroTipo === "solvente" ? "active" : ""}`}
+                                        onClick={() => setFiltroTipo("solvente")}
+                                    >
+                                        Solvente
+                                    </button>
+                                    <button 
+                                        className={`tipo-filtro ${filtroTipo === "aditivo" ? "active" : ""}`}
+                                        onClick={() => setFiltroTipo("aditivo")}
+                                    >
+                                        Aditivo
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Tabla de Materias Primas */}
-                            {vistaActiva === "materias" && materiasFiltradas.length > 0 && (
+                            {materiasFiltradas.length > 0 && (
                                 <div className="tabla-resumen-global">
                                     <table className="tabla-consumo-global">
                                         <thead>
@@ -245,7 +310,7 @@ const ModalResumenConsumo = ({
                                         </thead>
                                         <tbody>
                                             {materiasFiltradas.map((item, idx) => {
-                                                const totalBase = estadisticas?.totalMateriaPrima || totalConsumoMP;
+                                                const totalBase = estadisticas?.totalMateriaPrima || materiasFiltradas.reduce((sum, c) => sum + c.consumoTotal, 0);
                                                 const porcentaje = totalBase > 0 ? (item.consumoTotal / totalBase) * 100 : 0;
                                                 return (
                                                     <tr key={idx} className={item.consumoTotal > 1000 ? 'alto-consumo' : ''}>
@@ -271,7 +336,7 @@ const ModalResumenConsumo = ({
                                             <tr className="total-row">
                                                 <td colSpan="3"><strong>Total general:</strong></td>
                                                 <td className="total-celda">
-                                                    <strong>{(estadisticas?.totalMateriaPrima || totalConsumoMP).toFixed(2)} L</strong>
+                                                    <strong>{(estadisticas?.totalMateriaPrima || materiasFiltradas.reduce((sum, c) => sum + c.consumoTotal, 0)).toFixed(2)} L</strong>
                                                 </td>
                                                 <td className="total-celda">100%</td>
                                             </tr>
@@ -280,83 +345,16 @@ const ModalResumenConsumo = ({
                                 </div>
                             )}
 
-                            {/* Tabla de Cargas Individuales con Número de Lote */}
-                            {vistaActiva === "cargas" && cargasFiltradas.length > 0 && (
-                                <div className="tabla-resumen-global">
-                                    <table className="tabla-consumo-global">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>N° Lote (Folio)</th>
-                                                <th>Código</th>
-                                                <th>Descripción</th>
-                                                <th>Litros a Producir</th>
-                                                <th>Consumo MP</th>
-                                                <th>Eficiencia</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {cargasFiltradas.map((carga, idx) => {
-                                                const eficienciaCarga = carga.litros > 0 && carga.consumoTotal > 0 
-                                                    ? (carga.litros / carga.consumoTotal).toFixed(2) 
-                                                    : 0;
-                                                
-                                                return (
-                                                    <tr key={idx} className={carga.consumoTotal > 500 ? 'alto-consumo' : ''}>
-                                                        <td><strong>#{idx + 1}</strong></td>
-                                                        <td>
-                                                            <code className="lote-number" style={{ background: 'rgba(0, 229, 255, 0.1)', padding: '4px 8px', borderRadius: '6px' }}>
-                                                                {carga.numeroLote || "N/A"}
-                                                            </code>
-                                                        </td>
-                                                        <td><code>{carga.codigo || "N/A"}</code></td>
-                                                        <td>{carga.descripcion || "-"}</td>
-                                                        <td><strong>{carga.litros || 0} L</strong></td>
-                                                        <td>
-                                                            {carga.consumoTotal > 0 ? (
-                                                                <strong style={{ color: '#ff5f7e' }}>{carga.consumoTotal?.toFixed(2)} L</strong>
-                                                            ) : (
-                                                                <span className="sin-datos" style={{ color: '#ffca28' }}>⚠️ Sin fórmula</span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            <span className={`eficiencia-badge ${eficienciaCarga >= 0.8 ? 'buena' : eficienciaCarga > 0 ? 'media' : 'mala'}`}>
-                                                                {eficienciaCarga > 0 ? `${eficienciaCarga} L/L` : 'N/A'}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-
-                            {vistaActiva === "materias" && materiasFiltradas.length === 0 && (
+                            {materiasFiltradas.length === 0 && (
                                 <div className="sin-consumo-global">
                                     <span>🔍</span>
                                     <p>No hay materias primas que coincidan con la búsqueda</p>
                                 </div>
                             )}
 
-                            {vistaActiva === "cargas" && cargasFiltradas.length === 0 && (
-                                <div className="sin-consumo-global">
-                                    <span>🔍</span>
-                                    <p>No hay cargas que coincidan con la búsqueda</p>
-                                </div>
-                            )}
-
-                            {/* Advertencia si hay cargas sin consumo */}
-                            {cargasConConsumo.some(c => c.consumoTotal === 0) && (
-                                <div className="aviso-consumo-global" style={{ borderLeftColor: '#ffca28', marginTop: '15px' }}>
-                                    <span>⚠️</span>
-                                    <small>Algunas cargas no tienen fórmula definida, por lo que su consumo de materia prima aparece en 0.</small>
-                                </div>
-                            )}
-
                             <div className="aviso-consumo-global">
                                 <span>📌</span>
-                                <small>El Consumo MP representa la cantidad total de materia prima necesaria para producir esta carga. Para que aparezca, la carga debe tener una fórmula asociada.</small>
+                                <small>El Consumo MP representa la cantidad total de materia prima necesaria para producir todas las cargas del tablero.</small>
                             </div>
                         </>
                     )}

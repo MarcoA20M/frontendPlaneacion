@@ -543,6 +543,19 @@
     padding: 4px 10px;
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.3);
+    color: #fff;  /* 🔴 AGREGA ESTO */
+}
+
+
+.tanque-codigo {
+    color: #fff;  /* Blanco */
+    font-size: 10px;
+    font-weight: 500;
+    margin-left: 6px;
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-family: monospace;
 }
 
 .tanque-nivel {
@@ -2356,4 +2369,102 @@
     color: #2ecc71;
     font-size: 14px;
     font-weight: 600;
+}
+
+
+/* ========== BUSCADOR DE MATERIA PRIMA ========== */
+
+.buscador-mp-container {
+    position: relative;
+    flex: 2;
+    min-width: 200px;
+}
+
+.buscador-mp-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+}
+
+.buscador-mp-input:focus {
+    outline: none;
+    border-color: #c000ff;
+    box-shadow: 0 0 8px rgba(192, 0, 255, 0.3);
+}
+
+.buscador-mp-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.buscador-mp-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 8px;
+    margin-top: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.buscador-mp-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.buscador-mp-item:hover {
+    background: rgba(192, 0, 255, 0.15);
+}
+
+.mp-item-codigo {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e879f9;
+    min-width: 70px;
+}
+
+.mp-item-nombre {
+    flex: 1;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mp-item-tipo {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #a855f7;
+}
+
+.buscador-mp-sin-resultados {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+}
+
+/* Ajuste para el formulario en responsive */
+@media (max-width: 768px) {
+    .agregar-row {
+        flex-direction: column;
+    }
+    
+    .buscador-mp-container {
+        width: 100%;
+    }
 }

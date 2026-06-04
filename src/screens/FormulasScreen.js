@@ -40,6 +40,11 @@ export default function FormulasScreen() {
         litrosBase: 800
     });
     const [mostrarFormNueva, setMostrarFormNueva] = useState(false);
+    
+    // 🔴 NUEVO: Estados para el buscador de materia prima
+    const [busquedaMP, setBusquedaMP] = useState("");
+    const [mostrarDropdownMP, setMostrarDropdownMP] = useState(false);
+    const [materiasFiltradas, setMateriasFiltradas] = useState([]);
 
     const getProductoParamFromUrl = () => {
         const params = new URLSearchParams(location.search);
@@ -85,6 +90,26 @@ export default function FormulasScreen() {
         }
     };
 
+    // 🔴 Filtrar materias primas para el buscador
+    useEffect(() => {
+        if (busquedaMP.trim() === "") {
+            setMateriasFiltradas([]);
+            return;
+        }
+        
+        const filtradas = materiasPrimas.filter(mp => {
+            const materiaNoUsada = !formulas.some(f => 
+                (f.materiaPrima?.id === mp.id) || (f.materiaPrimaId === mp.id)
+            );
+            const coincideBusqueda = 
+                mp.codigo?.toLowerCase().includes(busquedaMP.toLowerCase()) ||
+                mp.nombre?.toLowerCase().includes(busquedaMP.toLowerCase());
+            return materiaNoUsada && coincideBusqueda;
+        });
+        
+        setMateriasFiltradas(filtradas.slice(0, 10)); // Máximo 10 resultados
+    }, [busquedaMP, materiasPrimas, formulas]);
+
     const cargarFormulas = async (productoId) => {
         try {
             const data = await formulasService.listarPorProducto(productoId);
@@ -121,6 +146,8 @@ export default function FormulasScreen() {
         setNuevaMateria({ materiaPrimaId: "", cantidad: "", litrosBase: 800 });
         setLitrosProduccion(800);
         setEditandoId(null);
+        setBusquedaMP("");
+        setMostrarDropdownMP(false);
         await cargarFormulas(productoId);
     };
 
@@ -155,6 +182,7 @@ export default function FormulasScreen() {
             alert(`✅ Materia prima agregada\n${cantidad} L para ${litrosBase} L de producto`);
             setNuevaMateria({ materiaPrimaId: "", cantidad: "", litrosBase: 800 });
             setMostrarFormNueva(false);
+            setBusquedaMP("");
             await cargarFormulas(productoSeleccionado.id || productoSeleccionado.codigo);
         } catch (error) {
             alert("Error: " + error.message);
@@ -173,14 +201,14 @@ export default function FormulasScreen() {
         }
     };
 
-    // 🔴 Función para editar la cantidad para el litraje actual
+    // Función para editar la cantidad para el litraje actual
     const iniciarEdicion = (formula) => {
         const consumoActual = formula.cantidadPorLitro * litrosProduccion;
         setEditandoId(formula.id);
         setEditandoValor(consumoActual.toFixed(2));
     };
 
-    // 🔴 Guardar la edición y recalcular la cantidad por litro
+    // Guardar la edición y recalcular la cantidad por litro
     const guardarEdicion = async (formula) => {
         const nuevaCantidadTotal = parseFloat(editandoValor);
         if (isNaN(nuevaCantidadTotal) || nuevaCantidadTotal < 0) {
@@ -402,18 +430,41 @@ export default function FormulasScreen() {
                                             {mostrarFormNueva && (
                                                 <div className="agregar-materia-simple">
                                                     <div className="agregar-row">
-                                                        <select
-                                                            className="agregar-select"
-                                                            value={nuevaMateria.materiaPrimaId}
-                                                            onChange={(e) => setNuevaMateria({ ...nuevaMateria, materiaPrimaId: e.target.value })}
-                                                        >
-                                                            <option value="">Seleccionar materia prima...</option>
-                                                            {materiasDisponibles.map(mp => (
-                                                                <option key={mp.id} value={mp.id}>
-                                                                    {mp.codigo} - {mp.nombre} ({mp.tipo})
-                                                                </option>
-                                                            ))}
-                                                        </select>
+                                                        {/* 🔴 BUSCADOR DE MATERIA PRIMA */}
+                                                        <div className="buscador-mp-container">
+                                                            <input
+                                                                type="text"
+                                                                className="buscador-mp-input"
+                                                                placeholder="🔍 Buscar materia prima por código o nombre..."
+                                                                value={busquedaMP}
+                                                                onChange={(e) => setBusquedaMP(e.target.value)}
+                                                                onFocus={() => setMostrarDropdownMP(true)}
+                                                            />
+                                                            {mostrarDropdownMP && materiasFiltradas.length > 0 && (
+                                                                <div className="buscador-mp-dropdown">
+                                                                    {materiasFiltradas.map(mp => (
+                                                                        <div
+                                                                            key={mp.id}
+                                                                            className="buscador-mp-item"
+                                                                            onClick={() => {
+                                                                                setNuevaMateria({ ...nuevaMateria, materiaPrimaId: mp.id.toString() });
+                                                                                setBusquedaMP(`${mp.codigo} - ${mp.nombre}`);
+                                                                                setMostrarDropdownMP(false);
+                                                                            }}
+                                                                        >
+                                                                            <span className="mp-item-codigo">{mp.codigo}</span>
+                                                                            <span className="mp-item-nombre">{mp.nombre}</span>
+                                                                            <span className="mp-item-tipo">{mp.tipo}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                            {mostrarDropdownMP && busquedaMP && materiasFiltradas.length === 0 && (
+                                                                <div className="buscador-mp-sin-resultados">
+                                                                    <span>🔍 No se encontraron materias primas</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                         <input
                                                             type="number"
                                                             step="0.01"
@@ -435,6 +486,15 @@ export default function FormulasScreen() {
                                                     <div className="agregar-ayuda">
                                                         <small>💡 Ejemplo: Si consumes 230L de materia prima para producir 800L de producto → Cantidad: 230, Litros base: 800</small>
                                                     </div>
+                                                    {nuevaMateria.cantidad && nuevaMateria.litrosBase && (
+                                                        <div className="preview-calculo">
+                                                            <span className="preview-label">Equivalente a:</span>
+                                                            <strong>
+                                                                {(parseFloat(nuevaMateria.cantidad) / parseFloat(nuevaMateria.litrosBase)).toFixed(4)} L/L
+                                                            </strong>
+                                                            <span className="preview-note">(por cada litro de producto)</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
@@ -510,12 +570,6 @@ export default function FormulasScreen() {
                                                                 );
                                                             })}
                                                         </tbody>
-                                                        {/* <tfoot>
-                                                            <tr className="total-row">
-                                                                <td colSpan="3"><strong>TOTAL</strong></td>
-                                                                <td><strong style={{ color: '#2ecc71', fontSize: '14px' }}>{consumoTotal.toFixed(2)} L</strong></td>
-                                                            </tr>
-                                                        </tfoot> */}
                                                     </table>
                                                 )}
                                             </div>

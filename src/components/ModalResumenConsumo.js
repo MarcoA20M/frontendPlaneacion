@@ -3,15 +3,15 @@ import React, { useState, useMemo, useEffect } from "react";
 import { formulasService } from "../services/formulasService";
 import "../styles/modalCriticos.css";
 
-const ModalResumenConsumo = ({ 
-    visible, 
-    cargando, 
-    resumenGlobal = [], 
-    cargasConConsumo = [], 
-    totalCargas, 
-    totalLitros, 
-    onClose, 
-    onGuardar 
+const ModalResumenConsumo = ({
+    visible,
+    cargando,
+    resumenGlobal = [],
+    cargasConConsumo = [],
+    totalCargas,
+    totalLitros,
+    onClose,
+    onGuardar
 }) => {
     const [vistaActiva, setVistaActiva] = useState("materias");
     const [filtroTipo, setFiltroTipo] = useState("todos");
@@ -20,14 +20,14 @@ const ModalResumenConsumo = ({
     const [materiasConConsumoReal, setMateriasConConsumoReal] = useState([]);
     const [materiasCompletas, setMateriasCompletas] = useState([]);
     const [calculando, setCalculando] = useState(false);
-    
+
     // Estado para controlar si mostrar solo las específicas o todas
     const [mostrarSoloEspecificas, setMostrarSoloEspecificas] = useState(true);
 
     // Lista de códigos de materia prima específicos
     const codigosPermitidos = [
-        'CCA10', 'CCA20', 'CCM30', 'CCM60', 'RVA50', 'RVO10', 
-        'RIE30', 'RAC30', 'RRN10', 'SXI10', 'SGA10', 'TT06', 
+        'CCA10', 'CCA20', 'CCM30', 'CCM60', 'RVA50', 'RVO10',
+        'RIE30', 'RAC30', 'RRN10', 'SXI10', 'SGA10', 'TT06',
         'CCP15', 'TMB10', 'RRN20', 'AMP10', 'AEA10', 'ACO20', 'ABL10'
     ];
 
@@ -56,25 +56,25 @@ const ModalResumenConsumo = ({
         try {
             const mapaMaterias = new Map();
             const mapaMateriasCompletas = new Map();
-            
+
             for (const carga of cargasConConsumo) {
                 const codigoProducto = carga.codigo;
                 const litrosProducir = carga.litros || 0;
-                
+
                 if (!codigoProducto || litrosProducir === 0) continue;
-                
+
                 try {
                     const formulas = await formulasService.listarPorProducto(codigoProducto);
-                    
+
                     for (const formula of formulas) {
                         const mpId = formula.materiaPrima?.id || formula.materiaPrimaId;
                         const mpCodigo = formula.materiaPrima?.codigo || formula.materiaPrimaCodigo;
                         const mpNombre = formula.materiaPrima?.nombre || formula.materiaPrimaNombre;
                         const mpTipo = formula.materiaPrima?.tipo || formula.materiaPrimaTipo;
                         const cantidadPorLitro = formula.cantidadPorLitro;
-                        
+
                         const consumo = cantidadPorLitro * litrosProducir;
-                        
+
                         // Todas las materias
                         if (mapaMateriasCompletas.has(mpId)) {
                             const existente = mapaMateriasCompletas.get(mpId);
@@ -88,7 +88,7 @@ const ModalResumenConsumo = ({
                                 consumoTotal: consumo
                             });
                         }
-                        
+
                         // Solo específicas
                         if (esCodigoPermitido(mpCodigo)) {
                             if (mapaMaterias.has(mpId)) {
@@ -109,10 +109,10 @@ const ModalResumenConsumo = ({
                     console.error(`Error al obtener fórmulas para ${codigoProducto}:`, error);
                 }
             }
-            
+
             const resultadoCompletas = Array.from(mapaMateriasCompletas.values()).sort((a, b) => b.consumoTotal - a.consumoTotal);
             const resultadoEspecificas = Array.from(mapaMaterias.values()).sort((a, b) => b.consumoTotal - a.consumoTotal);
-            
+
             setMateriasCompletas(resultadoCompletas);
             setMateriasConConsumoReal(resultadoEspecificas);
         } catch (error) {
@@ -129,12 +129,12 @@ const ModalResumenConsumo = ({
 
     const estadisticas = useMemo(() => {
         if (!datosMostrar || datosMostrar.length === 0) return null;
-        
+
         const productoMayorConsumo = [...datosMostrar].sort((a, b) => b.consumoTotal - a.consumoTotal)[0];
         const totalMateriaPrima = datosMostrar.reduce((sum, c) => sum + c.consumoTotal, 0);
         const eficiencia = totalLitros > 0 && totalMateriaPrima > 0 ? (totalLitros / totalMateriaPrima).toFixed(2) : 0;
         const topMaterias = [...datosMostrar].sort((a, b) => b.consumoTotal - a.consumoTotal).slice(0, 3);
-        
+
         return { productoMayorConsumo, totalMateriaPrima, eficiencia, topMaterias };
     }, [datosMostrar, totalLitros]);
 
@@ -145,7 +145,7 @@ const ModalResumenConsumo = ({
             filtradas = filtradas.filter(item => item.tipo?.toLowerCase() === filtroTipo);
         }
         if (busqueda) {
-            filtradas = filtradas.filter(item => 
+            filtradas = filtradas.filter(item =>
                 item.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
                 item.nombre?.toLowerCase().includes(busqueda.toLowerCase())
             );
@@ -162,7 +162,7 @@ const ModalResumenConsumo = ({
                     <h3>📊 Resumen de Consumo de Materia Prima</h3>
                     <button className="modal-close" onClick={onClose}>✖</button>
                 </div>
-                
+
                 <div className="modal-body">
                     {cargando || calculando ? (
                         <div className="loading-resumen">
@@ -182,14 +182,14 @@ const ModalResumenConsumo = ({
                                     <h4>🎯 Insights de Producción</h4>
                                     {/* 🔴 SELECTOR INTEGRADO - más compacto */}
                                     <div className="insights-toggle">
-                                        <button 
+                                        <button
                                             className={`insight-toggle-btn ${mostrarSoloEspecificas ? 'active' : ''}`}
                                             onClick={() => setMostrarSoloEspecificas(true)}
                                             title="Mostrar solo las 19 materias primas principales"
                                         >
                                             📌 {materiasConConsumoReal.length}
                                         </button>
-                                        <button 
+                                        <button
                                             className={`insight-toggle-btn ${!mostrarSoloEspecificas ? 'active' : ''}`}
                                             onClick={() => setMostrarSoloEspecificas(false)}
                                             title="Mostrar todas las materias primas"
@@ -220,15 +220,15 @@ const ModalResumenConsumo = ({
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Top 3 Materias Primas más consumidas */}
                                 {estadisticas?.topMaterias && estadisticas.topMaterias.length > 0 && (
                                     <div className="top-materias">
                                         <span className="top-label">🔥 Top 3 Materias Primas más consumidas</span>
                                         <div className="top-items">
                                             {estadisticas.topMaterias.map((item, idx) => (
-                                                <div 
-                                                    key={idx} 
+                                                <div
+                                                    key={idx}
                                                     className="top-item clickable"
                                                     onClick={() => setDetalleMateriaSeleccionada(
                                                         detalleMateriaSeleccionada?.codigo === item.codigo ? null : item
@@ -250,8 +250,8 @@ const ModalResumenConsumo = ({
                             {/* Filtros */}
                             <div className="filtros-container">
                                 <div className="search-box-modal">
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="🔍 Buscar por código o nombre..."
                                         value={busqueda}
                                         onChange={(e) => setBusqueda(e.target.value)}
@@ -260,33 +260,33 @@ const ModalResumenConsumo = ({
                                         <button className="clear-search" onClick={() => setBusqueda("")}>✖</button>
                                     )}
                                 </div>
-                                
+
                                 <div className="filtro-tipos">
-                                    <button 
+                                    <button
                                         className={`tipo-filtro ${filtroTipo === "todos" ? "active" : ""}`}
                                         onClick={() => setFiltroTipo("todos")}
                                     >
                                         Todos
                                     </button>
-                                    <button 
+                                    <button
                                         className={`tipo-filtro ${filtroTipo === "base" ? "active" : ""}`}
                                         onClick={() => setFiltroTipo("base")}
                                     >
                                         Base
                                     </button>
-                                    <button 
+                                    <button
                                         className={`tipo-filtro ${filtroTipo === "pigmento" ? "active" : ""}`}
                                         onClick={() => setFiltroTipo("pigmento")}
                                     >
                                         Pigmento
                                     </button>
-                                    <button 
+                                    <button
                                         className={`tipo-filtro ${filtroTipo === "solvente" ? "active" : ""}`}
                                         onClick={() => setFiltroTipo("solvente")}
                                     >
                                         Solvente
                                     </button>
-                                    <button 
+                                    <button
                                         className={`tipo-filtro ${filtroTipo === "aditivo" ? "active" : ""}`}
                                         onClick={() => setFiltroTipo("aditivo")}
                                     >
@@ -359,7 +359,7 @@ const ModalResumenConsumo = ({
                         </>
                     )}
                 </div>
-                
+
                 <div className="modal-footer">
                     <button className="btn-cerrar" onClick={onClose}>Cerrar</button>
                     <button className="btn-guardar" onClick={onGuardar}>Confirmar y Guardar</button>

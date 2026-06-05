@@ -302,10 +302,12 @@ export default function MateriasPrimasScreen() {
                         </div>
                         <div className="tipo-filtros">
                             <button className={`tipo-filtro-btn ${filtroTipo === "todos" ? "active" : ""}`} onClick={() => setFiltroTipo("todos")}>Todos</button>
-                            <button className={`tipo-filtro-btn ${filtroTipo === "BASE" ? "active" : ""}`} onClick={() => setFiltroTipo("BASE")}>🛢️ Base</button>
-                            <button className={`tipo-filtro-btn ${filtroTipo === "PIGMENTO" ? "active" : ""}`} onClick={() => setFiltroTipo("PIGMENTO")}>🎨 Pigmento</button>
-                            <button className={`tipo-filtro-btn ${filtroTipo === "SOLVENTE" ? "active" : ""}`} onClick={() => setFiltroTipo("SOLVENTE")}>💧 Solvente</button>
-                            <button className={`tipo-filtro-btn ${filtroTipo === "ADITIVO" ? "active" : ""}`} onClick={() => setFiltroTipo("ADITIVO")}>⚗️ Aditivo</button>
+                            <button className={`tipo-filtro-btn ${filtroTipo === "RESINA" ? "active" : ""}`} onClick={() => setFiltroTipo("RESINA")}>🛢️ Resinas</button>
+                            <button className={`tipo-filtro-btn ${filtroTipo === "PIGMENTO" ? "active" : ""}`} onClick={() => setFiltroTipo("PIGMENTO")}>🎨 Pigmentos</button>
+                            <button className={`tipo-filtro-btn ${filtroTipo === "SOLVENTE" ? "active" : ""}`} onClick={() => setFiltroTipo("SOLVENTE")}>💧 Solventes</button>
+                            <button className={`tipo-filtro-btn ${filtroTipo === "ADITIVO" ? "active" : ""}`} onClick={() => setFiltroTipo("ADITIVO")}>⚗️ Aditivos</button>
+                            <button className={`tipo-filtro-btn ${filtroTipo === "CARGA" ? "active" : ""}`} onClick={() => setFiltroTipo("CARGA")}>📦 Cargas</button>
+
                         </div>
                     </div>
 
@@ -382,7 +384,7 @@ export default function MateriasPrimasScreen() {
                                 <div className="form-group">
                                     <label>Tipo</label>
                                     <select className="form-input" value={formData.tipo} onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}>
-                                        <option value="BASE">BASE</option>
+                                        <option value="BASE">RESINA</option>
                                         <option value="PIGMENTO">PIGMENTO</option>
                                         <option value="SOLVENTE">SOLVENTE</option>
                                         <option value="ADITIVO">ADITIVO</option>

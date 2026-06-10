@@ -18,9 +18,12 @@ export default function MateriaPrimaProductos() {
     const [todasLasFormulas, setTodasLasFormulas] = useState([]);
 
     const [filtroNombreProducto, setFiltroNombreProducto] = useState("");
+    const [ordenamientoConsumo, setOrdenamientoConsumo] = useState("asc");
 
     const [imagenFamiliaProducto, setImagenFamiliaProducto] = useState(null);
     const [familiaProducto, setFamiliaProducto] = useState(null);
+
+    const CARGA_ESTANDAR = 800;
 
     useEffect(() => {
         cargarDatosIniciales();
@@ -103,6 +106,7 @@ export default function MateriaPrimaProductos() {
         setSelectedMP(mp);
         setLoadingProductos(true);
         setFiltroNombreProducto("");
+        setOrdenamientoConsumo("asc");
 
         try {
             const productosQueUsan = [];
@@ -114,6 +118,7 @@ export default function MateriaPrimaProductos() {
 
                 if (usaMP) {
                     const producto = productosDisponibles.find(p => p.codigo === formula.productoId);
+                    const cantidadPorLitro = formula.cantidadPorLitro || 0;
 
                     productosQueUsan.push({
                         ...formula,
@@ -122,8 +127,9 @@ export default function MateriaPrimaProductos() {
                             descripcion: formula.productoNombre || "Producto",
                             familiaId: formula.familiaId
                         },
-                        cantidadPorLitro: formula.cantidadPorLitro || 0,
-                        consumoMensual: (formula.cantidadPorLitro || 0) * produccionMensual
+                        cantidadPorLitro: cantidadPorLitro,
+                        cantidadPorCarga: cantidadPorLitro * CARGA_ESTANDAR,
+                        consumoMensual: cantidadPorLitro * produccionMensual
                     });
                 }
             }
@@ -142,6 +148,7 @@ export default function MateriaPrimaProductos() {
         setSelectedMP(mp);
         setLoadingProductos(true);
         setFiltroNombreProducto("");
+        setOrdenamientoConsumo("asc");
 
         try {
             const response = await fetch(`http://localhost:8080/api/formulas/materia-prima/${mp.id}`);
@@ -152,12 +159,14 @@ export default function MateriaPrimaProductos() {
                     formulas.map(async (formula) => {
                         const productoResponse = await fetch(`http://localhost:8080/api/productos/${formula.productoId}`);
                         const producto = productoResponse.ok ? await productoResponse.json() : null;
+                        const cantidadPorLitro = formula.cantidadPorLitro || 0;
 
                         return {
                             ...formula,
                             producto: producto,
-                            cantidadPorLitro: formula.cantidadPorLitro || 0,
-                            consumoMensual: (formula.cantidadPorLitro || 0) * produccionMensual
+                            cantidadPorLitro: cantidadPorLitro,
+                            cantidadPorCarga: cantidadPorLitro * CARGA_ESTANDAR,
+                            consumoMensual: cantidadPorLitro * produccionMensual
                         };
                     })
                 );
@@ -173,9 +182,12 @@ export default function MateriaPrimaProductos() {
         }
     };
 
-    const handleVerProducto = async (producto) => {
-        await cargarImagenFamiliaProducto(producto);
-        window.location.href = `/mantenimiento/formulas?producto=${producto.codigo}`;
+    // 🔴 NUEVA FUNCIÓN: Manejar clic en la card del producto
+    const handleProductCardClick = (producto) => {
+        if (producto && producto.codigo) {
+            // Navegar a la página de fórmulas con el producto seleccionado
+            window.location.href = `/mantenimiento/formulas?producto=${producto.codigo}`;
+        }
     };
 
     const obtenerNombresUnicos = () => {
@@ -197,15 +209,34 @@ export default function MateriaPrimaProductos() {
         return unicos;
     };
 
-    const productosFiltrados = filtroNombreProducto
-        ? productosRelacionados.filter(p => {
-            const descripcion = p.producto?.descripcion || p.productoNombre;
-            return descripcion?.toUpperCase().includes(filtroNombreProducto.toUpperCase());
-        })
-        : productosRelacionados;
+    const productosFiltradosYOrdenados = () => {
+        let filtrados = filtroNombreProducto
+            ? productosRelacionados.filter(p => {
+                const descripcion = p.producto?.descripcion || p.productoNombre;
+                return descripcion?.toUpperCase().includes(filtroNombreProducto.toUpperCase());
+            })
+            : [...productosRelacionados];
+
+        filtrados.sort((a, b) => {
+            const consumoA = a.cantidadPorCarga || 0;
+            const consumoB = b.cantidadPorCarga || 0;
+
+            if (ordenamientoConsumo === "asc") {
+                return consumoA - consumoB;
+            } else {
+                return consumoB - consumoA;
+            }
+        });
+
+        return filtrados;
+    };
 
     const resetearFiltro = () => {
         setFiltroNombreProducto("");
+    };
+
+    const toggleOrdenamiento = () => {
+        setOrdenamientoConsumo(ordenamientoConsumo === "asc" ? "desc" : "asc");
     };
 
     const getTipoIcon = (tipo) => {
@@ -226,8 +257,9 @@ export default function MateriaPrimaProductos() {
     };
 
     const calcularDiasStock = () => {
-        if (!selectedMP || productosFiltrados.length === 0) return 0;
-        const consumoDiario = productosFiltrados.reduce((sum, p) => sum + (p.consumoMensual || 0), 0) / 30;
+        const productosMostrados = productosFiltradosYOrdenados();
+        if (!selectedMP || productosMostrados.length === 0) return 0;
+        const consumoDiario = productosMostrados.reduce((sum, p) => sum + (p.consumoMensual || 0), 0) / 30;
         if (consumoDiario === 0) return 999;
         return Math.floor(selectedMP.nivelActual / consumoDiario);
     };
@@ -252,7 +284,6 @@ export default function MateriaPrimaProductos() {
 
     return (
         <div className="trazabilidad-container">
-
             <div className="trazabilidad-layout">
                 {/* Panel izquierdo */}
                 <div className="mp-list-panel">
@@ -285,8 +316,7 @@ export default function MateriaPrimaProductos() {
                             >
                                 🎨 Pigmento
                             </button>
-
-                             <button
+                            <button
                                 className={`tipo-filtro-btn ${filtroTipo === "RESINA" ? "active" : ""}`}
                                 onClick={() => setFiltroTipo("RESINA")}
                             >
@@ -350,11 +380,10 @@ export default function MateriaPrimaProductos() {
                     </div>
                 </div>
 
-                {/* Panel derecho - CON HEADER STICKY */}
+                {/* Panel derecho */}
                 <div className="productos-panel">
                     {selectedMP ? (
                         <>
-                            {/* HEADER STICKY - se queda fijo mientras scrollea */}
                             <div className="productos-header-sticky">
                                 <div className="mp-detalle-header">
                                     <div className="mp-header-row">
@@ -369,7 +398,6 @@ export default function MateriaPrimaProductos() {
                                             </div>
                                         </div>
 
-                                        {/* FILTRO CON BOTONES */}
                                         {productosRelacionados.length > 0 && (
                                             <div className="filtro-lateral">
                                                 <div className="filtro-lateral-label">
@@ -400,7 +428,7 @@ export default function MateriaPrimaProductos() {
                                                 </div>
                                                 {filtroNombreProducto && (
                                                     <div className="filtro-lateral-info">
-                                                        Mostrando <span>{productosFiltrados.length}</span> de {productosRelacionados.length} productos
+                                                        Mostrando <span>{productosFiltradosYOrdenados().length}</span> de {productosRelacionados.length} productos
                                                     </div>
                                                 )}
                                             </div>
@@ -422,19 +450,27 @@ export default function MateriaPrimaProductos() {
                                 </div>
                             </div>
 
-                            {/* CONTENIDO SCROLLABLE */}
                             <div className="productos-scrollable">
                                 <div className="productos-consumo">
                                     <div className="section-header">
                                         <h4>📋 Productos que consumen esta materia prima</h4>
-                                        <div className="produccion-control">
-                                            <label>Producción mensual (L):</label>
-                                            <input
-                                                type="number"
-                                                value={produccionMensual}
-                                                onChange={(e) => setProduccionMensual(Number(e.target.value))}
-                                                className="produccion-input"
-                                            />
+                                        <div className="controles-ordenamiento">
+                                            <div className="produccion-control">
+                                                <label>Producción mensual (L):</label>
+                                                <input
+                                                    type="number"
+                                                    value={produccionMensual}
+                                                    onChange={(e) => setProduccionMensual(Number(e.target.value))}
+                                                    className="produccion-input"
+                                                />
+                                            </div>
+                                            <button
+                                                className="btn-ordenar"
+                                                onClick={toggleOrdenamiento}
+                                                title={ordenamientoConsumo === "asc" ? "Ordenar de mayor a menor" : "Ordenar de menor a mayor"}
+                                            >
+                                                {ordenamientoConsumo === "asc" ? "⬆️ Menor a Mayor consumo" : "⬇️ Mayor a Menor consumo"}
+                                            </button>
                                         </div>
                                     </div>
 
@@ -443,17 +479,23 @@ export default function MateriaPrimaProductos() {
                                             <div className="spinner-small"></div>
                                             <p>Buscando productos relacionados...</p>
                                         </div>
-                                    ) : productosFiltrados.length > 0 ? (
+                                    ) : productosFiltradosYOrdenados().length > 0 ? (
                                         <>
                                             <div className="productos-grid">
-                                                {productosFiltrados.map((relacion, idx) => {
+                                                {productosFiltradosYOrdenados().map((relacion, idx) => {
                                                     const consumoMensual = (relacion.cantidadPorLitro || 0) * produccionMensual;
                                                     const porcentajeStock = selectedMP.nivelActual > 0
                                                         ? (consumoMensual / selectedMP.nivelActual) * 100
                                                         : 0;
 
                                                     return (
-                                                        <div key={idx} className="producto-card">
+                                                        // 🔴 AÑADIDO onClick a toda la card
+                                                        <div
+                                                            key={idx}
+                                                            className="producto-card"
+                                                            onClick={() => handleProductCardClick(relacion.producto)}
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
                                                             <div className="producto-header">
                                                                 {relacion.producto?.familiaId ? (
                                                                     <div className="producto-imagen-familia">
@@ -463,7 +505,7 @@ export default function MateriaPrimaProductos() {
                                                                             className="producto-familia-img"
                                                                             onError={(e) => {
                                                                                 e.target.style.display = 'none';
-                                                                                e.target.parentElement.innerHTML = '<span class="producto-icono-fallback">📦</span>';
+                                                                                e.target.parentElement.innerHTML = '<span className="producto-icono-fallback">📦</span>';
                                                                             }}
                                                                         />
                                                                     </div>
@@ -474,8 +516,10 @@ export default function MateriaPrimaProductos() {
                                                                     <h5>{relacion.producto?.descripcion || relacion.productoNombre || 'Producto'}</h5>
                                                                     <span className="producto-codigo">{relacion.producto?.codigo || relacion.productoId}</span>
                                                                 </div>
+                                                              
+
                                                                 <div className="producto-badge">
-                                                                    {((relacion.cantidadPorLitro || 0) * 100 / 800).toFixed(1)}% de la fórmula
+                                                                    {((relacion.cantidadPorCarga || 0) / CARGA_ESTANDAR * 100).toFixed(1)}% de la carga
                                                                 </div>
                                                             </div>
 
@@ -484,10 +528,20 @@ export default function MateriaPrimaProductos() {
                                                                     <div className="detalle-item">
                                                                         <span className="detalle-icon">📊</span>
                                                                         <div>
-                                                                            <span className="detalle-label">Cantidad por litro:</span>
-                                                                            <strong>{(relacion.cantidadPorLitro || 0).toFixed(3)} {selectedMP.unidad}/L</strong>
+                                                                            <span className="detalle-label">Cantidad por carga (800L):</span>
+                                                                            <strong>{(relacion.cantidadPorCarga || 0).toFixed(3)} {selectedMP.unidad}</strong>
                                                                         </div>
                                                                     </div>
+                                                                    {ordenamientoConsumo === "asc" && (
+                                                                        <div className="detalle-item orden-indicador">
+                                                                            <span className="orden-badge">#{idx + 1} menor consumo</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {ordenamientoConsumo === "desc" && (
+                                                                        <div className="detalle-item orden-indicador">
+                                                                            <span className="orden-badge">#{idx + 1} mayor consumo</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
 
                                                                 <div className="impacto-bar">
@@ -503,15 +557,6 @@ export default function MateriaPrimaProductos() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-
-                                                            <div className="producto-actions">
-                                                                <button
-                                                                    className="btn-ver-formula"
-                                                                    onClick={() => handleVerProducto(relacion.producto)}
-                                                                >
-                                                                    Ver fórmula completa →
-                                                                </button>
-                                                            </div>
                                                         </div>
                                                     );
                                                 })}
@@ -524,7 +569,7 @@ export default function MateriaPrimaProductos() {
                                                         <div className="resumen-icon">🏭</div>
                                                         <div className="resumen-info">
                                                             <span className="resumen-label">Total productos</span>
-                                                            <span className="resumen-number">{productosFiltrados.length}</span>
+                                                            <span className="resumen-number">{productosFiltradosYOrdenados().length}</span>
                                                         </div>
                                                     </div>
                                                     <div className="resumen-card">
@@ -532,7 +577,7 @@ export default function MateriaPrimaProductos() {
                                                         <div className="resumen-info">
                                                             <span className="resumen-label">Consumo mensual total</span>
                                                             <span className="resumen-number">
-                                                                {productosFiltrados.reduce((sum, p) => sum + ((p.cantidadPorLitro || 0) * produccionMensual), 0).toLocaleString()} {selectedMP.unidad}
+                                                                {productosFiltradosYOrdenados().reduce((sum, p) => sum + ((p.cantidadPorLitro || 0) * produccionMensual), 0).toLocaleString()} {selectedMP.unidad}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -565,7 +610,8 @@ export default function MateriaPrimaProductos() {
                             <p>Elige cualquier materia prima del panel izquierdo para ver:</p>
                             <ul className="feature-list">
                                 <li>✓ Qué productos la consumen</li>
-                                <li>✓ Cantidad utilizada por fórmula</li>
+                                <li>✓ Cantidad utilizada por carga de 800L</li>
+                                <li>✓ Ordenar de menor a mayor consumo</li>
                                 <li>✓ Consumo mensual estimado</li>
                                 <li>✓ Impacto en tu inventario</li>
                             </ul>

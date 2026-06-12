@@ -220,12 +220,9 @@ export default function ProduccionScreen() {
 const cargasConConsumo = useMemo(() => {
     const todasLasCargas = [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
     
-    console.log("=== CARGAS CON CONSUMO ===");
-    console.log("Todas las cargas:", todasLasCargas);
-    
     return todasLasCargas.map((carga, index) => {
-        // Obtener el número de lote (folio)
-        const numeroLote = carga.folio || carga.lote || carga.numeroLote || `Carga-${index + 1}`;
+        // 🔴 CLAVE: Usar el folio real que ya existe en la carga
+        const folio = carga.folio || carga.lote || carga.numeroLote || `ORD-${index + 1}`;
         
         // Obtener el código del producto
         const codigo = carga.codigo || carga.codigoProducto || `PROD-${index + 1}`;
@@ -237,8 +234,6 @@ const cargasConConsumo = useMemo(() => {
         const litros = carga.litros || 0;
         
         // IMPORTANTE: El consumo de materia prima DEBE venir del cálculo de la fórmula
-        // Si tu carga tiene un campo consumoTotal, úsalo
-        // Si no, necesitas calcularlo basado en los materiales que usa
         let consumoTotal = carga.consumoTotal || 0;
         
         // Si no tiene consumoTotal pero tiene materiasPrimas, calcular
@@ -249,24 +244,23 @@ const cargasConConsumo = useMemo(() => {
         // Obtener las materias primas de la carga (si las tiene)
         const materiasPrimas = carga.materiasPrimas || [];
         
-        console.log(`Carga ${index + 1}:`, {
-            codigo,
-            numeroLote,
-            litros,
-            consumoTotal,
-            descripcion
-        });
-        
         return {
             id: carga.idTemp || carga.id || index,
             codigo: codigo,
-            numeroLote: numeroLote,
+            folio: folio,                    // 🔴 ESTO ES LO QUE FALTA - el campo que usa el modal
+            orden: folio,                    // También como orden para compatibilidad
+            lote: folio,                     // También como lote
+            numeroLote: folio,               // Mantener compatibilidad
             descripcion: descripcion,
+            nombre: descripcion,
+            productoNombre: descripcion,
             litros: litros,
             consumoTotal: consumoTotal,
             tipo: carga.tipo || "Desconocido",
             operario: carga.operario || "N/A",
-            materiasPrimas: materiasPrimas
+            materiasPrimas: materiasPrimas,
+            fecha: carga.fecha || new Date().toLocaleDateString(),
+            estado: carga.estado || "Programada"
         };
     });
 }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);

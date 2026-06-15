@@ -1,287 +1,488 @@
 
-.rondas-panel {
-  margin-top: 40px;
-  width: 95%;
-  margin-left: -8%;
-}
+  .rondas-panel {
+    margin-top: 40px;
+    width: 95%;
+    margin-left: -8%;
+  }
 
-.rondas-panel h2 {
-  margin-bottom: 65px;
-  font-size: 24px;
-  color: #00c0ff;
-  letter-spacing: 1px;
-  margin-left: 140px;
-  margin-top: 100px;
-}
+  .rondas-panel h2 {
+    margin-bottom: 65px;
+    font-size: 24px;
+    color: #00c0ff;
+    letter-spacing: 1px;
+    margin-left: 140px;
+    margin-top: 100px;
+  }
 
-/* Tabla completa */
-.tabla-rondas {
-  width: 110%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Reducido para evitar exceso de espacio entre filas */
-}
+  /* Tabla completa */
+  .tabla-rondas {
+    width: 110%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Reducido para evitar exceso de espacio entre filas */
+  }
 
-/* Filas */
-.fila-ronda {
-  display: grid;
-  grid-template-columns: 240px repeat(6, 1fr);
-  gap: 12px;
-  align-items: stretch; /* Obliga a todas las celdas de la fila a tener la misma altura */
-}
+  /* Filas */
+  .fila-ronda {
+    display: grid;
+    grid-template-columns: 240px repeat(6, 1fr);
+    gap: 12px;
+    align-items: stretch; /* Obliga a todas las celdas de la fila a tener la misma altura */
+  }
 
-/* Header */
-.fila-ronda.header {
-  font-weight: 700;
-  font-size: 16px;
-  color: #00ffcc;
-}
+  /* Header */
+  .fila-ronda.header {
+    font-weight: 700;
+    font-size: 16px;
+    color: #00ffcc;
+  }
 
-.fila-ronda.header div {
-  text-align: center;
-}
+  .fila-ronda.header div {
+    text-align: center;
+  }
 
-/* Etiqueta izquierda */
-.etiqueta-ronda {
-  font-weight: 700;
-  font-size: 16px;
-  color: #00ffcc;
-  text-align: right;
-  padding-right: 15px;
-}
+  /* Etiqueta izquierda */
+  .etiqueta-ronda {
+    font-weight: 700;
+    font-size: 16px;
+    color: #00ffcc;
+    text-align: right;
+    padding-right: 15px;
+  }
 
-/* Celdas */
-.celda-ronda {
-  height: 155px;
-  height: auto;      /* CRECIMIENTO DINÁMICO: La celda se estira si hay 2+ cards */
-  border-radius: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  display: flex;
-  flex-direction: column; /* APILADO VERTICAL: Evita que las cards se choquen de lado */
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;             /* Espacio entre la card de Maquila y de Línea */
-  padding: 10px 1px;     /* Espacio interno */
-  overflow: visible !important;
-  position: relative;
-} 
+  /* Celdas */
+  .celda-ronda {
+    height: 155px;
+    height: auto;      /* CRECIMIENTO DINÁMICO: La celda se estira si hay 2+ cards */
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    flex-direction: column; /* APILADO VERTICAL: Evita que las cards se choquen de lado */
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;             /* Espacio entre la card de Maquila y de Línea */
+    padding: 10px 1px;     /* Espacio interno */
+    overflow: visible !important;
+    position: relative;
+  } 
 
 
-.etiqueta-ronda {
-  display: flex;
-  flex-direction: column; /* Alineación vertical */
-  justify-content: center;
-  align-items: flex-end; /* Alineado a la derecha */
-  padding-right: 20px;
-  border-right: 2px solid rgba(0, 255, 204, 0.3); /* Guía visual */
-}
+  .etiqueta-ronda {
+    display: flex;
+    flex-direction: column; /* Alineación vertical */
+    justify-content: center;
+    align-items: flex-end; /* Alineado a la derecha */
+    padding-right: 20px;
+    border-right: 2px solid rgba(0, 255, 204, 0.3); /* Guía visual */
+  }
 
+
+
+
+  .titulo-especial {
+    display: flex;
+    align-items: center;
+    color: #ff9800;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .alarma-dot {
+    width: 8px;
+    height: 8px;
+    background: #ff4400;
+    border-radius: 50%;
+    margin-right: 12px;
+    animation: pulse-orange 1.5s infinite;
+  }
+
+  @keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 68, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0); }
+  }
+
+  .toggle-view-btn {
+    background: #ff9800;
+    color: #000;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+
+  /* Grid de Tarjetas */
+  .grid-especial-premium {
+    position: absolute; /* Sacamos el grid del flujo normal */
+    top: 100%; /* Justo debajo del header */
+    left: 0;
+    right: 0;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    background: #0a0a0a;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid rgba(255, 152, 0, 0.4);
+    border-top: none;
+    z-index: 999;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    max-height: 400px; /* Altura máxima antes de scroll */
+    overflow-y: auto; /* Scroll si hay muchas tarjetas */
+  }
+
+
+  /* Tarjeta V2 */
+  .card-especial-v2 {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    transition: transform 0.2s;
+  }
+
+  .card-especial-v2:hover {
+    border-color: #ff9800;
+    transform: translateY(-2px);
+  }
+
+  .card-header-ex {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .code-badge {
+    background: #ff9800;
+    color: #000;
+    padding: 2px 6px;
+    font-weight: 900;
+    font-size: 12px;
+    border-radius: 3px;
+  }
+
+  .litros-badge {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .card-body-ex {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+
+  /* Contenedor de los botones de operarios */
+  .resumen-operarios {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+  }
+
+  /* Botón de Operario (Copiado de tu .btn-family-explorer) */
+  .card-op {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+
+  .card-op:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Estado Activo (Cuando el operario está seleccionado) */
+  .card-op.active {
+    background: #00e5ff; 
+    color: #002b36;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+    border-color: transparent;
+  }
+
+  .op-total-badge {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+  }
+
+  .card-op.active .op-total-badge {
+    background: rgba(0, 43, 54, 0.2);
+  }
+
+  /* --- BOTÓN QUITAR FILTRO --- */
+  .btn-limpiar-filtro {
+    background: rgba(255, 152, 0, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    color: #ff9800;
+    padding: 8px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .btn-limpiar-filtro:hover {
+    background: rgba(255, 152, 0, 0.25);
+    border-color: #ff9800;
+    transform: scale(1.05);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+
+
+
+
+  /* ===== PANEL DE CARGAS ESPECIALES - NUEVO DISEÑO MORADO/AZUL ===== */
+
+/* Contenedor principal */
+/* ===== PANEL DE CARGAS ESPECIALES - DISEÑO MORADO ===== */
+
+/* Contenedor principal */
 .contenedor-especiales-premium {
-  position: relative; /* Contenedor de referencia para el panel */
-  margin-top: 20px; /* Reducido drásticamente de 190px */
-  background: rgba(20, 20, 20, 0.8);
-  border: 1px solid rgba(255, 152, 0, 0.4);
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(255, 152, 0, 0.1);
-  overflow: visible; /* Cambiado de hidden a visible */
-  z-index: 1000; /* Para que flote sobre otros elementos */
+  position: relative;
+  top: -20px;
+  margin-top: 20px;
+  margin-left: auto;     /* Mueve a la derecha */
+  margin-right: 20px;    /* Espacio desde el borde */
+  background: linear-gradient(135deg, rgba(30, 20, 50, 0.95), rgba(20, 15, 40, 0.95));
+  border: 1px solid rgba(156, 39, 176, 0.4); /* Borde morado */
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: visible;
+  z-index: 1000;
+  max-width: 380px;
+  width: 100%;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.3s ease-out;
 }
 
+.contenedor-especiales-premium:hover {
+  border-color: rgba(156, 39, 176, 0.7); /* Morado más brillante */
+  box-shadow: 0 8px 32px rgba(156, 39, 176, 0.2);
+}
+
+/* Header del panel */
 .header-especial {
-  padding: 8px 15px; /* Reducido de 12px 18px */
-  background: rgba(255, 152, 0, 0.15);
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(106, 26, 158, 0.5), rgba(156, 39, 176, 0.2));
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 152, 0, 0.2);
-  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid rgba(156, 39, 176, 0.3);
+  border-radius: 12px 12px 0 0;
+  transition: all 0.3s ease;
 }
 
+.header-especial:hover {
+  background: linear-gradient(135deg, rgba(106, 26, 158, 0.6), rgba(156, 39, 176, 0.3));
+}
 
+/* Título */
 .titulo-especial {
   display: flex;
   align-items: center;
-  color: #ff9800;
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 1px;
+  gap: 8px;
+  color: #c084fc; /* Morado claro */
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
 }
 
+/* Punto de alarma */
 .alarma-dot {
   width: 8px;
   height: 8px;
   background: #ff4400;
   border-radius: 50%;
-  margin-right: 12px;
   animation: pulse-orange 1.5s infinite;
 }
 
 @keyframes pulse-orange {
   0% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(255, 68, 0, 0); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 68, 0, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 68, 0, 0); }
 }
 
+/* Botón toggle */
 .toggle-view-btn {
-  background: #ff9800;
-  color: #000;
+  background: linear-gradient(90deg, #9c27b0, #6a1a9e); /* Gradiente morado */
+  color: white;
   border: none;
   padding: 4px 12px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.toggle-view-btn:hover { background: #fff; }
+.toggle-view-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+}
 
-/* Grid de Tarjetas */
+/* Grid de tarjetas */
 .grid-especial-premium {
-  position: absolute; /* Sacamos el grid del flujo normal */
-  top: 100%; /* Justo debajo del header */
+  position: absolute;
+  top: 100%;
   left: 0;
   right: 0;
-  padding: 15px;
+  padding: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  background: #0a0a0a;
-  border-radius: 0 0 8px 8px;
-  border: 1px solid rgba(255, 152, 0, 0.4);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  background: rgba(20, 15, 35, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 0 0 12px 12px;
+  border: 1px solid rgba(156, 39, 176, 0.4);
   border-top: none;
   z-index: 999;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  max-height: 400px; /* Altura máxima antes de scroll */
-  overflow-y: auto; /* Scroll si hay muchas tarjetas */
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  max-height: 350px;
+  overflow-y: auto;
 }
 
-
-/* Tarjeta V2 */
-.card-especial-v2 {
-  background: #151515;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 10px;
-  transition: transform 0.2s;
+/* Scroll personalizado */
+.grid-especial-premium::-webkit-scrollbar {
+  width: 6px;
 }
 
-.card-especial-v2:hover {
-  border-color: #ff9800;
-  transform: translateY(-2px);
-}
-
-.card-header-ex {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.code-badge {
-  background: #ff9800;
-  color: #000;
-  padding: 2px 6px;
-  font-weight: 900;
-  font-size: 12px;
+.grid-especial-premium::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 3px;
 }
 
-.litros-badge {
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
+.grid-especial-premium::-webkit-scrollbar-thumb {
+  background: rgba(156, 39, 176, 0.5);
+  border-radius: 3px;
 }
 
+.grid-especial-premium::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 39, 176, 0.7);
+}
+
+/* Tarjetas */
+.card-especial-v2 {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(156, 39, 176, 0.2);
+  border-radius: 10px;
+  padding: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card-especial-v2:hover {
+  border-color: rgba(156, 39, 176, 0.6);
+  transform: translateY(-3px);
+  background: rgba(156, 39, 176, 0.15);
+  box-shadow: 0 6px 16px rgba(156, 39, 176, 0.25);
+}
+
+/* Header de tarjeta */
+.card-header-ex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Badge código */
+.code-badge {
+  background: linear-gradient(90deg, #9c27b0, #6a1a9e); /* Gradiente morado */
+  color: white;
+  padding: 2px 8px;
+  font-weight: 800;
+  font-size: 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* Badge lote */
+.litros-badge {
+  color: #d8b4fe; /* Morado claro */
+  font-size: 9px;
+  font-weight: 600;
+  background: rgba(156, 39, 176, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Cuerpo */
 .card-body-ex {
   font-size: 10px;
-  color: #888;
+  color: #d1d1d1;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-
-/* Contenedor de los botones de operarios */
-.resumen-operarios {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 5px 0;
-}
-
-/* Botón de Operario (Copiado de tu .btn-family-explorer) */
-.card-op {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 8px 18px;
-  border-radius: 50px;
-  cursor: pointer;
+  margin-bottom: 6px;
   font-weight: 500;
-  font-size: 0.85rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-
-.card-op:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.3);
+/* Footer */
+.card-footer-ex {
+  font-size: 9px;
+  color: #aaa;
+  padding-top: 6px;
+  border-top: 1px solid rgba(156, 39, 176, 0.2);
 }
 
-/* Estado Activo (Cuando el operario está seleccionado) */
-.card-op.active {
-  background: #00e5ff; 
-  color: #002b36;
+.card-footer-ex strong {
+  color: #c084fc; /* Morado claro */
+  font-size: 9px;
   font-weight: 700;
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-  border-color: transparent;
 }
 
-.op-total-badge {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1px 8px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-}
-
-.card-op.active .op-total-badge {
-  background: rgba(0, 43, 54, 0.2);
-}
-
-/* --- BOTÓN QUITAR FILTRO --- */
-.btn-limpiar-filtro {
-  background: rgba(255, 152, 0, 0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 152, 0, 0.3);
-  color: #ff9800;
-  padding: 8px 18px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: all 0.3s ease;
-  animation: fadeIn 0.4s ease-out;
-}
-
-.btn-limpiar-filtro:hover {
-  background: rgba(255, 152, 0, 0.25);
-  border-color: #ff9800;
-  transform: scale(1.05);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+/* Animación */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

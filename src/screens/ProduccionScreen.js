@@ -292,11 +292,8 @@ const cargasConConsumo = useMemo(() => {
                                     <p className="usuario-rol">Sistema de Producción</p>
                                 </div>
                                 <div className="divider-perfil"></div>
-                                <button className="perfil-item" onClick={() => navigate("/ajustes")}>⚙️ Ajustes</button>
                                 <button className="perfil-item" onClick={() => navigate("/mantenimiento")}>🛠️ Mantenimiento</button>
-                                <button className="perfil-item" onClick={() => navigate("/configuracion")}>🔧 Configuración</button>
                                 <div className="divider-perfil"></div>
-                                <button className="perfil-item cerrar-sesion" onClick={() => setMenuPerfilAbierto(false)}>🚪 Cerrar Sesión</button>
                             </div>
                         )}
                     </div>

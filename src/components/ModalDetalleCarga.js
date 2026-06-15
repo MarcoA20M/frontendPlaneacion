@@ -56,9 +56,9 @@ const ModalDetalleCarga = ({
             </div>
             
             <div className="info-group half">
-              <label>⚙️ Especificaciones</label>
+              <label>Nivel cubriente</label>
               <div className="data">
-                {carga.tipo} — {carga.nivelCubriente} m²/L
+                {carga.nivelCubriente}
               </div>
             </div>
           </div>

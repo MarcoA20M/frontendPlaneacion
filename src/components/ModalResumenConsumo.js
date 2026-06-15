@@ -345,24 +345,9 @@ const ModalResumenConsumo = ({
                         </div>
                     ) : (
                         <>
-                            {/* Selector de vista */}
-                            <div className="vista-selector">
-                                <button
-                                    className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`}
-                                    onClick={() => setVistaActiva("materias")}
-                                >
-                                    📦 Por Materia Prima
-                                </button>
-                                <button
-                                    className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`}
-                                    onClick={() => setVistaActiva("cargas")}
-                                >
-                                    📋 Por Carga / Lote
-                                </button>
-                            </div>
+
 
                             {vistaActiva === "materias" ? (
-                                /* ========== VISTA DE MATERIAS PRIMAS (ORIGINAL) ========== */
                                 <>
                                     {/* Panel de Insights con el selector integrado */}
                                     <div className="insights-panel">
@@ -383,6 +368,20 @@ const ModalResumenConsumo = ({
                                                 >
                                                     📦 {materiasCompletas.length}
                                                 </button>
+
+                                                <button
+                                                    className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`}
+                                                    onClick={() => setVistaActiva("materias")}
+                                                >
+                                                    📦 Por Materia Prima
+                                                </button>
+                                                <button
+                                                    className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`}
+                                                    onClick={() => setVistaActiva("cargas")}
+                                                >
+                                                    📋 Por Carga / Lote
+                                                </button>
+
                                             </div>
                                         </div>
                                         <div className="insights-grid">
@@ -533,7 +532,6 @@ const ModalResumenConsumo = ({
                                     )}
                                 </>
                             ) : (
-                                /* ========== VISTA DE CARGAS / LOTES (MATRICIAL) ========== */
                                 <>
                                     {/* Resumen de cargas */}
                                     <div className="matricial-resumen">
@@ -558,6 +556,24 @@ const ModalResumenConsumo = ({
                                                 <span className="resumen-valor">{materiasUnicas.length}</span>
                                             </div>
                                         </div>
+
+
+                                        <div className="resumen-item">
+                                            <button
+                                                className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`}
+                                                onClick={() => setVistaActiva("materias")}
+                                            >
+                                                📦 Por Materia Prima
+                                            </button>
+                                            <button
+                                                className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`}
+                                                onClick={() => setVistaActiva("cargas")}
+                                            >
+                                                📋 Por Carga / Lote
+                                            </button>
+                                        </div>
+
+
                                     </div>
 
                                     {/* Buscador */}
@@ -576,6 +592,9 @@ const ModalResumenConsumo = ({
 
                                     {/* Tabla Matricial */}
                                     <div className="matricial-tabla-container">
+
+
+
                                         <table className="matricial-tabla">
                                             <thead>
                                                 <tr>

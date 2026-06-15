@@ -1048,3 +1048,23 @@ body, html {
   cursor: not-allowed;
 }
 
+
+
+/* Elimina la posición absoluta de consumo-preview-mini */
+.consumo-preview-mini {
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 360px;
+  position: absolute;
+  top: 20px;     
+  left: 550px;      
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.3s ease-out;
+  z-index: 100;
+}
+
+
+

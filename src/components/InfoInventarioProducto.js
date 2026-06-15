@@ -3,6 +3,129 @@ import { litrosPorEnvasado, litrosATexto } from "../constants/config";
 import { formulasService } from "../services/formulasService";
 import "../styles/InfoInventarioProducto.css";
 
+// Componente Input con evaluación inteligente
+const InputExpresion = ({ value, onChange, className, placeholder, disabled, ...props }) => {
+  const [inputValue, setInputValue] = useState(value?.toString() || '');
+  const [isFocused, setIsFocused] = useState(false);
+  
+  // Función para evaluar expresiones matemáticas
+  const evaluarExpresion = (valor) => {
+    if (!valor || typeof valor !== 'string') return null;
+    
+    const expresion = valor.replace(/\s/g, '');
+    
+    // Detectar si tiene operadores (+, -, *, /)
+    if (/[+\-*/]/.test(expresion)) {
+      try {
+        const expresionLimpia = expresion.replace(/[^0-9+\-*/().]/g, '');
+        let expresionFinal = expresionLimpia;
+        if (expresionFinal.startsWith('+')) {
+          expresionFinal = expresionFinal.substring(1);
+        }
+        
+        if (expresionFinal && !/^[+\-*/]/.test(expresionFinal)) {
+          const resultado = Function('"use strict"; return (' + expresionFinal + ')')();
+          if (!isNaN(resultado) && isFinite(resultado)) {
+            if (Number.isInteger(resultado)) {
+              return resultado;
+            }
+            return Math.round(resultado * 100) / 100;
+          }
+        }
+      } catch (e) {
+        console.log("Error evaluando expresión:", e);
+      }
+      return null; // Si tiene operadores pero no se pudo evaluar, esperar
+    }
+    return null;
+  };
+  
+  // Verificar si el valor contiene operadores (+, -, *, /)
+  const tieneOperadores = (valor) => {
+    return /[+\-*/]/.test(valor);
+  };
+  
+  const handleBlur = () => {
+    setIsFocused(false);
+    
+    // Si tiene operadores, evaluar la expresión completa
+    if (tieneOperadores(inputValue)) {
+      const evaluado = evaluarExpresion(inputValue);
+      if (evaluado !== null) {
+        const nuevoValor = evaluado.toString();
+        setInputValue(nuevoValor);
+        if (onChange) onChange(nuevoValor);
+        return;
+      }
+    }
+    
+    // Si no tiene operadores, validar como número normal
+    const numValor = parseFloat(inputValue);
+    if (!isNaN(numValor) && numValor >= 0) {
+      const nuevoValor = numValor.toString();
+      setInputValue(nuevoValor);
+      if (onChange) onChange(nuevoValor);
+    } else if (inputValue === '') {
+      const nuevoValor = '0';
+      setInputValue(nuevoValor);
+      if (onChange) onChange('0');
+    } else {
+      // Restaurar valor anterior
+      const valorAnterior = value?.toString() || '0';
+      setInputValue(valorAnterior);
+      if (onChange) onChange(valorAnterior);
+    }
+  };
+  
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+  
+  const handleChange = (e) => {
+    const nuevoValor = e.target.value;
+    setInputValue(nuevoValor);
+    
+    // SI NO tiene operadores (+, -, *, /), actualizar en tiempo real
+    if (!tieneOperadores(nuevoValor)) {
+      const numValor = parseFloat(nuevoValor);
+      if (!isNaN(numValor) && numValor >= 0) {
+        if (onChange) onChange(numValor.toString());
+      } else if (nuevoValor === '') {
+        if (onChange) onChange('0');
+      }
+    }
+    // SI tiene operadores, NO actualizar hasta el blur
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.target.blur();
+    }
+  };
+  
+  // Sincronizar cuando la prop cambia externamente
+  useEffect(() => {
+    if (!isFocused && value !== undefined && value !== null) {
+      setInputValue(value.toString());
+    }
+  }, [value, isFocused]);
+  
+  return (
+    <input
+      type="text"
+      className={className}
+      value={inputValue}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyPress={handleKeyPress}
+      placeholder={placeholder || "Ej: 42 o +42+42"}
+      disabled={disabled}
+      {...props}
+    />
+  );
+};
+
 const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitrosActuales }) => {
     
     const extraerLitrosDeArticulo = (art) => {
@@ -11,6 +134,15 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
         let valor = parseFloat(parteNumerica) || 0;
         if (valor >= 100) return valor / 1000;
         return valor;
+    };
+
+    const handleCantidadChange = (envId, nuevoValor) => {
+        const valorNumerico = Math.max(0, parseFloat(nuevoValor) || 0);
+        
+        setCantidades(prev => ({
+            ...prev,
+            [envId]: valorNumerico
+        }));
     };
 
     const calcularDatosEnvase = (env) => {
@@ -106,15 +238,11 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
                         .map(env => (
                             <div className="fila" key={env.id}>
                                 <span className="litros-text">{litrosATexto(litrosPorEnvasado(env.id))}</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="1"
+                                <InputExpresion
                                     value={cantidades[env.id] || 0}
-                                    onChange={(e) => setCantidades({ 
-                                        ...cantidades, 
-                                        [env.id]: Math.max(0, Number(e.target.value)) 
-                                    })}
+                                    onChange={(nuevoValor) => handleCantidadChange(env.id, nuevoValor)}
+                                    className="input-cantidad-expresion"
+                                    placeholder="Ej: 42 o +42+42"
                                 />
                             </div>
                         ))}
@@ -125,7 +253,6 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
 
     return (
         <div className="layout-dinamico-produccion">
-            {/* Panel de Envasados */}
             <div className="envases-section">
                 {renderColumnaEnvasado()}
                 <div className="contador-litros-wrapper">
@@ -135,7 +262,6 @@ const InfoInventarioProducto = ({ producto, cantidades, setCantidades, totalLitr
                 </div>
             </div>
 
-            {/* Tabla de Inventario */}
             <div className="inventario-column">
                 <table className="tabla-inventario-tecnica">
                     <thead>

@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -8,7 +7,7 @@
 .op-screen-container {
     height: 100vh;
     width: 100vw;
-    background: linear-gradient(135deg, #0a0a0f 0%, #0d0d1a 100%);
+    background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 40%, #1a1a2e 100%);
     display: flex;
     overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -17,7 +16,7 @@
 .op-glass-panel {
     width: 100%;
     height: 100%;
-    background: rgba(17, 17, 29, 0.95);
+    background: rgba(26, 11, 46, 0.85);
     backdrop-filter: blur(0px);
     display: flex;
 }
@@ -25,11 +24,11 @@
 /* --- SIDEBAR MODERNO --- */
 .op-sidebar {
     width: 280px;
-    background: linear-gradient(180deg, #0a0a12 0%, #0d0d16 100%);
+    background: linear-gradient(180deg, #140926 0%, #1a0f2e 100%);
     padding: 32px 20px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(0, 229, 255, 0.15);
+    border-right: 1px solid rgba(156, 39, 176, 0.2);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -39,15 +38,15 @@
     gap: 12px;
     margin-bottom: 48px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    border-bottom: 1px solid rgba(156, 39, 176, 0.15);
 }
 
 .op-dot {
     width: 10px;
     height: 10px;
-    background: #00e5ff;
+    background: #c084fc;
     border-radius: 50%;
-    box-shadow: 0 0 12px #00e5ff;
+    box-shadow: 0 0 12px #c084fc;
     animation: pulse 2s infinite;
 }
 
@@ -65,7 +64,7 @@
 }
 
 .nav-label {
-    color: #4a4a5a;
+    color: #7a6a8a;
     font-size: 10px;
     font-weight: 700;
     margin-bottom: 16px;
@@ -85,7 +84,7 @@
     background: transparent;
     border: none;
     padding: 12px 16px;
-    color: #8a8a9a;
+    color: #aa9aba;
     text-align: left;
     border-radius: 12px;
     cursor: pointer;
@@ -98,15 +97,15 @@
 }
 
 .op-nav-btn:hover {
-    background: rgba(0, 229, 255, 0.08);
+    background: rgba(156, 39, 176, 0.15);
     color: #fff;
     transform: translateX(4px);
 }
 
 .op-nav-btn.active {
-    background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 168, 255, 0.1));
-    color: #00e5ff;
-    border-left: 2px solid #00e5ff;
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
+    color: #e879f9;
+    border-left: 2px solid #c084fc;
 }
 
 .nav-icon {
@@ -121,9 +120,9 @@
 
 .op-btn-exit {
     width: 100%;
-    background: rgba(30, 30, 48, 0.8);
+    background: rgba(30, 20, 48, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #aaa;
+    color: #aa9aba;
     padding: 12px;
     border-radius: 12px;
     cursor: pointer;
@@ -148,6 +147,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    background: rgba(18, 10, 30, 0.6);
 }
 
 .op-main-content::-webkit-scrollbar {
@@ -160,7 +160,7 @@
 }
 
 .op-main-content::-webkit-scrollbar-thumb {
-    background: #00e5ff;
+    background: #9c27b0;
     border-radius: 3px;
 }
 
@@ -176,14 +176,14 @@
     font-size: 28px;
     margin: 0;
     font-weight: 700;
-    background: linear-gradient(135deg, #fff, #00e5ff);
+    background: linear-gradient(135deg, #fff, #e879f9);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .op-title-group p {
-    color: #6a6a7a;
+    color: #9a8aaa;
     margin-top: 8px;
     font-size: 14px;
 }
@@ -202,17 +202,17 @@
 
 /* --- CARDS MODERNAS --- */
 .op-card {
-    background: rgba(20, 20, 30, 0.7);
+    background: rgba(30, 20, 50, 0.75);
     backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 24px;
-    border: 1px solid rgba(0, 229, 255, 0.08);
+    border: 1px solid rgba(156, 39, 176, 0.15);
     transition: all 0.3s ease;
 }
 
 .op-card:hover {
-    border-color: rgba(0, 229, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-color: rgba(192, 132, 252, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .card-header-flex {
@@ -223,7 +223,7 @@
 }
 
 .op-card-title {
-    color: #00e5ff;
+    color: #e879f9;
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -232,8 +232,8 @@
 }
 
 .count-badge {
-    background: rgba(0, 229, 255, 0.12);
-    color: #00e5ff;
+    background: rgba(156, 39, 176, 0.15);
+    color: #e879f9;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
@@ -253,7 +253,7 @@
 
 .op-table th {
     text-align: left;
-    color: #6a6a7a;
+    color: #9a8aaa;
     font-size: 11px;
     padding: 12px 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -268,12 +268,12 @@
 }
 
 .row-hover:hover {
-    background: rgba(0, 229, 255, 0.04);
+    background: rgba(156, 39, 176, 0.08);
     border-radius: 8px;
 }
 
 .op-input-edit {
-    background: rgba(13, 13, 22, 0.8);
+    background: rgba(18, 10, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: #fff;
     padding: 8px 12px;
@@ -284,15 +284,15 @@
 }
 
 .op-input-edit:focus {
-    border-color: #00e5ff;
+    border-color: #c084fc;
     outline: none;
-    background: #0d0d16;
-    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+    background: #1a0f2e;
+    box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.15);
 }
 
 .op-puesto-tag {
-    background: rgba(0, 229, 255, 0.08);
-    color: #00e5ff;
+    background: rgba(156, 39, 176, 0.12);
+    color: #e879f9;
     padding: 4px 12px;
     border-radius: 6px;
     font-size: 12px;
@@ -311,7 +311,7 @@
 .op-add-operario input {
     flex: 1;
     padding: 10px 14px;
-    background: rgba(13, 13, 22, 0.8);
+    background: rgba(18, 10, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     color: #fff;
@@ -320,20 +320,20 @@
 }
 
 .op-add-operario input::placeholder {
-    color: #5a5a6a;
+    color: #6a5a7a;
 }
 
 .op-add-operario input:focus {
     outline: none;
-    border-color: #00e5ff;
+    border-color: #c084fc;
 }
 
 .op-add-operario button {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #00e5ff, #0099cc);
+    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
     border: none;
     border-radius: 10px;
-    color: #000;
+    color: #fff;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -341,14 +341,14 @@
 
 .op-add-operario button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
 }
 
-/* --- VISTA PREVIA DE ROTACIÓN (ahora abajo de los operarios) --- */
+/* --- VISTA PREVIA DE ROTACIÓN --- */
 .preview-rotacion-section {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid rgba(0, 229, 255, 0.1);
+    border-top: 1px solid rgba(156, 39, 176, 0.12);
 }
 
 .preview-rotacion-title {
@@ -359,7 +359,7 @@
 }
 
 .preview-rotacion-title h4 {
-    color: #00e5ff;
+    color: #e879f9;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 1px;
@@ -375,7 +375,7 @@
 .preview-rotacion-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(13, 13, 22, 0.5);
+    background: rgba(18, 10, 30, 0.6);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -383,8 +383,8 @@
 .preview-rotacion-table th {
     text-align: left;
     padding: 12px 16px;
-    background: rgba(0, 229, 255, 0.08);
-    color: #00e5ff;
+    background: rgba(156, 39, 176, 0.1);
+    color: #e879f9;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -394,7 +394,7 @@
 .preview-rotacion-table td {
     padding: 10px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    color: #c0c0d0;
+    color: #c0b0d0;
     font-size: 13px;
 }
 
@@ -408,19 +408,19 @@
 }
 
 .preview-rotacion-table tr:hover td {
-    background: rgba(0, 229, 255, 0.03);
+    background: rgba(156, 39, 176, 0.06);
 }
 
-/* --- MAQUINARIA PANEL (Panel derecho de asignación) --- */
+/* --- MAQUINARIA PANEL --- */
 .card-desc {
-    color: #9a9aaa;
+    color: #aa9aba;
     font-size: 13px;
     margin-bottom: 20px;
     line-height: 1.5;
 }
 
 .op-machine-item {
-    background: rgba(13, 13, 22, 0.8);
+    background: rgba(18, 10, 30, 0.8);
     padding: 16px;
     border-radius: 14px;
     margin-bottom: 12px;
@@ -429,7 +429,7 @@
 }
 
 .op-machine-item:hover {
-    border-color: rgba(0, 229, 255, 0.2);
+    border-color: rgba(156, 39, 176, 0.3);
     transform: translateX(4px);
 }
 
@@ -441,8 +441,8 @@
 }
 
 .machine-id {
-    background: linear-gradient(135deg, #00e5ff, #0099cc);
-    color: #000;
+    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
+    color: #fff;
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 6px;
@@ -450,7 +450,7 @@
 }
 
 .op-machine-item label {
-    color: #aaa;
+    color: #baaaca;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -458,7 +458,7 @@
 
 .op-select-custom {
     width: 100%;
-    background: #1a1a2a;
+    background: #1f1535;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #fff;
     padding: 10px 14px;
@@ -469,25 +469,25 @@
 }
 
 .op-select-custom option {
-    background: #1a1a2a;
+    background: #1f1535;
     color: #fff;
 }
 
 .op-select-custom:hover {
-    border-color: #00e5ff;
+    border-color: #c084fc;
 }
 
 .op-select-custom:focus {
     outline: none;
-    border-color: #00e5ff;
+    border-color: #c084fc;
 }
 
 .operario-asignado-actual {
     margin-top: 10px;
     font-size: 12px;
-    color: #00e5ff;
+    color: #e879f9;
     padding: 6px 10px;
-    background: rgba(0, 229, 255, 0.08);
+    background: rgba(156, 39, 176, 0.12);
     border-radius: 8px;
     display: inline-block;
 }
@@ -530,12 +530,12 @@
 
 .info-box {
     font-size: 12px;
-    color: #9a9aaa;
-    background: rgba(0, 229, 255, 0.05);
+    color: #aa9aba;
+    background: rgba(156, 39, 176, 0.08);
     padding: 12px;
     border-radius: 10px;
     margin: 16px 0;
-    border-left: 3px solid #00e5ff;
+    border-left: 3px solid #c084fc;
 }
 
 .txt-center {
@@ -644,63 +644,20 @@
     }
 }
 
-
-/* Estilos para la sección de operarios especiales */
+/* --- ESTILOS PARA OPERARIOS ESPECIALES --- */
 .especiales-card {
     margin-top: 24px;
-    border: 1px solid rgba(255, 95, 126, 0.3);
+    border: 1px solid rgba(156, 39, 176, 0.3);
 }
 
 .op-puesto-tag.especial {
-    background: linear-gradient(135deg, #ff5f7e, #ff1493);
+    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
+    color: #fff;
 }
 
 .operario-activo {
-    color: #ff5f7e;
-    background: rgba(255, 95, 126, 0.2);
-    padding: 2px 8px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-}
-
-.status-badge.active {
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-    border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.status-badge.inactive {
-    background: rgba(149, 165, 166, 0.2);
-    color: #95a5a6;
-    border: 1px solid rgba(149, 165, 166, 0.3);
-}
-
-.status-badge:hover {
-    transform: scale(1.05);
-}/* Estilos para la sección de operarios especiales */
-.especiales-card {
-    margin-top: 24px;
-    border: 1px solid rgba(255, 95, 126, 0.3);
-}
-
-.op-puesto-tag.especial {
-    background: linear-gradient(135deg, #ff5f7e, #ff1493);
-}
-
-.operario-activo {
-    color: #ff5f7e;
-    background: rgba(255, 95, 126, 0.2);
+    color: #e879f9;
+    background: rgba(156, 39, 176, 0.2);
     padding: 2px 8px;
     border-radius: 12px;
     display: inline-block;
@@ -733,20 +690,13 @@
     transform: scale(1.05);
 }
 
-
-
-
-
-
-
-
-/* Estilos para el submenú de Vinílicas */
+/* --- ESTILOS PARA SUBMENÚ DE VINÍLICAS --- */
 .op-nav-sub-btn {
     width: 100%;
     background: transparent;
     border: none;
     padding: 10px 12px 10px 32px;
-    color: #c4b5fd;
+    color: #c084fc;
     text-align: left;
     border-radius: 12px;
     cursor: pointer;
@@ -759,26 +709,29 @@
 }
 
 .op-nav-sub-btn:hover {
-    background: rgba(192, 0, 255, 0.15);
+    background: rgba(156, 39, 176, 0.15);
     color: #fff;
     transform: translateX(4px);
 }
 
 .op-nav-sub-btn.active {
-    background: linear-gradient(135deg, rgba(192, 0, 255, 0.25), rgba(128, 0, 255, 0.15));
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
     color: #e879f9;
-    border-left: 2px solid #c000ff;
+    border-left: 2px solid #c084fc;
 }
 
 .nav-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(192, 0, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(156, 39, 176, 0.3), transparent);
     margin: 16px 0;
 }
 
+.machine-label-group {
+    color: white;
+}
 
-
-
-
-
-
+.op-card.machinery-card {
+    margin-top: -80px;
+    font-size: 10px;
+    right: -24px;
+}

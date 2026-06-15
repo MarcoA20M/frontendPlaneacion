@@ -631,24 +631,13 @@ export default function OperariosScreen() {
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="operario-asignado-actual">
-                                            👤 Base: {getNombreOperario(grupo.operarioId)}
-                                            {operarioPorOrden && grupo.operarioId === operarioPorOrden.id && (
-                                                <span className="match-indicador"> ✓ Coincide con orden</span>
-                                            )}
-                                        </div>
+                                      
                                     </div>
                                 );
                             })}
                         </div>
 
-                        <div className="info-box">
-                            <strong>🔄 Sincronización Automática Bidireccional:</strong>
-                            <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
-                                <li><strong>Arrastrar en tabla →</strong> Actualiza automáticamente los selectores</li>
-                                <li><strong>Cambiar selector →</strong> Reordena automáticamente la tabla</li>
-                            </ul>
-                        </div>
+                       
                     </div>
                 </>
             );

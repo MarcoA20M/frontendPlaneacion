@@ -7,7 +7,7 @@ import "../styles/criticos.css";
 
 export default function CriticosScreen() {
     const navigate = useNavigate();
-    const location = useLocation(); // 🔴 IMPORTAR useLocation
+    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [seccionActiva, setSeccionActiva] = useState("dashboard");
     const [tanques, setTanques] = useState([]);
@@ -26,6 +26,8 @@ export default function CriticosScreen() {
         observaciones: "",
         usuario: "Admin"
     });
+    // 🟢 NUEVO: Estado para actualización
+    const [actualizando, setActualizando] = useState(false);
 
     // 🔴 LEER PARÁMETRO 'tab' DE LA URL
     useEffect(() => {
@@ -58,6 +60,38 @@ export default function CriticosScreen() {
             setLoading(false);
         }
     };
+
+    // 🟢 NUEVO: Función para recargar datos sin loading completo
+    const recargarDatos = async () => {
+        if (actualizando) return;
+        setActualizando(true);
+        try {
+            const [tanquesData, resumenData] = await Promise.all([
+                materiaPrimaService.listarTodas(),
+                materiaPrimaService.getResumenDashboard()
+            ]);
+            setTanques(tanquesData);
+            setResumenDashboard(resumenData);
+        } catch (error) {
+            console.error("Error recargando datos:", error);
+        } finally {
+            setActualizando(false);
+        }
+    };
+
+    // 🟢 NUEVO: Exponer función globalmente
+    useEffect(() => {
+        window.recargarCriticos = recargarDatos;
+        return () => {
+            delete window.recargarCriticos;
+        };
+    }, []);
+
+    // 🟢 NUEVO: Actualizar automáticamente cada 30 segundos
+    useEffect(() => {
+        const interval = setInterval(recargarDatos, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         cargarDatos();
@@ -176,6 +210,14 @@ export default function CriticosScreen() {
                             <span className="btn-icon">📦</span>
                             Gestionar Materias Primas
                         </button>
+
+                        <button
+                            className="sidebar-btn"
+                            onClick={() => navigate("/bases")}
+                        >
+                            <span className="btn-icon">🛢️</span>
+                            Bases
+                        </button>
                     </nav>
 
                     <div className="sidebar-footer">
@@ -213,6 +255,12 @@ export default function CriticosScreen() {
                         </div>
                         {seccionActiva !== "trazabilidad" && (
                             <div className="header-stats">
+                                {actualizando && (
+                                    <div className="stat-card-header actualizando">
+                                        <span className="spinner-mini"></span>
+                                        <span className="stat-label">Actualizando...</span>
+                                    </div>
+                                )}
                                 <div className="stat-card-header critico">
                                     <span className="stat-num">{resumenDashboard.criticos}</span>
                                     <span className="stat-label">Críticos</span>

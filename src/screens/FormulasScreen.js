@@ -402,6 +402,13 @@ export default function FormulasScreen() {
                             <span className="btn-icon">📦</span>
                             Gestionar Materias Primas
                         </button>
+                        <button
+                            className="sidebar-btn"
+                            onClick={() => navigate("/bases")}
+                        >
+                            <span className="btn-icon">🛢️</span>
+                            Bases
+                        </button>
                     </nav>
 
                     <div className="sidebar-footer">

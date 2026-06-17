@@ -3,7 +3,7 @@ import { buscarProducto } from "../services/productoService";
 import { analizarExcel } from "../services/excelService";
 import { getOperarioPorMaquina, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../constants/config";
 import { registrarCarga, eliminarCarga, obtenerCargasPorFecha } from "../services/cargaService";
-import { formulasService } from "../services/formulasService"; // 🔴 IMPORTAR
+import { formulasService } from "../services/formulasService";
 
 // --- FUNCIÓN DE UTILIDAD: GENERACIÓN DE FOLIOS ---
 const generarFolioAutomatico = (tipo, cola, rondas, esmaltes, especiales) => {
@@ -70,14 +70,78 @@ export function useProduccion() {
     const CODIGOS_BASES = ["BBE20", "BBE30", "BAL40", "BNE10", "BSP10"];
     const IGUALADORES = ["Gaspar", "Alberto", "Pedro"];
 
-    // --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD RESPETANDO ÓRDENES ---
-    // --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD RESPETANDO MÁQUINA Y OPERARIO ---
-    // --- FUNCIÓN CORREGIDA: CARGAR DATOS DE BD ---
+    const normalizarCodigo = (cod) => {
+        if (!cod) return "";
+        return String(cod).trim().toUpperCase().replace(/^0+/, '') || "0";
+    };
+
+    const ordenarCargas = useCallback((lista) => [...lista].sort((a, b) => {
+        const cubA = a.nivelCubriente || 0;
+        const cubB = b.nivelCubriente || 0;
+        if (cubA !== cubB) return cubA - cubB;
+        return String(a.folio).localeCompare(String(b.folio), undefined, { numeric: true });
+    }), []);
+
+    const extraerLitrosDeArticulo = (articuloCompleto) => {
+        if (!articuloCompleto) return 0;
+        const partes = String(articuloCompleto).split('-');
+        const prefijoCapacidad = partes[0].replace(/^0+/, '');
+        switch (prefijoCapacidad) {
+            case "19": return 19;
+            case "4": return 4;
+            case "1": return 1;
+            case "500": return 0.5;
+            case "250": return 0.25;
+            default:
+                const num = parseFloat(prefijoCapacidad);
+                return isNaN(num) ? 0 : num;
+        }
+    };
+
+    const totalLitrosActuales = useMemo(() => producto
+        ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
+        : 0, [producto, cantidades]);
+
+    // --- FUNCIÓN PARA CONSUMIR BASES ---
+    const consumirBasesDeCargas = useCallback(async (cargas) => {
+        if (!cargas || cargas.length === 0) {
+            console.log('⚠️ No hay cargas para consumir bases');
+            return null;
+        }
+
+        console.log('🚀 Consumiendo bases desde', cargas.length, 'cargas');
+        
+        try {
+            const cargasPendientes = cargas.filter(c => c.estado !== 'Completada');
+            
+            if (cargasPendientes.length === 0) {
+                console.log('⚠️ Todas las cargas ya están completadas');
+                return null;
+            }
+
+            const resultado = await formulasService.consumirBasesDesdeCargas(cargasPendientes);
+            
+            console.log('✅ Bases consumidas:', resultado);
+            
+            if (resultado.basesConsumidas && resultado.basesConsumidas.length > 0) {
+                console.log('📦 Resumen de consumo:');
+                resultado.basesConsumidas.forEach(b => {
+                    console.log(`  • ${b.codigo}: ${b.cantidad.toFixed(2)} L (${b.nivelAnterior.toFixed(2)} → ${b.nivelNuevo.toFixed(2)})`);
+                });
+            }
+            
+            return resultado;
+        } catch (error) {
+            console.error('❌ Error consumiendo bases:', error);
+            throw error;
+        }
+    }, []);
+
+    // --- CARGAR DATOS DE BD ---
     const cargarDatosPorFecha = useCallback(async (fechaInput) => {
         try {
             setBuscandoFecha(true);
 
-            // Inicializar rondas vacías
             const nuevasRondas = Array.from({ length: 8 }, () => Array(6).fill(null));
             const nuevosEsmaltes = [];
             const nuevasEspeciales = [];
@@ -94,23 +158,12 @@ export function useProduccion() {
                 return;
             }
 
-            // 🔴 MAPA DE OPERARIO A MÁQUINA
             const mapaOperarioMaquina = {
-                "Isaac": 101,
-                "Juan": 102,
-                "Pedro": 103,
-                "Luis": 104,
-                "Carlos": 105,  // Carlos debe ir a máquina 105
-                "Javier": 106,
-                "Miguel": 107,
-                "Roberto": 108,
-                "Aldo": 101,
-                "Germán": 104,
-                "Gaspar": 105,
-                "Alberto": 106
+                "Isaac": 101, "Juan": 102, "Pedro": 103, "Luis": 104,
+                "Carlos": 105, "Javier": 106, "Miguel": 107, "Roberto": 108,
+                "Aldo": 101, "Germán": 104, "Gaspar": 105, "Alberto": 106
             };
 
-            // 1. Agrupar por folio madre
             const mapaCargasBD = {};
 
             datos.forEach(reg => {
@@ -123,25 +176,16 @@ export function useProduccion() {
                         normalizarCodigo(ex) === normalizarCodigo(reg.producto || "")
                     );
 
-                    // 🔴 OBTENER MÁQUINA: Si viene vacía, asignar por operario
                     let maquinaGuardada = String(reg.maquina || "").replace(/\D/g, "");
                     const operarioGuardado = reg.operario || "";
 
-                    // Si no tiene máquina, asignar según el operario
                     if (!maquinaGuardada && operarioGuardado) {
                         maquinaGuardada = String(mapaOperarioMaquina[operarioGuardado] || "");
-                        console.log(`🔧 Asignando máquina por operario: ${operarioGuardado} → ${maquinaGuardada}`);
                     }
 
-                    // Si sigue sin máquina, asignar 101 por defecto
                     if (!maquinaGuardada) {
                         maquinaGuardada = "101";
-                        console.log(`⚠️ Sin máquina ni operario, asignando 101 por defecto`);
                     }
-
-                    console.log(`📌 Creando carga madre: ${folioMadre}`);
-                    console.log(`   - maquina guardada: "${maquinaGuardada}"`);
-                    console.log(`   - operario: "${operarioGuardado}"`);
 
                     mapaCargasBD[folioMadre] = {
                         idBD: reg.id,
@@ -162,7 +206,6 @@ export function useProduccion() {
                     };
                 }
 
-                // Agregar detalle de envasado
                 const envasadoId = Number(reg.envasadoId || reg.envasado_id);
                 const formatoCorrecto = formatearArticulo(envasadoId);
                 const litrosUnitario = litrosPorEnvasado(envasadoId);
@@ -175,13 +218,9 @@ export function useProduccion() {
                     litros: litrosUnitario
                 });
 
-                // Sumar litros totales
                 mapaCargasBD[folioMadre].litros += Number(reg.cantidad) * litrosUnitario;
             });
 
-            console.log("📦 TOTAL CARGAS MADRE:", Object.keys(mapaCargasBD).length);
-
-            // 2. Separar por tipo
             const cargasVinilicas = [];
             const cargasEsmaltesTemp = [];
 
@@ -195,39 +234,23 @@ export function useProduccion() {
                 }
             });
 
-            console.log("📦 VINÍLICAS:", cargasVinilicas.length);
-            cargasVinilicas.forEach(c => console.log(`   - ${c.folio}: máquina="${c.maquina}", operario="${c.operario}"`));
-
-            // 3. ORDENAR VINÍLICAS POR MÁQUINA
-            // 3. ORDENAR VINÍLICAS POR MÁQUINA
-            // 3. ORDENAR VINÍLICAS POR MÁQUINA Y DENTRO POR FOLIO (o por fecha)
             cargasVinilicas.sort((a, b) => {
                 const maqA = parseInt(a.maquina) || 999;
                 const maqB = parseInt(b.maquina) || 999;
                 if (maqA !== maqB) return maqA - maqB;
-                // Dentro de la misma máquina, ordenar por folio (numérico)
                 const numA = parseInt(a.folio?.replace(/[^0-9]/g, '') || 0);
                 const numB = parseInt(b.folio?.replace(/[^0-9]/g, '') || 0);
                 return numA - numB;
             });
 
-            // 4. COLOCAR CADA CARGA EN SU MÁQUINA CORRESPONDIENTE
             for (const carga of cargasVinilicas) {
                 const maquinaNum = parseInt(carga.maquina);
-
-                console.log(`🔧 Procesando: ${carga.folio} | máquina="${carga.maquina}" | maquinaNum=${maquinaNum}`);
-
                 let filaDestino = -1;
 
                 if (!isNaN(maquinaNum) && maquinaNum >= 101 && maquinaNum <= 108) {
                     filaDestino = maquinaNum - 101;
-                    console.log(`   ✅ Máquina específica: ${maquinaNum} → fila ${filaDestino}`);
-                } else {
-                    console.log(`   ❌ Máquina inválida: "${carga.maquina}"`);
-                    // No asignar, se irá a especiales
                 }
 
-                // Asignar a la fila correspondiente
                 if (filaDestino >= 0 && filaDestino < 8) {
                     let columnaAsignada = -1;
                     for (let col = 0; col < 6; col++) {
@@ -239,9 +262,7 @@ export function useProduccion() {
 
                     if (columnaAsignada !== -1) {
                         nuevasRondas[filaDestino][columnaAsignada] = carga;
-                        console.log(`   ✅ Asignada a fila ${filaDestino}, col ${columnaAsignada}`);
                     } else {
-                        console.log(`   ⚠️ Fila ${filaDestino} llena, buscando espacio...`);
                         let asignada = false;
                         for (let f = 0; f < 8 && !asignada; f++) {
                             for (let c = 0; c < 6 && !asignada; c++) {
@@ -249,15 +270,12 @@ export function useProduccion() {
                                     nuevasRondas[f][c] = { ...carga, maquina: String(101 + f) };
                                     nuevasRondas[f][c].textoMaquina = `VI-${101 + f} ${carga.operario}`;
                                     asignada = true;
-                                    console.log(`   📦 Reubicada en máquina ${101 + f}`);
                                 }
                             }
                         }
                         if (!asignada) nuevasEspeciales.push(carga);
                     }
                 } else {
-                    // Máquina inválida, buscar cualquier espacio
-                    console.log(`   ❌ Máquina inválida: "${carga.maquina}"`);
                     let asignada = false;
                     for (let f = 0; f < 8 && !asignada; f++) {
                         for (let c = 0; c < 6 && !asignada; c++) {
@@ -265,7 +283,6 @@ export function useProduccion() {
                                 nuevasRondas[f][c] = { ...carga, maquina: String(101 + f) };
                                 nuevasRondas[f][c].textoMaquina = `VI-${101 + f} ${carga.operario}`;
                                 asignada = true;
-                                console.log(`   📦 Asignada a máquina ${101 + f} por defecto`);
                             }
                         }
                     }
@@ -273,7 +290,6 @@ export function useProduccion() {
                 }
             }
 
-            // 5. Esmaltes
             const esmaltesOrdenados = [...cargasEsmaltesTemp].sort((a, b) => {
                 const cubA = a.nivelCubriente || 0;
                 const cubB = b.nivelCubriente || 0;
@@ -291,37 +307,24 @@ export function useProduccion() {
                 nuevosEsmaltes.push(carga);
             });
 
-            // 6. Actualizar estados
             setRondas(nuevasRondas);
             setCargasEsmaltesAsignadas(ordenarCargas(nuevosEsmaltes));
             setCargasEspeciales(ordenarCargas(nuevasEspeciales));
             setColaCargas([]);
-
-            console.log("📦 DISTRIBUCIÓN FINAL:");
-            for (let i = 0; i < 8; i++) {
-                const maquina = 101 + i;
-                const cargasEnFila = nuevasRondas[i].filter(c => c !== null);
-                if (cargasEnFila.length > 0) {
-                    console.log(`   Máquina ${maquina} (Ronda ${i + 1}): ${cargasEnFila.length} cargas`);
-                    cargasEnFila.forEach(c => console.log(`      - ${c.folio} | operario: ${c.operario}`));
-                }
-            }
 
         } catch (error) {
             console.error("Error al cargar fecha:", error);
         } finally {
             setBuscandoFecha(false);
         }
-    }, []);
+    }, [ordenarCargas]);
 
     useEffect(() => {
         cargarDatosPorFecha(new Date().toISOString().split('T')[0]);
     }, [cargarDatosPorFecha]);
 
-
-
+    // --- CALCULAR CONSUMO GLOBAL ---
     const calcularConsumoGlobal = useCallback(async () => {
-        // Reunir todas las cargas del tablero (rondas + esmaltes + especiales)
         const todasLasCargas = [
             ...rondas.flat().filter(Boolean),
             ...cargasEsmaltesAsignadas,
@@ -383,89 +386,100 @@ export function useProduccion() {
             .sort((a, b) => b.consumoTotal - a.consumoTotal);
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
-
-    // --- FUNCIONES DE NORMALIZACIÓN Y CÁLCULO ---
-    const normalizarCodigo = (cod) => {
-        if (!cod) return "";
-        return String(cod).trim().toUpperCase().replace(/^0+/, '') || "0";
-    };
-
-    const ordenarCargas = useCallback((lista) => [...lista].sort((a, b) => {
-        const cubA = a.nivelCubriente || 0;
-        const cubB = b.nivelCubriente || 0;
-        if (cubA !== cubB) return cubA - cubB;
-        return String(a.folio).localeCompare(String(b.folio), undefined, { numeric: true });
-    }), []);
-
-    const extraerLitrosDeArticulo = (articuloCompleto) => {
-        if (!articuloCompleto) return 0;
-        const partes = String(articuloCompleto).split('-');
-        const prefijoCapacidad = partes[0].replace(/^0+/, '');
-        switch (prefijoCapacidad) {
-            case "19": return 19;
-            case "4": return 4;
-            case "1": return 1;
-            case "500": return 0.5;
-            case "250": return 0.25;
-            default:
-                const num = parseFloat(prefijoCapacidad);
-                return isNaN(num) ? 0 : num;
-        }
-    };
-
-    const totalLitrosActuales = useMemo(() => producto
-        ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
-        : 0, [producto, cantidades]);
-
-    // --- ACCIONES DE BD ---
+    // --- ACCIONES DE BD - MODIFICADA PARA CONSUMIR BASES ---
     const guardarProduccionEnBD = async () => {
         const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-        if (todas.length === 0) return alert("No hay cargas para guardar.");
+        
+        if (todas.length === 0) {
+            alert("No hay cargas para guardar.");
+            return;
+        }
 
-        const registrosParaBD = [];
-        todas.forEach(carga => {
-            if (carga.detallesEnvasado) {
-                carga.detallesEnvasado.forEach(detalle => {
-                    if (detalle.cantidad > 0 && detalle.id) {
-                        // 🔴 Asegurar que la máquina se guarda correctamente
-                        let maquinaGuardar = "";
-                        if (carga.maquina) {
-                            maquinaGuardar = String(carga.maquina);
-                        } else if (carga.maquinaAsignada) {
-                            maquinaGuardar = String(carga.maquinaAsignada);
-                        } else if (carga.textoMaquina) {
-                            // Extraer número de máquina del texto "VI-101 Isaac"
-                            const match = carga.textoMaquina.match(/VI-(\d+)/);
-                            if (match) maquinaGuardar = match[1];
-                        }
+        const totalLitros = todas.reduce((sum, c) => sum + (c.litros || 0), 0);
 
-                        registrosParaBD.push({
-                            codigoProducto: String(carga.codigoProducto),
-                            envasadoId: Number(detalle.id),
-                            cantidad: Number(detalle.cantidad),
-                            litros: Number(carga.litros),
-                            tipo: carga.tipo === "Vinílica" ? "V" : "E",
-                            folio: carga.folio,
-                            folioHija: detalle.folioIndividual,
-                            operario: carga.operario || "Sin asignar",
-                            maquina: maquinaGuardar
-                        });
-                    }
-                });
-            }
-        });
-
-        console.log("📦 Registros a guardar:", registrosParaBD.map(r => ({ folio: r.folio, maquina: r.maquina, operario: r.operario })));
+        if (!window.confirm(
+            `✅ ¿Guardar producción?\n\n` +
+            `Cargas a procesar: ${todas.length}\n` +
+            `Total de litros: ${totalLitros.toFixed(2)} L\n\n` +
+            `⚠️ Esto consumirá las bases necesarias y reducirá los niveles en los tanques.`
+        )) {
+            return;
+        }
 
         try {
             setGuardandoBD(true);
+
+            // 🔴 CONSUMIR BASES
+            try {
+                const resultadoConsumo = await consumirBasesDeCargas(todas);
+                
+                if (resultadoConsumo && resultadoConsumo.basesConsumidas.length > 0) {
+                    let mensaje = `📦 Bases consumidas:\n\n`;
+                    resultadoConsumo.basesConsumidas.forEach(b => {
+                        mensaje += `  • ${b.codigo}: ${b.cantidad.toFixed(2)} L (${b.nivelAnterior.toFixed(2)} → ${b.nivelNuevo.toFixed(2)})\n`;
+                    });
+                    alert(mensaje);
+                }
+            } catch (error) {
+                console.error('❌ Error consumiendo bases:', error);
+                if (!window.confirm(`⚠️ Error al consumir bases: ${error.message}\n¿Continuar con el guardado?`)) {
+                    setGuardandoBD(false);
+                    return;
+                }
+            }
+
+            // 🔴 GUARDAR EN BD
+            const registrosParaBD = [];
+            todas.forEach(carga => {
+                if (carga.detallesEnvasado) {
+                    carga.detallesEnvasado.forEach(detalle => {
+                        if (detalle.cantidad > 0 && detalle.id) {
+                            let maquinaGuardar = "";
+                            if (carga.maquina) {
+                                maquinaGuardar = String(carga.maquina);
+                            } else if (carga.maquinaAsignada) {
+                                maquinaGuardar = String(carga.maquinaAsignada);
+                            } else if (carga.textoMaquina) {
+                                const match = carga.textoMaquina.match(/VI-(\d+)/);
+                                if (match) maquinaGuardar = match[1];
+                            }
+
+                            registrosParaBD.push({
+                                codigoProducto: String(carga.codigoProducto),
+                                envasadoId: Number(detalle.id),
+                                cantidad: Number(detalle.cantidad),
+                                litros: Number(carga.litros),
+                                tipo: carga.tipo === "Vinílica" ? "V" : "E",
+                                folio: carga.folio,
+                                folioHija: detalle.folioIndividual,
+                                operario: carga.operario || "Sin asignar",
+                                maquina: maquinaGuardar
+                            });
+                        }
+                    });
+                }
+            });
+
+            console.log("📦 Registros a guardar:", registrosParaBD.length);
+
             await registrarCarga(registrosParaBD);
-            alert("Guardado con éxito");
+
+            // 🔴 ACTUALIZAR PANTALLAS
+            if (window.recargarBases) {
+                window.recargarBases();
+            }
+            if (window.recargarCriticos) {
+                window.recargarCriticos();
+            }
+
+            alert("✅ Producción guardada con éxito");
+
         } catch (error) {
             console.error("Error al guardar:", error);
-            alert("Error al conectar con el servidor.");
+            alert("Error al conectar con el servidor: " + error.message);
+        } finally {
+            setGuardandoBD(false);
         }
-        finally { setGuardandoBD(false); }
     };
 
     const handleEliminarCargaBD = async (idBD, idTemp) => {
@@ -588,12 +602,6 @@ export function useProduccion() {
         setCantidades({}); setProducto(null); setCodigo("");
     }, [producto, tipoPintura, totalLitrosActuales, cantidades, ordenarCargas]);
 
-
-
-
-    
-
-    // --- EXCEL E IMPORTACIÓN ---
     // --- EXCEL E IMPORTACIÓN ---
     const handleImportExcel = async (e, soloRetornar = false) => {
         const file = e.target.files[0];
@@ -609,14 +617,12 @@ export function useProduccion() {
                 const lote = String(item.folio || "").toUpperCase();
                 let tipoFinal = lote.startsWith("V") ? "Vinílica" : (lote.startsWith("E") || lote.startsWith("S") ? "Esmalte" : (res.tipoPinturaId === 2 ? "Vinílica" : "Esmalte"));
 
-                // 🔴 Obtener los detalles de envasado con ID correcto
                 const detallesEnvasado = [];
                 if (item.hijas && item.hijas.length > 0) {
                     for (const h of item.hijas) {
-                        const capacidadStr = h.articulo.split('-')[0]; // "250", "500", "1", "4", "19"
+                        const capacidadStr = h.articulo.split('-')[0];
                         let envasadoId = null;
 
-                        // 🔴 Convertir capacidad a número para buscar el ID
                         let capacidadNum;
                         if (capacidadStr === "250") capacidadNum = 0.25;
                         else if (capacidadStr === "500") capacidadNum = 0.5;
@@ -627,7 +633,6 @@ export function useProduccion() {
                         else if (capacidadStr === "018") capacidadNum = 18;
                         else capacidadNum = parseInt(capacidadStr);
 
-                        // 🔴 Buscar el envasado en res.envasados
                         const envasadoEncontrado = res.envasados?.find(env => {
                             const litrosEnv = litrosPorEnvasado(env.id);
                             return Math.abs(litrosEnv - capacidadNum) < 0.01;
@@ -638,7 +643,7 @@ export function useProduccion() {
                         detallesEnvasado.push({
                             cantidad: h.cantidad,
                             formato: capacidadStr,
-                            id: envasadoId  // 🔴 CLAVE: guardar el ID
+                            id: envasadoId
                         });
                     }
                 }
@@ -771,7 +776,6 @@ export function useProduccion() {
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas,
         ordenarCargas, actualizarOperarioEsmalte, generarLotesFinales,
         guardarProduccionEnBD, handleEliminarCargaBD, cargarDatosPorFecha,
-        calcularConsumoGlobal  
-        
+        calcularConsumoGlobal, consumirBasesDeCargas
     };
 }

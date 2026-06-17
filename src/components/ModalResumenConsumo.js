@@ -1,4 +1,4 @@
-// src/components/ModalResumenConsumo.js - VERSIÓN COMPLETA CON AMBAS VISTAS
+// src/components/ModalResumenConsumo.js - VERSIÓN SOLO LECTURA (SIN CONFIRMAR)
 import React, { useState, useMemo, useEffect } from "react";
 import { formulasService } from "../services/formulasService";
 import "../styles/modalCriticos.css";
@@ -11,9 +11,9 @@ const ModalResumenConsumo = ({
     totalCargas,
     totalLitros,
     onClose,
-    onGuardar
+    onGuardar  // Este onGuardar ahora solo se usa para cerrar
 }) => {
-    const [vistaActiva, setVistaActiva] = useState("materias"); // "materias" o "cargas"
+    const [vistaActiva, setVistaActiva] = useState("materias");
     const [filtroTipo, setFiltroTipo] = useState("todos");
     const [busqueda, setBusqueda] = useState("");
     const [detalleMateriaSeleccionada, setDetalleMateriaSeleccionada] = useState(null);
@@ -23,11 +23,9 @@ const ModalResumenConsumo = ({
     const [cargasConDetalle, setCargasConDetalle] = useState([]);
     const [materiasUnicas, setMateriasUnicas] = useState([]);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
-
-    // Estado para controlar si mostrar solo las específicas o todas
     const [mostrarSoloEspecificas, setMostrarSoloEspecificas] = useState(true);
 
-    // Lista de códigos de materia prima específicos en el ORDEN CORRECTO
+    // Lista de códigos de materia prima específicos
     const codigosPermitidos = [
         'CCA10', 'CCA20', 'CCM30', 'CCM60', 'RVA50', 'RVO10',
         'RIE30', 'RAC30', 'RRN10', 'SXI10', 'SGA10', 'TTI06',
@@ -39,7 +37,6 @@ const ModalResumenConsumo = ({
         return codigosPermitidos.includes(codigo.toUpperCase());
     };
 
-    // Función para obtener nombre de materia por código
     const obtenerNombreMateria = (codigo) => {
         const nombres = {
             'CCA10': 'Carga Ácida 10',
@@ -65,7 +62,6 @@ const ModalResumenConsumo = ({
         return nombres[codigo] || codigo;
     };
 
-    // Función para obtener tipo de materia por código
     const obtenerTipoMateria = (codigo) => {
         if (codigo.startsWith('CCA') || codigo.startsWith('CCM') || codigo === 'CCP15') return 'CARGA';
         if (codigo.startsWith('RVA') || codigo.startsWith('RVO') || codigo.startsWith('RIE') || codigo.startsWith('RAC') || codigo.startsWith('RRN')) return 'RESINA';
@@ -74,7 +70,6 @@ const ModalResumenConsumo = ({
         return 'ADITIVO';
     };
 
-    // Función para extraer número de orden de un string como "V260612001"
     const extraerNumeroOrden = (ordenStr) => {
         if (!ordenStr) return 999999;
         const numeros = ordenStr.match(/\d+/g);
@@ -84,7 +79,7 @@ const ModalResumenConsumo = ({
         return ordenStr.length;
     };
 
-    // Cargar datos para vista de materias
+    // Cargar datos
     useEffect(() => {
         if (visible && cargasConConsumo.length > 0) {
             recalcularConsumosReales();
@@ -102,12 +97,11 @@ const ModalResumenConsumo = ({
         }
     }, [visible, cargasConConsumo, resumenGlobal]);
 
-    // Procesar datos para la vista matricial de cargas
+    // Procesar datos para la vista matricial
     const procesarCargasMatricial = async () => {
         const cargasConInfo = [];
         const mapaMaterias = new Map();
 
-        // 🔴 Inicializar el mapa con TODAS las materias de la lista (consumo 0 por defecto)
         for (const codigo of codigosPermitidos) {
             mapaMaterias.set(codigo, {
                 codigo: codigo,
@@ -120,16 +114,12 @@ const ModalResumenConsumo = ({
         for (const carga of cargasConConsumo) {
             const codigoProducto = carga.codigo || carga.codigoProducto;
             const litrosProducir = carga.litros || 0;
-
-            // PRIORIDAD: folio > orden > numeroOrden > id
             const orden = carga.folio || carga.orden || carga.numeroOrden || `ORD-${carga.id}`;
             const lote = carga.lote || carga.folio || orden;
-            const fecha = carga.fecha || new Date().toLocaleDateString();
 
             let consumoTotal = 0;
             const consumosPorMateria = {};
 
-            // 🔴 Inicializar consumosPorMateria para todas las materias de la lista
             for (const codigo of codigosPermitidos) {
                 consumosPorMateria[codigo] = null;
             }
@@ -146,7 +136,6 @@ const ModalResumenConsumo = ({
                         const consumo = cantidadPorLitro * litrosProducir;
                         consumoTotal += consumo;
 
-                        // Solo guardar si está en la lista permitida
                         if (codigosPermitidos.includes(mpCodigo)) {
                             consumosPorMateria[mpCodigo] = {
                                 codigo: mpCodigo,
@@ -175,20 +164,18 @@ const ModalResumenConsumo = ({
                 productoNombre: carga.productoNombre || carga.nombre || carga.descripcion || "Producto",
                 litros: litrosProducir,
                 consumoTotal: consumoTotal.toFixed(2),
-                fecha: fecha,
+                fecha: carga.fecha || new Date().toLocaleDateString(),
                 estado: carga.estado || "Programada",
                 consumos: consumosPorMateria,
                 numeroOrden: extraerNumeroOrden(orden)
             });
         }
 
-        // 🔴 Crear el arreglo de materias en el ORDEN específico de codigosPermitidos
         const materiasOrdenadas = [];
         for (const codigo of codigosPermitidos) {
             if (mapaMaterias.has(codigo)) {
                 materiasOrdenadas.push(mapaMaterias.get(codigo));
             } else {
-                // Si no existe, crear una con consumo 0
                 materiasOrdenadas.push({
                     codigo: codigo,
                     nombre: obtenerNombreMateria(codigo),
@@ -199,7 +186,6 @@ const ModalResumenConsumo = ({
         }
 
         setMateriasUnicas(materiasOrdenadas);
-        // 🔴 ORDENAR CARGAS POR NÚMERO DE ORDEN (menor a mayor)
         const cargasOrdenadas = [...cargasConInfo].sort((a, b) => a.numeroOrden - b.numeroOrden);
         setCargasConDetalle(cargasOrdenadas);
     };
@@ -228,7 +214,6 @@ const ModalResumenConsumo = ({
 
                         const consumo = cantidadPorLitro * litrosProducir;
 
-                        // Todas las materias
                         if (mapaMateriasCompletas.has(mpId)) {
                             const existente = mapaMateriasCompletas.get(mpId);
                             existente.consumoTotal += consumo;
@@ -242,7 +227,6 @@ const ModalResumenConsumo = ({
                             });
                         }
 
-                        // Solo específicas
                         if (esCodigoPermitido(mpCodigo)) {
                             if (mapaMaterias.has(mpId)) {
                                 const existente = mapaMaterias.get(mpId);
@@ -306,11 +290,9 @@ const ModalResumenConsumo = ({
         return filtradas.sort((a, b) => b.consumoTotal - a.consumoTotal);
     }, [datosMostrar, filtroTipo, busqueda]);
 
-    // Calcular totales para la vista de cargas
     const totalLitrosGeneral = cargasConDetalle.reduce((sum, c) => sum + c.litros, 0);
     const totalCargasCount = cargasConDetalle.length;
 
-    // Filtrar cargas por búsqueda
     const cargasFiltradas = useMemo(() => {
         if (!busqueda) return cargasConDetalle;
         const termino = busqueda.toLowerCase();
@@ -345,11 +327,8 @@ const ModalResumenConsumo = ({
                         </div>
                     ) : (
                         <>
-
-
                             {vistaActiva === "materias" ? (
                                 <>
-                                    {/* Panel de Insights con el selector integrado */}
                                     <div className="insights-panel">
                                         <div className="insights-header-row">
                                             <h4>🎯 Insights de Producción</h4>
@@ -381,7 +360,6 @@ const ModalResumenConsumo = ({
                                                 >
                                                     📋 Por Carga / Lote
                                                 </button>
-
                                             </div>
                                         </div>
                                         <div className="insights-grid">
@@ -407,7 +385,6 @@ const ModalResumenConsumo = ({
                                             </div>
                                         </div>
 
-                                        {/* Top 3 Materias Primas más consumidas */}
                                         {estadisticas?.topMaterias && estadisticas.topMaterias.length > 0 && (
                                             <div className="top-materias">
                                                 <span className="top-label">🔥 Top 3 Materias Primas más consumidas</span>
@@ -433,7 +410,6 @@ const ModalResumenConsumo = ({
                                         )}
                                     </div>
 
-                                    {/* Filtros */}
                                     <div className="filtros-container">
                                         <div className="search-box-modal">
                                             <input
@@ -448,40 +424,14 @@ const ModalResumenConsumo = ({
                                         </div>
 
                                         <div className="filtro-tipos">
-                                            <button
-                                                className={`tipo-filtro ${filtroTipo === "todos" ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo("todos")}
-                                            >
-                                                Todos
-                                            </button>
-                                            <button
-                                                className={`tipo-filtro ${filtroTipo === "base" ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo("base")}
-                                            >
-                                                Base
-                                            </button>
-                                            <button
-                                                className={`tipo-filtro ${filtroTipo === "pigmento" ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo("pigmento")}
-                                            >
-                                                Pigmento
-                                            </button>
-                                            <button
-                                                className={`tipo-filtro ${filtroTipo === "solvente" ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo("solvente")}
-                                            >
-                                                Solvente
-                                            </button>
-                                            <button
-                                                className={`tipo-filtro ${filtroTipo === "aditivo" ? "active" : ""}`}
-                                                onClick={() => setFiltroTipo("aditivo")}
-                                            >
-                                                Aditivo
-                                            </button>
+                                            <button className={`tipo-filtro ${filtroTipo === "todos" ? "active" : ""}`} onClick={() => setFiltroTipo("todos")}>Todos</button>
+                                            <button className={`tipo-filtro ${filtroTipo === "base" ? "active" : ""}`} onClick={() => setFiltroTipo("base")}>Base</button>
+                                            <button className={`tipo-filtro ${filtroTipo === "pigmento" ? "active" : ""}`} onClick={() => setFiltroTipo("pigmento")}>Pigmento</button>
+                                            <button className={`tipo-filtro ${filtroTipo === "solvente" ? "active" : ""}`} onClick={() => setFiltroTipo("solvente")}>Solvente</button>
+                                            <button className={`tipo-filtro ${filtroTipo === "aditivo" ? "active" : ""}`} onClick={() => setFiltroTipo("aditivo")}>Aditivo</button>
                                         </div>
                                     </div>
 
-                                    {/* Tabla de Materias Primas */}
                                     {materiasFiltradas.length > 0 && (
                                         <div className="tabla-resumen-global">
                                             <table className="tabla-consumo-global">
@@ -533,7 +483,6 @@ const ModalResumenConsumo = ({
                                 </>
                             ) : (
                                 <>
-                                    {/* Resumen de cargas */}
                                     <div className="matricial-resumen">
                                         <div className="resumen-item">
                                             <span className="resumen-icon">📋</span>
@@ -557,26 +506,16 @@ const ModalResumenConsumo = ({
                                             </div>
                                         </div>
 
-
                                         <div className="resumen-item">
-                                            <button
-                                                className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`}
-                                                onClick={() => setVistaActiva("materias")}
-                                            >
+                                            <button className={`vista-btn ${vistaActiva === "materias" ? "active" : ""}`} onClick={() => setVistaActiva("materias")}>
                                                 📦 Por Materia Prima
                                             </button>
-                                            <button
-                                                className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`}
-                                                onClick={() => setVistaActiva("cargas")}
-                                            >
+                                            <button className={`vista-btn ${vistaActiva === "cargas" ? "active" : ""}`} onClick={() => setVistaActiva("cargas")}>
                                                 📋 Por Carga / Lote
                                             </button>
                                         </div>
-
-
                                     </div>
 
-                                    {/* Buscador */}
                                     <div className="matricial-buscador">
                                         <input
                                             type="text"
@@ -590,11 +529,7 @@ const ModalResumenConsumo = ({
                                         )}
                                     </div>
 
-                                    {/* Tabla Matricial */}
                                     <div className="matricial-tabla-container">
-
-
-
                                         <table className="matricial-tabla">
                                             <thead>
                                                 <tr>
@@ -616,15 +551,9 @@ const ModalResumenConsumo = ({
                                                         onClick={() => setFilaSeleccionada(filaSeleccionada === carga.id ? null : carga.id)}
                                                         style={{ cursor: 'pointer' }}
                                                     >
-                                                        <td className="sticky-col">
-                                                            <code>{carga.orden}</code>
-                                                        </td>
-                                                        <td className="sticky-col-2">
-                                                            <code className="producto-codigo-solo">{carga.producto}</code>
-                                                        </td>
-                                                        <td className="sticky-col-3 cantidad">
-                                                            {carga.litros.toLocaleString()}
-                                                        </td>
+                                                        <td className="sticky-col"><code>{carga.orden}</code></td>
+                                                        <td className="sticky-col-2"><code className="producto-codigo-solo">{carga.producto}</code></td>
+                                                        <td className="sticky-col-3 cantidad">{carga.litros.toLocaleString()}</td>
                                                         {materiasUnicas.map(materia => {
                                                             const consumo = carga.consumos[materia.codigo];
                                                             const valor = consumo ? consumo.consumo.toFixed(2) : "-";
@@ -647,9 +576,7 @@ const ModalResumenConsumo = ({
                                             </tbody>
                                             <tfoot>
                                                 <tr className="total-row">
-                                                    <td colSpan="3" className="total-label">
-                                                        <strong>TOTALES:</strong>
-                                                    </td>
+                                                    <td colSpan="3" className="total-label"><strong>TOTALES:</strong></td>
                                                     {materiasUnicas.map(materia => {
                                                         const totalMateria = materiasUnicas.find(m => m.codigo === materia.codigo)?.totalConsumo || 0;
                                                         return (
@@ -664,7 +591,6 @@ const ModalResumenConsumo = ({
                                         </table>
                                     </div>
 
-                                    {/* Leyenda */}
                                     <div className="matricial-leyenda">
                                         <div className="leyenda-item">
                                             <span className="leyenda-color consumo-alto"></span>
@@ -695,8 +621,9 @@ const ModalResumenConsumo = ({
                 </div>
 
                 <div className="modal-footer">
-                    <button className="btn-cerrar" onClick={onClose}>Cerrar</button>
-                    <button className="btn-guardar" onClick={onGuardar}>Confirmar y Guardar</button>
+                    <button className="btn-cerrar" onClick={onClose}>
+                        ✖ Cerrar
+                    </button>
                 </div>
             </div>
         </div>

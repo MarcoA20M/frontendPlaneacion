@@ -12,7 +12,7 @@ export default function MateriasPrimasScreen() {
     const [filtroTipo, setFiltroTipo] = useState("todos");
     const [mostrarModalForm, setMostrarModalForm] = useState(false);
     const [editando, setEditando] = useState(null);
-    
+
     // Estados para el sidebar
     const [tanques, setTanques] = useState([]);
     const [resumenDashboard, setResumenDashboard] = useState({
@@ -96,7 +96,7 @@ export default function MateriasPrimasScreen() {
             });
 
             if (!response.ok) throw new Error("Error al crear");
-            
+
             alert("✅ Materia prima creada");
             setMostrarModalForm(false);
             resetForm();
@@ -131,7 +131,7 @@ export default function MateriasPrimasScreen() {
             });
 
             if (!response.ok) throw new Error("Error al actualizar");
-            
+
             alert("✅ Materia prima actualizada");
             setMostrarModalForm(false);
             setEditando(null);
@@ -148,9 +148,9 @@ export default function MateriasPrimasScreen() {
                 const response = await fetch(`http://localhost:8080/api/materias-primas/${mp.id}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (!response.ok) throw new Error("Error al eliminar");
-                
+
                 alert("✅ Materia prima eliminada");
                 cargarMateriasPrimas();
             } catch (error) {
@@ -199,7 +199,7 @@ export default function MateriasPrimasScreen() {
 
     const filteredMP = materiasPrimas.filter(mp => {
         const matchesSearch = mp.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             mp.codigo?.toLowerCase().includes(searchTerm.toLowerCase());
+            mp.codigo?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesTipo = filtroTipo === "todos" || mp.tipo === filtroTipo;
         return matchesSearch && matchesTipo;
     });
@@ -259,6 +259,15 @@ export default function MateriasPrimasScreen() {
                             <span className="btn-icon">📦</span>
                             Gestionar Materias Primas
                         </button>
+
+                        <button
+                            className="sidebar-btn"
+                            onClick={() => navigate("/bases")}
+                        >
+                            <span className="btn-icon">🛢️</span>
+                            Bases
+                        </button>
+
                     </nav>
 
                     <div className="sidebar-footer">
@@ -307,7 +316,7 @@ export default function MateriasPrimasScreen() {
                             <button className={`tipo-filtro-btn ${filtroTipo === "SOLVENTE" ? "active" : ""}`} onClick={() => setFiltroTipo("SOLVENTE")}>💧 Solventes</button>
                             <button className={`tipo-filtro-btn ${filtroTipo === "ADITIVO" ? "active" : ""}`} onClick={() => setFiltroTipo("ADITIVO")}>⚗️ Aditivos</button>
                             <button className={`tipo-filtro-btn ${filtroTipo === "CARGA" ? "active" : ""}`} onClick={() => setFiltroTipo("CARGA")}>📦 Cargas</button>
-
+                            
                         </div>
                     </div>
 
@@ -388,6 +397,8 @@ export default function MateriasPrimasScreen() {
                                         <option value="PIGMENTO">PIGMENTO</option>
                                         <option value="SOLVENTE">SOLVENTE</option>
                                         <option value="ADITIVO">ADITIVO</option>
+                                        <option value="BASE">BASE</option>
+
                                     </select>
                                 </div>
                                 <div className="form-group">

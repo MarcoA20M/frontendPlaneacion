@@ -387,100 +387,122 @@ export function useProduccion() {
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
     // --- ACCIONES DE BD - MODIFICADA PARA CONSUMIR BASES ---
-    const guardarProduccionEnBD = async () => {
-        const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-        
-        if (todas.length === 0) {
-            alert("No hay cargas para guardar.");
-            return;
-        }
+// src/hooks/useProduccion.js - SOLO MODIFICAR la función guardarProduccionEnBD
 
-        const totalLitros = todas.reduce((sum, c) => sum + (c.litros || 0), 0);
+const guardarProduccionEnBD = async () => {
+    const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
+    
+    if (todas.length === 0) {
+        alert("No hay cargas para guardar.");
+        return;
+    }
 
-        if (!window.confirm(
-            `✅ ¿Guardar producción?\n\n` +
-            `Cargas a procesar: ${todas.length}\n` +
-            `Total de litros: ${totalLitros.toFixed(2)} L\n\n` +
-            `⚠️ Esto consumirá las bases necesarias y reducirá los niveles en los tanques.`
-        )) {
-            return;
-        }
+    const totalLitros = todas.reduce((sum, c) => sum + (c.litros || 0), 0);
 
+    if (!window.confirm(
+        `✅ ¿Guardar producción?\n\n` +
+        `Cargas a procesar: ${todas.length}\n` +
+        `Total de litros: ${totalLitros.toFixed(2)} L\n\n` +
+        `⚠️ Esto consumirá las bases necesarias y reducirá los niveles en los tanques.`
+    )) {
+        return;
+    }
+
+    try {
+        setGuardandoBD(true);
+
+        // 🔴 CONSUMIR BASES
         try {
-            setGuardandoBD(true);
+            const resultadoConsumo = await consumirBasesDeCargas(todas);
+            
+            if (resultadoConsumo && resultadoConsumo.basesConsumidas.length > 0) {
+                // 🔴 FILTRAR SOLO BBE20 Y BBE30
+                const basesFiltradas = resultadoConsumo.basesConsumidas.filter(b => 
+                    b.codigo === 'BBE20' || b.codigo === 'BBE30'
+                );
 
-            // 🔴 CONSUMIR BASES
-            try {
-                const resultadoConsumo = await consumirBasesDeCargas(todas);
-                
-                if (resultadoConsumo && resultadoConsumo.basesConsumidas.length > 0) {
-                    let mensaje = `📦 Bases consumidas:\n\n`;
-                    resultadoConsumo.basesConsumidas.forEach(b => {
-                        mensaje += `  • ${b.codigo}: ${b.cantidad.toFixed(2)} L (${b.nivelAnterior.toFixed(2)} → ${b.nivelNuevo.toFixed(2)})\n`;
+                if (basesFiltradas.length > 0) {
+                    let mensaje = `📦 Consumo de bases:\n\n`;
+                    
+                    basesFiltradas.forEach(b => {
+                        // Buscar la carga que consumió esta base
+                        const cargaRelacionada = todas.find(c => 
+                            c.codigoProducto === b.codigoProducto || 
+                            c.codigo === b.codigoProducto
+                        );
+                        
+                        const lote = cargaRelacionada?.folio || 'S/F';
+                        const producto = cargaRelacionada?.codigoProducto || cargaRelacionada?.codigo || 'S/C';
+                        const tipo = cargaRelacionada?.tipo || 'Desconocido';
+                        
+                        mensaje += `  • ${b.codigo}: ${b.cantidad.toFixed(2)} L\n`;
+                        mensaje += `    Lote: ${lote} | Producto: ${producto} | Tipo: ${tipo}\n\n`;
                     });
+                    
                     alert(mensaje);
                 }
-            } catch (error) {
-                console.error('❌ Error consumiendo bases:', error);
-                if (!window.confirm(`⚠️ Error al consumir bases: ${error.message}\n¿Continuar con el guardado?`)) {
-                    setGuardandoBD(false);
-                    return;
-                }
             }
-
-            // 🔴 GUARDAR EN BD
-            const registrosParaBD = [];
-            todas.forEach(carga => {
-                if (carga.detallesEnvasado) {
-                    carga.detallesEnvasado.forEach(detalle => {
-                        if (detalle.cantidad > 0 && detalle.id) {
-                            let maquinaGuardar = "";
-                            if (carga.maquina) {
-                                maquinaGuardar = String(carga.maquina);
-                            } else if (carga.maquinaAsignada) {
-                                maquinaGuardar = String(carga.maquinaAsignada);
-                            } else if (carga.textoMaquina) {
-                                const match = carga.textoMaquina.match(/VI-(\d+)/);
-                                if (match) maquinaGuardar = match[1];
-                            }
-
-                            registrosParaBD.push({
-                                codigoProducto: String(carga.codigoProducto),
-                                envasadoId: Number(detalle.id),
-                                cantidad: Number(detalle.cantidad),
-                                litros: Number(carga.litros),
-                                tipo: carga.tipo === "Vinílica" ? "V" : "E",
-                                folio: carga.folio,
-                                folioHija: detalle.folioIndividual,
-                                operario: carga.operario || "Sin asignar",
-                                maquina: maquinaGuardar
-                            });
-                        }
-                    });
-                }
-            });
-
-            console.log("📦 Registros a guardar:", registrosParaBD.length);
-
-            await registrarCarga(registrosParaBD);
-
-            // 🔴 ACTUALIZAR PANTALLAS
-            if (window.recargarBases) {
-                window.recargarBases();
-            }
-            if (window.recargarCriticos) {
-                window.recargarCriticos();
-            }
-
-            alert("✅ Producción guardada con éxito");
-
         } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Error al conectar con el servidor: " + error.message);
-        } finally {
-            setGuardandoBD(false);
+            console.error('❌ Error consumiendo bases:', error);
+            if (!window.confirm(`⚠️ Error al consumir bases: ${error.message}\n¿Continuar con el guardado?`)) {
+                setGuardandoBD(false);
+                return;
+            }
         }
-    };
+
+        // 🔴 GUARDAR EN BD
+        const registrosParaBD = [];
+        todas.forEach(carga => {
+            if (carga.detallesEnvasado) {
+                carga.detallesEnvasado.forEach(detalle => {
+                    if (detalle.cantidad > 0 && detalle.id) {
+                        let maquinaGuardar = "";
+                        if (carga.maquina) {
+                            maquinaGuardar = String(carga.maquina);
+                        } else if (carga.maquinaAsignada) {
+                            maquinaGuardar = String(carga.maquinaAsignada);
+                        } else if (carga.textoMaquina) {
+                            const match = carga.textoMaquina.match(/VI-(\d+)/);
+                            if (match) maquinaGuardar = match[1];
+                        }
+
+                        registrosParaBD.push({
+                            codigoProducto: String(carga.codigoProducto),
+                            envasadoId: Number(detalle.id),
+                            cantidad: Number(detalle.cantidad),
+                            litros: Number(carga.litros),
+                            tipo: carga.tipo === "Vinílica" ? "V" : "E",
+                            folio: carga.folio,
+                            folioHija: detalle.folioIndividual,
+                            operario: carga.operario || "Sin asignar",
+                            maquina: maquinaGuardar
+                        });
+                    }
+                });
+            }
+        });
+
+        console.log("📦 Registros a guardar:", registrosParaBD.length);
+
+        await registrarCarga(registrosParaBD);
+
+        // 🔴 ACTUALIZAR PANTALLAS
+        if (window.recargarBases) {
+            window.recargarBases();
+        }
+        if (window.recargarCriticos) {
+            window.recargarCriticos();
+        }
+
+        alert("✅ Producción guardada con éxito");
+
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert("Error al conectar con el servidor: " + error.message);
+    } finally {
+        setGuardandoBD(false);
+    }
+};
 
     const handleEliminarCargaBD = async (idBD, idTemp) => {
         if (!idBD) {

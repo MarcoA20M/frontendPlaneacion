@@ -1,8 +1,9 @@
-// src/screens/CriticosScreen.js
+// src/screens/CriticosScreen.js - CON CÓDIGO EN ALERTAS
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import MateriaPrimaProductos from "../components/MateriaPrimaProductos";
+import SidebarMateriaPrima from "../components/SidebarMateriaPrima";
 import "../styles/criticos.css";
 
 export default function CriticosScreen() {
@@ -26,10 +27,8 @@ export default function CriticosScreen() {
         observaciones: "",
         usuario: "Admin"
     });
-    // 🟢 NUEVO: Estado para actualización
     const [actualizando, setActualizando] = useState(false);
 
-    // 🔴 LEER PARÁMETRO 'tab' DE LA URL
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
@@ -44,7 +43,6 @@ export default function CriticosScreen() {
         }
     }, [location.search]);
 
-    // Cargar datos desde el backend
     const cargarDatos = async () => {
         setLoading(true);
         try {
@@ -61,7 +59,6 @@ export default function CriticosScreen() {
         }
     };
 
-    // 🟢 NUEVO: Función para recargar datos sin loading completo
     const recargarDatos = async () => {
         if (actualizando) return;
         setActualizando(true);
@@ -79,7 +76,6 @@ export default function CriticosScreen() {
         }
     };
 
-    // 🟢 NUEVO: Exponer función globalmente
     useEffect(() => {
         window.recargarCriticos = recargarDatos;
         return () => {
@@ -87,7 +83,6 @@ export default function CriticosScreen() {
         };
     }, []);
 
-    // 🟢 NUEVO: Actualizar automáticamente cada 30 segundos
     useEffect(() => {
         const interval = setInterval(recargarDatos, 30000);
         return () => clearInterval(interval);
@@ -97,13 +92,11 @@ export default function CriticosScreen() {
         cargarDatos();
     }, []);
 
-    // Calcular inventario total
     const inventarioTotal = tanques.reduce((sum, t) => sum + (t.nivelActual || 0), 0);
     const capacidadTotal = tanques.reduce((sum, t) => sum + (t.capacidadMaxima || 0), 0);
     const tanquesCriticos = tanques.filter(t => t.critico);
     const tanquesAlerta = tanques.filter(t => t.alerta);
 
-    // Registrar compra
     const handleRegistrarCompra = async () => {
         if (!formCompra.cantidad || formCompra.cantidad <= 0) {
             alert("Ingresa una cantidad válida");
@@ -128,7 +121,6 @@ export default function CriticosScreen() {
         }
     };
 
-    // 🔴 Función para cambiar sección y actualizar URL
     const cambiarSeccion = (seccion) => {
         setSeccionActiva(seccion);
         navigate(`/mantenimiento/criticos?tab=${seccion}`);
@@ -148,96 +140,15 @@ export default function CriticosScreen() {
     return (
         <div className="criticos-container">
             <div className="criticos-glass-panel">
-                {/* SIDEBAR */}
-                <aside className="criticos-sidebar">
-                    <div className="sidebar-logo">
-                        <span className="logo-icon">⚡</span>
-                        <h2>Materia Prima</h2>
-                    </div>
+                <SidebarMateriaPrima
+                    seccionActiva={seccionActiva}
+                    inventarioTotal={inventarioTotal}
+                    capacidadTotal={capacidadTotal}
+                    tanquesCriticos={tanquesCriticos}
+                    onCambiarSeccion={cambiarSeccion}
+                    mostrarBases={true}
+                />
 
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">PRINCIPAL</div>
-                        <button
-                            className={`sidebar-btn ${seccionActiva === "dashboard" ? "active" : ""}`}
-                            onClick={() => cambiarSeccion("dashboard")}
-                        >
-                            <span className="btn-icon">📊</span>
-                            Dashboard
-                        </button>
-                        <button
-                            className={`sidebar-btn ${seccionActiva === "tanques" ? "active" : ""}`}
-                            onClick={() => cambiarSeccion("tanques")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Tanques
-                        </button>
-                        <button
-                            className={`sidebar-btn ${seccionActiva === "alertas" ? "active" : ""}`}
-                            onClick={() => cambiarSeccion("alertas")}
-                        >
-                            <span className="btn-icon">🚨</span>
-                            Alertas
-                            {tanquesCriticos.length > 0 && (
-                                <span className="badge-alerta">{tanquesCriticos.length}</span>
-                            )}
-                        </button>
-                        <button
-                            className={`sidebar-btn ${seccionActiva === "trazabilidad" ? "active" : ""}`}
-                            onClick={() => cambiarSeccion("trazabilidad")}
-                        >
-                            <span className="btn-icon">🔗</span>
-                            Trazabilidad
-                        </button>
-                    </nav>
-
-                    {/* Separador */}
-                    <div className="nav-divider"></div>
-
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">CONFIGURACIÓN</div>
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/formulas")}
-                        >
-                            <span className="btn-icon">📋</span>
-                            Consultar codigos
-                        </button>
-
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/materias-primas")}
-                        >
-                            <span className="btn-icon">📦</span>
-                            Gestionar Materias Primas
-                        </button>
-
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/bases")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Bases
-                        </button>
-                    </nav>
-
-                    <div className="sidebar-footer">
-                        <div className="stats-resumen-sidebar">
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{inventarioTotal.toLocaleString()}</span>
-                                <span className="stat-label">Total L/Kg</span>
-                            </div>
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{capacidadTotal > 0 ? ((inventarioTotal / capacidadTotal) * 100).toFixed(0) : 0}%</span>
-                                <span className="stat-label">Capacidad</span>
-                            </div>
-                        </div>
-                        <button className="btn-volver" onClick={() => navigate("/mantenimiento")}>
-                            ↩ Volver
-                        </button>
-                    </div>
-                </aside>
-
-                {/* CONTENIDO PRINCIPAL */}
                 <main className="criticos-main">
                     <header className="criticos-header">
                         <div className="header-titulo">
@@ -274,7 +185,6 @@ export default function CriticosScreen() {
                     </header>
 
                     <div className="criticos-workspace">
-                        {/* SECCIÓN DASHBOARD */}
                         {seccionActiva === "dashboard" && (
                             <>
                                 <div className="dashboard-cards">
@@ -308,7 +218,6 @@ export default function CriticosScreen() {
                                     </div>
                                 </div>
 
-                                {/* Widget de acceso rápido a trazabilidad */}
                                 <div className="dashboard-section">
                                     <h3>🔗 Acceso rápido a trazabilidad</h3>
                                     <div className="quick-access-grid">
@@ -366,7 +275,6 @@ export default function CriticosScreen() {
                             </>
                         )}
 
-                        {/* SECCIÓN TANQUES */}
                         {seccionActiva === "tanques" && (
                             <>
                                 <div className="filtros-section">
@@ -417,31 +325,13 @@ export default function CriticosScreen() {
                                                     <div className="umbral-item critico">🚨 Crítico: {tanque.umbralCritico?.toLocaleString()} {tanque.unidad}</div>
                                                 </div>
                                                 <div className="tanque-acciones">
-                                                    <button
-                                                        className="btn-ver-consumo"
-                                                        onClick={() => {
-                                                            console.log("Ver historial de", tanque.nombre);
-                                                        }}
-                                                    >
-                                                        📋 Ver Historial
-                                                    </button>
-                                                    <button
-                                                        className="btn-registrar-compra"
-                                                        onClick={() => {
-                                                            setTanqueSeleccionado(tanque);
-                                                            setMostrarModalCompra(true);
-                                                        }}
-                                                    >
-                                                        🛒 Registrar Compra
-                                                    </button>
-                                                    <button
-                                                        className="btn-ver-trazabilidad"
-                                                        onClick={() => {
-                                                            cambiarSeccion("trazabilidad");
-                                                        }}
-                                                    >
-                                                        🔗 Ver productos que consume
-                                                    </button>
+                                                   <button 
+    className="btn-ver-trazabilidad" 
+    onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
+>
+    📋 Ver Consumos
+</button>                                                    <button className="btn-registrar-compra" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Registrar Compra</button>
+                                                    <button className="btn-ver-trazabilidad" onClick={() => cambiarSeccion("trazabilidad")}>🔗 Ver productos que consume</button>
                                                 </div>
                                             </div>
                                         );
@@ -450,7 +340,6 @@ export default function CriticosScreen() {
                             </>
                         )}
 
-                        {/* SECCIÓN ALERTAS */}
                         {seccionActiva === "alertas" && (
                             <div className="alertas-section">
                                 <div className="alertas-header">
@@ -464,13 +353,22 @@ export default function CriticosScreen() {
                                             <div key={tanque.id} className="alerta-card critica">
                                                 <div className="alerta-icono">🚨</div>
                                                 <div className="alerta-info">
-                                                    <h4>{tanque.nombre}</h4>
+                                                    <div className="alerta-titulo">
+                                                        <h4>{tanque.nombre}</h4>
+                                                        <span className="alerta-codigo">{tanque.codigo}</span>
+                                                    </div>
                                                     <p>Nivel actual: <strong>{tanque.nivelActual?.toLocaleString()} {tanque.unidad}</strong> (Mínimo: {tanque.umbralCritico?.toLocaleString()} {tanque.unidad})</p>
                                                     <p>Porcentaje: <strong>{tanque.porcentajeLlenado?.toFixed(1)}%</strong></p>
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-urgente" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Solicitar compra urgente</button>
-                                                    <button className="btn-accion-trazabilidad" onClick={() => cambiarSeccion("trazabilidad")}>🔗 Ver consumo</button>
+<button
+    className="btn-ver-consumo"
+    onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
+>
+    📋 Ver Consumos
+</button>
+                                                                                                   
                                                 </div>
                                             </div>
                                         ))}
@@ -483,7 +381,10 @@ export default function CriticosScreen() {
                                             <div key={tanque.id} className="alerta-card precaucion">
                                                 <div className="alerta-icono">⚠️</div>
                                                 <div className="alerta-info">
-                                                    <h4>{tanque.nombre}</h4>
+                                                    <div className="alerta-titulo">
+                                                        <h4>{tanque.nombre}</h4>
+                                                        <span className="alerta-codigo">{tanque.codigo}</span>
+                                                    </div>
                                                     <p>Nivel actual: <strong>{tanque.nivelActual?.toLocaleString()} {tanque.unidad}</strong> (Alerta: {tanque.umbralAlerta?.toLocaleString()} {tanque.unidad})</p>
                                                     <p>Porcentaje: <strong>{tanque.porcentajeLlenado?.toFixed(1)}%</strong></p>
                                                 </div>
@@ -505,7 +406,6 @@ export default function CriticosScreen() {
                             </div>
                         )}
 
-                        {/* SECCIÓN TRAZABILIDAD */}
                         {seccionActiva === "trazabilidad" && (
                             <MateriaPrimaProductos />
                         )}
@@ -513,7 +413,6 @@ export default function CriticosScreen() {
                 </main>
             </div>
 
-            {/* Modal Registrar Compra */}
             {mostrarModalCompra && tanqueSeleccionado && (
                 <div className="modal-overlay" onClick={() => setMostrarModalCompra(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -524,34 +423,15 @@ export default function CriticosScreen() {
                         <div className="modal-body">
                             <div className="form-group">
                                 <label>Cantidad ({tanqueSeleccionado.unidad})</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="form-input"
-                                    value={formCompra.cantidad}
-                                    onChange={(e) => setFormCompra({ ...formCompra, cantidad: e.target.value })}
-                                    placeholder="Ej: 1000"
-                                />
+                                <input type="number" step="0.01" className="form-input" value={formCompra.cantidad} onChange={(e) => setFormCompra({ ...formCompra, cantidad: e.target.value })} placeholder="Ej: 1000" />
                             </div>
                             <div className="form-group">
                                 <label>Documento de referencia (Factura)</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formCompra.documentoReferencia}
-                                    onChange={(e) => setFormCompra({ ...formCompra, documentoReferencia: e.target.value })}
-                                    placeholder="Ej: FACT-001"
-                                />
+                                <input type="text" className="form-input" value={formCompra.documentoReferencia} onChange={(e) => setFormCompra({ ...formCompra, documentoReferencia: e.target.value })} placeholder="Ej: FACT-001" />
                             </div>
                             <div className="form-group">
                                 <label>Observaciones</label>
-                                <textarea
-                                    className="form-input"
-                                    rows="2"
-                                    value={formCompra.observaciones}
-                                    onChange={(e) => setFormCompra({ ...formCompra, observaciones: e.target.value })}
-                                    placeholder="Notas adicionales..."
-                                />
+                                <textarea className="form-input" rows="2" value={formCompra.observaciones} onChange={(e) => setFormCompra({ ...formCompra, observaciones: e.target.value })} placeholder="Notas adicionales..." />
                             </div>
                         </div>
                         <div className="modal-footer">

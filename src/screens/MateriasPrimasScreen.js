@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
+import SidebarMateriaPrima from "../components/SidebarMateriaPrima";
 import "../styles/materiasPrimasScreen.css";
 
 export default function MateriasPrimasScreen() {
@@ -217,77 +218,15 @@ export default function MateriasPrimasScreen() {
     return (
         <div className="criticos-container">
             <div className="criticos-glass-panel">
-                {/* SIDEBAR */}
-                <aside className="criticos-sidebar">
-                    <div className="sidebar-logo">
-                        <span className="logo-icon">⚡</span>
-                        <h2>Materia Prima</h2>
-                    </div>
+                <SidebarMateriaPrima 
+                    seccionActiva="materias-primas"
+                    inventarioTotal={inventarioTotal}
+                    capacidadTotal={capacidadTotal}
+                    tanquesCriticos={tanquesCriticos}
+                    onCambiarSeccion={null}
+                    mostrarBases={true}
+                />
 
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">PRINCIPAL</div>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">📊</span>
-                            Dashboard
-                        </button>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">🛢️</span>
-                            Tanques
-                        </button>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">🚨</span>
-                            Alertas
-                            {tanquesCriticos.length > 0 && (
-                                <span className="badge-alerta">{tanquesCriticos.length}</span>
-                            )}
-                        </button>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos?tab=trazabilidad")}>
-                            <span className="btn-icon">🔗</span>
-                            Trazabilidad
-                        </button>
-                    </nav>
-
-                    <div className="nav-divider"></div>
-
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">CONFIGURACIÓN</div>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/formulas")}>
-                            <span className="btn-icon">📋</span>
-                            Consultar codigos
-                        </button>
-                        <button className="sidebar-btn active" style={{ background: "rgba(192,0,255,0.2)" }}>
-                            <span className="btn-icon">📦</span>
-                            Gestionar Materias Primas
-                        </button>
-
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/bases")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Bases
-                        </button>
-
-                    </nav>
-
-                    <div className="sidebar-footer">
-                        <div className="stats-resumen-sidebar">
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{sidebarDataLoaded ? inventarioTotal.toLocaleString() : "---"}</span>
-                                <span className="stat-label">Total L/Kg</span>
-                            </div>
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{sidebarDataLoaded && capacidadTotal > 0 ? ((inventarioTotal / capacidadTotal) * 100).toFixed(0) : "---"}%</span>
-                                <span className="stat-label">Capacidad</span>
-                            </div>
-                        </div>
-                        <button className="btn-volver" onClick={() => navigate("/mantenimiento")}>
-                            ↩ Volver
-                        </button>
-                    </div>
-                </aside>
-
-                {/* CONTENIDO PRINCIPAL */}
                 <main className="criticos-main">
                     <header className="criticos-header">
                         <div className="header-titulo">
@@ -316,7 +255,6 @@ export default function MateriasPrimasScreen() {
                             <button className={`tipo-filtro-btn ${filtroTipo === "SOLVENTE" ? "active" : ""}`} onClick={() => setFiltroTipo("SOLVENTE")}>💧 Solventes</button>
                             <button className={`tipo-filtro-btn ${filtroTipo === "ADITIVO" ? "active" : ""}`} onClick={() => setFiltroTipo("ADITIVO")}>⚗️ Aditivos</button>
                             <button className={`tipo-filtro-btn ${filtroTipo === "CARGA" ? "active" : ""}`} onClick={() => setFiltroTipo("CARGA")}>📦 Cargas</button>
-                            
                         </div>
                     </div>
 
@@ -347,11 +285,7 @@ export default function MateriasPrimasScreen() {
                                             <td><strong>{mp.nombre}</strong></td>
                                             <td><span className={getTipoBadge(mp.tipo)}>{mp.tipo || "-"}</span></td>
                                             <td>{mp.capacidadMaxima?.toLocaleString()}</td>
-                                            <td>
-                                                <span className={mp.critico ? "nivel-critico" : mp.alerta ? "nivel-alerta" : "nivel-normal"}>
-                                                    {mp.nivelActual?.toLocaleString()}
-                                                </span>
-                                            </td>
+                                            <td><span className={mp.critico ? "nivel-critico" : mp.alerta ? "nivel-alerta" : "nivel-normal"}>{mp.nivelActual?.toLocaleString()}</span></td>
                                             <td>{mp.unidad}</td>
                                             <td>{mp.ubicacion || "-"}</td>
                                             <td className="acciones-mp">
@@ -370,7 +304,6 @@ export default function MateriasPrimasScreen() {
                 </main>
             </div>
 
-            {/* Modal para crear/editar */}
             {mostrarModalForm && (
                 <div className="modal-overlay" onClick={() => setMostrarModalForm(false)}>
                     <div className="modal-content modal-mp-full" onClick={(e) => e.stopPropagation()}>
@@ -397,8 +330,6 @@ export default function MateriasPrimasScreen() {
                                         <option value="PIGMENTO">PIGMENTO</option>
                                         <option value="SOLVENTE">SOLVENTE</option>
                                         <option value="ADITIVO">ADITIVO</option>
-                                        <option value="BASE">BASE</option>
-
                                     </select>
                                 </div>
                                 <div className="form-group">

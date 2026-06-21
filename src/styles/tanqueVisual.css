@@ -1,0 +1,363 @@
+/* src/styles/tanqueVisual.css */
+
+/* ===== VERSIÓN HORIZONTAL CON TANQUE MÁS GRANDE - ESTILO NEON ===== */
+.tanque-visual-container {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(192, 0, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.08);
+}
+
+/* Header */
+.tanque-visual-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tanque-visual-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tanque-visual-codigo {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #e879f9;
+    background: rgba(192, 0, 255, 0.15);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    border: 1px solid rgba(192, 0, 255, 0.1);
+}
+
+.tanque-visual-nombre {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.tanque-visual-estado {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Cuerpo horizontal */
+.tanque-visual-cuerpo {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .tanque-visual-cuerpo {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* ===== GRÁFICO DEL TANQUE - ESTILO NEON ===== */
+.tanque-visual-grafico {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    min-height: 240px;
+    min-width: 160px;
+    flex-shrink: 0;
+    border: 1px solid rgba(192, 0, 255, 0.08);
+    box-shadow: inset 0 0 30px rgba(192, 0, 255, 0.05);
+}
+
+/* Tapa - estilo neon */
+.tanque-tapa {
+    width: 130px;
+    height: 16px;
+    border: 3px solid;
+    border-radius: 6px 6px 0 0;
+    background: rgba(255, 255, 255, 0.03);
+    position: relative;
+    border-bottom: none;
+    box-shadow: 0 -2px 15px rgba(192, 0, 255, 0.1);
+}
+
+.tanque-tapa-detalle {
+    width: 35px;
+    height: 5px;
+    background: rgba(192, 0, 255, 0.2);
+    border-radius: 2px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+}
+
+/* Cuerpo del tanque - estilo neon */
+.tanque-cuerpo {
+    width: 130px;
+    height: 200px;
+    border: 3px solid;
+    border-radius: 0 0 6px 6px;
+    position: relative;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 40px rgba(192, 0, 255, 0.05);
+}
+
+/* Nivel del líquido */
+.tanque-nivel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ondas en el líquido - efecto neón */
+.tanque-onda {
+    position: absolute;
+    top: -5px;
+    left: -50%;
+    width: 200%;
+    height: 10px;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    animation: onda 3s ease-in-out infinite;
+}
+
+.tanque-onda-2 {
+    animation-delay: 1.5s;
+    opacity: 0.4;
+}
+
+@keyframes onda {
+    0%, 100% {
+        transform: translateX(0) scaleY(1);
+    }
+    50% {
+        transform: translateX(8%) scaleY(0.5);
+    }
+}
+
+/* Burbujas decorativas - efecto neón */
+.burbuja {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent);
+    animation: burbuja 4s ease-in-out infinite;
+}
+
+.burbuja-1 {
+    width: 8px;
+    height: 8px;
+    left: 15%;
+    bottom: 20%;
+    animation-delay: 0.5s;
+    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+}
+
+.burbuja-2 {
+    width: 6px;
+    height: 6px;
+    right: 20%;
+    bottom: 40%;
+    animation-delay: 1.5s;
+    box-shadow: 0 0 8px rgba(192, 0, 255, 0.08);
+}
+
+.burbuja-3 {
+    width: 5px;
+    height: 5px;
+    left: 30%;
+    bottom: 60%;
+    animation-delay: 2.5s;
+    box-shadow: 0 0 6px rgba(192, 0, 255, 0.06);
+}
+
+@keyframes burbuja {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 0.3;
+    }
+}
+
+/* Porcentaje interior - estilo neón */
+.tanque-porcentaje-interior {
+    position: relative;
+    z-index: 2;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(192, 0, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+/* Mediciones laterales - estilo neón */
+.tanque-mediciones {
+    position: absolute;
+    right: -24px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.medicion {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.2);
+    text-align: right;
+    position: relative;
+    line-height: 1;
+}
+
+.medicion::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: 8px;
+    height: 2px;
+    background: rgba(192, 0, 255, 0.15);
+    margin-right: 3px;
+}
+
+/* Base del tanque - estilo neón */
+.tanque-base {
+    width: 145px;
+    height: 10px;
+    border: 3px solid;
+    border-radius: 0 0 6px 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: none;
+    margin-top: -1px;
+    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+}
+
+.tanque-base-detalle {
+    width: 40px;
+    height: 4px;
+    background: rgba(192, 0, 255, 0.15);
+    border-radius: 2px;
+    margin: 2px auto 0;
+    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+}
+
+/* ===== INFORMACIÓN DEL TANQUE - ESTILO NEÓN ===== */
+.tanque-visual-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    flex: 1;
+    min-width: 220px;
+    border: 1px solid rgba(192, 0, 255, 0.06);
+}
+
+@media (max-width: 768px) {
+    .tanque-visual-info {
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+}
+
+.tanque-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.tanque-info-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+}
+
+.tanque-info-valor {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.tipo-badge {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.65rem;
+    color: white;
+    box-shadow: 0 0 15px rgba(192, 0, 255, 0.2);
+}
+
+/* Efecto de brillo neón en el tanque */
+.tanque-cuerpo::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 25%;
+    height: 35%;
+    background: radial-gradient(ellipse, rgba(192, 0, 255, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Efecto de brillo neón en los bordes */
+.tanque-cuerpo::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 8px;
+    background: transparent;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Efecto de brillo en el contenedor */
+.tanque-visual-container:hover {
+    border-color: rgba(192, 0, 255, 0.25);
+    box-shadow: 0 4px 30px rgba(192, 0, 255, 0.12);
+    transition: all 0.3s ease;
+}
+
+.tanque-visual-grafico:hover {
+    border-color: rgba(192, 0, 255, 0.15);
+    box-shadow: inset 0 0 40px rgba(192, 0, 255, 0.08);
+    transition: all 0.3s ease;
+}

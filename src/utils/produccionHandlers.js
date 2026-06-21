@@ -13,7 +13,9 @@ export const createProduccionHandlers = (dependencies) => {
         tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
         setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales,
         setAnalizandoStock, setProcesandoPdf, setProcesandoReporte,
-        setAlertasInventario, setProgreso, setMenuCargasAbierto,
+        setAlertasInventario, 
+        setAlertasRevisar, // ✅ RECIBIR EL SETTER
+        setProgreso, setMenuCargasAbierto,
         setMenuReporteAbierto, setDatosPlanificador, setMostrarModalPlanificador,
         setMostrarModalInventario,
         // Funciones del hook useProduccion
@@ -55,21 +57,47 @@ export const createProduccionHandlers = (dependencies) => {
             }
         },
 
-        // Handler: Analizar stock
+        // ✅ HANDLER CORREGIDO - Analizar stock
         handleAnalizarStock: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             
+            console.log('📂 Iniciando análisis de stock...');
             setAnalizandoStock(true);
             setMenuCargasAbierto(false);
             const idInt = simularProgreso();
             
             try {
                 const data = await inventarioService.analizarBajoInventario(file);
-                setAlertasInventario(data.alertas);
+                
+                console.log('📊 Datos recibidos del análisis:', data);
+                console.log('✅ Alertas normales:', data.alertas?.length || 0);
+                console.log('✅ Alertas para revisar:', data.revisar?.length || 0);
+                
+                // ✅ ACTUALIZAR AMBOS ESTADOS
+                if (setAlertasInventario) {
+                    setAlertasInventario(data.alertas || []);
+                    console.log('✅ setAlertasInventario llamado con', data.alertas?.length, 'alertas');
+                }
+                
+                if (setAlertasRevisar) {
+                    setAlertasRevisar(data.revisar || []);
+                    console.log('✅ setAlertasRevisar llamado con', data.revisar?.length, 'alertas para revisar');
+                }
+                
                 setProgreso(100);
-                setTimeout(() => setMostrarModalInventario(true), 500);
+                
+                // Abrir el modal si hay algún tipo de alerta
+                if (data.alertas?.length > 0 || data.revisar?.length > 0) {
+                    console.log('🔔 Abriendo modal con alertas...');
+                    setTimeout(() => setMostrarModalInventario(true), 500);
+                } else {
+                    console.log('✅ No hay alertas para mostrar');
+                    alert('✅ No se encontraron alertas de inventario');
+                }
+                
             } catch (err) { 
+                console.error('❌ Error con inventario:', err);
                 alert("Error con inventario: " + err.message); 
             } finally {
                 clearInterval(idInt);

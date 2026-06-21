@@ -1,15 +1,17 @@
 // src/screens/BasesScreen.js
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
+import SidebarMateriaPrima from "../components/SidebarMateriaPrima";
 import "../styles/bases.css";
 
 export default function BasesScreen() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [bases, setBases] = useState([]);
+    const [todasLasMP, setTodasLasMP] = useState([]); // 🔴 NUEVO: Todas las materias primas
     const [filtro, setFiltro] = useState("todas");
+    const [busqueda, setBusqueda] = useState("");
     const [mostrarModalCompra, setMostrarModalCompra] = useState(false);
     const [mostrarModalConsumo, setMostrarModalConsumo] = useState(false);
     const [baseSeleccionada, setBaseSeleccionada] = useState(null);
@@ -21,18 +23,19 @@ export default function BasesScreen() {
         observaciones: "",
         usuario: "Admin"
     });
-
     const [actualizando, setActualizando] = useState(false);
 
-    // Códigos de bases que queremos mostrar
-    const CODIGOS_BASES = ['BRO40', 'BRE40','BAC40', 'BAL40', 'BAO40', 'BNM40', 'BVE40','BAE40',
-         'BNE30', 'BNE10', 'BBE20', 'BBE30', 'BED10','BVE10'];
+    const CODIGOS_BASES = ['BRO40', 'BRE40', 'BAC40', 'BAL40', 'BAO40', 'BNM40', 'BVE40', 'BAE40',
+        'BNE30', 'BNE10', 'BBE20', 'BBE30', 'BED10', 'BVE10'];
 
-    // Cargar datos
     const cargarBases = async () => {
         setLoading(true);
         try {
+            // 🔴 OBTENER TODAS LAS MATERIAS PRIMAS
             const todas = await materiaPrimaService.listarTodas();
+            setTodasLasMP(todas); // Guardar todas para el sidebar
+            
+            // Filtrar solo bases para mostrar
             const basesFiltradas = todas.filter(mp =>
                 mp.tipo === 'BASE' && CODIGOS_BASES.includes(mp.codigo)
             );
@@ -49,6 +52,7 @@ export default function BasesScreen() {
         setActualizando(true);
         try {
             const todas = await materiaPrimaService.listarTodas();
+            setTodasLasMP(todas);
             const basesFiltradas = todas.filter(mp =>
                 mp.tipo === 'BASE' && CODIGOS_BASES.includes(mp.codigo)
             );
@@ -60,68 +64,50 @@ export default function BasesScreen() {
         }
     };
 
-    // Función para obtener el historial de consumo de una base
-    const verConsumos = async (base) => {
+    const verConsumos = (base) => {
         setBaseSeleccionada(base);
         setMostrarModalConsumo(true);
         setCargandoConsumos(true);
-        
+
         try {
-            // Obtener consumos de la base desde el backend
-            const response = await fetch(`http://localhost:8080/api/consumos/base/${base.id}`);
-            if (response.ok) {
-                const data = await response.json();
-                setConsumosBase(data);
-            } else {
-                // Si no hay datos, usar datos de ejemplo
-                setConsumosBase([
-                    { 
-                        id: 1, 
-                        lote: 'V260612001', 
-                        codigoProducto: '600SR', 
-                        cantidad: 487.43,
-                        fecha: '2026-06-12',
-                        operario: 'Aldo'
-                    },
-                    { 
-                        id: 2, 
-                        lote: 'V260612002', 
-                        codigoProducto: '400SR', 
-                        cantidad: 320.50,
-                        fecha: '2026-06-12',
-                        operario: 'Germán'
-                    },
-                    { 
-                        id: 3, 
-                        lote: 'V260613001', 
-                        codigoProducto: '200SR', 
-                        cantidad: 150.00,
-                        fecha: '2026-06-13',
-                        operario: 'Pedro'
-                    }
-                ]);
-            }
+            const consumosGuardados = JSON.parse(localStorage.getItem('consumosBases') || '[]');
+            const consumosFiltrados = consumosGuardados.filter(c => c.baseCodigo === base.codigo);
+            const hoy = new Date();
+            const hace7Dias = new Date();
+            hace7Dias.setDate(hoy.getDate() - 7);
+            const fechaLimite = hace7Dias.toISOString().split('T')[0];
+            const consumosSemana = consumosFiltrados.filter(c => c.fecha >= fechaLimite);
+
+            const consumosAgrupados = {};
+            consumosSemana.forEach(c => {
+                const key = `${c.lote}-${c.codigoProducto}`;
+                if (!consumosAgrupados[key]) {
+                    consumosAgrupados[key] = {
+                        lote: c.lote,
+                        codigoProducto: c.codigoProducto,
+                        cantidad: 0,
+                        fecha: c.fecha,
+                        operario: c.operario || 'N/A'
+                    };
+                }
+                consumosAgrupados[key].cantidad += c.cantidad;
+            });
+
+            const consumosFormateados = Object.values(consumosAgrupados)
+                .sort((a, b) => b.fecha.localeCompare(a.fecha))
+                .map((c, index) => ({
+                    id: index + 1,
+                    lote: c.lote,
+                    codigoProducto: c.codigoProducto,
+                    cantidad: c.cantidad,
+                    fecha: c.fecha,
+                    operario: c.operario
+                }));
+
+            setConsumosBase(consumosFormateados);
         } catch (error) {
             console.error("Error cargando consumos:", error);
-            // Datos de ejemplo en caso de error
-            setConsumosBase([
-                { 
-                    id: 1, 
-                    lote: 'V260612001', 
-                    codigoProducto: '600SR', 
-                    cantidad: 487.43,
-                    fecha: '2026-06-12',
-                    operario: 'Aldo'
-                },
-                { 
-                    id: 2, 
-                    lote: 'V260612002', 
-                    codigoProducto: '400SR', 
-                    cantidad: 320.50,
-                    fecha: '2026-06-12',
-                    operario: 'Germán'
-                }
-            ]);
+            setConsumosBase([]);
         } finally {
             setCargandoConsumos(false);
         }
@@ -143,16 +129,32 @@ export default function BasesScreen() {
         cargarBases();
     }, []);
 
-    // Calcular estadísticas
-    const inventarioTotal = bases.reduce((sum, b) => sum + (b.nivelActual || 0), 0);
-    const capacidadTotal = bases.reduce((sum, b) => sum + (b.capacidadMaxima || 0), 0);
+    // 🔴 CALCULAR ESTADÍSTICAS CON TODAS LAS MATERIAS PRIMAS (no solo bases)
+    const inventarioTotal = todasLasMP.reduce((sum, mp) => sum + (mp.nivelActual || 0), 0);
+    const capacidadTotal = todasLasMP.reduce((sum, mp) => sum + (mp.capacidadMaxima || 0), 0);
+    const todasCriticas = todasLasMP.filter(mp => mp.critico);
+
+    // Bases críticas y alerta (solo para mostrar en el contenido)
     const basesCriticas = bases.filter(b => (b.nivelActual / b.capacidadMaxima) * 100 <= 20);
     const basesAlerta = bases.filter(b => {
         const pct = (b.nivelActual / b.capacidadMaxima) * 100;
         return pct > 20 && pct <= 40;
     });
 
-    // Registrar compra
+    const basesMostrar = bases.filter(base => {
+        const termino = busqueda.toLowerCase().trim();
+        if (!termino) return true;
+        return base.codigo?.toLowerCase().includes(termino) ||
+               base.nombre?.toLowerCase().includes(termino);
+    }).filter(base => {
+        const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
+        if (filtro === 'todas') return true;
+        if (filtro === 'critico') return porcentaje <= 20;
+        if (filtro === 'alerta') return porcentaje > 20 && porcentaje <= 40;
+        if (filtro === 'normal') return porcentaje > 40;
+        return true;
+    });
+
     const handleRegistrarCompra = async () => {
         if (!formCompra.cantidad || formCompra.cantidad <= 0) {
             alert("Ingresa una cantidad válida");
@@ -177,7 +179,6 @@ export default function BasesScreen() {
         }
     };
 
-    // Función para obtener el color según el nivel
     const getColorNivel = (porcentaje) => {
         if (porcentaje <= 20) return '#e74c3c';
         if (porcentaje <= 40) return '#f39c12';
@@ -185,7 +186,6 @@ export default function BasesScreen() {
         return '#2ecc71';
     };
 
-    // Función para obtener el estado
     const getEstado = (porcentaje) => {
         if (porcentaje <= 20) return 'critico';
         if (porcentaje <= 40) return 'alerta';
@@ -193,7 +193,6 @@ export default function BasesScreen() {
         return 'optimo';
     };
 
-    // Función para obtener el ícono del estado
     const getIconoEstado = (porcentaje) => {
         if (porcentaje <= 20) return '🚨';
         if (porcentaje <= 40) return '⚠️';
@@ -215,95 +214,16 @@ export default function BasesScreen() {
     return (
         <div className="bases-container">
             <div className="bases-glass-panel">
-                {/* SIDEBAR */}
-                <aside className="base-sidebar">
-                    <div className="base-sidebar-logo">
-                        <span className="logo-icon">⚡</span>
-                        <h2>Materia Prima</h2>
-                    </div>
+                {/* 🔴 SIDEBAR CON DATOS DE TODAS LAS MATERIAS PRIMAS */}
+                <SidebarMateriaPrima 
+                    seccionActiva="bases"
+                    inventarioTotal={inventarioTotal}
+                    capacidadTotal={capacidadTotal}
+                    tanquesCriticos={todasCriticas}
+                    onCambiarSeccion={null}
+                    mostrarBases={true}
+                />
 
-                    <nav className="base-sidebar-nav">
-                        <div className="nav-label">PRINCIPAL</div>
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos?tab=dashboard")}
-                        >
-                            <span className="btn-icon">📊</span>
-                            Dashboard
-                        </button>
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos?tab=tanques")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Tanques
-                        </button>
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos?tab=alertas")}
-                        >
-                            <span className="btn-icon">🚨</span>
-                            Alertas
-                        </button>
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/criticos?tab=trazabilidad")}
-                        >
-                            <span className="btn-icon">🔗</span>
-                            Trazabilidad
-                        </button>
-                    </nav>
-
-                    <div className="base-nav-divider"></div>
-
-                    <nav className="base-sidebar-nav">
-                        <div className="nav-label">CONFIGURACIÓN</div>
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/formulas")}
-                        >
-                            <span className="btn-icon">📋</span>
-                            Consultar codigos
-                        </button>
-
-                        <button
-                            className="base-sidebar-btn"
-                            onClick={() => navigate("/mantenimiento/materias-primas")}
-                        >
-                            <span className="btn-icon">📦</span>
-                            Gestionar Materias Primas
-                        </button>
-
-                        <button
-                            className="base-sidebar-btn active"
-                            onClick={() => navigate("/bases")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Bases
-                            {basesCriticas.length > 0 && (
-                                <span className="badge-alerta">{basesCriticas.length}</span>
-                            )}
-                        </button>
-                    </nav>
-
-                    <div className="base-sidebar-footer">
-                        <div className="base-stats-resumen">
-                            <div className="base-stat-item">
-                                <span className="stat-value">{inventarioTotal.toLocaleString()}</span>
-                                <span className="stat-label">Total L/Kg</span>
-                            </div>
-                            <div className="base-stat-item">
-                                <span className="stat-value">{capacidadTotal > 0 ? ((inventarioTotal / capacidadTotal) * 100).toFixed(0) : 0}%</span>
-                                <span className="stat-label">Capacidad</span>
-                            </div>
-                        </div>
-                        <button className="base-btn-volver" onClick={() => navigate("/mantenimiento")}>
-                            ↩ Volver
-                        </button>
-                    </div>
-                </aside>
-
-                {/* CONTENIDO PRINCIPAL */}
                 <main className="base-main">
                     <header className="base-header">
                         <div className="header-titulo">
@@ -333,164 +253,112 @@ export default function BasesScreen() {
                     </header>
 
                     <div className="bases-workspace">
-                        <div className="base-filtros">
-                            <button
-                                className={`base-filtro-btn ${filtro === 'todas' ? 'active' : ''}`}
-                                onClick={() => setFiltro('todas')}
-                            >
-                                📊 Todas
-                            </button>
-                            <button
-                                className={`base-filtro-btn ${filtro === 'critico' ? 'active' : ''}`}
-                                onClick={() => setFiltro('critico')}
-                            >
-                                🚨 Crítico
-                            </button>
-                            <button
-                                className={`base-filtro-btn ${filtro === 'alerta' ? 'active' : ''}`}
-                                onClick={() => setFiltro('alerta')}
-                            >
-                                ⚠️ Alerta
-                            </button>
-                            <button
-                                className={`base-filtro-btn ${filtro === 'normal' ? 'active' : ''}`}
-                                onClick={() => setFiltro('normal')}
-                            >
-                                ✅ Normal
-                            </button>
+                        <div className="base-header-actions">
+                            <div className="base-filtros">
+                                <button className={`base-filtro-btn ${filtro === 'todas' ? 'active' : ''}`} onClick={() => setFiltro('todas')}>📊 Todas</button>
+                                <button className={`base-filtro-btn ${filtro === 'critico' ? 'active' : ''}`} onClick={() => setFiltro('critico')}>🚨 Crítico</button>
+                                <button className={`base-filtro-btn ${filtro === 'alerta' ? 'active' : ''}`} onClick={() => setFiltro('alerta')}>⚠️ Alerta</button>
+                                <button className={`base-filtro-btn ${filtro === 'normal' ? 'active' : ''}`} onClick={() => setFiltro('normal')}>✅ Normal</button>
+                            </div>
+
+                            <div className="base-search-box">
+                                <span className="base-search-icon">🔍</span>
+                                <input type="text" className="base-search-input" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+                                {busqueda && <button className="base-search-clear" onClick={() => setBusqueda('')}>✖</button>}
+                            </div>
                         </div>
+
+                        {busqueda && (
+                            <div className="base-resultados-info">
+                                <span>{basesMostrar.length} resultado{basesMostrar.length !== 1 ? 's' : ''} para "{busqueda}"</span>
+                            </div>
+                        )}
 
                         <div className="base-grid">
-                            {bases
-                                .filter(base => {
-                                    const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
-                                    if (filtro === 'todas') return true;
-                                    if (filtro === 'critico') return porcentaje <= 20;
-                                    if (filtro === 'alerta') return porcentaje > 20 && porcentaje <= 40;
-                                    if (filtro === 'normal') return porcentaje > 40;
-                                    return true;
-                                })
-                                .map(base => {
-                                    const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
-                                    const estado = getEstado(porcentaje);
-                                    const color = getColorNivel(porcentaje);
-                                    const icono = getIconoEstado(porcentaje);
+                            {basesMostrar.map(base => {
+                                const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
+                                const estado = getEstado(porcentaje);
+                                const icono = getIconoEstado(porcentaje);
 
-                                    return (
-                                        <div key={base.id} className={`base-tanque-card ${estado}`}>
-                                            <div className="base-tanque-header">
-                                                <div className="tanque-info">
-                                                    <h3>{base.nombre}</h3>
-                                                    <span className="tanque-codigo">{base.codigo}</span>
+                                return (
+                                    <div key={base.id} className={`base-tanque-card ${estado}`}>
+                                        <div className="base-tanque-header">
+                                            <div className="tanque-info">
+                                                <h3>{base.nombre}</h3>
+                                                <span className="tanque-codigo">{base.codigo}</span>
+                                            </div>
+                                            <div className="tanque-estado-badge">{icono} {estado.toUpperCase()}</div>
+                                        </div>
+
+                                        <div className="base-tanque-visual">
+                                            <div className="base-tanque-body">
+                                                <div className="base-tanque-nivel" style={{ height: `${porcentaje}%`, transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                                                    <div className="base-onda-1"></div>
+                                                    <div className="base-onda-2"></div>
+                                                    <div className="base-onda-3"></div>
+                                                    <div className="base-burbujas">
+                                                        <div className="base-burbuja"></div>
+                                                        <div className="base-burbuja"></div>
+                                                        <div className="base-burbuja"></div>
+                                                        <div className="base-burbuja"></div>
+                                                        <div className="base-burbuja"></div>
+                                                    </div>
+                                                    <div className="base-superficie-brillo"></div>
+                                                    <span className="base-nivel-porcentaje">{porcentaje.toFixed(1)}%</span>
                                                 </div>
-                                                <div className="tanque-estado-badge">
-                                                    {icono} {estado.toUpperCase()}
-                                                </div>
+                                                <div className="base-reflejo-izquierdo"></div>
+                                                <div className="base-reflejo-derecho"></div>
                                             </div>
 
-                                            <div className="base-tanque-visual">
-                                                <div className="base-tanque-body">
-                                                    <div
-                                                        className="base-tanque-nivel"
-                                                        style={{
-                                                            height: `${porcentaje}%`,
-                                                            transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
-                                                        }}
-                                                    >
-                                                        <div className="base-onda-1"></div>
-                                                        <div className="base-onda-2"></div>
-                                                        <div className="base-onda-3"></div>
-
-                                                        <div className="base-burbujas">
-                                                            <div className="base-burbuja"></div>
-                                                            <div className="base-burbuja"></div>
-                                                            <div className="base-burbuja"></div>
-                                                            <div className="base-burbuja"></div>
-                                                            <div className="base-burbuja"></div>
-                                                        </div>
-
-                                                        <div className="base-superficie-brillo"></div>
-
-                                                        <span className="base-nivel-porcentaje">{porcentaje.toFixed(1)}%</span>
-                                                    </div>
-
-                                                    <div className="base-reflejo-izquierdo"></div>
-                                                    <div className="base-reflejo-derecho"></div>
+                                            <div className="base-tanque-medidas">
+                                                <div className="medida-lineas">
+                                                    <span className="medida-linea"></span>
+                                                    <span className="medida-linea"></span>
+                                                    <span className="medida-linea"></span>
+                                                    <span className="medida-linea"></span>
+                                                    <span className="medida-linea"></span>
                                                 </div>
-
-                                                <div className="base-tanque-medidas">
-                                                    <div className="medida-lineas">
-                                                        <span className="medida-linea"></span>
-                                                        <span className="medida-linea"></span>
-                                                        <span className="medida-linea"></span>
-                                                        <span className="medida-linea"></span>
-                                                        <span className="medida-linea"></span>
-                                                    </div>
-
-                                                    <div className="medida">
-                                                        <span className="medida-valor">{base.capacidadMaxima}</span>
-                                                        <span className="medida-label">Máx</span>
-                                                    </div>
-                                                    <div className="medida actual">
-                                                        <span className="medida-valor">{base.nivelActual}</span>
-                                                        <span className="medida-label">Actual</span>
-                                                    </div>
-                                                    <div className="medida">
-                                                        <span className="medida-valor">{base.umbralCritico}</span>
-                                                        <span className="medida-label">Mín</span>
-                                                    </div>
+                                                <div className="medida">
+                                                    <span className="medida-valor">{base.capacidadMaxima?.toFixed(0) || 0}</span>
+                                                    <span className="medida-label">Máx</span>
                                                 </div>
-                                            </div>
-
-                                            <div className="base-tanque-detalles">
-                                                <div className="detalle-item">
-                                                    <span className="detalle-icon">📦</span>
-                                                    <span>{base.nivelActual} {base.unidad}</span>
+                                                <div className="medida actual">
+                                                    <span className="medida-valor">{base.nivelActual?.toFixed(0) || 0}</span>
+                                                    <span className="medida-label">Actual</span>
                                                 </div>
-                                                <div className="detalle-item">
-                                                    <span className="detalle-icon">📍</span>
-                                                    <span>{base.ubicacion || 'Sin ubicación'}</span>
+                                                <div className="medida">
+                                                    <span className="medida-valor">{base.umbralCritico?.toFixed(0) || 0}</span>
+                                                    <span className="medida-label">Mín</span>
                                                 </div>
-                                                <div className="detalle-item">
-                                                    <span className="detalle-icon">⚡</span>
-                                                    <span>Alerta: {base.umbralAlerta} {base.unidad}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="base-tanque-acciones">
-                                                <button
-                                                    className="base-btn-ver-consumo"
-                                                    onClick={() => verConsumos(base)}
-                                                >
-                                                    📋 Ver Consumo
-                                                </button>
-                                                <button
-                                                    className="base-btn-registrar-compra"
-                                                    onClick={() => {
-                                                        setBaseSeleccionada(base);
-                                                        setMostrarModalCompra(true);
-                                                    }}
-                                                >
-                                                    🛒 Comprar
-                                                </button>
                                             </div>
                                         </div>
-                                    );
-                                })}
+
+                                        <div className="base-tanque-detalles">
+                                            <div className="detalle-item"><span className="detalle-icon">📦</span><span>{base.nivelActual?.toFixed(0)} {base.unidad}</span></div>
+                                            <div className="detalle-item"><span className="detalle-icon">📍</span><span>{base.ubicacion || 'Sin ubicación'}</span></div>
+                                            <div className="detalle-item"><span className="detalle-icon">⚡</span><span>Alerta: {base.umbralAlerta?.toFixed(0)} {base.unidad}</span></div>
+                                        </div>
+
+                                        <div className="base-tanque-acciones">
+                                            <button className="base-btn-ver-consumo" onClick={() => verConsumos(base)}>📋 Ver Consumo</button>
+                                            <button className="base-btn-registrar-compra" onClick={() => { setBaseSeleccionada(base); setMostrarModalCompra(true); }}>🛒 Recargar</button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        {bases.length === 0 && (
+                        {basesMostrar.length === 0 && (
                             <div className="base-no-bases">
-                                <div className="no-bases-icon">🛢️</div>
+                                <div className="no-bases-icon">🔍</div>
                                 <h3>No se encontraron bases</h3>
-                                <p>No hay bases con los códigos configurados</p>
+                                <p>{busqueda ? <>No hay bases que coincidan con "<strong>{busqueda}</strong>"</> : <>No hay bases con los códigos configurados</>}</p>
                             </div>
                         )}
                     </div>
                 </main>
             </div>
 
-            {/* Modal Registrar Compra */}
             {mostrarModalCompra && baseSeleccionada && (
                 <div className="base-modal-overlay" onClick={() => setMostrarModalCompra(false)}>
                     <div className="base-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -501,34 +369,7 @@ export default function BasesScreen() {
                         <div className="base-modal-body">
                             <div className="base-form-group">
                                 <label>Cantidad ({baseSeleccionada.unidad})</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="base-form-input"
-                                    value={formCompra.cantidad}
-                                    onChange={(e) => setFormCompra({ ...formCompra, cantidad: e.target.value })}
-                                    placeholder="Ej: 1000"
-                                />
-                            </div>
-                            <div className="base-form-group">
-                                <label>Documento de referencia (Factura)</label>
-                                <input
-                                    type="text"
-                                    className="base-form-input"
-                                    value={formCompra.documentoReferencia}
-                                    onChange={(e) => setFormCompra({ ...formCompra, documentoReferencia: e.target.value })}
-                                    placeholder="Ej: FACT-001"
-                                />
-                            </div>
-                            <div className="base-form-group">
-                                <label>Observaciones</label>
-                                <textarea
-                                    className="base-form-input"
-                                    rows="2"
-                                    value={formCompra.observaciones}
-                                    onChange={(e) => setFormCompra({ ...formCompra, observaciones: e.target.value })}
-                                    placeholder="Notas adicionales..."
-                                />
+                                <input type="number" step="0.01" className="base-form-input" value={formCompra.cantidad} onChange={(e) => setFormCompra({ ...formCompra, cantidad: e.target.value })} placeholder="Ej: 1000" />
                             </div>
                         </div>
                         <div className="base-modal-footer">
@@ -539,7 +380,6 @@ export default function BasesScreen() {
                 </div>
             )}
 
-            {/* Modal Ver Consumos */}
             {mostrarModalConsumo && baseSeleccionada && (
                 <div className="base-modal-overlay" onClick={() => setMostrarModalConsumo(false)}>
                     <div className="base-modal-content base-modal-consumo" onClick={(e) => e.stopPropagation()}>
@@ -562,28 +402,14 @@ export default function BasesScreen() {
                                 <div className="base-tabla-consumos">
                                     <table className="base-consumos-table">
                                         <thead>
-                                            <tr>
-                                                <th>Lote</th>
-                                                <th>Código Producto</th>
-                                                <th>Cantidad (L)</th>
-                                                <th>Fecha</th>
-                                                <th>Operario</th>
-                                            </tr>
+                                            <tr><th>Lote</th><th>Código Producto</th><th>Cantidad (L)</th><th>Fecha</th><th>Operario</th></tr>
                                         </thead>
                                         <tbody>
                                             {consumosBase.map((consumo, index) => (
                                                 <tr key={consumo.id || index}>
-                                                    <td>
-                                                        <span className="base-lote-badge">{consumo.lote}</span>
-                                                    </td>
-                                                    <td>
-                                                        <span className="base-codigo-badge">{consumo.codigoProducto}</span>
-                                                    </td>
-                                                    <td>
-                                                        <strong className="base-cantidad-consumida">
-                                                            {consumo.cantidad.toFixed(2)} L
-                                                        </strong>
-                                                    </td>
+                                                    <td><span className="base-lote-badge">{consumo.lote}</span></td>
+                                                    <td><span className="base-codigo-badge">{consumo.codigoProducto}</span></td>
+                                                    <td><strong className="base-cantidad-consumida">{consumo.cantidad.toFixed(2)} L</strong></td>
                                                     <td>{consumo.fecha}</td>
                                                     <td>{consumo.operario || 'N/A'}</td>
                                                 </tr>
@@ -591,14 +417,8 @@ export default function BasesScreen() {
                                         </tbody>
                                         <tfoot>
                                             <tr className="base-total-consumo">
-                                                <td colSpan="2">
-                                                    <strong>Total consumido:</strong>
-                                                </td>
-                                                <td>
-                                                    <strong>
-                                                        {consumosBase.reduce((sum, c) => sum + c.cantidad, 0).toFixed(2)} L
-                                                    </strong>
-                                                </td>
+                                                <td colSpan="2"><strong>Total consumido:</strong></td>
+                                                <td><strong>{consumosBase.reduce((sum, c) => sum + c.cantidad, 0).toFixed(2)} L</strong></td>
                                                 <td colSpan="2"></td>
                                             </tr>
                                         </tfoot>

@@ -302,7 +302,7 @@ export default function MateriaPrimaProductos() {
                                 className={`tipo-filtro-btn ${filtroTipo === "todos" ? "active" : ""}`}
                                 onClick={() => setFiltroTipo("todos")}
                             >
-                                Todos
+                                Todossss
                             </button>
                             <button
                                 className={`tipo-filtro-btn ${filtroTipo === "CARGA" ? "active" : ""}`}

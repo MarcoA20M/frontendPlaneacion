@@ -406,3 +406,288 @@
 }
 
 
+/* ===== PODER CUBRIENTE - MISMO ESTILO QUE EL RESTO ===== */
+.poder-cubriente-display {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    margin-top: 2px;
+    padding: 2px 4px;
+}
+
+.poder-cubriente-numero {
+    font-size: 7px;
+    font-weight: 800;
+    color: #00c0ff;  /* Mismo color que el código */
+    line-height: 1.2;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.poder-cubriente-etiqueta {
+    font-size: 7px;
+    color: #64748b;  /* Mismo color que los headers */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-top: 1px;
+}
+
+/* Mantener el estilo de "PROGRAMAR" oculto pero disponible */
+.hint-programar {
+    font-size: 9px;
+    color: #00c0ff;
+    font-weight: bold;
+    margin-top: 4px;
+    opacity: 0.7;
+    text-align: center;
+}
+
+
+/* ============================================================ */
+/* ===== TABS EN EL HEADER ===== */
+/* ============================================================ */
+
+.tabs-container-header {
+  display: flex;
+  gap: 6px;
+  margin-left: 16px;
+}
+
+.tab-btn-header {
+  padding: 4px 12px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+}
+
+.tab-btn-header:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn-header.active {
+  color: #00c0ff;
+  background: rgba(0, 192, 255, 0.08);
+}
+
+.tab-btn-header.revisar-tab-header.active {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.tab-btn-header .tab-badge-header {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.tab-btn-header.active .tab-badge-header {
+  background: rgba(0, 192, 255, 0.12);
+  color: #00c0ff;
+}
+
+.tab-btn-header.revisar-tab-header.active .tab-badge-header {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+}
+
+/* ============================================================ */
+/* ===== SECCIONES VACÍAS ===== */
+/* ============================================================ */
+
+.seccion-vacia {
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 0.9rem;
+}
+
+.sin-presentaciones {
+  padding: 8px 16px;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.sin-alertas {
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #4ade80;
+}
+
+
+/* ===== ESTILOS PARA EL CÁLCULO DE DÍAS DE ALCANCE ===== */
+
+.emergente-calculo-dias {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(0, 192, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 192, 255, 0.1);
+}
+
+.calculo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calculo-icono {
+  font-size: 18px;
+}
+
+.calculo-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.5px;
+}
+
+.calculo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.calculo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.calculo-item-destacado {
+  grid-column: 1 / -1;
+  background: rgba(0, 192, 255, 0.08);
+  border: 1px solid rgba(0, 192, 255, 0.15);
+  padding: 8px 12px;
+}
+
+.calculo-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.calculo-valor {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.calculo-valor.highlight-verde {
+  color: #4ade80;
+}
+
+.calculo-valor.highlight-cyan {
+  color: #00c0ff;
+  font-size: 15px;
+}
+
+.incremento-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Barra de progreso */
+.calculo-barra-container {
+  margin-top: 8px;
+}
+
+.calculo-barra-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #64748b;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+
+.calculo-barra-fondo {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.calculo-barra-progreso {
+  height: 100%;
+  background: linear-gradient(90deg, #00c0ff, #4ade80);
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 2%;
+}
+
+.calculo-barra-puntos {
+  position: relative;
+  height: 20px;
+  margin-top: -2px;
+}
+
+.punto-actual,
+.punto-nuevo {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.punto-actual {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.punto-nuevo {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .calculo-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .calculo-item-destacado {
+    grid-column: 1;
+  }
+}

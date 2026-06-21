@@ -71,10 +71,6 @@ export const formulasService = {
         return response.json();
     },
 
-    // 🟢 CONSUMIR BASES - Versión corregida
-// src/services/formulasService.js - Modificar la función consumirBasesDesdeCargas
-
-// src/services/formulasService.js - Modificar consumirBasesDesdeCargas
 
 consumirBasesDesdeCargas: async (cargas) => {
     console.log('🚀 Consumiendo bases desde cargas:', cargas);
@@ -87,8 +83,9 @@ consumirBasesDesdeCargas: async (cargas) => {
     for (const carga of cargas) {
         const codigoProducto = carga.codigo || carga.codigoProducto;
         const litros = parseFloat(carga.litros) || 0;
+        const folio = carga.folio || carga.lote || 'S/F';
         
-        console.log(`📦 Procesando: ${codigoProducto} - ${litros} L`);
+        console.log(`📦 Procesando: ${codigoProducto} - ${litros} L - Folio: ${folio}`);
 
         if (!codigoProducto || litros <= 0) {
             console.warn(`⚠️ Carga inválida:`, carga);
@@ -168,7 +165,8 @@ consumirBasesDesdeCargas: async (cargas) => {
                         cantidad: cantidadConsumida,
                         nivelAnterior: nivelActual,
                         nivelNuevo: nuevoNivel,
-                        codigoProducto: codigoProducto  // 🔴 GUARDAR EL CODIGO DEL PRODUCTO
+                        codigoProducto: codigoProducto,
+                        folio: folio  // 🔴 GUARDAR EL FOLIO
                     });
                 }
             }

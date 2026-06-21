@@ -4,6 +4,7 @@ import { analizarExcel } from "../services/excelService";
 import { getOperarioPorMaquina, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../constants/config";
 import { registrarCarga, eliminarCarga, obtenerCargasPorFecha } from "../services/cargaService";
 import { formulasService } from "../services/formulasService";
+import { materiaPrimaService } from "../services/materiaPrimaService";
 
 // --- FUNCIÓN DE UTILIDAD: GENERACIÓN DE FOLIOS ---
 const generarFolioAutomatico = (tipo, cola, rondas, esmaltes, especiales) => {
@@ -102,6 +103,29 @@ export function useProduccion() {
         ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
         : 0, [producto, cantidades]);
 
+    // --- FUNCIÓN PARA GUARDAR CONSUMOS EN LOCALSTORAGE ---
+    const guardarConsumosEnLocalStorage = useCallback((consumos) => {
+        try {
+            const consumosExistentes = JSON.parse(localStorage.getItem('consumosBases') || '[]');
+            const hoy = new Date().toISOString().split('T')[0];
+            
+            const nuevosConsumos = consumos.map(c => ({
+                baseCodigo: c.codigo,
+                lote: c.folio || 'S/F',
+                codigoProducto: c.codigoProducto || 'S/C',
+                cantidad: c.cantidad,
+                fecha: hoy,
+                operario: c.operario || 'Admin'
+            }));
+            
+            const consumosActualizados = [...consumosExistentes, ...nuevosConsumos];
+            localStorage.setItem('consumosBases', JSON.stringify(consumosActualizados));
+            console.log('✅ Consumos guardados en localStorage:', nuevosConsumos.length);
+        } catch (error) {
+            console.error('Error guardando consumos en localStorage:', error);
+        }
+    }, []);
+
     // --- FUNCIÓN PARA CONSUMIR BASES ---
     const consumirBasesDeCargas = useCallback(async (cargas) => {
         if (!cargas || cargas.length === 0) {
@@ -119,14 +143,20 @@ export function useProduccion() {
                 return null;
             }
 
-            const resultado = await formulasService.consumirBasesDesdeCargas(cargasPendientes);
+            const cargasConDatos = cargasPendientes.map(c => ({
+                ...c,
+                codigoProducto: c.codigoProducto || c.codigo,
+                folio: c.folio || c.lote || 'S/F'
+            }));
+
+            const resultado = await formulasService.consumirBasesDesdeCargas(cargasConDatos);
             
             console.log('✅ Bases consumidas:', resultado);
             
             if (resultado.basesConsumidas && resultado.basesConsumidas.length > 0) {
                 console.log('📦 Resumen de consumo:');
                 resultado.basesConsumidas.forEach(b => {
-                    console.log(`  • ${b.codigo}: ${b.cantidad.toFixed(2)} L (${b.nivelAnterior.toFixed(2)} → ${b.nivelNuevo.toFixed(2)})`);
+                    console.log(`  • ${b.codigo}: ${b.cantidad.toFixed(2)} L (Lote: ${b.folio || 'S/F'})`);
                 });
             }
             
@@ -386,123 +416,173 @@ export function useProduccion() {
             .sort((a, b) => b.consumoTotal - a.consumoTotal);
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
-    // --- ACCIONES DE BD - MODIFICADA PARA CONSUMIR BASES ---
-// src/hooks/useProduccion.js - SOLO MODIFICAR la función guardarProduccionEnBD
+    // --- GUARDAR PRODUCCIÓN EN BD - MODIFICADA PARA GUARDAR CONSUMOS EN BD ---
+    const guardarProduccionEnBD = async () => {
+        const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
+        
+        if (todas.length === 0) {
+            alert("No hay cargas para guardar.");
+            return;
+        }
 
-const guardarProduccionEnBD = async () => {
-    const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-    
-    if (todas.length === 0) {
-        alert("No hay cargas para guardar.");
-        return;
-    }
+        const totalLitros = todas.reduce((sum, c) => sum + (c.litros || 0), 0);
 
-    const totalLitros = todas.reduce((sum, c) => sum + (c.litros || 0), 0);
+        if (!window.confirm(
+            `✅ ¿Guardar producción?\n\n` +
+            `Cargas a procesar: ${todas.length}\n` +
+            `Total de litros: ${totalLitros.toFixed(2)} L\n\n` +
+            `⚠️ Esto consumirá las bases necesarias y reducirá los niveles en los tanques.`
+        )) {
+            return;
+        }
 
-    if (!window.confirm(
-        `✅ ¿Guardar producción?\n\n` +
-        `Cargas a procesar: ${todas.length}\n` +
-        `Total de litros: ${totalLitros.toFixed(2)} L\n\n` +
-        `⚠️ Esto consumirá las bases necesarias y reducirá los niveles en los tanques.`
-    )) {
-        return;
-    }
-
-    try {
-        setGuardandoBD(true);
-
-        // 🔴 CONSUMIR BASES
         try {
-            const resultadoConsumo = await consumirBasesDeCargas(todas);
-            
-            if (resultadoConsumo && resultadoConsumo.basesConsumidas.length > 0) {
-                // 🔴 FILTRAR SOLO BBE20 Y BBE30
-                const basesFiltradas = resultadoConsumo.basesConsumidas.filter(b => 
-                    b.codigo === 'BBE20' || b.codigo === 'BBE30'
-                );
+            setGuardandoBD(true);
 
-                if (basesFiltradas.length > 0) {
-                    let mensaje = `📦 Consumo de bases:\n\n`;
+            // 🔴 CONSUMIR BASES
+            try {
+                const resultadoConsumo = await consumirBasesDeCargas(todas);
+                
+                if (resultadoConsumo && resultadoConsumo.basesConsumidas && resultadoConsumo.basesConsumidas.length > 0) {
                     
-                    basesFiltradas.forEach(b => {
-                        // Buscar la carga que consumió esta base
-                        const cargaRelacionada = todas.find(c => 
-                            c.codigoProducto === b.codigoProducto || 
-                            c.codigo === b.codigoProducto
-                        );
+                    // 🔴 GUARDAR EN LOCALSTORAGE
+                    guardarConsumosEnLocalStorage(resultadoConsumo.basesConsumidas);
+
+                    // 🔴 GUARDAR EN LA BASE DE DATOS
+                    try {
+                        // Obtener todas las materias primas para tener los IDs
+                        const todasLasMP = await materiaPrimaService.listarTodas();
                         
-                        const lote = cargaRelacionada?.folio || 'S/F';
-                        const producto = cargaRelacionada?.codigoProducto || cargaRelacionada?.codigo || 'S/C';
-                        const tipo = cargaRelacionada?.tipo || 'Desconocido';
-                        
-                        mensaje += `  • ${b.codigo}: ${b.cantidad.toFixed(2)} L\n`;
-                        mensaje += `    Lote: ${lote} | Producto: ${producto} | Tipo: ${tipo}\n\n`;
-                    });
+                        const consumosParaBD = resultadoConsumo.basesConsumidas.map(b => {
+                            // Buscar la materia prima por código para obtener su ID
+                            const mp = todasLasMP.find(m => m.codigo === b.codigo);
+                            return {
+                                loteId: b.folio || 'S/F',
+                                materiaPrimaId: mp ? mp.id : null,
+                                cantidadConsumida: b.cantidad,
+                                litrosProducidos: 0,
+                                operario: 'Admin',
+                                observaciones: `Consumo de ${b.codigo} para lote ${b.folio}`
+                            };
+                        });
+
+                        const response = await fetch('http://localhost:8080/api/consumos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(consumosParaBD)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('✅ Consumos guardados en BD:', data);
+                        } else {
+                            const error = await response.text();
+                            console.error('❌ Error guardando consumos en BD:', error);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error guardando consumos en BD:', error);
+                    }
                     
-                    alert(mensaje);
+                    // 🔴 FILTRAR SOLO BBE20 Y BBE30 PARA EL MENSAJE
+                    const basesFiltradas = resultadoConsumo.basesConsumidas.filter(b => 
+                        b.codigo === 'BBE20' || b.codigo === 'BBE30'
+                    );
+
+                    if (basesFiltradas.length > 0) {
+                        const consumosAgrupados = {};
+                        
+                        basesFiltradas.forEach(b => {
+                            const lote = b.folio || 'S/F';
+                            const producto = b.codigoProducto || 'S/C';
+                            
+                            const key = `${b.codigo}-${lote}`;
+                            if (!consumosAgrupados[key]) {
+                                consumosAgrupados[key] = {
+                                    codigo: b.codigo,
+                                    lote: lote,
+                                    producto: producto,
+                                    cantidad: 0
+                                };
+                            }
+                            consumosAgrupados[key].cantidad += b.cantidad;
+                        });
+
+                        let mensaje = `📦 Consumo de bases:\n\n`;
+                        const valores = Object.values(consumosAgrupados);
+                        
+                        if (valores.length === 0) {
+                            mensaje += 'No se encontraron consumos de BBE20 o BBE30';
+                        } else {
+                            valores.forEach(item => {
+                                mensaje += `  • ${item.codigo}: ${item.cantidad.toFixed(2)} L\n`;
+                                mensaje += `    Lote: ${item.lote} | Producto: ${item.producto}\n\n`;
+                            });
+                        }
+                        
+                        alert(mensaje);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error consumiendo bases:', error);
+                if (!window.confirm(`⚠️ Error al consumir bases: ${error.message}\n¿Continuar con el guardado?`)) {
+                    setGuardandoBD(false);
+                    return;
                 }
             }
-        } catch (error) {
-            console.error('❌ Error consumiendo bases:', error);
-            if (!window.confirm(`⚠️ Error al consumir bases: ${error.message}\n¿Continuar con el guardado?`)) {
-                setGuardandoBD(false);
-                return;
-            }
-        }
 
-        // 🔴 GUARDAR EN BD
-        const registrosParaBD = [];
-        todas.forEach(carga => {
-            if (carga.detallesEnvasado) {
-                carga.detallesEnvasado.forEach(detalle => {
-                    if (detalle.cantidad > 0 && detalle.id) {
-                        let maquinaGuardar = "";
-                        if (carga.maquina) {
-                            maquinaGuardar = String(carga.maquina);
-                        } else if (carga.maquinaAsignada) {
-                            maquinaGuardar = String(carga.maquinaAsignada);
-                        } else if (carga.textoMaquina) {
-                            const match = carga.textoMaquina.match(/VI-(\d+)/);
-                            if (match) maquinaGuardar = match[1];
+            // 🔴 GUARDAR EN BD (cargas)
+            const registrosParaBD = [];
+            todas.forEach(carga => {
+                if (carga.detallesEnvasado) {
+                    carga.detallesEnvasado.forEach(detalle => {
+                        if (detalle.cantidad > 0 && detalle.id) {
+                            let maquinaGuardar = "";
+                            if (carga.maquina) {
+                                maquinaGuardar = String(carga.maquina);
+                            } else if (carga.maquinaAsignada) {
+                                maquinaGuardar = String(carga.maquinaAsignada);
+                            } else if (carga.textoMaquina) {
+                                const match = carga.textoMaquina.match(/VI-(\d+)/);
+                                if (match) maquinaGuardar = match[1];
+                            }
+
+                            registrosParaBD.push({
+                                codigoProducto: String(carga.codigoProducto),
+                                envasadoId: Number(detalle.id),
+                                cantidad: Number(detalle.cantidad),
+                                litros: Number(carga.litros),
+                                tipo: carga.tipo === "Vinílica" ? "V" : "E",
+                                folio: carga.folio,
+                                folioHija: detalle.folioIndividual,
+                                operario: carga.operario || "Sin asignar",
+                                maquina: maquinaGuardar
+                            });
                         }
+                    });
+                }
+            });
 
-                        registrosParaBD.push({
-                            codigoProducto: String(carga.codigoProducto),
-                            envasadoId: Number(detalle.id),
-                            cantidad: Number(detalle.cantidad),
-                            litros: Number(carga.litros),
-                            tipo: carga.tipo === "Vinílica" ? "V" : "E",
-                            folio: carga.folio,
-                            folioHija: detalle.folioIndividual,
-                            operario: carga.operario || "Sin asignar",
-                            maquina: maquinaGuardar
-                        });
-                    }
-                });
+            console.log("📦 Registros a guardar:", registrosParaBD.length);
+
+            await registrarCarga(registrosParaBD);
+
+            // 🔴 ACTUALIZAR PANTALLAS
+            if (window.recargarBases) {
+                window.recargarBases();
             }
-        });
+            if (window.recargarCriticos) {
+                window.recargarCriticos();
+            }
 
-        console.log("📦 Registros a guardar:", registrosParaBD.length);
+            alert("✅ Producción guardada con éxito");
 
-        await registrarCarga(registrosParaBD);
-
-        // 🔴 ACTUALIZAR PANTALLAS
-        if (window.recargarBases) {
-            window.recargarBases();
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Error al conectar con el servidor: " + error.message);
+        } finally {
+            setGuardandoBD(false);
         }
-        if (window.recargarCriticos) {
-            window.recargarCriticos();
-        }
-
-        alert("✅ Producción guardada con éxito");
-
-    } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Error al conectar con el servidor: " + error.message);
-    } finally {
-        setGuardandoBD(false);
-    }
-};
+    };
 
     const handleEliminarCargaBD = async (idBD, idTemp) => {
         if (!idBD) {

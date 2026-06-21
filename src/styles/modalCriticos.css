@@ -1118,3 +1118,111 @@
     text-shadow: 0 0 5px rgba(192, 0, 255, 0.5);
 }
 
+/* ===== ESTILOS PARA EL INDICADOR DE TIPOS DE CARGA ===== */
+.tipos-carga-indicador {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.tipo-label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.tipo-badge {
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tipo-badge.vinilica {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.tipo-badge.esmalte {
+    background: rgba(251, 146, 60, 0.15);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.tipo-badge.desconocido {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tipo-badge.total {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===== ESTILOS PARA LAS FILAS SEGÚN TIPO ===== */
+.fila-vinilica {
+    border-left: 3px solid rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.02);
+}
+
+.fila-esmalte {
+    border-left: 3px solid rgba(251, 146, 60, 0.3);
+    background: rgba(251, 146, 60, 0.02);
+}
+
+.tipo-carga-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+
+.tipo-carga-badge.vinilica {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.tipo-carga-badge.esmalte {
+    background: rgba(251, 146, 60, 0.15);
+    color: #fb923c;
+}
+
+/* ===== LEYENDA DE COLORES ===== */
+.leyenda-color.vinilica {
+    background: #3b82f6;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.leyenda-color.esmalte {
+    background: #fb923c;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .tipos-carga-indicador {
+        padding: 6px 12px;
+        gap: 8px;
+    }
+    
+    .tipo-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+    }
+}

@@ -59,7 +59,13 @@ export default function ProduccionScreen() {
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
 
+    // 🔴 ESTADOS PARA INVENTARIO
     const [alertasInventario, setAlertasInventario] = useState({
+        "Vinílica": [],
+        "Esmalte": []
+    });
+
+    const [alertasRevisar, setAlertasRevisar] = useState({
         "Vinílica": [],
         "Esmalte": []
     });
@@ -172,20 +178,40 @@ export default function ProduccionScreen() {
         };
     }, [cargasEsmaltesAsignadas, filtroOperario]);
 
+    // 🔴 HANDLERS MODIFICADO - Incluye setAlertasRevisar
     const handlers = useMemo(() => {
         return createProduccionHandlers({
-            tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
-            setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales,
-            setAnalizandoStock, setProcesandoPdf, setProcesandoReporte,
+            tipoPintura, 
+            rondas, 
+            cargasEsmaltesAsignadas, 
+            cargasEspeciales,
+            setRondas, 
+            setCargasEsmaltesAsignadas, 
+            setCargasEspeciales,
+            setAnalizandoStock, 
+            setProcesandoPdf, 
+            setProcesandoReporte,
             setAlertasInventario: (nuevasAlertas) => {
                 setAlertasInventario(prev => ({
                     ...prev,
                     [tipoPintura]: nuevasAlertas
                 }));
             },
-            setProgreso, setMenuCargasAbierto, setMenuReporteAbierto,
-            setDatosPlanificador, setMostrarModalPlanificador, setMostrarModalInventario,
-            handleImportExcel, ordenarCargas, fechaTrabajo: fechaRotacion
+            setAlertasRevisar: (nuevasRevisar) => {
+                setAlertasRevisar(prev => ({
+                    ...prev,
+                    [tipoPintura]: nuevasRevisar
+                }));
+            },
+            setProgreso, 
+            setMenuCargasAbierto, 
+            setMenuReporteAbierto,
+            setDatosPlanificador, 
+            setMostrarModalPlanificador, 
+            setMostrarModalInventario,
+            handleImportExcel, 
+            ordenarCargas, 
+            fechaTrabajo: fechaRotacion
         });
     }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
 
@@ -215,55 +241,44 @@ export default function ProduccionScreen() {
             .reduce((sum, c) => sum + (c.litros || 0), 0).toFixed(2);
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
-
-// Calcular cargas con su consumo individual (para la vista por carga)
-const cargasConConsumo = useMemo(() => {
-    const todasLasCargas = [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-    
-    return todasLasCargas.map((carga, index) => {
-        // 🔴 CLAVE: Usar el folio real que ya existe en la carga
-        const folio = carga.folio || carga.lote || carga.numeroLote || `ORD-${index + 1}`;
+    // Calcular cargas con su consumo individual (para la vista por carga)
+    const cargasConConsumo = useMemo(() => {
+        const todasLasCargas = [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
         
-        // Obtener el código del producto
-        const codigo = carga.codigo || carga.codigoProducto || `PROD-${index + 1}`;
-        
-        // Obtener la descripción
-        const descripcion = carga.descripcion || carga.nombre || "Sin descripción";
-        
-        // Obtener los litros
-        const litros = carga.litros || 0;
-        
-        // IMPORTANTE: El consumo de materia prima DEBE venir del cálculo de la fórmula
-        let consumoTotal = carga.consumoTotal || 0;
-        
-        // Si no tiene consumoTotal pero tiene materiasPrimas, calcular
-        if (consumoTotal === 0 && carga.materiasPrimas && Array.isArray(carga.materiasPrimas)) {
-            consumoTotal = carga.materiasPrimas.reduce((sum, mp) => sum + (mp.consumo || mp.cantidad || 0), 0);
-        }
-        
-        // Obtener las materias primas de la carga (si las tiene)
-        const materiasPrimas = carga.materiasPrimas || [];
-        
-        return {
-            id: carga.idTemp || carga.id || index,
-            codigo: codigo,
-            folio: folio,                    // 🔴 ESTO ES LO QUE FALTA - el campo que usa el modal
-            orden: folio,                    // También como orden para compatibilidad
-            lote: folio,                     // También como lote
-            numeroLote: folio,               // Mantener compatibilidad
-            descripcion: descripcion,
-            nombre: descripcion,
-            productoNombre: descripcion,
-            litros: litros,
-            consumoTotal: consumoTotal,
-            tipo: carga.tipo || "Desconocido",
-            operario: carga.operario || "N/A",
-            materiasPrimas: materiasPrimas,
-            fecha: carga.fecha || new Date().toLocaleDateString(),
-            estado: carga.estado || "Programada"
-        };
-    });
-}, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
+        return todasLasCargas.map((carga, index) => {
+            const folio = carga.folio || carga.lote || carga.numeroLote || `ORD-${index + 1}`;
+            const codigo = carga.codigo || carga.codigoProducto || `PROD-${index + 1}`;
+            const descripcion = carga.descripcion || carga.nombre || "Sin descripción";
+            const litros = carga.litros || 0;
+            
+            let consumoTotal = carga.consumoTotal || 0;
+            
+            if (consumoTotal === 0 && carga.materiasPrimas && Array.isArray(carga.materiasPrimas)) {
+                consumoTotal = carga.materiasPrimas.reduce((sum, mp) => sum + (mp.consumo || mp.cantidad || 0), 0);
+            }
+            
+            const materiasPrimas = carga.materiasPrimas || [];
+            
+            return {
+                id: carga.idTemp || carga.id || index,
+                codigo: codigo,
+                folio: folio,
+                orden: folio,
+                lote: folio,
+                numeroLote: folio,
+                descripcion: descripcion,
+                nombre: descripcion,
+                productoNombre: descripcion,
+                litros: litros,
+                consumoTotal: consumoTotal,
+                tipo: carga.tipo || "Desconocido",
+                operario: carga.operario || "N/A",
+                materiasPrimas: materiasPrimas,
+                fecha: carga.fecha || new Date().toLocaleDateString(),
+                estado: carga.estado || "Programada"
+            };
+        });
+    }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
     return (
         <div className="app">
@@ -382,7 +397,7 @@ const cargasConConsumo = useMemo(() => {
                                     )}
 
                                     <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>
-                                        📋 Lista Espera
+                                        📋 Lista Espera  
                                     </button>
                                     <label className="dropdown-item label-input">
                                         📊 Importar Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleImportExcelConProgreso} />
@@ -553,7 +568,8 @@ const cargasConConsumo = useMemo(() => {
 
             <ModalInventarioBajo
                 visible={mostrarModalInventario}
-                alertas={alertasInventario[tipoPintura]}
+                alertas={alertasInventario[tipoPintura] || []}
+                alertasRevisar={alertasRevisar[tipoPintura] || []}
                 onClose={() => setMostrarModalInventario(false)}
                 onSelectCode={setCodigo}
                 onAnalizarNuevo={handlers.handleAnalizarStock}

@@ -2956,3 +2956,144 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+
+
+/* ========== PAGINACIÓN ========== */
+.paginacion-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.paginacion-info {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.paginacion-botones {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.paginacion-btn {
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    min-width: 32px;
+    text-align: center;
+}
+
+.paginacion-btn:hover:not(:disabled) {
+    background: rgba(192, 0, 255, 0.2);
+    border-color: rgba(192, 0, 255, 0.3);
+    color: #e879f9;
+}
+
+.paginacion-btn.active {
+    background: linear-gradient(135deg, rgba(192, 0, 255, 0.3), rgba(128, 0, 255, 0.2));
+    border-color: #c000ff;
+    color: #e879f9;
+    font-weight: 600;
+}
+
+.paginacion-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.paginacion-puntos {
+    color: rgba(255, 255, 255, 0.3);
+    padding: 0 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .paginacion-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .paginacion-botones {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+
+/* ========== ALERTAS CON CÓDIGO ========== */
+.alerta-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.alerta-titulo h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.alerta-codigo {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: rgba(168, 85, 247, 0.2);
+    color: #a855f7;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+.alerta-card.critica .alerta-codigo {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.alerta-card.precaucion .alerta-codigo {
+    background: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+}
+
+.alerta-info p {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 4px 0 0 0;
+}
+
+.alerta-info p strong {
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .alerta-titulo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .alerta-titulo h4 {
+        font-size: 13px;
+    }
+    
+    .alerta-codigo {
+        font-size: 9px;
+        padding: 1px 8px;
+    }
+}
+
+

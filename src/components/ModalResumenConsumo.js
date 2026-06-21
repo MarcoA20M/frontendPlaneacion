@@ -1,4 +1,4 @@
-// src/components/ModalResumenConsumo.js - VERSIÓN SOLO LECTURA (SIN CONFIRMAR)
+// src/components/ModalResumenConsumo.js - VERSIÓN CON ORDENAMIENTO POR TIPO Y LOTE
 import React, { useState, useMemo, useEffect } from "react";
 import { formulasService } from "../services/formulasService";
 import "../styles/modalCriticos.css";
@@ -79,6 +79,66 @@ const ModalResumenConsumo = ({
         return ordenStr.length;
     };
 
+    // ===== FUNCIÓN: Determinar si es Vinílica o Esmalte basado en el lote =====
+    const determinarTipoPorLote = (lote) => {
+        if (!lote) return 'desconocido';
+        const loteUpper = lote.toUpperCase().trim();
+        // Si el lote empieza con 'V', es Vinílica
+        if (loteUpper.startsWith('V')) {
+            return 'vinilica';
+        }
+        // Si el lote empieza con 'E', es Esmalte
+        if (loteUpper.startsWith('E')) {
+            return 'esmalte';
+        }
+        return 'desconocido';
+    };
+
+    // ===== FUNCIÓN: Extraer número del lote (ej: V26 -> 26, E26 -> 26) =====
+    const extraerNumeroLote = (lote) => {
+        if (!lote) return 999999;
+        const numeros = lote.match(/\d+/g);
+        if (numeros) {
+            return parseInt(numeros.join(''), 10);
+        }
+        return 999999;
+    };
+
+    // ===== FUNCIÓN: Determinar el tipo de carga basado en múltiples fuentes =====
+    const determinarTipoCarga = (carga) => {
+        // 1. Primero por el lote
+        const lote = carga.lote || carga.folio || '';
+        const tipoPorLote = determinarTipoPorLote(lote);
+        if (tipoPorLote !== 'desconocido') {
+            return tipoPorLote;
+        }
+
+        // 2. Por el código del producto
+        const codigo = carga.codigo || carga.codigoProducto || '';
+        if (codigo) {
+            const codigoUpper = codigo.toUpperCase();
+            if (codigoUpper.startsWith('V')) return 'vinilica';
+            if (codigoUpper.startsWith('E')) return 'esmalte';
+        }
+
+        // 3. Por el nombre del producto
+        const nombre = carga.productoNombre || carga.nombre || carga.descripcion || '';
+        if (nombre) {
+            const nombreLower = nombre.toLowerCase();
+            if (nombreLower.includes('vinilica') || nombreLower.includes('vin')) return 'vinilica';
+            if (nombreLower.includes('esmalte') || nombreLower.includes('esm')) return 'esmalte';
+        }
+
+        // 4. Por el tipo explícito de la carga
+        if (carga.tipo) {
+            const tipoLower = carga.tipo.toLowerCase();
+            if (tipoLower === 'vinilica' || tipoLower === 'vin') return 'vinilica';
+            if (tipoLower === 'esmalte' || tipoLower === 'esm') return 'esmalte';
+        }
+
+        return 'desconocido';
+    };
+
     // Cargar datos
     useEffect(() => {
         if (visible && cargasConConsumo.length > 0) {
@@ -156,6 +216,10 @@ const ModalResumenConsumo = ({
                 }
             }
 
+            // Determinar el tipo de carga
+            const tipoCarga = determinarTipoCarga(carga);
+            const numeroLote = extraerNumeroLote(lote);
+
             cargasConInfo.push({
                 id: carga.id,
                 orden: orden,
@@ -167,7 +231,9 @@ const ModalResumenConsumo = ({
                 fecha: carga.fecha || new Date().toLocaleDateString(),
                 estado: carga.estado || "Programada",
                 consumos: consumosPorMateria,
-                numeroOrden: extraerNumeroOrden(orden)
+                numeroOrden: extraerNumeroOrden(orden),
+                tipoCarga: tipoCarga,
+                numeroLote: numeroLote
             });
         }
 
@@ -186,7 +252,23 @@ const ModalResumenConsumo = ({
         }
 
         setMateriasUnicas(materiasOrdenadas);
-        const cargasOrdenadas = [...cargasConInfo].sort((a, b) => a.numeroOrden - b.numeroOrden);
+
+        // ===== ORDENAMIENTO CORREGIDO: Primero Vinílicas (V*), luego Esmaltes (E*), por número de lote =====
+        const cargasOrdenadas = [...cargasConInfo].sort((a, b) => {
+            // Definir el orden de tipos: Vinílica primero, Esmalte después
+            const tipoOrder = { 'vinilica': 0, 'esmalte': 1, 'desconocido': 2 };
+            const tipoA = tipoOrder[a.tipoCarga] ?? 2;
+            const tipoB = tipoOrder[b.tipoCarga] ?? 2;
+            
+            // Primero ordenar por tipo
+            if (tipoA !== tipoB) {
+                return tipoA - tipoB;
+            }
+            
+            // Si son del mismo tipo, ordenar por número de lote (menor a mayor)
+            return a.numeroLote - b.numeroLote;
+        });
+
         setCargasConDetalle(cargasOrdenadas);
     };
 
@@ -303,6 +385,16 @@ const ModalResumenConsumo = ({
             carga.productoNombre?.toLowerCase().includes(termino)
         );
     }, [cargasConDetalle, busqueda]);
+
+    // Contar Vinílicas y Esmaltes
+    const contarPorTipo = () => {
+        const vinilicas = cargasConDetalle.filter(c => c.tipoCarga === 'vinilica').length;
+        const esmaltes = cargasConDetalle.filter(c => c.tipoCarga === 'esmalte').length;
+        const desconocidos = cargasConDetalle.filter(c => c.tipoCarga === 'desconocido').length;
+        return { vinilicas, esmaltes, desconocidos };
+    };
+
+    const { vinilicas, esmaltes, desconocidos } = contarPorTipo();
 
     if (!visible) return null;
 
@@ -516,6 +608,31 @@ const ModalResumenConsumo = ({
                                         </div>
                                     </div>
 
+                                    {/* ===== INDICADOR DE TIPOS ===== */}
+                                    {(vinilicas > 0 || esmaltes > 0) && (
+                                        <div className="tipos-carga-indicador">
+                                            <span className="tipo-label">📌 Orden: </span>
+                                            {vinilicas > 0 && (
+                                                <span className="tipo-badge vinilica">
+                                                    🟦 Vinílicas: {vinilicas}
+                                                </span>
+                                            )}
+                                            {esmaltes > 0 && (
+                                                <span className="tipo-badge esmalte">
+                                                    🟧 Esmaltes: {esmaltes}
+                                                </span>
+                                            )}
+                                            {desconocidos > 0 && (
+                                                <span className="tipo-badge desconocido">
+                                                    ⬜ Sin clasificar: {desconocidos}
+                                                </span>
+                                            )}
+                                            <span className="tipo-badge total">
+                                                📊 Total: {vinilicas + esmaltes + desconocidos}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <div className="matricial-buscador">
                                         <input
                                             type="text"
@@ -544,35 +661,46 @@ const ModalResumenConsumo = ({
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {cargasFiltradas.map((carga, idx) => (
-                                                    <tr
-                                                        key={carga.id}
-                                                        className={`${carga.estado === "Completada" ? "fila-completada" : "fila-pendiente"} ${filaSeleccionada === carga.id ? "fila-seleccionada" : ""}`}
-                                                        onClick={() => setFilaSeleccionada(filaSeleccionada === carga.id ? null : carga.id)}
-                                                        style={{ cursor: 'pointer' }}
-                                                    >
-                                                        <td className="sticky-col"><code>{carga.orden}</code></td>
-                                                        <td className="sticky-col-2"><code className="producto-codigo-solo">{carga.producto}</code></td>
-                                                        <td className="sticky-col-3 cantidad">{carga.litros.toLocaleString()}</td>
-                                                        {materiasUnicas.map(materia => {
-                                                            const consumo = carga.consumos[materia.codigo];
-                                                            const valor = consumo ? consumo.consumo.toFixed(2) : "-";
-                                                            const esAlto = consumo && consumo.consumo > 100;
-                                                            return (
-                                                                <td key={materia.codigo} className={esAlto ? "consumo-alto" : ""}>
-                                                                    {valor !== "-" ? (
-                                                                        <div className="consumo-cell">
-                                                                            <span>{valor}</span>
-                                                                            <div className="consumo-bar" style={{ width: `${Math.min(100, (parseFloat(valor) / 800) * 100)}%` }}></div>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <span className="sin-consumo">—</span>
-                                                                    )}
-                                                                </td>
-                                                            );
-                                                        })}
-                                                    </tr>
-                                                ))}
+                                                {cargasFiltradas.map((carga, idx) => {
+                                                    const esVinilica = carga.tipoCarga === 'vinilica';
+                                                    const esEsmalte = carga.tipoCarga === 'esmalte';
+                                                    const tipoClase = esVinilica ? 'fila-vinilica' : (esEsmalte ? 'fila-esmalte' : '');
+                                                    
+                                                    return (
+                                                        <tr
+                                                            key={carga.id}
+                                                            className={`${carga.estado === "Completada" ? "fila-completada" : "fila-pendiente"} 
+                                                                ${filaSeleccionada === carga.id ? "fila-seleccionada" : ""} 
+                                                                ${tipoClase}`}
+                                                            onClick={() => setFilaSeleccionada(filaSeleccionada === carga.id ? null : carga.id)}
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
+                                                            <td className="sticky-col">
+                                                                <code>{carga.orden}</code>
+                                                               
+                                                            </td>
+                                                            <td className="sticky-col-2"><code className="producto-codigo-solo">{carga.producto}</code></td>
+                                                            <td className="sticky-col-3 cantidad">{carga.litros.toLocaleString()}</td>
+                                                            {materiasUnicas.map(materia => {
+                                                                const consumo = carga.consumos[materia.codigo];
+                                                                const valor = consumo ? consumo.consumo.toFixed(2) : "-";
+                                                                const esAlto = consumo && consumo.consumo > 100;
+                                                                return (
+                                                                    <td key={materia.codigo} className={esAlto ? "consumo-alto" : ""}>
+                                                                        {valor !== "-" ? (
+                                                                            <div className="consumo-cell">
+                                                                                <span>{valor}</span>
+                                                                                <div className="consumo-bar" style={{ width: `${Math.min(100, (parseFloat(valor) / 800) * 100)}%` }}></div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="sin-consumo">—</span>
+                                                                        )}
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                             <tfoot>
                                                 <tr className="total-row">
@@ -607,6 +735,14 @@ const ModalResumenConsumo = ({
                                         <div className="leyenda-item">
                                             <span className="leyenda-bg pendiente"></span>
                                             <span>Carga pendiente</span>
+                                        </div>
+                                        <div className="leyenda-item">
+                                            <span className="leyenda-color vinilica"></span>
+                                            <span>🟦 Vinílica (V*)</span>
+                                        </div>
+                                        <div className="leyenda-item">
+                                            <span className="leyenda-color esmalte"></span>
+                                            <span>🟧 Esmalte (E*)</span>
                                         </div>
                                     </div>
                                 </>

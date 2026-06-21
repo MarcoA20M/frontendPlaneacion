@@ -1,10 +1,11 @@
-// src/screens/FormulasScreen.js - VERSIÓN COMPLETA CON IMAGEN DE FAMILIA
+// src/screens/FormulasScreen.js - VERSIÓN COMPLETA CON PAGINACIÓN
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import { productoService } from "../services/productoService";
 import { formulasService } from "../services/formulasService";
 import { familiaService } from "../services/familiaService";
+import SidebarMateriaPrima from "../components/SidebarMateriaPrima";
 import "../styles/criticos.css";
 
 export default function FormulasScreen() {
@@ -41,6 +42,10 @@ export default function FormulasScreen() {
     const [materiasFiltradas, setMateriasFiltradas] = useState([]);
     const dropdownRef = useRef(null);
 
+    // 🔴 ESTADOS PARA PAGINACIÓN
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [productosPorPagina] = useState(20);
+
     // 🔴 ESTADOS PARA LA IMAGEN DE FAMILIA
     const [imagenFamilia, setImagenFamilia] = useState(null);
     const [familiaInfo, setFamiliaInfo] = useState(null);
@@ -55,6 +60,19 @@ export default function FormulasScreen() {
     const formulasFiltradas = mostrarSoloImportantesEnTabla
         ? formulas.filter(f => MATERIAS_IMPORTANTES.includes(f.materiaPrima?.codigo))
         : formulas;
+
+    // 🔴 CÁLCULOS DE PAGINACIÓN
+    const indexUltimoProducto = paginaActual * productosPorPagina;
+    const indexPrimerProducto = indexUltimoProducto - productosPorPagina;
+    const productosPaginaActual = productosFiltrados.slice(indexPrimerProducto, indexUltimoProducto);
+    const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+
+    // 🔴 FUNCIÓN PARA CAMBIAR PÁGINA
+    const cambiarPagina = (numeroPagina) => {
+        setPaginaActual(numeroPagina);
+        const panel = document.querySelector('.productos-lista-simple');
+        if (panel) panel.scrollTop = 0;
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -107,14 +125,12 @@ export default function FormulasScreen() {
 
         setCargandoImagen(true);
         try {
-            // Cargar información de la familia
             const familiaResponse = await fetch(`http://localhost:8080/api/familias/${familiaId}`);
             if (familiaResponse.ok) {
                 const familia = await familiaResponse.json();
                 setFamiliaInfo(familia);
             }
 
-            // Obtener URL de la imagen
             const imgUrl = familiaService.getImagenUrl(familiaId);
             setImagenFamilia(imgUrl);
         } catch (error) {
@@ -131,7 +147,6 @@ export default function FormulasScreen() {
         if (productos.length > 0 && !productoSeleccionado) {
             const productoParam = getProductoParamFromUrl();
             if (productoParam) {
-                console.log("Buscando producto con parámetro:", productoParam);
                 let productoEncontrado = productos.find(p =>
                     p.codigo?.toString().toLowerCase() === productoParam.toString().toLowerCase()
                 );
@@ -141,16 +156,13 @@ export default function FormulasScreen() {
                     );
                 }
                 if (productoEncontrado) {
-                    console.log("Producto encontrado:", productoEncontrado);
                     seleccionarProducto(productoEncontrado);
-                } else {
-                    console.log("Producto no encontrado para el parámetro:", productoParam);
                 }
             }
         }
     }, [productos]);
 
-    // 🔴 EFECTO para escuchar cambios en la URL mientras el componente está montado
+    // 🔴 EFECTO para escuchar cambios en la URL
     useEffect(() => {
         if (productos.length > 0) {
             const productoParam = getProductoParamFromUrl();
@@ -165,6 +177,11 @@ export default function FormulasScreen() {
             }
         }
     }, [location.search, productos]);
+
+    // 🔴 EFECTO para resetear página al buscar o filtrar
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda, filtroTipo]);
 
     useEffect(() => {
         if (!mostrarFormNueva) {
@@ -215,7 +232,6 @@ export default function FormulasScreen() {
     };
 
     const seleccionarProducto = async (producto) => {
-        console.log("Seleccionando producto:", producto);
         const productoId = producto.id || producto.codigo;
         setProductoSeleccionado(producto);
         setMostrarFormNueva(false);
@@ -226,7 +242,6 @@ export default function FormulasScreen() {
         setMostrarDropdownMP(false);
         setMateriasFiltradas([]);
 
-        // 🔴 Cargar imagen de la familia del producto
         if (producto.familiaId) {
             await cargarImagenFamilia(producto.familiaId);
         } else {
@@ -361,72 +376,14 @@ export default function FormulasScreen() {
     return (
         <div className="criticos-container">
             <div className="criticos-glass-panel">
-                <aside className="criticos-sidebar">
-                    <div className="sidebar-logo">
-                        <span className="logo-icon">⚡</span>
-                        <h2>Materia Prima</h2>
-                    </div>
-
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">PRINCIPAL</div>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">📊</span>
-                            Dashboard
-                        </button>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">🛢️</span>
-                            Tanques
-                        </button>
-                        <button className="sidebar-btn" onClick={() => navigate("/mantenimiento/criticos")}>
-                            <span className="btn-icon">🚨</span>
-                            Alertas
-                            {tanquesCriticos.length > 0 && (
-                                <span className="badge-alerta">{tanquesCriticos.length}</span>
-                            )}
-                        </button>
-                        <button className="sidebar-btn" onClick={irATrazabilidad}>
-                            <span className="btn-icon">🔗</span>
-                            Trazabilidad
-                        </button>
-                    </nav>
-
-                    <div className="nav-divider"></div>
-
-                    <nav className="sidebar-nav">
-                        <div className="nav-label">CONFIGURACIÓN</div>
-                        <button className="sidebar-btn active" style={{ background: "rgba(192,0,255,0.2)" }}>
-                            <span className="btn-icon">📋</span>
-                            Consultar codigos
-                        </button>
-                        <button className="sidebar-btn" onClick={irAGestionarMP} style={{ marginTop: "4px" }}>
-                            <span className="btn-icon">📦</span>
-                            Gestionar Materias Primas
-                        </button>
-                        <button
-                            className="sidebar-btn"
-                            onClick={() => navigate("/bases")}
-                        >
-                            <span className="btn-icon">🛢️</span>
-                            Bases
-                        </button>
-                    </nav>
-
-                    <div className="sidebar-footer">
-                        <div className="stats-resumen-sidebar">
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{sidebarDataLoaded ? inventarioTotal.toLocaleString() : "---"}</span>
-                                <span className="stat-label">Total L/Kg</span>
-                            </div>
-                            <div className="stat-sidebar">
-                                <span className="stat-value">{sidebarDataLoaded && capacidadTotal > 0 ? ((inventarioTotal / capacidadTotal) * 100).toFixed(0) : "---"}%</span>
-                                <span className="stat-label">Capacidad</span>
-                            </div>
-                        </div>
-                        <button className="btn-volver" onClick={() => navigate("/mantenimiento")}>
-                            ↩ Volver
-                        </button>
-                    </div>
-                </aside>
+                <SidebarMateriaPrima 
+                    seccionActiva="formulas"
+                    inventarioTotal={inventarioTotal}
+                    capacidadTotal={capacidadTotal}
+                    tanquesCriticos={tanquesCriticos}
+                    onCambiarSeccion={null}
+                    mostrarBases={true}
+                />
 
                 <main className="criticos-main">
                     {loadingContent ? (
@@ -467,7 +424,7 @@ export default function FormulasScreen() {
                                         </div>
                                     </div>
                                     <div className="productos-lista-simple">
-                                        {productosFiltrados.map(producto => (
+                                        {productosPaginaActual.map(producto => (
                                             <div
                                                 key={producto.codigo}
                                                 className={`producto-simple ${productoSeleccionado?.codigo === producto.codigo ? 'active' : ''}`}
@@ -479,6 +436,61 @@ export default function FormulasScreen() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* 🔴 PAGINACIÓN */}
+                                    {productosFiltrados.length > productosPorPagina && (
+                                        <div className="paginacion-container">
+                                           
+                                            <div className="paginacion-botones">
+                                                <button 
+                                                    className="paginacion-btn"
+                                                    onClick={() => cambiarPagina(paginaActual - 1)}
+                                                    disabled={paginaActual === 1}
+                                                >
+                                                    ◀
+                                                </button>
+                                                {Array.from({ length: Math.min(totalPaginas, 5) }, (_, i) => {
+                                                    let numeroPagina;
+                                                    if (totalPaginas <= 5) {
+                                                        numeroPagina = i + 1;
+                                                    } else if (paginaActual <= 3) {
+                                                        numeroPagina = i + 1;
+                                                    } else if (paginaActual >= totalPaginas - 2) {
+                                                        numeroPagina = totalPaginas - 4 + i;
+                                                    } else {
+                                                        numeroPagina = paginaActual - 2 + i;
+                                                    }
+                                                    return (
+                                                        <button
+                                                            key={numeroPagina}
+                                                            className={`paginacion-btn ${paginaActual === numeroPagina ? 'active' : ''}`}
+                                                            onClick={() => cambiarPagina(numeroPagina)}
+                                                        >
+                                                            {numeroPagina}
+                                                        </button>
+                                                    );
+                                                })}
+                                                {totalPaginas > 5 && paginaActual < totalPaginas - 2 && (
+                                                    <>
+                                                        <span className="paginacion-puntos">...</span>
+                                                        <button
+                                                            className="paginacion-btn"
+                                                            onClick={() => cambiarPagina(totalPaginas)}
+                                                        >
+                                                            {totalPaginas}
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button 
+                                                    className="paginacion-btn"
+                                                    onClick={() => cambiarPagina(paginaActual + 1)}
+                                                    disabled={paginaActual === totalPaginas}
+                                                >
+                                                    ▶
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="formulas-panel-simple">
@@ -492,7 +504,6 @@ export default function FormulasScreen() {
                                         <>
                                             <div className="formula-header">
                                                 <div className="formula-header-info">
-                                                    {/* Imagen de la familia */}
                                                     <div className="formula-imagen-wrap">
                                                         {cargandoImagen ? (
                                                             <div className="formula-imagen-loading">
@@ -525,7 +536,6 @@ export default function FormulasScreen() {
                                                         )}
                                                     </div>
 
-                                                    {/* Información del producto */}
                                                     <div className="formula-info-text">
                                                         <div className="formula-code-row">
                                                             <span className="formula-code-badge">Código</span>

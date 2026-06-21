@@ -1417,3 +1417,134 @@
         padding: 1px 6px;
     }
 }
+
+
+
+/* ========== HEADER CON FILTROS Y BUSCADOR ========== */
+.base-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+/* Filtros a la izquierda */
+.base-filtros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Buscador a la derecha - MÁS PEQUEÑO */
+.base-search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0 10px;
+    transition: all 0.3s;
+    width: 200px; /* 🔴 ANCHO FIJO MÁS PEQUEÑO */
+    flex-shrink: 0;
+}
+
+.base-search-box:focus-within {
+    border-color: #c000ff;
+    box-shadow: 0 0 15px rgba(192, 0, 255, 0.15);
+    width: 240px; /* 🔴 SE EXPANDE UN POCO AL ENFOCARSE */
+}
+
+.base-search-icon {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-right: 6px;
+}
+
+.base-search-input {
+    flex: 1;
+    padding: 8px 6px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    min-width: 80px;
+}
+
+.base-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+}
+
+.base-search-clear {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: all 0.2s;
+}
+
+.base-search-clear:hover {
+    color: #ff5f7e;
+}
+
+/* Información de resultados */
+.base-resultados-info {
+    text-align: right;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 12px;
+    padding-right: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .base-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .base-filtros {
+        justify-content: center;
+    }
+    
+    .base-search-box {
+        width: 100%;
+        max-width: 300px;
+        align-self: center;
+    }
+    
+    .base-search-box:focus-within {
+        width: 100%;
+        max-width: 340px;
+    }
+    
+    .base-resultados-info {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .base-search-box {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .base-search-box:focus-within {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .base-filtros {
+        gap: 4px;
+    }
+    
+    .base-filtro-btn {
+        padding: 4px 12px;
+        font-size: 10px;
+    }
+}

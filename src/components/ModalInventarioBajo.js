@@ -256,7 +256,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 </div>
               )}
               
-              <p className="emergente-footer-aviso">⚠️ Ya existe producción registrada para esta combinación.</p>
             </>
           ) : (
             <div className="emergente-libre">

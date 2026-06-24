@@ -109,7 +109,6 @@ export const getOperarioPorMaquina = (idMaquina, fechaRef = new Date()) => {
   const usarSemanasGuardadas = fechaRef.toDateString() === new Date().toDateString();
   const semanasRotadas = usarSemanasGuardadas ? semanasGuardadas : semanasCalculadas;
   
-  console.log(`getOperarioPorMaquina - Máquina: ${maquinaId}, Fecha: ${fechaRef.toLocaleDateString()}, Semanas: ${semanasRotadas}`);
   
   // Aplicar rotación
   const asignacionRotada = [...asignacionBase];

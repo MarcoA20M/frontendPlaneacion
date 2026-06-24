@@ -6,46 +6,101 @@ import { productoService } from '../services/productoService';
 const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSelectCode, onAnalizarNuevo }) => {
   const [buscandoId, setBuscandoId] = useState(null);
   const [infoCarga, setInfoCarga] = useState(null);
-  const [poderesCubrientes, setPoderesCubrientes] = useState({});
-  const [cargandoPoderes, setCargandoPoderes] = useState(false);
+  const [infoProductos, setInfoProductos] = useState({});
+  const [cargandoInfo, setCargandoInfo] = useState(false);
   const [tabActivo, setTabActivo] = useState('alertas');
   const [datosPlanificador, setDatosPlanificador] = useState(null);
 
   const alertasNormales = alertas || [];
   const revisar = alertasRevisar || [];
 
-  // ===== OBTENER PODER CUBRIENTE =====
+  // ===== MAPA DE ABREVIATURAS PARA PROCESOS =====
+  const abreviaturaProcesos = {
+    'terminado': 'T',
+    'molienda': 'M',
+    'preparado': 'P',
+    'igualacion': 'I',
+    'igualación': 'I',
+  };
+
+  // ===== OBTENER INFORMACIÓN DE PRODUCTOS =====
   useEffect(() => {
     const todasLasAlertas = [...alertasNormales, ...revisar];
     if (!visible || todasLasAlertas.length === 0) return;
 
-    const obtenerPoderesCubrientes = async () => {
-      setCargandoPoderes(true);
+    const obtenerInfoProductos = async () => {
+      setCargandoInfo(true);
       
       try {
         const productos = await productoService.listarTodos();
         
-        const mapaPoderes = {};
+        const mapaInfo = {};
         productos.forEach(producto => {
           if (producto.codigo) {
-            mapaPoderes[producto.codigo] = producto.poderCubriente || producto.poder_cubriente || 'N/A';
+            // Obtener procesos de diferentes fuentes posibles
+            let procesos = [];
+            
+            // Intentar obtener procesos de diferentes propiedades
+            if (producto.procesos && Array.isArray(producto.procesos) && producto.procesos.length > 0) {
+              procesos = producto.procesos;
+            } else if (producto.ruta_produccion && Array.isArray(producto.ruta_produccion) && producto.ruta_produccion.length > 0) {
+              procesos = producto.ruta_produccion;
+            } else if (producto.procesos_fabricacion && Array.isArray(producto.procesos_fabricacion) && producto.procesos_fabricacion.length > 0) {
+              procesos = producto.procesos_fabricacion;
+            } else if (producto.ruta && Array.isArray(producto.ruta) && producto.ruta.length > 0) {
+              procesos = producto.ruta;
+            } else if (producto.proceso) {
+              if (typeof producto.proceso === 'string') {
+                procesos = [{ paso: 1, descripcion: producto.proceso }];
+              } else if (typeof producto.proceso === 'object') {
+                procesos = [producto.proceso];
+              }
+            }
+            
+            // Verificar si es esmalte por el tipo o por tener procesos
+            const esEsmalte = 
+              producto.tipo === 'esmalte' || 
+              producto.tipo === 'Esmalte' ||
+              producto.categoria?.toLowerCase().includes('esmalte') ||
+              producto.familia?.toLowerCase().includes('esmalte') ||
+              producto.tipo_producto?.toLowerCase().includes('esmalte') ||
+              producto.descripcion?.toLowerCase().includes('esmalte') ||
+              producto.nombre?.toLowerCase().includes('esmalte') ||
+              procesos.length > 0;
+              
+            // Si tiene procesos y no se detectó como esmalte, igual lo marcamos como esmalte
+            const esEsmalteFinal = esEsmalte || procesos.length > 0;
+            
+            mapaInfo[producto.codigo] = {
+              poderCubriente: producto.poderCubriente || producto.poder_cubriente || 'N/A',
+              esEsmalte: esEsmalteFinal,
+              procesos: procesos,
+              descripcion: producto.descripcion || producto.nombre || '',
+              nombre: producto.nombre || producto.descripcion || ''
+            };
           }
         });
         
-        setPoderesCubrientes(mapaPoderes);
+        setInfoProductos(mapaInfo);
       } catch (error) {
         console.error('Error al cargar productos:', error);
         const fallback = {};
         todasLasAlertas.forEach(grupo => {
-          fallback[grupo.codigo] = 'N/A';
+          fallback[grupo.codigo] = {
+            poderCubriente: 'N/A',
+            esEsmalte: false,
+            procesos: [],
+            descripcion: grupo.codigo,
+            nombre: grupo.codigo
+          };
         });
-        setPoderesCubrientes(fallback);
+        setInfoProductos(fallback);
       } finally {
-        setCargandoPoderes(false);
+        setCargandoInfo(false);
       }
     };
 
-    obtenerPoderesCubrientes();
+    obtenerInfoProductos();
   }, [visible, alertasNormales, revisar]);
 
   if (!visible) return null;
@@ -88,7 +143,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     setBuscandoId(null);
 
     if (data) {
-      // Guardar los datos del planificador junto con la info de carga
       setDatosPlanificador({
         salidas: datosPresentacion.salidas_mes || 0,
         existencia: datosPresentacion.existencia || 0,
@@ -96,19 +150,87 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         nombreEnvasado: nombreEnvasado
       });
       
-      setInfoCarga({ ...data, nombreEnvasado, tipo: 'ocupado' });
+      setInfoCarga({ ...data, nombreEnvasado, tipo: 'ocupado', codigo: codigo });
     } else {
       setDatosPlanificador(null);
       setInfoCarga({
         tipo: 'libre',
         nombreEnvasado,
-        msg: `No se encontraron registros para ${nombreEnvasado} bajo el código ${codigo}.`
+        msg: `No se encontraron registros para ${nombreEnvasado} bajo el código ${codigo}.`,
+        codigo: codigo
       });
     }
   };
 
-  const getPoderCubriente = (codigo) => {
-    return poderesCubrientes[codigo] || 'N/A';
+  const getInfoProducto = (codigo) => {
+    return infoProductos[codigo] || { 
+      poderCubriente: 'N/A', 
+      esEsmalte: false, 
+      procesos: [],
+      descripcion: codigo,
+      nombre: codigo
+    };
+  };
+
+  // ===== FUNCIÓN PARA ABREVIAR TEXTO DE PROCESOS =====
+  const abreviarProceso = (texto) => {
+    if (!texto) return "N/A";
+    
+    // Limpiar el texto
+    let limpio = texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
+    
+    // Buscar abreviatura en el mapa
+    const textoLower = limpio.toLowerCase();
+    for (const [key, value] of Object.entries(abreviaturaProcesos)) {
+      if (textoLower.includes(key)) {
+        return value;
+      }
+    }
+    
+    // Si no encuentra, tomar primera letra
+    return limpio.charAt(0).toUpperCase();
+  };
+
+  // ===== FUNCIÓN PARA RENDERIZAR LA INFO DEL PRODUCTO =====
+  const renderInfoProducto = (codigo) => {
+    const info = getInfoProducto(codigo);
+    
+    if (cargandoInfo) {
+      return (
+        <div className="hint-programar" style={{ color: '#64748b', opacity: 0.5 }}>
+          Cargando...
+        </div>
+      );
+    }
+
+    // Si tiene procesos, mostrar las abreviaturas
+    if (info.procesos && info.procesos.length > 0) {
+      return (
+        <div className="procesos-info-mini">
+          <div className="lista-procesos-tags-mini">
+            {info.procesos.slice(0, 4).map((p, idx) => {
+              const abrev = abreviarProceso(p.descripcion || p);
+              return (
+                <div key={idx} className="proceso-item-mini">
+                  <span className="paso-desc-mini">{abrev}</span>
+                </div>
+              );
+            })}
+            {info.procesos.length > 4 && (
+              <span className="procesos-mas-mini">+{info.procesos.length - 4}</span>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Si no tiene procesos, mostrar el poder cubriente
+    return (
+      <div className="poder-cubriente-display">
+        <span className="poder-cubriente-numero">{info.poderCubriente}</span>
+        <span className="poder-cubriente-etiqueta">Cub:</span>
+      </div>
+    );
   };
 
   // ===== FUNCIÓN PARA CALCULAR AUMENTO DE DÍAS DE ALCANCE =====
@@ -116,32 +238,21 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     if (!datosCarga || datosCarga.tipo !== 'ocupado') return null;
 
     try {
-      // Obtener la cantidad total de piezas programadas (pz)
       const totalPz = datosCarga.total || 0;
-      
-      // Obtener los datos del planificador
       const salidasMensuales = planificadorData?.salidas || 0;
       const existenciaActual = planificadorData?.existencia || 0;
       const alcanceActual = planificadorData?.alcance || 0;
       
-      // Factor de conversión: 24 días = 1 mes
       const factorC2 = 24;
-      
-      // Calcular días adicionales de alcance
-      // Días adicionales = (Piezas programadas / Salidas mensuales) * 24
       let diasAdicionales = 0;
       
       if (salidasMensuales > 0 && totalPz > 0) {
         diasAdicionales = (totalPz / salidasMensuales) * factorC2;
       }
       
-      // Calcular nuevo alcance
       let nuevoAlcance = alcanceActual + diasAdicionales;
-      
-      // Calcular nuevo inventario
       let nuevoInventario = existenciaActual + totalPz;
       
-      // Calcular días estimados con el nuevo inventario
       let diasEstimados = 0;
       if (salidasMensuales > 0 && nuevoInventario > 0) {
         diasEstimados = (nuevoInventario / salidasMensuales) * factorC2;
@@ -164,16 +275,24 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     }
   };
 
-  // Renderizar el detalle de la programación con el cálculo de días
+  // Renderizar el detalle de la programación
   const renderInfoCargaDetalle = () => {
     if (!infoCarga) return null;
 
     const calculoDias = calcularAumentoDias(infoCarga, datosPlanificador);
+    const info = getInfoProducto(infoCarga.codigo);
+    const tieneProcesos = info.procesos && info.procesos.length > 0;
 
     return (
       <div className={`emergente-info-card ${infoCarga.tipo}`}>
         <div className="emergente-header">
-          <h3>{infoCarga.tipo === 'ocupado' ? '📊 PROGRAMACIÓN ENCONTRADA' : '✅ DISPONIBLE'}</h3>
+          <h3>
+            {infoCarga.tipo === 'ocupado' ? (
+              tieneProcesos ? '🎨 ESMALTE' : '📊 VINÍLICA'
+            ) : (
+              '✅ DISPONIBLE'
+            )}
+          </h3>
           <button className="close-mini-btn" onClick={() => setInfoCarga(null)}>&times;</button>
         </div>
         <div className="emergente-body">
@@ -181,13 +300,36 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
             <>
               <p className="emergente-titulo-prod">{infoCarga.nombreEnvasado.toUpperCase()}</p>
               
+              {/* Mostrar procesos si tiene */}
+              {tieneProcesos && (
+                <div className="procesos-info-detalle">
+                  <strong>Ruta:</strong>
+                  <div className="lista-procesos-detalle">
+                    {info.procesos.map((p, idx) => (
+                      <div key={idx} className="proceso-item-detalle">
+                        <span className="paso-nro-detalle">{p.paso || idx + 1}</span>
+                        <span className="paso-desc-detalle">{abreviarProceso(p.descripcion || p)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mostrar poder cubriente si no tiene procesos */}
+              {!tieneProcesos && (
+                <div className="info-item">
+                  <span>Poder Cubriente:</span>
+                  <strong>{info.poderCubriente}</strong>
+                </div>
+              )}
+              
               <div className="emergente-dato">
-                <span>Lotes detectados:</span> 
+                <span>Lotes:</span> 
                 <strong>{infoCarga.conteoLotes || 1}</strong>
               </div>
               
               <div className="emergente-dato">
-                <span>Cantidad Total:</span> 
+                <span>Cantidad:</span> 
                 <strong>{infoCarga.total} uds</strong>
               </div>
               
@@ -209,50 +351,44 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
               {/* ===== SECCIÓN DE CÁLCULO DE DÍAS DE ALCANCE ===== */}
               {calculoDias && calculoDias.totalPz > 0 && (
                 <div className="emergente-calculo-dias">
-                
-                  
                   <div className="calculo-grid">
                     <div className="calculo-item">
-                      <span className="calculo-label">Piezas Programadas</span>
+                      <span className="calculo-label">Piezas Prog.</span>
                       <span className="calculo-valor">{calculoDias.totalPz}</span>
                     </div>
                     
                     <div className="calculo-item">
-                      <span className="calculo-label">Salidas Mensuales</span>
+                      <span className="calculo-label">Salidas Mens.</span>
                       <span className="calculo-valor">{calculoDias.salidasMensuales}</span>
                     </div>
 
                     <div className="calculo-item">
-                      <span className="calculo-label">Existencia Actual</span>
+                      <span className="calculo-label">Existencia</span>
                       <span className="calculo-valor">{calculoDias.existenciaActual}</span>
                     </div>
 
                     <div className="calculo-item">
-                      <span className="calculo-label">Nuevo Inventario</span>
+                      <span className="calculo-label">Nuevo Inv.</span>
                       <span className="calculo-valor highlight-verde">{calculoDias.nuevoInventario}</span>
                     </div>
                     
                     <div className="calculo-item">
-                      <span className="calculo-label">Días Adicionales</span>
-                      <span className="calculo-valor highlight-verde">+{calculoDias.diasAdicionales} días</span>
+                      <span className="calculo-label">Días Adic.</span>
+                      <span className="calculo-valor highlight-verde">+{calculoDias.diasAdicionales}</span>
                     </div>
                     
                     <div className="calculo-item">
-                      <span className="calculo-label">Alcance Actual</span>
+                      <span className="calculo-label">Alcance</span>
                       <span className="calculo-valor">{calculoDias.alcanceActual} días</span>
                     </div>
                     
-  
-
                     <div className="calculo-item calculo-item-destacado" style={{ gridColumn: '1 / -1', background: 'rgba(74, 222, 128, 0.05)', borderColor: 'rgba(74, 222, 128, 0.15)' }}>
-                      <span className="calculo-label">Días Estimados (con nuevo inventario)</span>
+                      <span className="calculo-label">Días Estimados</span>
                       <span className="calculo-valor" style={{ color: '#4ade80', fontSize: '15px' }}>
                         {calculoDias.diasEstimados} días
                       </span>
                     </div>
                   </div>
-
-                 
                 </div>
               )}
               
@@ -280,22 +416,11 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     }
 
     return listaAlertas.map((grupo, idx) => {
-      const poderCubriente = getPoderCubriente(grupo.codigo);
-      
       return (
         <div key={idx} className="bloque-grupo-codigo">
           <div className="columna-codigo-unificada" onClick={() => { onSelectCode(grupo.codigo); onClose(); }}>
             <span className="codigo-resaltado-grande">{grupo.codigo}</span>
-            {cargandoPoderes ? (
-              <div className="hint-programar" style={{ color: '#64748b', opacity: 0.5 }}>
-                Cargando...
-              </div>
-            ) : (
-              <div className="poder-cubriente-display">
-                <span className="poder-cubriente-numero">{poderCubriente}</span>
-                <span className="poder-cubriente-etiqueta">Cubriente: </span>
-              </div>
-            )}
+            {renderInfoProducto(grupo.codigo)}
           </div>
 
           <div className="columna-presentaciones">
@@ -379,7 +504,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                   className={`tab-btn-header revisar-tab-header ${tabActivo === 'revisar' ? 'active' : ''}`}
                   onClick={() => setTabActivo('revisar')}
                 >
-                  🔍 Para Revisar
+                  🔍 Revisar
                   <span className="tab-badge-header">{revisar.length}</span>
                 </button>
               )}

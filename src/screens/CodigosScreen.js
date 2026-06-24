@@ -163,7 +163,6 @@ export default function CodigosScreen() {
                 if (response.ok) {
                     const data = await response.json();
                     setFamilias(data);
-                    console.log("📋 Todas las familias cargadas:", data);
                 }
             } catch (error) {
                 console.error("Error cargando familias:", error);
@@ -221,11 +220,9 @@ export default function CodigosScreen() {
         }
 
         setLoading(true);
-        console.log("🔍 Buscando producto en API:", codigoBusqueda);
 
         try {
             const producto = await buscarProducto(codigoBusqueda.trim());
-            console.log("✅ Producto encontrado:", producto);
 
             setProductoEditandoId(producto.codigo);
             setProductoOriginal(producto);

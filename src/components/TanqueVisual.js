@@ -12,6 +12,12 @@ export default function TanqueVisual({
     umbralCritico = null,
     umbralAlerta = null
 }) {
+    // ===== FUNCIÓN PARA FORMATEAR NÚMEROS SIN DECIMALES =====
+    const formatearNumero = (numero) => {
+        if (numero === undefined || numero === null || isNaN(numero)) return '0';
+        return Math.round(numero).toLocaleString('es-ES');
+    };
+
     // Calcular porcentaje de llenado
     const porcentaje = capacidadMaxima > 0 ? (nivelActual / capacidadMaxima) * 100 : 0;
     const porcentajeLimitado = Math.min(Math.max(porcentaje, 0), 100);
@@ -96,10 +102,10 @@ export default function TanqueVisual({
                             <div className="burbuja burbuja-2"></div>
                             <div className="burbuja burbuja-3"></div>
                             
-                            {/* Porcentaje dentro del tanque */}
+                            {/* Porcentaje dentro del tanque - SIN DECIMALES */}
                             {porcentajeLimitado > 15 && (
                                 <div className="tanque-porcentaje-interior">
-                                    {porcentajeLimitado.toFixed(0)}%
+                                    {Math.round(porcentajeLimitado)}%
                                 </div>
                             )}
                         </div>
@@ -125,19 +131,19 @@ export default function TanqueVisual({
                     <div className="tanque-info-item">
                         <span className="tanque-info-label">📊 Capacidad</span>
                         <span className="tanque-info-valor">
-                            {new Intl.NumberFormat('es-ES').format(capacidadMaxima)} {unidad}
+                            {formatearNumero(capacidadMaxima)} {unidad}
                         </span>
                     </div>
                     <div className="tanque-info-item">
                         <span className="tanque-info-label">📉 Nivel Actual</span>
                         <span className="tanque-info-valor" style={{ color: colorNivel }}>
-                            {new Intl.NumberFormat('es-ES').format(nivelActual)} {unidad}
+                            {formatearNumero(nivelActual)} {unidad}
                         </span>
                     </div>
                     <div className="tanque-info-item">
                         <span className="tanque-info-label">📈 Porcentaje</span>
                         <span className="tanque-info-valor" style={{ color: colorNivel }}>
-                            {porcentajeLimitado.toFixed(1)}%
+                            {Math.round(porcentajeLimitado)}%
                         </span>
                     </div>
                     <div className="tanque-info-item">
@@ -151,14 +157,14 @@ export default function TanqueVisual({
                     <div className="tanque-info-item">
                         <span className="tanque-info-label">⚡ Espacio disponible</span>
                         <span className="tanque-info-valor">
-                            {new Intl.NumberFormat('es-ES').format(capacidadMaxima - nivelActual)} {unidad}
+                            {formatearNumero(capacidadMaxima - nivelActual)} {unidad}
                         </span>
                     </div>
                     {umbralAlerta && (
                         <div className="tanque-info-item">
                             <span className="tanque-info-label">🟡 Umbral Alerta</span>
                             <span className="tanque-info-valor">
-                                {new Intl.NumberFormat('es-ES').format(umbralAlerta)} {unidad}
+                                {formatearNumero(umbralAlerta)} {unidad}
                             </span>
                         </div>
                     )}
@@ -166,7 +172,7 @@ export default function TanqueVisual({
                         <div className="tanque-info-item">
                             <span className="tanque-info-label">🔴 Umbral Crítico</span>
                             <span className="tanque-info-valor">
-                                {new Intl.NumberFormat('es-ES').format(umbralCritico)} {unidad}
+                                {formatearNumero(umbralCritico)} {unidad}
                             </span>
                         </div>
                     )}

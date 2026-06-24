@@ -9,7 +9,7 @@ export default function BasesScreen() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [bases, setBases] = useState([]);
-    const [todasLasMP, setTodasLasMP] = useState([]); // 🔴 NUEVO: Todas las materias primas
+    const [todasLasMP, setTodasLasMP] = useState([]);
     const [filtro, setFiltro] = useState("todas");
     const [busqueda, setBusqueda] = useState("");
     const [mostrarModalCompra, setMostrarModalCompra] = useState(false);
@@ -25,17 +25,37 @@ export default function BasesScreen() {
     });
     const [actualizando, setActualizando] = useState(false);
 
+    // ===== CONFIGURACIÓN DE TAMAÑOS DE CARGA POR BASE =====
+    const TAMANOS_CARGA = {
+        'BRO40': 650,
+        'BRE40': 500,
+        'BAC40': 700,
+        'BAL40': 700,
+        'BAO40': 600,
+        'BNM40': 700,
+        'BVE40': 200,
+        'BAE40': 250,
+        'BNE30': 800,
+        'BNE10': 1000,
+        'BBE20': 1169,
+        'BBE30': 1236,
+        'BED10': 500,
+        'BVE10': 150,
+        'BSR10': 30,
+        'BASA10': 30,
+        'BSP10': 30,
+        'BSN10': 30,
+    };
+
     const CODIGOS_BASES = ['BRO40', 'BRE40', 'BAC40', 'BAL40', 'BAO40', 'BNM40', 'BVE40', 'BAE40',
         'BNE30', 'BNE10', 'BBE20', 'BBE30', 'BED10', 'BVE10'];
 
     const cargarBases = async () => {
         setLoading(true);
         try {
-            // 🔴 OBTENER TODAS LAS MATERIAS PRIMAS
             const todas = await materiaPrimaService.listarTodas();
-            setTodasLasMP(todas); // Guardar todas para el sidebar
-            
-            // Filtrar solo bases para mostrar
+            setTodasLasMP(todas);
+
             const basesFiltradas = todas.filter(mp =>
                 mp.tipo === 'BASE' && CODIGOS_BASES.includes(mp.codigo)
             );
@@ -64,6 +84,86 @@ export default function BasesScreen() {
         }
     };
 
+    // ===== FUNCIÓN PARA CALCULAR CARGAS RECOMENDADAS (NUEVA LÓGICA) =====
+// ===== FUNCIÓN PARA CALCULAR CARGAS RECOMENDADAS (CORREGIDA) =====
+const calcularCargasRecomendadas = (base) => {
+    const tamanoCarga = TAMANOS_CARGA[base.codigo] || 500;
+    const espacioDisponible = base.capacidadMaxima - base.nivelActual;
+
+    if (espacioDisponible <= 0) {
+        return {
+            cargasCompletas: 0,
+            cargasParciales: 0,
+            espacioDisponible: 0,
+            tamanoCarga: tamanoCarga,
+            mensaje: '🟢 Tanque lleno',
+            recomendacion: 'No necesita cargas',
+            color: '#10B981',
+            nivel: 'lleno',
+            icono: '🟢',
+            tieneEspacio: false,
+            urgencia: 'bajo'
+        };
+    }
+
+    const cargasCompletas = Math.floor(espacioDisponible / tamanoCarga);
+    const espacioRestante = espacioDisponible - (cargasCompletas * tamanoCarga);
+
+    let mensaje = '';
+    let recomendacion = '';
+    let color = '#10B981';
+    let nivel = 'suficiente';
+    let icono = '🟢';
+    let urgencia = 'bajo';
+
+    if (cargasCompletas === 0) {
+        // 🟢 VERDE: Poco espacio, NO necesita cargas (tanque casi lleno)
+        mensaje = `🟢 ${espacioDisponible.toFixed(0)} ${base.unidad} disponible`;
+        recomendacion = `No necesita cargas, tanque con espacio limitado`;
+        color = '#10B981';
+        nivel = 'suficiente';
+        icono = '🟢';
+        urgencia = 'bajo';
+    } else if (cargasCompletas === 1) {
+        // 🟡 AMARILLO: Espacio para 1 carga, próximo a necesitar
+        mensaje = `🟡 ${espacioDisponible.toFixed(0)} ${base.unidad} disponible (1 carga)`;
+        recomendacion = `Próximo a necesitar recargar`;
+        color = '#F59E0B';
+        nivel = 'alerta';
+        icono = '🟡';
+        urgencia = 'medio';
+    } else if (cargasCompletas >= 2) {
+        // 🔴 ROJO: Mucho espacio, necesita cargas urgentemente
+        mensaje = `🔴 ${espacioDisponible.toFixed(0)} ${base.unidad} disponible (${cargasCompletas} cargas)`;
+        recomendacion = `¡URGENTE! Necesita recargar`;
+        color = '#EF4444';
+        nivel = 'critico';
+        icono = '🔴';
+        urgencia = 'alto';
+    } else {
+        mensaje = `🟢 Tanque lleno`;
+        recomendacion = 'No necesita cargas';
+        color = '#10B981';
+        nivel = 'lleno';
+        icono = '🟢';
+        urgencia = 'bajo';
+    }
+
+    return {
+        cargasCompletas,
+        cargasParciales: espacioRestante > 0 ? 1 : 0,
+        espacioDisponible,
+        tamanoCarga,
+        espacioRestante,
+        mensaje,
+        recomendacion,
+        color,
+        nivel,
+        icono,
+        urgencia,
+        tieneEspacio: cargasCompletas > 0 || espacioRestante > 0
+    };
+};
     const verConsumos = (base) => {
         setBaseSeleccionada(base);
         setMostrarModalConsumo(true);
@@ -129,31 +229,52 @@ export default function BasesScreen() {
         cargarBases();
     }, []);
 
-    // 🔴 CALCULAR ESTADÍSTICAS CON TODAS LAS MATERIAS PRIMAS (no solo bases)
     const inventarioTotal = todasLasMP.reduce((sum, mp) => sum + (mp.nivelActual || 0), 0);
     const capacidadTotal = todasLasMP.reduce((sum, mp) => sum + (mp.capacidadMaxima || 0), 0);
     const todasCriticas = todasLasMP.filter(mp => mp.critico);
 
-    // Bases críticas y alerta (solo para mostrar en el contenido)
     const basesCriticas = bases.filter(b => (b.nivelActual / b.capacidadMaxima) * 100 <= 20);
     const basesAlerta = bases.filter(b => {
         const pct = (b.nivelActual / b.capacidadMaxima) * 100;
         return pct > 20 && pct <= 40;
     });
 
+    // ===== BASES CON RECOMENDACIONES =====
+    const basesConRecomendacion = bases.filter(base => {
+        const info = calcularCargasRecomendadas(base);
+        return info.tieneEspacio;
+    });
+
+    // ===== FILTRADO DE BASES =====
     const basesMostrar = bases.filter(base => {
         const termino = busqueda.toLowerCase().trim();
         if (!termino) return true;
         return base.codigo?.toLowerCase().includes(termino) ||
-               base.nombre?.toLowerCase().includes(termino);
+            base.nombre?.toLowerCase().includes(termino);
     }).filter(base => {
         const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
+        
         if (filtro === 'todas') return true;
+        if (filtro === 'cargas') return true;
+        
         if (filtro === 'critico') return porcentaje <= 20;
         if (filtro === 'alerta') return porcentaje > 20 && porcentaje <= 40;
         if (filtro === 'normal') return porcentaje > 40;
         return true;
     });
+
+    // ===== OBTENER BASES PARA RECOMENDACIONES (con toda la info) =====
+    const basesRecomendacionConInfo = bases
+        .map(base => {
+            const info = calcularCargasRecomendadas(base);
+            return { ...base, ...info };
+        })
+        .filter(base => base.tieneEspacio)
+        .sort((a, b) => {
+            // Ordenar por urgencia: crítico (rojo) primero, luego alerta (amarillo), luego suficiente (verde)
+            const prioridad = { 'critico': 0, 'alerta': 1, 'suficiente': 2, 'lleno': 3 };
+            return prioridad[a.nivel] - prioridad[b.nivel];
+        });
 
     const handleRegistrarCompra = async () => {
         if (!formCompra.cantidad || formCompra.cantidad <= 0) {
@@ -179,13 +300,6 @@ export default function BasesScreen() {
         }
     };
 
-    const getColorNivel = (porcentaje) => {
-        if (porcentaje <= 20) return '#e74c3c';
-        if (porcentaje <= 40) return '#f39c12';
-        if (porcentaje <= 70) return '#3498db';
-        return '#2ecc71';
-    };
-
     const getEstado = (porcentaje) => {
         if (porcentaje <= 20) return 'critico';
         if (porcentaje <= 40) return 'alerta';
@@ -199,6 +313,9 @@ export default function BasesScreen() {
         if (porcentaje <= 70) return '📊';
         return '✅';
     };
+
+    // ===== DETERMINAR SI ESTAMOS EN MODO RECOMENDACIONES =====
+    const esModoRecomendaciones = filtro === 'cargas';
 
     if (loading) {
         return (
@@ -214,8 +331,7 @@ export default function BasesScreen() {
     return (
         <div className="bases-container">
             <div className="bases-glass-panel">
-                {/* 🔴 SIDEBAR CON DATOS DE TODAS LAS MATERIAS PRIMAS */}
-                <SidebarMateriaPrima 
+                <SidebarMateriaPrima
                     seccionActiva="bases"
                     inventarioTotal={inventarioTotal}
                     capacidadTotal={capacidadTotal}
@@ -249,106 +365,276 @@ export default function BasesScreen() {
                                 <span className="stat-num">{bases.length}</span>
                                 <span className="stat-label">Total</span>
                             </div>
+                            <div className="base-stat-card recomendacion">
+                                <span className="stat-num">{basesConRecomendacion.length}</span>
+                                <span className="stat-label">Cargas</span>
+                            </div>
                         </div>
                     </header>
 
                     <div className="bases-workspace">
                         <div className="base-header-actions">
                             <div className="base-filtros">
-                                <button className={`base-filtro-btn ${filtro === 'todas' ? 'active' : ''}`} onClick={() => setFiltro('todas')}>📊 Todas</button>
-                                <button className={`base-filtro-btn ${filtro === 'critico' ? 'active' : ''}`} onClick={() => setFiltro('critico')}>🚨 Crítico</button>
-                                <button className={`base-filtro-btn ${filtro === 'alerta' ? 'active' : ''}`} onClick={() => setFiltro('alerta')}>⚠️ Alerta</button>
-                                <button className={`base-filtro-btn ${filtro === 'normal' ? 'active' : ''}`} onClick={() => setFiltro('normal')}>✅ Normal</button>
+                                <button 
+                                    className={`base-filtro-btn ${filtro === 'todas' ? 'active' : ''}`} 
+                                    onClick={() => setFiltro('todas')}
+                                >
+                                    📊 Todas
+                                </button>
+                                <button 
+                                    className={`base-filtro-btn ${filtro === 'critico' ? 'active' : ''}`} 
+                                    onClick={() => setFiltro('critico')}
+                                >
+                                    🚨 Crítico
+                                </button>
+                                <button 
+                                    className={`base-filtro-btn ${filtro === 'alerta' ? 'active' : ''}`} 
+                                    onClick={() => setFiltro('alerta')}
+                                >
+                                    ⚠️ Alerta
+                                </button>
+                                <button 
+                                    className={`base-filtro-btn ${filtro === 'normal' ? 'active' : ''}`} 
+                                    onClick={() => setFiltro('normal')}
+                                >
+                                    ✅ Normal
+                                </button>
+                                <button 
+                                    className={`base-filtro-btn ${filtro === 'cargas' ? 'active' : ''}`} 
+                                    onClick={() => setFiltro('cargas')}
+                                >
+                                    📦 Cargas
+                                </button>
                             </div>
 
                             <div className="base-search-box">
                                 <span className="base-search-icon">🔍</span>
-                                <input type="text" className="base-search-input" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-                                {busqueda && <button className="base-search-clear" onClick={() => setBusqueda('')}>✖</button>}
+                                <input 
+                                    type="text" 
+                                    className="base-search-input" 
+                                    placeholder="Buscar..." 
+                                    value={busqueda} 
+                                    onChange={(e) => setBusqueda(e.target.value)} 
+                                />
+                                {busqueda && (
+                                    <button className="base-search-clear" onClick={() => setBusqueda('')}>
+                                        ✖
+                                    </button>
+                                )}
                             </div>
                         </div>
 
                         {busqueda && (
                             <div className="base-resultados-info">
-                                <span>{basesMostrar.length} resultado{basesMostrar.length !== 1 ? 's' : ''} para "{busqueda}"</span>
+                                <span>
+                                    {esModoRecomendaciones 
+                                        ? `${basesRecomendacionConInfo.filter(b => 
+                                            b.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
+                                            b.nombre?.toLowerCase().includes(busqueda.toLowerCase())
+                                        ).length} resultado${basesRecomendacionConInfo.length !== 1 ? 's' : ''} para "{busqueda}"`
+                                        : `${basesMostrar.length} resultado${basesMostrar.length !== 1 ? 's' : ''} para "{busqueda}"`
+                                    }
+                                </span>
                             </div>
                         )}
 
-                        <div className="base-grid">
-                            {basesMostrar.map(base => {
-                                const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
-                                const estado = getEstado(porcentaje);
-                                const icono = getIconoEstado(porcentaje);
+                        {/* ===== MODO RECOMENDACIONES ===== */}
+                        {esModoRecomendaciones ? (
+                            <div className="recomendaciones-grid">
+                                {basesRecomendacionConInfo.length > 0 ? (
+                                    basesRecomendacionConInfo.map(base => {
+                                        // Mapeo de niveles a nombres amigables para el usuario
+                                        const nivelLabels = {
+                                            'suficiente': 'Suficiente',
+                                            'alerta': 'Próximo a necesitar',
+                                            'critico': '¡Necesita recargar!',
+                                            'lleno': 'Lleno'
+                                        };
 
-                                return (
-                                    <div key={base.id} className={`base-tanque-card ${estado}`}>
-                                        <div className="base-tanque-header">
-                                            <div className="tanque-info">
-                                                <h3>{base.nombre}</h3>
-                                                <span className="tanque-codigo">{base.codigo}</span>
-                                            </div>
-                                            <div className="tanque-estado-badge">{icono} {estado.toUpperCase()}</div>
-                                        </div>
-
-                                        <div className="base-tanque-visual">
-                                            <div className="base-tanque-body">
-                                                <div className="base-tanque-nivel" style={{ height: `${porcentaje}%`, transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                                                    <div className="base-onda-1"></div>
-                                                    <div className="base-onda-2"></div>
-                                                    <div className="base-onda-3"></div>
-                                                    <div className="base-burbujas">
-                                                        <div className="base-burbuja"></div>
-                                                        <div className="base-burbuja"></div>
-                                                        <div className="base-burbuja"></div>
-                                                        <div className="base-burbuja"></div>
-                                                        <div className="base-burbuja"></div>
+                                        return (
+                                            <div key={base.id} className={`recomendacion-card ${base.nivel}`}>
+                                                <div className="recomendacion-card-header">
+                                                    <div className="recomendacion-base-info">
+                                                        <span className="recomendacion-codigo">{base.codigo}</span>
+                                                        <span className="recomendacion-nombre">{base.nombre}</span>
                                                     </div>
-                                                    <div className="base-superficie-brillo"></div>
-                                                    <span className="base-nivel-porcentaje">{porcentaje.toFixed(1)}%</span>
+                                                    <div className="recomendacion-estado">
+                                                        <span className="recomendacion-icono">{base.icono || '📦'}</span>
+                                                        <span className="recomendacion-nivel" style={{ color: base.color }}>
+                                                            {nivelLabels[base.nivel] || base.nivel.toUpperCase()}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="base-reflejo-izquierdo"></div>
-                                                <div className="base-reflejo-derecho"></div>
+
+                                                <div className="recomendacion-card-body">
+                                                    <div className="recomendacion-visual">
+                                                        <div className="recomendacion-barra-espacio">
+                                                            <div
+                                                                className="recomendacion-barra-lleno"
+                                                                style={{
+                                                                    width: `${(base.espacioDisponible / base.capacidadMaxima) * 100}%`,
+                                                                    background: `linear-gradient(90deg, ${base.color}, ${base.color}dd)`
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="recomendacion-espacio-texto">
+                                                            <span>Espacio disponible: <strong>{base.espacioDisponible.toFixed(0)} {base.unidad}</strong></span>
+                                                            <span>Capacidad total: <strong>{base.capacidadMaxima.toFixed(0)} {base.unidad}</strong></span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="recomendacion-detalles">
+                                                        <div className="recomendacion-item">
+                                                            <span className="recomendacion-item-icon">📦</span>
+                                                            <div>
+                                                                <span className="recomendacion-item-label">Tamaño de carga: </span>
+                                                                <span className="recomendacion-item-valor">{base.tamanoCarga} {base.unidad}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="recomendacion-item">
+                                                            <span className="recomendacion-item-icon">🔢</span>
+                                                            <div>
+                                                                <span className="recomendacion-item-label">Cargas completas: </span>
+                                                                <span className="recomendacion-item-valor" style={{ color: base.color }}>
+                                                                    {base.cargasCompletas}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        {base.espacioRestante > 0 && base.cargasCompletas === 0 && (
+                                                            <div className="recomendacion-item">
+                                                                <span className="recomendacion-item-icon">📊</span>
+                                                                <div>
+                                                                    <span className="recomendacion-item-label">Espacio parcial</span>
+                                                                    <span className="recomendacion-item-valor" style={{ color: '#F59E0B' }}>
+                                                                        {base.espacioRestante.toFixed(0)} {base.unidad}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="recomendacion-mensaje" style={{ color: base.color }}>
+                                                        {base.mensaje}
+                                                    </div>
+
+                                                    {base.cargasCompletas > 0 && (
+                                                        <button
+                                                            className="recomendacion-btn-programar"
+                                                            onClick={() => {
+                                                                setBaseSeleccionada(base);
+                                                                setFormCompra({
+                                                                    ...formCompra,
+                                                                    cantidad: (base.cargasCompletas * base.tamanoCarga).toString()
+                                                                });
+                                                                setMostrarModalCompra(true);
+                                                            }}
+                                                        >
+                                                            📦 Programar {base.cargasCompletas} carga{base.cargasCompletas > 1 ? 's' : ''}
+                                                        </button>
+                                                    )}
+                                                    
+                                                    {base.cargasCompletas === 0 && base.nivel === 'critico' && (
+                                                        <button
+                                                            className="recomendacion-btn-recargar"
+                                                            onClick={() => {
+                                                                setBaseSeleccionada(base);
+                                                                setMostrarModalCompra(true);
+                                                            }}
+                                                        >
+                                                            🛒 Recargar tanque
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-
-                                            <div className="base-tanque-medidas">
-                                                <div className="medida-lineas">
-                                                    <span className="medida-linea"></span>
-                                                    <span className="medida-linea"></span>
-                                                    <span className="medida-linea"></span>
-                                                    <span className="medida-linea"></span>
-                                                    <span className="medida-linea"></span>
-                                                </div>
-                                                <div className="medida">
-                                                    <span className="medida-valor">{base.capacidadMaxima?.toFixed(0) || 0}</span>
-                                                    <span className="medida-label">Máx</span>
-                                                </div>
-                                                <div className="medida actual">
-                                                    <span className="medida-valor">{base.nivelActual?.toFixed(0) || 0}</span>
-                                                    <span className="medida-label">Actual</span>
-                                                </div>
-                                                <div className="medida">
-                                                    <span className="medida-valor">{base.umbralCritico?.toFixed(0) || 0}</span>
-                                                    <span className="medida-label">Mín</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="base-tanque-detalles">
-                                            <div className="detalle-item"><span className="detalle-icon">📦</span><span>{base.nivelActual?.toFixed(0)} {base.unidad}</span></div>
-                                            <div className="detalle-item"><span className="detalle-icon">📍</span><span>{base.ubicacion || 'Sin ubicación'}</span></div>
-                                            <div className="detalle-item"><span className="detalle-icon">⚡</span><span>Alerta: {base.umbralAlerta?.toFixed(0)} {base.unidad}</span></div>
-                                        </div>
-
-                                        <div className="base-tanque-acciones">
-                                            <button className="base-btn-ver-consumo" onClick={() => verConsumos(base)}>📋 Ver Consumo</button>
-                                            <button className="base-btn-registrar-compra" onClick={() => { setBaseSeleccionada(base); setMostrarModalCompra(true); }}>🛒 Recargar</button>
-                                        </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="recomendaciones-vacio">
+                                        <span>🎯</span>
+                                        <p>Todas las bases están llenas</p>
+                                        <span className="recomendaciones-subtext">No hay espacio para programar cargas</span>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                )}
+                            </div>
+                        ) : (
+                            /* ===== MODO NORMAL (Todas, Crítico, Alerta, Normal) - SIN INDICADOR ===== */
+                            <div className="base-grid">
+                                {basesMostrar.map(base => {
+                                    const porcentaje = (base.nivelActual / base.capacidadMaxima) * 100;
+                                    const estado = getEstado(porcentaje);
+                                    const icono = getIconoEstado(porcentaje);
 
-                        {basesMostrar.length === 0 && (
+                                    return (
+                                        <div key={base.id} className={`base-tanque-card ${estado}`}>
+                                            <div className="base-tanque-header">
+                                                <div className="tanque-info">
+                                                    <h3>{base.nombre}</h3>
+                                                    <span className="tanque-codigo">{base.codigo}</span>
+                                                </div>
+                                                <div className="tanque-estado-badge">{icono} {estado.toUpperCase()}</div>
+                                            </div>
+
+                                            <div className="base-tanque-visual">
+                                                <div className="base-tanque-body">
+                                                    <div className="base-tanque-nivel" style={{ height: `${porcentaje}%`, transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                                                        <div className="base-onda-1"></div>
+                                                        <div className="base-onda-2"></div>
+                                                        <div className="base-onda-3"></div>
+                                                        <div className="base-burbujas">
+                                                            <div className="base-burbuja"></div>
+                                                            <div className="base-burbuja"></div>
+                                                            <div className="base-burbuja"></div>
+                                                            <div className="base-burbuja"></div>
+                                                            <div className="base-burbuja"></div>
+                                                        </div>
+                                                        <div className="base-superficie-brillo"></div>
+                                                        <span className="base-nivel-porcentaje">{porcentaje.toFixed(1)}%</span>
+                                                    </div>
+                                                    <div className="base-reflejo-izquierdo"></div>
+                                                    <div className="base-reflejo-derecho"></div>
+                                                </div>
+
+                                                <div className="base-tanque-medidas">
+                                                    <div className="medida-lineas">
+                                                        <span className="medida-linea"></span>
+                                                        <span className="medida-linea"></span>
+                                                        <span className="medida-linea"></span>
+                                                        <span className="medida-linea"></span>
+                                                        <span className="medida-linea"></span>
+                                                    </div>
+                                                    <div className="medida">
+                                                        <span className="medida-valor">{base.capacidadMaxima?.toFixed(0) || 0}</span>
+                                                        <span className="medida-label">Máx</span>
+                                                    </div>
+                                                    <div className="medida actual">
+                                                        <span className="medida-valor">{base.nivelActual?.toFixed(0) || 0}</span>
+                                                        <span className="medida-label">Actual</span>
+                                                    </div>
+                                                    <div className="medida">
+                                                        <span className="medida-valor">{base.umbralCritico?.toFixed(0) || 0}</span>
+                                                        <span className="medida-label">Mín</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="base-tanque-detalles">
+                                                <div className="detalle-item"><span className="detalle-icon">📦</span><span>{base.nivelActual?.toFixed(0)} {base.unidad}</span></div>
+                                                <div className="detalle-item"><span className="detalle-icon">📍</span><span>{base.ubicacion || 'Sin ubicación'}</span></div>
+                                                <div className="detalle-item"><span className="detalle-icon">⚡</span><span>Alerta: {base.umbralAlerta?.toFixed(0)} {base.unidad}</span></div>
+                                            </div>
+
+                                            <div className="base-tanque-acciones">
+                                                <button className="base-btn-ver-consumo" onClick={() => verConsumos(base)}>📋 Ver Consumo</button>
+                                                <button className="base-btn-registrar-compra" onClick={() => { setBaseSeleccionada(base); setMostrarModalCompra(true); }}>🛒 Recargar</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* ===== MENSAJE DE SIN RESULTADOS ===== */}
+                        {!esModoRecomendaciones && basesMostrar.length === 0 && (
                             <div className="base-no-bases">
                                 <div className="no-bases-icon">🔍</div>
                                 <h3>No se encontraron bases</h3>

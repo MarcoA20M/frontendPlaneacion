@@ -97,7 +97,6 @@ export default function ProduccionScreen() {
                 if (response.ok) {
                     const data = await response.json();
                     setFamilias(data);
-                    console.log('Familias cargadas:', data);
                 } else {
                     console.error('Error al cargar familias:', response.status);
                     setFamilias([]);
@@ -397,7 +396,7 @@ export default function ProduccionScreen() {
                                     )}
 
                                     <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>
-                                        📋 Lista Espera  
+                                        📋 Lista Espera ({colaFiltrada.length})
                                     </button>
                                     <label className="dropdown-item label-input">
                                         📊 Importar Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleImportExcelConProgreso} />

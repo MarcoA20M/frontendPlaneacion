@@ -121,16 +121,46 @@
   letter-spacing: 0.5px;
 }
 
-.badge-alcance-final.crítico {
-  background: rgba(255, 95, 126, 0.1);
-  color: #ff5f7e;
-  border: 1px solid rgba(255, 95, 126, 0.2);
+/* --- BADGES DE ALCANCE PULIDOS --- */
+.badge-alcance-final {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  transition: all 0.3s ease;
 }
 
+/* Crítico - ROJO (alcance bajo) */
+.badge-alcance-final.crítico {
+  background: rgba(255, 95, 126, 0.15) !important;
+  color: #ff5f7e !important;
+  border: 1px solid rgba(255, 95, 126, 0.3) !important;
+  box-shadow: 0 0 15px rgba(255, 95, 126, 0.1);
+}
+
+/* Estancado - NARANJA (alcance medio-bajo) */
 .badge-alcance-final.estancado {
-  background: rgba(246, 173, 85, 0.1);
-  color: #f6ad55;
-  border: 1px solid rgba(246, 173, 85, 0.2);
+  background: rgba(246, 173, 85, 0.15) !important;
+  color: #f6ad55 !important;
+  border: 1px solid rgba(246, 173, 85, 0.3) !important;
+  box-shadow: 0 0 15px rgba(246, 173, 85, 0.1);
+}
+
+/* Normal - VERDE (alcance bueno) - Agregar un estilo por defecto */
+.badge-alcance-final.normal {
+  background: rgba(74, 222, 128, 0.1);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+/* Por defecto - AZUL (cuando no hay clase) */
+.badge-alcance-final {
+  background: rgba(0, 192, 255, 0.1);
+  color: #00c0ff;
+  border: 1px solid rgba(0, 192, 255, 0.2);
 }
 
 /* --- BOTÓN ACCIÓN ESTILO "TARGET" --- */
@@ -689,5 +719,232 @@
   
   .calculo-item-destacado {
     grid-column: 1;
+  }
+}
+
+
+.procesos-info-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 4px;
+  background: rgba(96, 165, 250, 0.06);
+  border-radius: 4px;
+  border-left: 2px solid #60a5fa;
+  width: 100%;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.lista-procesos-tags-mini {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Centra los tags */
+  gap: 3px;
+  width: 100%;
+}
+
+.proceso-item-mini {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.5rem;
+  border: 1px solid rgba(96, 165, 250, 0.08);
+}
+
+.paso-nro-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  background: rgba(96, 165, 250, 0.2);
+  border-radius: 50%;
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.paso-desc-mini {
+  color: #94a3b8;
+  font-size: 0.5rem;
+  max-width: 55px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.procesos-mas-mini {
+  font-size: 0.5rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0px 4px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Estilos para procesos en el detalle (popup) --- */
+.procesos-info-detalle {
+  background: rgba(96, 165, 250, 0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0 12px 0;
+  border: 1px solid rgba(96, 165, 250, 0.1);
+}
+
+.procesos-info-detalle strong {
+  display: block;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.lista-procesos-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proceso-item-detalle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.2s;
+}
+
+.proceso-item-detalle:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(96, 165, 250, 0.15);
+}
+
+.paso-nro-detalle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: rgba(96, 165, 250, 0.15);
+  border-radius: 50%;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.paso-desc-detalle {
+  color: #e2e8f0;
+  flex: 1;
+  font-size: 0.75rem;
+}
+
+/* --- Estilos para el badge de "Procesos" abreviado --- */
+.poder-cubriente-display.procesos-badge {
+  border-left-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.08);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.poder-cubriente-display.procesos-badge .poder-cubriente-numero {
+  font-size: 0.7rem;
+  color: #60a5fa;
+}
+
+.poder-cubriente-display.procesos-badge .poder-cubriente-etiqueta {
+  color: #60a5fa;
+  font-weight: 600;
+  font-size: 0.55rem;
+}
+
+/* --- Ajustes para la columna de código cuando muestra procesos --- */
+.columna-codigo-unificada .procesos-info-mini {
+  border-left: none;
+  background: transparent;
+  padding: 1px 4px;
+}
+
+/* --- Info item para el detalle --- */
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item span {
+  color: #64748b;
+}
+
+.info-item strong {
+  color: #e2e8f0;
+}
+
+/* ============================================================ */
+/* ===== RESPONSIVE PARA PROCESOS ===== */
+/* ============================================================ */
+
+@media (max-width: 768px) {
+  .proceso-item-detalle {
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  
+  .paso-desc-detalle {
+    font-size: 0.65rem;
+    min-width: 100%;
+  }
+  
+  .proceso-item-mini {
+    font-size: 0.45rem;
+  }
+  
+  .paso-desc-mini {
+    font-size: 0.45rem;
+    max-width: 40px;
+  }
+  
+  .paso-nro-mini {
+    min-width: 12px;
+    height: 12px;
+    font-size: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .procesos-info-mini {
+    padding: 1px 3px;
+  }
+  
+  .proceso-item-mini {
+    padding: 0px 3px;
+  }
+  
+  .lista-procesos-tags-mini {
+    gap: 2px;
+  }
+  
+  .paso-desc-mini {
+    max-width: 30px;
+    font-size: 0.4rem;
   }
 }

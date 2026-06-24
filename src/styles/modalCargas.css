@@ -365,62 +365,61 @@
 
 
 
-/* GRID DE MARCAS COMERCIALES */
+/* GRID DE MARCAS COMERCIALES - VERSIÓN COMPACTA */
 .contenedor-marcas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
-  margin-bottom: 10px;
-  padding: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Reducido de 120px a 80px */
+  gap: 6px; /* Reducido de 12px a 6px */
+  margin-bottom: 6px; /* Reducido de 10px a 6px */
+  padding: 2px;
 }
 
 .marca-card {
   background: #2a2640;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 5px;
+  border-radius: 8px; /* Reducido de 12px a 8px */
+  padding: 4px 6px; /* Reducido de 5px a 4px 6px */
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .marca-card h3 {
-  font-size: 13px;
+  font-size: 10px; /* Reducido de 13px a 10px */
   color: #ccc;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; /* Reducido de 1px a 0.5px */
 }
 
 .marca-card p {
-  font-size: 16px;
+  font-size: 12px; /* Reducido de 16px a 12px */
   color: #00ffcc;
   font-weight: 700;
-  margin: 5px 0;
+  margin: 2px 0; /* Reducido de 5px a 2px */
 }
 
 .marca-card span {
-  font-size: 10px;
+  font-size: 12px; /* Reducido de 10px a 8px */
   color: #888;
+  display: block;
 }
 
 .marca-card:hover {
   background: rgba(0, 192, 255, 0.1);
-  transform: translateY(-3px);
+  transform: translateY(-2px); /* Reducido de -3px a -2px */
   border-color: rgba(0, 192, 255, 0.3);
 }
 
 .marca-card.activa {
   background: rgba(0, 192, 255, 0.2);
   border: 1px solid #00c0ff;
-  box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 192, 255, 0.2); /* Reducido de 15px a 10px */
 }
 
 .marca-card.activa h3 {
   color: #fff;
 }
-
-
 
 
 .fila-carga.clickable-row {

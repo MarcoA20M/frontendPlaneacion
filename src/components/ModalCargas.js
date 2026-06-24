@@ -24,7 +24,6 @@ function ModalCargas({
         if (response.ok) {
           const data = await response.json();
           setFamilias(data);
-          console.log('Familias cargadas:', data);
         }
       } catch (error) {
         console.error('Error al cargar familias:', error);

@@ -472,7 +472,6 @@ export default function FormulasScreen() {
                                                 })}
                                                 {totalPaginas > 5 && paginaActual < totalPaginas - 2 && (
                                                     <>
-                                                        <span className="paginacion-puntos">...</span>
                                                         <button
                                                             className="paginacion-btn"
                                                             onClick={() => cambiarPagina(totalPaginas)}

@@ -13,7 +13,7 @@ export default function MateriaPrimaProductos() {
     const [loadingProductos, setLoadingProductos] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [filtroTipo, setFiltroTipo] = useState("todos");
-    const [produccionMensual, setProduccionMensual] = useState(1000);
+    const [litrajeDeseado, setLitrajeDeseado] = useState(800);
     const [productosDisponibles, setProductosDisponibles] = useState([]);
     const [todasLasFormulas, setTodasLasFormulas] = useState([]);
 
@@ -129,7 +129,7 @@ export default function MateriaPrimaProductos() {
                         },
                         cantidadPorLitro: cantidadPorLitro,
                         cantidadPorCarga: cantidadPorLitro * CARGA_ESTANDAR,
-                        consumoMensual: cantidadPorLitro * produccionMensual
+                        consumoCalculado: cantidadPorLitro * litrajeDeseado
                     });
                 }
             }
@@ -166,7 +166,7 @@ export default function MateriaPrimaProductos() {
                             producto: producto,
                             cantidadPorLitro: cantidadPorLitro,
                             cantidadPorCarga: cantidadPorLitro * CARGA_ESTANDAR,
-                            consumoMensual: cantidadPorLitro * produccionMensual
+                            consumoCalculado: cantidadPorLitro * litrajeDeseado
                         };
                     })
                 );
@@ -182,10 +182,8 @@ export default function MateriaPrimaProductos() {
         }
     };
 
-    // 🔴 NUEVA FUNCIÓN: Manejar clic en la card del producto
     const handleProductCardClick = (producto) => {
         if (producto && producto.codigo) {
-            // Navegar a la página de fórmulas con el producto seleccionado
             window.location.href = `/mantenimiento/formulas?producto=${producto.codigo}`;
         }
     };
@@ -259,7 +257,7 @@ export default function MateriaPrimaProductos() {
     const calcularDiasStock = () => {
         const productosMostrados = productosFiltradosYOrdenados();
         if (!selectedMP || productosMostrados.length === 0) return 0;
-        const consumoDiario = productosMostrados.reduce((sum, p) => sum + (p.consumoMensual || 0), 0) / 30;
+        const consumoDiario = productosMostrados.reduce((sum, p) => sum + (p.consumoCalculado || 0), 0) / 30;
         if (consumoDiario === 0) return 999;
         return Math.floor(selectedMP.nivelActual / consumoDiario);
     };
@@ -270,6 +268,26 @@ export default function MateriaPrimaProductos() {
         const matchesTipo = filtroTipo === "todos" || mp.tipo === filtroTipo;
         return matchesSearch && matchesTipo;
     });
+
+    // 🔴 FUNCIÓN PARA MANEJAR ERROR DE IMAGEN - CORREGIDA
+    const handleImageError = (e) => {
+        // Ocultar la imagen que falló
+        e.target.style.display = 'none';
+        
+        // Buscar el contenedor padre y mostrar un icono de respaldo
+        const parent = e.target.parentElement;
+        if (parent) {
+            // Verificar si ya existe un icono de respaldo
+            const existingFallback = parent.querySelector('.producto-icono-fallback');
+            if (!existingFallback) {
+                // Crear y agregar el icono de respaldo
+                const fallbackSpan = document.createElement('span');
+                fallbackSpan.className = 'producto-icono-fallback';
+                fallbackSpan.textContent = '📦';
+                parent.appendChild(fallbackSpan);
+            }
+        }
+    };
 
     if (loading) {
         return (
@@ -456,11 +474,11 @@ export default function MateriaPrimaProductos() {
                                         <h4>📋 Productos que consumen esta materia prima</h4>
                                         <div className="controles-ordenamiento">
                                             <div className="produccion-control">
-                                                <label>Producción mensual (L):</label>
+                                                <label>Litraje deseado (L):</label>
                                                 <input
                                                     type="number"
-                                                    value={produccionMensual}
-                                                    onChange={(e) => setProduccionMensual(Number(e.target.value))}
+                                                    value={litrajeDeseado}
+                                                    onChange={(e) => setLitrajeDeseado(Number(e.target.value))}
                                                     className="produccion-input"
                                                 />
                                             </div>
@@ -483,13 +501,12 @@ export default function MateriaPrimaProductos() {
                                         <>
                                             <div className="productos-grid">
                                                 {productosFiltradosYOrdenados().map((relacion, idx) => {
-                                                    const consumoMensual = (relacion.cantidadPorLitro || 0) * produccionMensual;
+                                                    const consumoCalculado = (relacion.cantidadPorLitro || 0) * litrajeDeseado;
                                                     const porcentajeStock = selectedMP.nivelActual > 0
-                                                        ? (consumoMensual / selectedMP.nivelActual) * 100
+                                                        ? (consumoCalculado / selectedMP.nivelActual) * 100
                                                         : 0;
 
                                                     return (
-                                                        // 🔴 AÑADIDO onClick a toda la card
                                                         <div
                                                             key={idx}
                                                             className="producto-card"
@@ -503,10 +520,7 @@ export default function MateriaPrimaProductos() {
                                                                             src={familiaService.getImagenUrl(relacion.producto.familiaId)}
                                                                             alt={relacion.producto?.descripcion || 'Producto'}
                                                                             className="producto-familia-img"
-                                                                            onError={(e) => {
-                                                                                e.target.style.display = 'none';
-                                                                                e.target.parentElement.innerHTML = '<span className="producto-icono-fallback">📦</span>';
-                                                                            }}
+                                                                            onError={handleImageError} // 🔴 USAR LA FUNCIÓN CORREGIDA
                                                                         />
                                                                     </div>
                                                                 ) : (
@@ -532,6 +546,13 @@ export default function MateriaPrimaProductos() {
                                                                             <strong>{(relacion.cantidadPorCarga || 0).toFixed(3)} {selectedMP.unidad}</strong>
                                                                         </div>
                                                                     </div>
+                                                                    <div className="detalle-item">
+                                                                        <span className="detalle-icon">📈</span>
+                                                                        <div>
+                                                                            <span className="detalle-label">Cantidad para {litrajeDeseado}L:</span>
+                                                                            <strong>{(consumoCalculado).toFixed(3)} {selectedMP.unidad}</strong>
+                                                                        </div>
+                                                                    </div>
                                                                     {ordenamientoConsumo === "asc" && (
                                                                         <div className="detalle-item orden-indicador">
                                                                             <span className="orden-badge">#{idx + 1} menor consumo</span>
@@ -545,7 +566,7 @@ export default function MateriaPrimaProductos() {
                                                                 </div>
 
                                                                 <div className="impacto-bar">
-                                                                    <div className="impacto-label">Impacto en stock mensual:</div>
+                                                                    <div className="impacto-label">Impacto en stock para {litrajeDeseado}L:</div>
                                                                     <div className="impacto-bar-container">
                                                                         <div
                                                                             className="impacto-bar-fill"
@@ -575,9 +596,9 @@ export default function MateriaPrimaProductos() {
                                                     <div className="resumen-card">
                                                         <div className="resumen-icon">📦</div>
                                                         <div className="resumen-info">
-                                                            <span className="resumen-label">Consumo mensual total</span>
+                                                            <span className="resumen-label">Consumo para {litrajeDeseado}L</span>
                                                             <span className="resumen-number">
-                                                                {productosFiltradosYOrdenados().reduce((sum, p) => sum + ((p.cantidadPorLitro || 0) * produccionMensual), 0).toLocaleString()} {selectedMP.unidad}
+                                                                {productosFiltradosYOrdenados().reduce((sum, p) => sum + ((p.cantidadPorLitro || 0) * litrajeDeseado), 0).toLocaleString()} {selectedMP.unidad}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -612,7 +633,7 @@ export default function MateriaPrimaProductos() {
                                 <li>✓ Qué productos la consumen</li>
                                 <li>✓ Cantidad utilizada por carga de 800L</li>
                                 <li>✓ Ordenar de menor a mayor consumo</li>
-                                <li>✓ Consumo mensual estimado</li>
+                                <li>✓ Consumo para el litraje que desees</li>
                                 <li>✓ Impacto en tu inventario</li>
                             </ul>
                         </div>

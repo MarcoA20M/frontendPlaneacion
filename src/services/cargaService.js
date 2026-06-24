@@ -56,9 +56,7 @@ export const obtenerCargasPorFecha = async (fechaInput) => {
     };
   });
   
-  console.log("📦 Primer registro normalizado:", datosNormalizados[0]);
-  console.log("   - maquina:", datosNormalizados[0]?.maquina);
-  console.log("   - operario:", datosNormalizados[0]?.operario);
+
   
   return datosNormalizados;
 };

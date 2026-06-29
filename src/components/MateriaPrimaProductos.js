@@ -273,7 +273,7 @@ export default function MateriaPrimaProductos() {
     const handleImageError = (e) => {
         // Ocultar la imagen que falló
         e.target.style.display = 'none';
-        
+
         // Buscar el contenedor padre y mostrar un icono de respaldo
         const parent = e.target.parentElement;
         if (parent) {
@@ -416,6 +416,21 @@ export default function MateriaPrimaProductos() {
                                             </div>
                                         </div>
 
+
+
+                                        <div className="mp-stock-detalle">
+                                            <div className="stock-info">
+                                                <span className="stock-label">Stock actual:</span>
+                                                <strong className={`stock-value ${getEstadoColor(selectedMP)}`}>
+                                                    {selectedMP.nivelActual?.toLocaleString()} {selectedMP.unidad}
+                                                </strong>
+                                            </div>
+                                            <div className="umbrales">
+                                                <span>⚠️ Alerta: {selectedMP.umbralAlerta?.toLocaleString()} {selectedMP.unidad}</span>
+                                                <span>🚨 Crítico: {selectedMP.umbralCritico?.toLocaleString()} {selectedMP.unidad}</span>
+                                            </div>
+                                        </div>
+
                                         {productosRelacionados.length > 0 && (
                                             <div className="filtro-lateral">
                                                 <div className="filtro-lateral-label">
@@ -453,18 +468,6 @@ export default function MateriaPrimaProductos() {
                                         )}
                                     </div>
 
-                                    <div className="mp-stock-detalle">
-                                        <div className="stock-info">
-                                            <span className="stock-label">Stock actual:</span>
-                                            <strong className={`stock-value ${getEstadoColor(selectedMP)}`}>
-                                                {selectedMP.nivelActual?.toLocaleString()} {selectedMP.unidad}
-                                            </strong>
-                                        </div>
-                                        <div className="umbrales">
-                                            <span>⚠️ Alerta: {selectedMP.umbralAlerta?.toLocaleString()} {selectedMP.unidad}</span>
-                                            <span>🚨 Crítico: {selectedMP.umbralCritico?.toLocaleString()} {selectedMP.unidad}</span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -530,7 +533,7 @@ export default function MateriaPrimaProductos() {
                                                                     <h5>{relacion.producto?.descripcion || relacion.productoNombre || 'Producto'}</h5>
                                                                     <span className="producto-codigo">{relacion.producto?.codigo || relacion.productoId}</span>
                                                                 </div>
-                                                              
+
 
                                                                 <div className="producto-badge">
                                                                     {((relacion.cantidadPorCarga || 0) / CARGA_ESTANDAR * 100).toFixed(1)}% de la carga

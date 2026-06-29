@@ -15,6 +15,7 @@ import MateriasPrimasScreen from "./screens/MateriasPrimasScreen";
 import FamiliaProductosScreen from "./screens/FamiliaProductosScreen";
 import BasesScreen from './screens/BasesScreen';
 import ConsumosScreen from './screens/ConsumosScreen';
+import ProductoDetalleScreen from "./screens/ProductoDetalleScreen";
 
 
 // Wrapper para el detalle de familias (MEJORADO)
@@ -93,7 +94,9 @@ export default function App() {
         <Route path="/familia/:id" element={<FamiliaProductosScreen />} />
         <Route path="/bases" element={<BasesScreen />} />
         <Route path="/mantenimiento/familias" element={<FamiliasGestionScreen />} />
-  <Route path="/consumos" element={<ConsumosScreen />} />
+        <Route path="/consumos" element={<ConsumosScreen />} />
+        <Route path="/producto-detalle" element={<ProductoDetalleScreen />} />
+
         <Route path="/familias" element={<FamiliasWrapper />} />
         <Route path="/familia/:idFamilia" element={<FamiliaDetalleWrapper />} />
 

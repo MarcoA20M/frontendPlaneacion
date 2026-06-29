@@ -1,7 +1,7 @@
 /* src/styles/tanqueVisual.css */
 
 /* ===== VERSIÓN HORIZONTAL CON TANQUE MÁS GRANDE - ESTILO NEON ===== */
-.tanque-visual-container {
+.tv-container {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(192, 0, 255, 0.15);
@@ -12,7 +12,7 @@
 }
 
 /* Header */
-.tanque-visual-header {
+.tv-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -21,13 +21,13 @@
     gap: 6px;
 }
 
-.tanque-visual-titulo {
+.tv-titulo {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.tanque-visual-codigo {
+.tv-codigo {
     font-weight: 700;
     font-size: 0.9rem;
     color: #e879f9;
@@ -38,12 +38,12 @@
     border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
-.tanque-visual-nombre {
+.tv-nombre {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.5);
 }
 
-.tanque-visual-estado {
+.tv-estado {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -56,7 +56,7 @@
 }
 
 /* Cuerpo horizontal */
-.tanque-visual-cuerpo {
+.tv-cuerpo {
     display: flex;
     flex-direction: row;
     gap: 24px;
@@ -64,14 +64,14 @@
 }
 
 @media (max-width: 768px) {
-    .tanque-visual-cuerpo {
+    .tv-cuerpo {
         flex-direction: column;
         gap: 12px;
     }
 }
 
 /* ===== GRÁFICO DEL TANQUE - ESTILO NEON ===== */
-.tanque-visual-grafico {
+.tv-grafico {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -86,7 +86,7 @@
 }
 
 /* Tapa - estilo neon */
-.tanque-tapa {
+.tv-tapa {
     width: 130px;
     height: 16px;
     border: 3px solid;
@@ -97,7 +97,7 @@
     box-shadow: 0 -2px 15px rgba(192, 0, 255, 0.1);
 }
 
-.tanque-tapa-detalle {
+.tv-tapa-detalle {
     width: 35px;
     height: 5px;
     background: rgba(192, 0, 255, 0.2);
@@ -110,7 +110,7 @@
 }
 
 /* Cuerpo del tanque - estilo neon */
-.tanque-cuerpo {
+.tv-cuerpo-tanque {
     width: 130px;
     height: 200px;
     border: 3px solid;
@@ -122,7 +122,7 @@
 }
 
 /* Nivel del líquido */
-.tanque-nivel {
+.tv-nivel {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -134,22 +134,22 @@
 }
 
 /* Ondas en el líquido - efecto neón */
-.tanque-onda {
+.tv-onda {
     position: absolute;
     top: -5px;
     left: -50%;
     width: 200%;
     height: 10px;
     background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-    animation: onda 3s ease-in-out infinite;
+    animation: tv-onda 3s ease-in-out infinite;
 }
 
-.tanque-onda-2 {
+.tv-onda-2 {
     animation-delay: 1.5s;
     opacity: 0.4;
 }
 
-@keyframes onda {
+@keyframes tv-onda {
     0%, 100% {
         transform: translateX(0) scaleY(1);
     }
@@ -159,14 +159,14 @@
 }
 
 /* Burbujas decorativas - efecto neón */
-.burbuja {
+.tv-burbuja {
     position: absolute;
     border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent);
-    animation: burbuja 4s ease-in-out infinite;
+    animation: tv-burbuja 4s ease-in-out infinite;
 }
 
-.burbuja-1 {
+.tv-burbuja-1 {
     width: 8px;
     height: 8px;
     left: 15%;
@@ -175,7 +175,7 @@
     box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
 }
 
-.burbuja-2 {
+.tv-burbuja-2 {
     width: 6px;
     height: 6px;
     right: 20%;
@@ -184,7 +184,7 @@
     box-shadow: 0 0 8px rgba(192, 0, 255, 0.08);
 }
 
-.burbuja-3 {
+.tv-burbuja-3 {
     width: 5px;
     height: 5px;
     left: 30%;
@@ -193,7 +193,7 @@
     box-shadow: 0 0 6px rgba(192, 0, 255, 0.06);
 }
 
-@keyframes burbuja {
+@keyframes tv-burbuja {
     0%, 100% {
         transform: translateY(0) scale(1);
         opacity: 0.6;
@@ -205,7 +205,7 @@
 }
 
 /* Porcentaje interior - estilo neón */
-.tanque-porcentaje-interior {
+.tv-porcentaje-interior {
     position: relative;
     z-index: 2;
     font-weight: 700;
@@ -216,7 +216,7 @@
 }
 
 /* Mediciones laterales - estilo neón */
-.tanque-mediciones {
+.tv-mediciones {
     position: absolute;
     right: -24px;
     top: 0;
@@ -228,7 +228,7 @@
     padding: 4px 0;
 }
 
-.medicion {
+.tv-medicion {
     font-size: 0.6rem;
     color: rgba(255, 255, 255, 0.2);
     text-align: right;
@@ -236,7 +236,7 @@
     line-height: 1;
 }
 
-.medicion::before {
+.tv-medicion::before {
     content: '';
     position: absolute;
     right: 100%;
@@ -248,7 +248,7 @@
 }
 
 /* Base del tanque - estilo neón */
-.tanque-base {
+.tv-base {
     width: 145px;
     height: 10px;
     border: 3px solid;
@@ -259,7 +259,7 @@
     box-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
 }
 
-.tanque-base-detalle {
+.tv-base-detalle {
     width: 40px;
     height: 4px;
     background: rgba(192, 0, 255, 0.15);
@@ -269,7 +269,7 @@
 }
 
 /* ===== INFORMACIÓN DEL TANQUE - ESTILO NEÓN ===== */
-.tanque-visual-info {
+.tv-info {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
@@ -282,13 +282,13 @@
 }
 
 @media (max-width: 768px) {
-    .tanque-visual-info {
+    .tv-info {
         grid-template-columns: 1fr 1fr;
         width: 100%;
     }
 }
 
-.tanque-info-item {
+.tv-info-item {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -298,7 +298,7 @@
     border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.tanque-info-label {
+.tv-info-label {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -306,13 +306,13 @@
     font-weight: 600;
 }
 
-.tanque-info-valor {
+.tv-info-valor {
     font-size: 0.85rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
 }
 
-.tipo-badge {
+.tv-tipo-badge {
     display: inline-block;
     padding: 1px 10px;
     border-radius: 8px;
@@ -323,7 +323,7 @@
 }
 
 /* Efecto de brillo neón en el tanque */
-.tanque-cuerpo::after {
+.tv-cuerpo-tanque::after {
     content: '';
     position: absolute;
     top: 10%;
@@ -336,7 +336,7 @@
 }
 
 /* Efecto de brillo neón en los bordes */
-.tanque-cuerpo::before {
+.tv-cuerpo-tanque::before {
     content: '';
     position: absolute;
     top: -2px;
@@ -350,13 +350,13 @@
 }
 
 /* Efecto de brillo en el contenedor */
-.tanque-visual-container:hover {
+.tv-container:hover {
     border-color: rgba(192, 0, 255, 0.25);
     box-shadow: 0 4px 30px rgba(192, 0, 255, 0.12);
     transition: all 0.3s ease;
 }
 
-.tanque-visual-grafico:hover {
+.tv-grafico:hover {
     border-color: rgba(192, 0, 255, 0.15);
     box-shadow: inset 0 0 40px rgba(192, 0, 255, 0.08);
     transition: all 0.3s ease;

@@ -1,7 +1,9 @@
+// src/components/ModalInventarioBajo.js
 import React, { useState, useEffect } from 'react';
 import '../styles/modalInventario.css';
 import { verificarCargaReciente } from '../services/cargaService';
 import { productoService } from '../services/productoService';
+import ModalDetalleCarga from './ModalDetalleCarga'; // 👈 IMPORTAR EL MODAL
 
 const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSelectCode, onAnalizarNuevo }) => {
   const [buscandoId, setBuscandoId] = useState(null);
@@ -10,6 +12,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
   const [cargandoInfo, setCargandoInfo] = useState(false);
   const [tabActivo, setTabActivo] = useState('alertas');
   const [datosPlanificador, setDatosPlanificador] = useState(null);
+
+  // 👈 NUEVO ESTADO PARA EL MODAL DE DETALLE
+  const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
+  const [cargaSeleccionada, setCargaSeleccionada] = useState(null);
 
   const alertasNormales = alertas || [];
   const revisar = alertasRevisar || [];
@@ -30,16 +36,16 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
 
     const obtenerInfoProductos = async () => {
       setCargandoInfo(true);
-      
+
       try {
         const productos = await productoService.listarTodos();
-        
+
         const mapaInfo = {};
         productos.forEach(producto => {
           if (producto.codigo) {
             // Obtener procesos de diferentes fuentes posibles
             let procesos = [];
-            
+
             // Intentar obtener procesos de diferentes propiedades
             if (producto.procesos && Array.isArray(producto.procesos) && producto.procesos.length > 0) {
               procesos = producto.procesos;
@@ -56,10 +62,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 procesos = [producto.proceso];
               }
             }
-            
+
             // Verificar si es esmalte por el tipo o por tener procesos
-            const esEsmalte = 
-              producto.tipo === 'esmalte' || 
+            const esEsmalte =
+              producto.tipo === 'esmalte' ||
               producto.tipo === 'Esmalte' ||
               producto.categoria?.toLowerCase().includes('esmalte') ||
               producto.familia?.toLowerCase().includes('esmalte') ||
@@ -67,10 +73,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
               producto.descripcion?.toLowerCase().includes('esmalte') ||
               producto.nombre?.toLowerCase().includes('esmalte') ||
               procesos.length > 0;
-              
+
             // Si tiene procesos y no se detectó como esmalte, igual lo marcamos como esmalte
             const esEsmalteFinal = esEsmalte || procesos.length > 0;
-            
+
             mapaInfo[producto.codigo] = {
               poderCubriente: producto.poderCubriente || producto.poder_cubriente || 'N/A',
               esEsmalte: esEsmalteFinal,
@@ -80,7 +86,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
             };
           }
         });
-        
+
         setInfoProductos(mapaInfo);
       } catch (error) {
         console.error('Error al cargar productos:', error);
@@ -149,7 +155,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         alcance: datosPresentacion.alcance || 0,
         nombreEnvasado: nombreEnvasado
       });
-      
+
       setInfoCarga({ ...data, nombreEnvasado, tipo: 'ocupado', codigo: codigo });
     } else {
       setDatosPlanificador(null);
@@ -162,10 +168,16 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     }
   };
 
+  // 👈 FUNCIÓN PARA ABRIR EL MODAL DE DETALLE CON LA CARGA SELECCIONADA
+  const handleAbrirDetalle = (carga) => {
+    setCargaSeleccionada(carga);
+    setModalDetalleVisible(true);
+  };
+
   const getInfoProducto = (codigo) => {
-    return infoProductos[codigo] || { 
-      poderCubriente: 'N/A', 
-      esEsmalte: false, 
+    return infoProductos[codigo] || {
+      poderCubriente: 'N/A',
+      esEsmalte: false,
       procesos: [],
       descripcion: codigo,
       nombre: codigo
@@ -175,10 +187,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
   // ===== FUNCIÓN PARA ABREVIAR TEXTO DE PROCESOS =====
   const abreviarProceso = (texto) => {
     if (!texto) return "N/A";
-    
+
     // Limpiar el texto
     let limpio = texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
-    
+
     // Buscar abreviatura en el mapa
     const textoLower = limpio.toLowerCase();
     for (const [key, value] of Object.entries(abreviaturaProcesos)) {
@@ -186,7 +198,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         return value;
       }
     }
-    
+
     // Si no encuentra, tomar primera letra
     return limpio.charAt(0).toUpperCase();
   };
@@ -194,7 +206,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
   // ===== FUNCIÓN PARA RENDERIZAR LA INFO DEL PRODUCTO =====
   const renderInfoProducto = (codigo) => {
     const info = getInfoProducto(codigo);
-    
+
     if (cargandoInfo) {
       return (
         <div className="hint-programar" style={{ color: '#64748b', opacity: 0.5 }}>
@@ -242,22 +254,22 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
       const salidasMensuales = planificadorData?.salidas || 0;
       const existenciaActual = planificadorData?.existencia || 0;
       const alcanceActual = planificadorData?.alcance || 0;
-      
+
       const factorC2 = 24;
       let diasAdicionales = 0;
-      
+
       if (salidasMensuales > 0 && totalPz > 0) {
         diasAdicionales = (totalPz / salidasMensuales) * factorC2;
       }
-      
+
       let nuevoAlcance = alcanceActual + diasAdicionales;
       let nuevoInventario = existenciaActual + totalPz;
-      
+
       let diasEstimados = 0;
       if (salidasMensuales > 0 && nuevoInventario > 0) {
         diasEstimados = (nuevoInventario / salidasMensuales) * factorC2;
       }
-      
+
       return {
         totalPz: totalPz,
         salidasMensuales: Math.round(salidasMensuales),
@@ -298,8 +310,14 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         <div className="emergente-body">
           {infoCarga.tipo === 'ocupado' ? (
             <>
-              <p className="emergente-titulo-prod">{infoCarga.nombreEnvasado.toUpperCase()}</p>
-              
+              <p className="emergente-titulo-prod">
+                {infoCarga.nombreEnvasado.toUpperCase()} {info.descripcion && (
+                  <span className="emergente-descripcion-prod">
+                    {info.descripcion}
+                  </span>
+                )}
+              </p>
+
               {/* Mostrar procesos si tiene */}
               {tieneProcesos && (
                 <div className="procesos-info-detalle">
@@ -315,37 +333,36 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 </div>
               )}
 
-              {/* Mostrar poder cubriente si no tiene procesos */}
-              {!tieneProcesos && (
-                <div className="info-item">
-                  <span>Poder Cubriente:</span>
-                  <strong>{info.poderCubriente}</strong>
-                </div>
-              )}
-              
+              {/* 👈 AQUÍ MODIFICAMOS EL LOTE PARA QUE SEA CLICKEABLE */}
               <div className="emergente-dato">
-                <span>Lotes:</span> 
+                <span>Lotes:</span>
                 <strong>{infoCarga.conteoLotes || 1}</strong>
               </div>
-              
+
               <div className="emergente-dato">
-                <span>Cantidad:</span> 
+                <span>Cantidad:</span>
                 <strong>{infoCarga.total} uds</strong>
               </div>
-              
+
               <div className="emergente-dato">
-                <span>Folio(s):</span> 
-                <strong className="txt-highlight">{infoCarga.folios}</strong>
+                <span>Folio(s):</span>
+                <strong
+                  className="folio-clickeable"
+                  onClick={() => handleAbrirDetalle(infoCarga)}
+                  title="Haz clic para ver detalles de la carga"
+                >
+                  {infoCarga.folios} 
+                </strong>
               </div>
-              
+
               <div className="emergente-dato">
-                <span>Operario(s):</span> 
+                <span>Operario(s):</span>
                 <strong>{infoCarga.operarios}</strong>
               </div>
-              
+
               <div className="emergente-dato">
-                <span>Último registro:</span> 
-                <strong>{infoCarga.fecha}</strong>
+                <span>Poder cubriente:</span>
+                <strong>{info.poderCubriente}</strong>
               </div>
 
               {/* ===== SECCIÓN DE CÁLCULO DE DÍAS DE ALCANCE ===== */}
@@ -356,7 +373,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                       <span className="calculo-label">Piezas Prog.</span>
                       <span className="calculo-valor">{calculoDias.totalPz}</span>
                     </div>
-                    
+
                     <div className="calculo-item">
                       <span className="calculo-label">Salidas Mens.</span>
                       <span className="calculo-valor">{calculoDias.salidasMensuales}</span>
@@ -371,17 +388,17 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                       <span className="calculo-label">Nuevo Inv.</span>
                       <span className="calculo-valor highlight-verde">{calculoDias.nuevoInventario}</span>
                     </div>
-                    
+
                     <div className="calculo-item">
                       <span className="calculo-label">Días Adic.</span>
                       <span className="calculo-valor highlight-verde">+{calculoDias.diasAdicionales}</span>
                     </div>
-                    
+
                     <div className="calculo-item">
                       <span className="calculo-label">Alcance</span>
                       <span className="calculo-valor">{calculoDias.alcanceActual} días</span>
                     </div>
-                    
+
                     <div className="calculo-item calculo-item-destacado" style={{ gridColumn: '1 / -1', background: 'rgba(74, 222, 128, 0.05)', borderColor: 'rgba(74, 222, 128, 0.15)' }}>
                       <span className="calculo-label">Días Estimados</span>
                       <span className="calculo-valor" style={{ color: '#4ade80', fontSize: '15px' }}>
@@ -391,7 +408,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                   </div>
                 </div>
               )}
-              
+
             </>
           ) : (
             <div className="emergente-libre">
@@ -480,6 +497,29 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     <div className="modal-overlay">
       <div className="modal-cargas inv-container">
 
+        {/* 👈 MODAL DE DETALLE DE CARGA */}
+        {modalDetalleVisible && (
+          <ModalDetalleCarga
+            visible={modalDetalleVisible}
+            carga={cargaSeleccionada}
+            onClose={() => {
+              setModalDetalleVisible(false);
+              setCargaSeleccionada(null);
+            }}
+            onEliminar={(carga) => {
+              console.log('Eliminar carga:', carga);
+              setModalDetalleVisible(false);
+            }}
+            onMoverEspecial={(carga) => {
+              console.log('Mover a especial:', carga);
+              setModalDetalleVisible(false);
+            }}
+            onCambiarOperario={(id, operario) => {
+              console.log('Cambiar operario:', id, operario);
+            }}
+          />
+        )}
+
         {infoCarga && (
           <div className="emergente-info-overlay">
             {renderInfoCargaDetalle()}
@@ -491,7 +531,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
             <h2>Análisis de Inventario</h2>
             <div className="tabs-container-header">
               {alertasNormales.length > 0 && (
-                <button 
+                <button
                   className={`tab-btn-header ${tabActivo === 'alertas' ? 'active' : ''}`}
                   onClick={() => setTabActivo('alertas')}
                 >
@@ -500,7 +540,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 </button>
               )}
               {revisar.length > 0 && (
-                <button 
+                <button
                   className={`tab-btn-header revisar-tab-header ${tabActivo === 'revisar' ? 'active' : ''}`}
                   onClick={() => setTabActivo('revisar')}
                 >

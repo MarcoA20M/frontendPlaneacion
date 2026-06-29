@@ -325,12 +325,13 @@ export default function CriticosScreen() {
                                                     <div className="umbral-item critico">🚨 Crítico: {tanque.umbralCritico?.toLocaleString()} {tanque.unidad}</div>
                                                 </div>
                                                 <div className="tanque-acciones">
-                                                   <button 
-    className="btn-ver-trazabilidad" 
-    onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
->
-    📋 Ver Consumos
-</button>                                                    <button className="btn-registrar-compra" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Registrar Compra</button>
+                                                    <button
+                                                        className="btn-ver-trazabilidad"
+                                                        onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
+                                                    >
+                                                        📋 Ver Consumos
+                                                    </button>                                                   
+                                                     <button className="btn-registrar-compra" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Registrar Compra</button>
                                                     <button className="btn-ver-trazabilidad" onClick={() => cambiarSeccion("trazabilidad")}>🔗 Ver productos que consume</button>
                                                 </div>
                                             </div>
@@ -362,13 +363,13 @@ export default function CriticosScreen() {
                                                 </div>
                                                 <div className="alerta-accion">
                                                     <button className="btn-accion-urgente" onClick={() => { setTanqueSeleccionado(tanque); setMostrarModalCompra(true); }}>🛒 Solicitar compra urgente</button>
-<button
-    className="btn-ver-consumo"
-    onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
->
-    📋 Ver Consumos
-</button>
-                                                                                                   
+                                                    <button
+                                                        className="btn-ver-consumo"
+                                                        onClick={() => navigate(`/consumos?base=${tanque.codigo}`)}
+                                                    >
+                                                        📋 Ver Consumos
+                                                    </button>
+
                                                 </div>
                                             </div>
                                         ))}

@@ -62,31 +62,31 @@ export default function TanqueVisual({
     const colorTipo = coloresTipo[tipo] || '#6B7280';
 
     return (
-        <div className="tanque-visual-container">
-            <div className="tanque-visual-header">
-                <div className="tanque-visual-titulo">
-                    <span className="tanque-visual-codigo">{codigo}</span>
-                    <span className="tanque-visual-nombre">{nombre}</span>
+        <div className="tv-container">
+            <div className="tv-header">
+                <div className="tv-titulo">
+                    <span className="tv-codigo">{codigo}</span>
+                    <span className="tv-nombre">{nombre}</span>
                 </div>
-                <div className="tanque-visual-estado" style={{ borderColor: colorNivel }}>
+                <div className="tv-estado" style={{ borderColor: colorNivel }}>
                     <span>{estadoIcono}</span>
                     <span style={{ color: colorNivel }}>{estado}</span>
                 </div>
             </div>
 
-            <div className="tanque-visual-cuerpo">
+            <div className="tv-cuerpo">
                 {/* Representación del tanque */}
-                <div className="tanque-visual-grafico">
+                <div className="tv-grafico">
                     {/* Tapa del tanque */}
-                    <div className="tanque-tapa" style={{ borderColor: colorTipo }}>
-                        <div className="tanque-tapa-detalle"></div>
+                    <div className="tv-tapa" style={{ borderColor: colorTipo }}>
+                        <div className="tv-tapa-detalle"></div>
                     </div>
                     
                     {/* Cuerpo del tanque */}
-                    <div className="tanque-cuerpo" style={{ borderColor: colorTipo }}>
+                    <div className="tv-cuerpo-tanque" style={{ borderColor: colorTipo }}>
                         {/* Nivel de líquido */}
                         <div 
-                            className="tanque-nivel" 
+                            className="tv-nivel" 
                             style={{ 
                                 height: `${porcentajeLimitado}%`,
                                 background: `linear-gradient(to top, ${colorNivel}, ${colorNivel}dd)`,
@@ -94,84 +94,84 @@ export default function TanqueVisual({
                             }}
                         >
                             {/* Ondas en el líquido */}
-                            <div className="tanque-onda"></div>
-                            <div className="tanque-onda tanque-onda-2"></div>
+                            <div className="tv-onda"></div>
+                            <div className="tv-onda tv-onda-2"></div>
                             
                             {/* Burbujas decorativas */}
-                            <div className="burbuja burbuja-1"></div>
-                            <div className="burbuja burbuja-2"></div>
-                            <div className="burbuja burbuja-3"></div>
+                            <div className="tv-burbuja tv-burbuja-1"></div>
+                            <div className="tv-burbuja tv-burbuja-2"></div>
+                            <div className="tv-burbuja tv-burbuja-3"></div>
                             
                             {/* Porcentaje dentro del tanque - SIN DECIMALES */}
                             {porcentajeLimitado > 15 && (
-                                <div className="tanque-porcentaje-interior">
+                                <div className="tv-porcentaje-interior">
                                     {Math.round(porcentajeLimitado)}%
                                 </div>
                             )}
                         </div>
                         
                         {/* Líneas de medición */}
-                        <div className="tanque-mediciones">
-                            <div className="medicion" style={{ bottom: '0%' }}>0</div>
-                            <div className="medicion" style={{ bottom: '25%' }}>25</div>
-                            <div className="medicion" style={{ bottom: '50%' }}>50</div>
-                            <div className="medicion" style={{ bottom: '75%' }}>75</div>
-                            <div className="medicion" style={{ bottom: '100%' }}>100</div>
+                        <div className="tv-mediciones">
+                            <div className="tv-medicion" style={{ bottom: '0%' }}>0</div>
+                            <div className="tv-medicion" style={{ bottom: '25%' }}>25</div>
+                            <div className="tv-medicion" style={{ bottom: '50%' }}>50</div>
+                            <div className="tv-medicion" style={{ bottom: '75%' }}>75</div>
+                            <div className="tv-medicion" style={{ bottom: '100%' }}>100</div>
                         </div>
                     </div>
                     
                     {/* Base del tanque */}
-                    <div className="tanque-base" style={{ borderColor: colorTipo }}>
-                        <div className="tanque-base-detalle"></div>
+                    <div className="tv-base" style={{ borderColor: colorTipo }}>
+                        <div className="tv-base-detalle"></div>
                     </div>
                 </div>
 
                 {/* Información del tanque */}
-                <div className="tanque-visual-info">
-                    <div className="tanque-info-item">
-                        <span className="tanque-info-label">📊 Capacidad</span>
-                        <span className="tanque-info-valor">
+                <div className="tv-info">
+                    <div className="tv-info-item">
+                        <span className="tv-info-label">📊 Capacidad</span>
+                        <span className="tv-info-valor">
                             {formatearNumero(capacidadMaxima)} {unidad}
                         </span>
                     </div>
-                    <div className="tanque-info-item">
-                        <span className="tanque-info-label">📉 Nivel Actual</span>
-                        <span className="tanque-info-valor" style={{ color: colorNivel }}>
+                    <div className="tv-info-item">
+                        <span className="tv-info-label">📉 Nivel Actual</span>
+                        <span className="tv-info-valor" style={{ color: colorNivel }}>
                             {formatearNumero(nivelActual)} {unidad}
                         </span>
                     </div>
-                    <div className="tanque-info-item">
-                        <span className="tanque-info-label">📈 Porcentaje</span>
-                        <span className="tanque-info-valor" style={{ color: colorNivel }}>
+                    <div className="tv-info-item">
+                        <span className="tv-info-label">📈 Porcentaje</span>
+                        <span className="tv-info-valor" style={{ color: colorNivel }}>
                             {Math.round(porcentajeLimitado)}%
                         </span>
                     </div>
-                    <div className="tanque-info-item">
-                        <span className="tanque-info-label">📦 Tipo</span>
-                        <span className="tanque-info-valor">
-                            <span className="tipo-badge" style={{ backgroundColor: colorTipo }}>
+                    <div className="tv-info-item">
+                        <span className="tv-info-label">📦 Tipo</span>
+                        <span className="tv-info-valor">
+                            <span className="tv-tipo-badge" style={{ backgroundColor: colorTipo }}>
                                 {tipo || 'N/A'}
                             </span>
                         </span>
                     </div>
-                    <div className="tanque-info-item">
-                        <span className="tanque-info-label">⚡ Espacio disponible</span>
-                        <span className="tanque-info-valor">
+                    <div className="tv-info-item">
+                        <span className="tv-info-label">⚡ Espacio disponible</span>
+                        <span className="tv-info-valor">
                             {formatearNumero(capacidadMaxima - nivelActual)} {unidad}
                         </span>
                     </div>
                     {umbralAlerta && (
-                        <div className="tanque-info-item">
-                            <span className="tanque-info-label">🟡 Umbral Alerta</span>
-                            <span className="tanque-info-valor">
+                        <div className="tv-info-item">
+                            <span className="tv-info-label">🟡 Umbral Alerta</span>
+                            <span className="tv-info-valor">
                                 {formatearNumero(umbralAlerta)} {unidad}
                             </span>
                         </div>
                     )}
                     {umbralCritico && (
-                        <div className="tanque-info-item">
-                            <span className="tanque-info-label">🔴 Umbral Crítico</span>
-                            <span className="tanque-info-valor">
+                        <div className="tv-info-item">
+                            <span className="tv-info-label">🔴 Umbral Crítico</span>
+                            <span className="tv-info-valor">
                                 {formatearNumero(umbralCritico)} {unidad}
                             </span>
                         </div>

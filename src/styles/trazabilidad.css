@@ -4,7 +4,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: rgba(60, 2, 76, 0.2);
+    background: rgba(62, 1, 56, 0.2);
     backdrop-filter: blur(4px);
     overflow: hidden;
     position: relative;
@@ -153,9 +153,10 @@
 
 .mp-list {
     flex: 1;
-    overflow-y: auto;
-    padding: 8px;
-    min-height: 0;
+    overflow-y: auto;  /* 🔴 Esto es lo que hace el scroll */
+    padding: 10px;
+    max-height: calc(100vh - 200px); /* Altura máxima para el scroll */
+    min-height: 300px; /* Altura mínima */
 }
 
 .mp-list::-webkit-scrollbar {
@@ -1199,3 +1200,6 @@
         padding: 10px;
     }
 }
+
+
+

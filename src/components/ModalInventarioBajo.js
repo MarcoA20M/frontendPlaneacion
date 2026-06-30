@@ -1,9 +1,9 @@
 // src/components/ModalInventarioBajo.js
 import React, { useState, useEffect } from 'react';
 import '../styles/modalInventario.css';
-import { verificarCargaReciente } from '../services/cargaService';
+import { verificarCargaReciente, verificarCargaPorFolio } from '../services/cargaService';
 import { productoService } from '../services/productoService';
-import ModalDetalleCarga from './ModalDetalleCarga'; // 👈 IMPORTAR EL MODAL
+import ModalDetalleCarga from './ModalDetalleCarga';
 
 const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSelectCode, onAnalizarNuevo }) => {
   const [buscandoId, setBuscandoId] = useState(null);
@@ -12,15 +12,18 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
   const [cargandoInfo, setCargandoInfo] = useState(false);
   const [tabActivo, setTabActivo] = useState('alertas');
   const [datosPlanificador, setDatosPlanificador] = useState(null);
+  const [cargandoFolio, setCargandoFolio] = useState(false);
 
-  // 👈 NUEVO ESTADO PARA EL MODAL DE DETALLE
+  // Estado para el modal de detalle
   const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
   const [cargaSeleccionada, setCargaSeleccionada] = useState(null);
+  // Estado para almacenar los datos de cada folio
+  const [datosFolios, setDatosFolios] = useState({});
 
   const alertasNormales = alertas || [];
   const revisar = alertasRevisar || [];
 
-  // ===== MAPA DE ABREVIATURAS PARA PROCESOS =====
+  // Mapa de abreviaturas para procesos
   const abreviaturaProcesos = {
     'terminado': 'T',
     'molienda': 'M',
@@ -29,7 +32,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     'igualación': 'I',
   };
 
-  // ===== OBTENER INFORMACIÓN DE PRODUCTOS =====
+  // Obtener información de productos
   useEffect(() => {
     const todasLasAlertas = [...alertasNormales, ...revisar];
     if (!visible || todasLasAlertas.length === 0) return;
@@ -43,10 +46,8 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         const mapaInfo = {};
         productos.forEach(producto => {
           if (producto.codigo) {
-            // Obtener procesos de diferentes fuentes posibles
             let procesos = [];
 
-            // Intentar obtener procesos de diferentes propiedades
             if (producto.procesos && Array.isArray(producto.procesos) && producto.procesos.length > 0) {
               procesos = producto.procesos;
             } else if (producto.ruta_produccion && Array.isArray(producto.ruta_produccion) && producto.ruta_produccion.length > 0) {
@@ -63,7 +64,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
               }
             }
 
-            // Verificar si es esmalte por el tipo o por tener procesos
             const esEsmalte =
               producto.tipo === 'esmalte' ||
               producto.tipo === 'Esmalte' ||
@@ -74,7 +74,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
               producto.nombre?.toLowerCase().includes('esmalte') ||
               procesos.length > 0;
 
-            // Si tiene procesos y no se detectó como esmalte, igual lo marcamos como esmalte
             const esEsmalteFinal = esEsmalte || procesos.length > 0;
 
             mapaInfo[producto.codigo] = {
@@ -149,6 +148,8 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     setBuscandoId(null);
 
     if (data) {
+      const info = getInfoProducto(codigo);
+      
       setDatosPlanificador({
         salidas: datosPresentacion.salidas_mes || 0,
         existencia: datosPresentacion.existencia || 0,
@@ -156,7 +157,30 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         nombreEnvasado: nombreEnvasado
       });
 
-      setInfoCarga({ ...data, nombreEnvasado, tipo: 'ocupado', codigo: codigo });
+      // Separar los folios
+      const foliosString = data.folios || 'N/A';
+      const foliosArray = foliosString.split(',').map(f => f.trim());
+      
+      // Inicializar datos de folios vacíos, se cargarán cuando se necesiten
+      const datosFoliosMap = {};
+      foliosArray.forEach(folio => {
+        datosFoliosMap[folio] = null; // null indica que no está cargado
+      });
+
+      setDatosFolios(datosFoliosMap);
+
+      // Añadir más información a infoCarga para el detalle
+      setInfoCarga({ 
+        ...data, 
+        nombreEnvasado, 
+        tipo: 'ocupado', 
+        codigo: codigo,
+        descripcionProducto: info.descripcion || nombreEnvasado,
+        nivelCubriente: info.poderCubriente || 'N/A',
+        tipoProducto: info.esEsmalte ? 'Esmalte' : 'Vinílica',
+        detallesEnvasado: data.detallesEnvasado || [],
+        foliosArray: foliosArray
+      });
     } else {
       setDatosPlanificador(null);
       setInfoCarga({
@@ -165,13 +189,89 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
         msg: `No se encontraron registros para ${nombreEnvasado} bajo el código ${codigo}.`,
         codigo: codigo
       });
+      setDatosFolios({});
     }
   };
 
-  // 👈 FUNCIÓN PARA ABRIR EL MODAL DE DETALLE CON LA CARGA SELECCIONADA
-  const handleAbrirDetalle = (carga) => {
-    setCargaSeleccionada(carga);
+  // Función para obtener datos específicos de un folio
+  const obtenerDatosFolio = async (folio, codigo) => {
+    setCargandoFolio(true);
+    try {
+      // Llamar a la API para obtener los datos específicos del folio
+      const data = await verificarCargaPorFolio(folio, codigo);
+      return data;
+    } catch (error) {
+      console.error('Error al obtener datos del folio:', error);
+      return null;
+    } finally {
+      setCargandoFolio(false);
+    }
+  };
+
+  // Función para abrir el modal de detalle con un folio específico
+  const handleAbrirDetalleConFolio = async (carga, folioSeleccionado) => {
+    const info = getInfoProducto(carga.codigo);
+    
+    // Verificar si ya tenemos los datos del folio
+    let datosFolio = datosFolios[folioSeleccionado];
+    
+    // Si no tenemos datos, hacer la consulta a la API
+    if (!datosFolio) {
+      const folioData = await obtenerDatosFolio(folioSeleccionado, carga.codigo);
+      if (folioData) {
+        // Guardar los datos del folio
+        setDatosFolios(prev => ({
+          ...prev,
+          [folioSeleccionado]: folioData
+        }));
+        datosFolio = folioData;
+      }
+    }
+
+    // Si aún no hay datos, usar valores por defecto
+    if (!datosFolio) {
+      datosFolio = {
+        cantidad: 0,
+        litros: 0,
+        operario: carga.operarios || 'No asignado',
+        detallesEnvasado: [{ formato: 1, cantidad: 0 }]
+      };
+    }
+
+    // Construir objeto con los datos específicos del folio
+    const cargaParaDetalle = {
+      folio: folioSeleccionado,
+      foliosOriginal: carga.folios || carga.folio || 'N/A',
+      codigoProducto: carga.codigo || 'N/A',
+      descripcion: carga.descripcionProducto || carga.nombreEnvasado || 'Sin descripción',
+      tipo: carga.tipoProducto || (carga.tipo === 'ocupado' ? 'Esmalte' : 'Vinílica'),
+      operario: datosFolio.operario || 'No asignado', // Operario específico del folio
+      litros: datosFolio.cantidad || datosFolio.litros || 0, // Cantidad específica del folio
+      nivelCubriente: carga.nivelCubriente || info?.poderCubriente || 'N/A',
+      idTemp: carga.idTemp || Date.now(),
+      detallesEnvasado: datosFolio.detallesEnvasado && datosFolio.detallesEnvasado.length > 0 
+        ? datosFolio.detallesEnvasado 
+        : [
+            {
+              formato: 1,
+              cantidad: datosFolio.cantidad || 0,
+              articulo: `${String(1).padStart(3, '0')}-${carga.codigo}`
+            }
+          ],
+      esMultiFolio: true,
+      folioSeleccionado: folioSeleccionado,
+      totalOriginal: carga.total
+    };
+    
+    setCargaSeleccionada(cargaParaDetalle);
     setModalDetalleVisible(true);
+  };
+
+  // Función original para compatibilidad
+  const handleAbrirDetalle = (carga) => {
+    const foliosString = carga.folios || carga.folio || 'N/A';
+    const foliosArray = foliosString.split(',').map(f => f.trim());
+    handleAbrirDetalleConFolio(carga, foliosArray[0] || 'N/A');
   };
 
   const getInfoProducto = (codigo) => {
@@ -184,14 +284,12 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     };
   };
 
-  // ===== FUNCIÓN PARA ABREVIAR TEXTO DE PROCESOS =====
+  // Función para abreviar texto de procesos
   const abreviarProceso = (texto) => {
     if (!texto) return "N/A";
 
-    // Limpiar el texto
     let limpio = texto.includes(':') ? texto.split(':')[1].trim() : texto.trim();
 
-    // Buscar abreviatura en el mapa
     const textoLower = limpio.toLowerCase();
     for (const [key, value] of Object.entries(abreviaturaProcesos)) {
       if (textoLower.includes(key)) {
@@ -199,11 +297,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
       }
     }
 
-    // Si no encuentra, tomar primera letra
     return limpio.charAt(0).toUpperCase();
   };
 
-  // ===== FUNCIÓN PARA RENDERIZAR LA INFO DEL PRODUCTO =====
+  // Función para renderizar la info del producto
   const renderInfoProducto = (codigo) => {
     const info = getInfoProducto(codigo);
 
@@ -215,7 +312,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
       );
     }
 
-    // Si tiene procesos, mostrar las abreviaturas
     if (info.procesos && info.procesos.length > 0) {
       return (
         <div className="procesos-info-mini">
@@ -236,7 +332,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
       );
     }
 
-    // Si no tiene procesos, mostrar el poder cubriente
     return (
       <div className="poder-cubriente-display">
         <span className="poder-cubriente-numero">{info.poderCubriente}</span>
@@ -245,7 +340,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     );
   };
 
-  // ===== FUNCIÓN PARA CALCULAR AUMENTO DE DÍAS DE ALCANCE =====
+  // Función para calcular aumento de días de alcance
   const calcularAumentoDias = (datosCarga, planificadorData) => {
     if (!datosCarga || datosCarga.tipo !== 'ocupado') return null;
 
@@ -295,6 +390,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     const info = getInfoProducto(infoCarga.codigo);
     const tieneProcesos = info.procesos && info.procesos.length > 0;
 
+    // Separar los folios para mostrarlos individualmente
+    const foliosString = infoCarga.folios || infoCarga.folio || 'N/A';
+    const foliosArray = foliosString.split(',').map(f => f.trim());
+
     return (
       <div className={`emergente-info-card ${infoCarga.tipo}`}>
         <div className="emergente-header">
@@ -305,7 +404,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
               '✅ DISPONIBLE'
             )}
           </h3>
-          <button className="close-mini-btn" onClick={() => setInfoCarga(null)}>&times;</button>
+          <button className="close-mini-btn" onClick={() => {
+            setInfoCarga(null);
+            setDatosFolios({});
+          }}>&times;</button>
         </div>
         <div className="emergente-body">
           {infoCarga.tipo === 'ocupado' ? (
@@ -318,7 +420,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 )}
               </p>
 
-              {/* Mostrar procesos si tiene */}
               {tieneProcesos && (
                 <div className="procesos-info-detalle">
                   <strong>Ruta:</strong>
@@ -333,26 +434,73 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 </div>
               )}
 
-              {/* 👈 AQUÍ MODIFICAMOS EL LOTE PARA QUE SEA CLICKEABLE */}
               <div className="emergente-dato">
                 <span>Lotes:</span>
                 <strong>{infoCarga.conteoLotes || 1}</strong>
               </div>
 
               <div className="emergente-dato">
-                <span>Cantidad:</span>
+                <span>Cantidad Total:</span>
                 <strong>{infoCarga.total} uds</strong>
               </div>
 
+              {/* FOLIOS SEPARADOS - CADA UNO CLICKEABLE */}
               <div className="emergente-dato">
                 <span>Folio(s):</span>
-                <strong
-                  className="folio-clickeable"
-                  onClick={() => handleAbrirDetalle(infoCarga)}
-                  title="Haz clic para ver detalles de la carga"
-                >
-                  {infoCarga.folios} 
-                </strong>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                  {foliosArray.map((folio, index) => {
+                    const datosFolio = datosFolios[folio];
+                    const cantidadFolio = datosFolio?.cantidad || 0;
+                    const cargando = cargandoFolio && datosFolio === null;
+                    
+                    return (
+                      <strong
+                        key={index}
+                        className="folio-clickeable"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAbrirDetalleConFolio(infoCarga, folio);
+                        }}
+                        title={`Haz clic para ver detalles del folio ${folio} (${cantidadFolio || 'cargando...'} uds)`}
+                        style={{
+                          cursor: 'pointer',
+                          padding: '2px 10px',
+                          background: 'rgba(59, 130, 246, 0.15)',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          fontSize: '13px',
+                          transition: 'all 0.2s',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'rgba(59, 130, 246, 0.3)';
+                          e.target.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(59, 130, 246, 0.15)';
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      >
+                        {folio}
+                        {cargando ? (
+                          <span style={{ fontSize: '10px', color: '#fcd34d' }}>⏳</span>
+                        ) : cantidadFolio > 0 ? (
+                          <span style={{ 
+                            fontSize: '10px', 
+                            color: '#94a3b8',
+                            background: 'rgba(0,0,0,0.2)',
+                            padding: '0 4px',
+                            borderRadius: '8px'
+                          }}>
+                            {cantidadFolio}
+                          </span>
+                        ) : null}
+                      </strong>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="emergente-dato">
@@ -365,7 +513,6 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
                 <strong>{info.poderCubriente}</strong>
               </div>
 
-              {/* ===== SECCIÓN DE CÁLCULO DE DÍAS DE ALCANCE ===== */}
               {calculoDias && calculoDias.totalPz > 0 && (
                 <div className="emergente-calculo-dias">
                   <div className="calculo-grid">
@@ -417,7 +564,10 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
             </div>
           )}
         </div>
-        <button className="btn-emergente-cerrar" onClick={() => setInfoCarga(null)}>ENTENDIDO</button>
+        <button className="btn-emergente-cerrar" onClick={() => {
+          setInfoCarga(null);
+          setDatosFolios({});
+        }}>ENTENDIDO</button>
       </div>
     );
   };
@@ -497,7 +647,7 @@ const ModalInventarioBajo = ({ visible, alertas, alertasRevisar, onClose, onSele
     <div className="modal-overlay">
       <div className="modal-cargas inv-container">
 
-        {/* 👈 MODAL DE DETALLE DE CARGA */}
+        {/* Modal de detalle de carga */}
         {modalDetalleVisible && (
           <ModalDetalleCarga
             visible={modalDetalleVisible}

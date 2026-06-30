@@ -28,9 +28,6 @@ import "../styles/rondas.css";
 import "../styles/esmaltes.css";
 import "../styles/familias-screen.css";
 
-// CLAVE PARA LOCALSTORAGE
-const STORAGE_KEY = 'produccion_data';
-
 export default function ProduccionScreen() {
     const navigate = useNavigate();
     const {
@@ -62,11 +59,6 @@ export default function ProduccionScreen() {
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
 
-    // Control de carga inicial
-    const primeraCargaRef = useRef(true);
-    const guardandoRef = useRef(false);
-    const [cargaInicialCompletada, setCargaInicialCompletada] = useState(false);
-
     // 🔴 ESTADOS PARA INVENTARIO
     const [alertasInventario, setAlertasInventario] = useState({
         "Vinílica": [],
@@ -92,99 +84,6 @@ export default function ProduccionScreen() {
     const [resumenGlobal, setResumenGlobal] = useState([]);
     const [cargandoResumen, setCargandoResumen] = useState(false);
 
-    // 🔴 FUNCIÓN PARA GUARDAR EN LOCALSTORAGE
-    const guardarEnLocalStorage = () => {
-        if (guardandoRef.current) return;
-        
-        // Verificar si hay datos reales
-        let tieneDatos = false;
-        if (Array.isArray(rondas)) {
-            for (let i = 0; i < rondas.length; i++) {
-                if (Array.isArray(rondas[i])) {
-                    for (let j = 0; j < rondas[i].length; j++) {
-                        if (rondas[i][j] !== null && rondas[i][j] !== undefined) {
-                            tieneDatos = true;
-                            break;
-                        }
-                    }
-                }
-                if (tieneDatos) break;
-            }
-        }
-        if (!tieneDatos && cargasEsmaltesAsignadas.length === 0 && 
-            cargasEspeciales.length === 0 && colaCargas.length === 0) {
-            return;
-        }
-
-        guardandoRef.current = true;
-        try {
-            const dataToSave = {
-                rondas,
-                cargasEsmaltesAsignadas,
-                cargasEspeciales,
-                colaCargas,
-                tipoPintura,
-                fechaRotacion: fechaRotacion.toISOString(),
-                fechaCargaBD: fechaCargaBD.toISOString(),
-                timestamp: new Date().toISOString()
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-        } catch (error) {
-            console.error('Error guardando en localStorage:', error);
-        } finally {
-            guardandoRef.current = false;
-        }
-    };
-
-    // 🔴 FUNCIÓN PARA CARGAR DESDE LOCALSTORAGE
-    const cargarDesdeLocalStorage = () => {
-        try {
-            const storedData = localStorage.getItem(STORAGE_KEY);
-            if (storedData) {
-                const parsedData = JSON.parse(storedData);
-                
-                let tieneDatos = false;
-                if (Array.isArray(parsedData.rondas)) {
-                    for (let i = 0; i < parsedData.rondas.length; i++) {
-                        if (Array.isArray(parsedData.rondas[i])) {
-                            for (let j = 0; j < parsedData.rondas[i].length; j++) {
-                                if (parsedData.rondas[i][j] !== null && parsedData.rondas[i][j] !== undefined) {
-                                    tieneDatos = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (tieneDatos) break;
-                    }
-                }
-                if (!tieneDatos && parsedData.cargasEsmaltesAsignadas?.length === 0 && 
-                    parsedData.cargasEspeciales?.length === 0 && parsedData.colaCargas?.length === 0) {
-                    localStorage.removeItem(STORAGE_KEY);
-                    return false;
-                }
-
-                if (parsedData.rondas) setRondas(parsedData.rondas);
-                if (parsedData.cargasEsmaltesAsignadas) setCargasEsmaltesAsignadas(parsedData.cargasEsmaltesAsignadas);
-                if (parsedData.cargasEspeciales) setCargasEspeciales(parsedData.cargasEspeciales);
-                if (parsedData.colaCargas) setColaCargas(parsedData.colaCargas);
-                if (parsedData.tipoPintura) setTipoPintura(parsedData.tipoPintura);
-                if (parsedData.fechaRotacion) setFechaRotacion(new Date(parsedData.fechaRotacion));
-                if (parsedData.fechaCargaBD) setFechaCargaBD(new Date(parsedData.fechaCargaBD));
-                
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Error cargando desde localStorage:', error);
-            return false;
-        }
-    };
-
-    // 🔴 FUNCIÓN PARA BORRAR LOCALSTORAGE (cuando se vacía el tablero)
-    const borrarLocalStorage = () => {
-        localStorage.removeItem(STORAGE_KEY);
-    };
-
     // Función para volver al menú principal
     const volverAlMenuPrincipal = () => {
         navigate("/");
@@ -207,6 +106,7 @@ export default function ProduccionScreen() {
                 setFamilias([]);
             }
         };
+
         cargarFamilias();
     }, []);
 
@@ -229,7 +129,6 @@ export default function ProduccionScreen() {
     const handleGuardarYcerrar = () => {
         setMostrarModalResumen(false);
         guardarProduccionEnBD();
-        setTimeout(() => guardarEnLocalStorage(), 500);
     };
 
     // --- EFECTOS ---
@@ -243,44 +142,11 @@ export default function ProduccionScreen() {
         return () => document.removeEventListener("mousedown", handleClickAfuera);
     }, []);
 
-    // 🔴 EFECTO DE CARGA INICIAL - SOLO UNA VEZ
     useEffect(() => {
-        if (primeraCargaRef.current) {
-            primeraCargaRef.current = false;
-            
-            const datosCargados = cargarDesdeLocalStorage();
-            
-            if (datosCargados) {
-                setCargaInicialCompletada(true);
-                return;
-            }
-            
-            if (cargarDatosPorFecha) {
-                cargarDatosPorFecha(fechaCargaBD)
-                    .then(() => {
-                        setTimeout(() => {
-                            guardarEnLocalStorage();
-                            setCargaInicialCompletada(true);
-                        }, 500);
-                    })
-                    .catch(() => {
-                        setCargaInicialCompletada(true);
-                    });
-            } else {
-                setCargaInicialCompletada(true);
-            }
+        if (cargarDatosPorFecha) {
+            cargarDatosPorFecha(fechaCargaBD);
         }
-    }, []);
-
-    // 🔴 EFECTO PARA GUARDAR AUTOMÁTICAMENTE
-    useEffect(() => {
-        if (cargaInicialCompletada && !guardandoRef.current) {
-            const timeoutId = setTimeout(() => {
-                guardarEnLocalStorage();
-            }, 1000);
-            return () => clearTimeout(timeoutId);
-        }
-    }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales, colaCargas, tipoPintura, fechaRotacion, cargaInicialCompletada]);
+    }, [fechaCargaBD, cargarDatosPorFecha]);
 
     useEffect(() => {
         const handleVinilicaUpdate = () => {
@@ -311,9 +177,9 @@ export default function ProduccionScreen() {
         };
     }, [cargasEsmaltesAsignadas, filtroOperario]);
 
-    // 🔴 HANDLERS MODIFICADO - Sobrescribir handleVaciarTablero
+    // 🔴 HANDLERS MODIFICADO - Incluye setAlertasRevisar
     const handlers = useMemo(() => {
-        const baseHandlers = createProduccionHandlers({
+        return createProduccionHandlers({
             tipoPintura, 
             rondas, 
             cargasEsmaltesAsignadas, 
@@ -346,24 +212,7 @@ export default function ProduccionScreen() {
             ordenarCargas, 
             fechaTrabajo: fechaRotacion
         });
-
-        // Sobrescribir handleVaciarTablero para que también borre localStorage y colas
-        const originalVaciarTablero = baseHandlers.handleVaciarTablero;
-        baseHandlers.handleVaciarTablero = () => {
-            if (window.confirm('¿Estás seguro de que quieres vaciar el tablero?')) {
-                // Ejecutar el comportamiento original
-                originalVaciarTablero();
-                // Borrar localStorage (esto borra TODOS los datos incluyendo colas)
-                borrarLocalStorage();
-                // Limpiar explícitamente las colas
-                setColaCargas([]);
-                setCargasEspeciales([]);
-                setCargasEsmaltesAsignadas([]);
-            }
-        };
-
-        return baseHandlers;
-    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, colaCargas, fechaRotacion, handleImportExcel, ordenarCargas]);
+    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
 
     const semanaAnterior = () => {
         const nuevaFecha = new Date(fechaRotacion);

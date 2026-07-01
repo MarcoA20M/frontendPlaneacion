@@ -13,7 +13,7 @@ export const createProduccionHandlers = (dependencies) => {
         tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
         setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales,
         setAnalizandoStock, setProcesandoPdf, setProcesandoReporte,
-        setAlertasInventario, 
+        setAlertasInventario,
         setAlertasRevisar, // ✅ RECIBIR EL SETTER
         setProgreso, setMenuCargasAbierto,
         setMenuReporteAbierto, setDatosPlanificador, setMostrarModalPlanificador,
@@ -34,10 +34,10 @@ export const createProduccionHandlers = (dependencies) => {
         handleCargarPlanificador: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             setAnalizandoStock(true);
             const idInt = simularProgreso();
-            
+
             try {
                 const data = await planificadorService.cargarExcelPlanificador(file);
                 setDatosPlanificador(data);
@@ -48,9 +48,9 @@ export const createProduccionHandlers = (dependencies) => {
                 alert("❌ Error al procesar planificador: " + error.message);
             } finally {
                 clearInterval(idInt);
-                setTimeout(() => { 
-                    setAnalizandoStock(false); 
-                    setProgreso(0); 
+                setTimeout(() => {
+                    setAnalizandoStock(false);
+                    setProgreso(0);
                 }, 600);
                 setMenuCargasAbierto(false);
                 e.target.value = null;
@@ -61,32 +61,32 @@ export const createProduccionHandlers = (dependencies) => {
         handleAnalizarStock: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             console.log('📂 Iniciando análisis de stock...');
             setAnalizandoStock(true);
             setMenuCargasAbierto(false);
             const idInt = simularProgreso();
-            
+
             try {
                 const data = await inventarioService.analizarBajoInventario(file);
-                
+
                 console.log('📊 Datos recibidos del análisis:', data);
                 console.log('✅ Alertas normales:', data.alertas?.length || 0);
                 console.log('✅ Alertas para revisar:', data.revisar?.length || 0);
-                
+
                 // ✅ ACTUALIZAR AMBOS ESTADOS
                 if (setAlertasInventario) {
                     setAlertasInventario(data.alertas || []);
                     console.log('✅ setAlertasInventario llamado con', data.alertas?.length, 'alertas');
                 }
-                
+
                 if (setAlertasRevisar) {
                     setAlertasRevisar(data.revisar || []);
                     console.log('✅ setAlertasRevisar llamado con', data.revisar?.length, 'alertas para revisar');
                 }
-                
+
                 setProgreso(100);
-                
+
                 // Abrir el modal si hay algún tipo de alerta
                 if (data.alertas?.length > 0 || data.revisar?.length > 0) {
                     console.log('🔔 Abriendo modal con alertas...');
@@ -95,15 +95,15 @@ export const createProduccionHandlers = (dependencies) => {
                     console.log('✅ No hay alertas para mostrar');
                     alert('✅ No se encontraron alertas de inventario');
                 }
-                
-            } catch (err) { 
+
+            } catch (err) {
                 console.error('❌ Error con inventario:', err);
-                alert("Error con inventario: " + err.message); 
+                alert("Error con inventario: " + err.message);
             } finally {
                 clearInterval(idInt);
-                setTimeout(() => { 
-                    setAnalizandoStock(false); 
-                    setProgreso(0); 
+                setTimeout(() => {
+                    setAnalizandoStock(false);
+                    setProgreso(0);
                 }, 600);
                 e.target.value = null;
             }
@@ -112,12 +112,12 @@ export const createProduccionHandlers = (dependencies) => {
         // Handler: Importar Excel con progreso
         handleImportExcelConProgreso: async (e) => {
             const idInt = simularProgreso();
-            
+
             try {
                 await handleImportExcel(e);
                 setProgreso(100);
-            } catch (err) { 
-                alert(err.message); 
+            } catch (err) {
+                alert(err.message);
             } finally {
                 clearInterval(idInt);
                 setTimeout(() => setProgreso(0), 600);
@@ -129,10 +129,10 @@ export const createProduccionHandlers = (dependencies) => {
         handlePdfClick: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             setProcesandoPdf(true);
             const idInt = simularProgreso();
-            
+
             try {
                 let tableroAProcesar = tipoPintura === "Vinílica"
                     ? rondas.map((fila, fIdx) => fila.map(celda => {
@@ -140,27 +140,27 @@ export const createProduccionHandlers = (dependencies) => {
                         const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
                         return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
                     })) : [cargasEsmaltesAsignadas];
-                
+
                 const blob = await procesarPdfConRondas(
-                    file, 
-                    tableroAProcesar, 
+                    file,
+                    tableroAProcesar,
                     cargasEspeciales.filter(c => c.tipo === tipoPintura)
                 );
-                
+
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a'); 
-                a.href = url; 
-                a.download = `Reporte_${tipoPintura}.pdf`; 
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Reporte_${tipoPintura}.pdf`;
                 a.click();
-                
+
                 setProgreso(100);
-            } catch (error) { 
-                alert("Error PDF: " + error.message); 
+            } catch (error) {
+                alert("Error PDF: " + error.message);
             } finally {
                 clearInterval(idInt);
-                setTimeout(() => { 
-                    setProcesandoPdf(false); 
-                    setProgreso(0); 
+                setTimeout(() => {
+                    setProcesandoPdf(false);
+                    setProgreso(0);
                 }, 600);
                 e.target.value = null;
             }
@@ -169,10 +169,10 @@ export const createProduccionHandlers = (dependencies) => {
         // Handler: Vaciar tablero
         handleVaciarTablero: () => {
             if (window.confirm(`¿Borrar todas las cargas de ${tipoPintura.toUpperCase()}?`)) {
-                if (tipoPintura === "Vinílica") { 
-                    setRondas(Array.from({ length: 8 }, () => Array(6).fill(null))); 
-                } else { 
-                    setCargasEsmaltesAsignadas([]); 
+                if (tipoPintura === "Vinílica") {
+                    setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
+                } else {
+                    setCargasEsmaltesAsignadas([]);
                 }
                 setCargasEspeciales(prev => prev.filter(c => c.tipo !== tipoPintura));
             }
@@ -182,18 +182,18 @@ export const createProduccionHandlers = (dependencies) => {
         handleReporteDesdeExcel: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             setProcesandoReporte(true);
             const idInt = simularProgreso();
-            
+
             try {
                 const datosExcel = await handleImportExcel(e, true);
                 if (!datosExcel || datosExcel.length === 0) return alert("Excel sin datos");
-                
+
                 const reporteSincronizado = datosExcel.map(item => {
                     let maq = "NO ASIGNADA", ope = "PENDIENTE";
                     const folioBusqueda = String(item.folio).trim().toUpperCase();
-                    
+
                     // Buscar en rondas
                     rondas.forEach((fila, fIdx) => {
                         fila.forEach(celda => {
@@ -206,63 +206,73 @@ export const createProduccionHandlers = (dependencies) => {
                             }
                         });
                     });
-                    
+
                     // Buscar en esmaltes
-                    const matchEsm = cargasEsmaltesAsignadas.find(c => 
+                    const matchEsm = cargasEsmaltesAsignadas.find(c =>
                         String(c.folio).trim().toUpperCase() === folioBusqueda
                     );
-                    if (matchEsm) { 
-                        maq = "ESM"; 
-                        ope = matchEsm.operario; 
+                    if (matchEsm) {
+                        maq = "ESM";
+                        ope = matchEsm.operario;
                     }
-                    
+
                     // Buscar en especiales
-                    const matchEsp = cargasEspeciales.find(c => 
+                    const matchEsp = cargasEspeciales.find(c =>
                         String(c.folio).trim().toUpperCase() === folioBusqueda
                     );
-                    if (matchEsp) { 
-                        maq = "ESPECIAL"; 
-                        ope = "LÁZARO"; 
+                    if (matchEsp) {
+                        maq = "ESPECIAL";
+                        ope = "LÁZARO";
                     }
-                    
+
                     return { ...item, maquina: maq, operario: ope };
                 });
-                
+
                 await exportarReporte(reporteSincronizado);
                 setProgreso(100);
-            } catch (error) { 
-                alert("Error al sincronizar reporte: " + error.message); 
+            } catch (error) {
+                alert("Error al sincronizar reporte: " + error.message);
             } finally {
                 clearInterval(idInt);
-                setTimeout(() => { 
-                    setProcesandoReporte(false); 
-                    setProgreso(0); 
+                setTimeout(() => {
+                    setProcesandoReporte(false);
+                    setProgreso(0);
                 }, 600);
                 setMenuReporteAbierto(false);
                 e.target.value = null;
             }
         },
 
-        // Handler: Imprimir bitácora
-        handleImprimirBitacora: async () => {
-            try {
-                await bitacoraService.generarPdf(rondas, fechaTrabajo, tipoPintura, getOperarioPorMaquina);
-            } catch (e) { 
-                alert("Error: " + e.message); 
-            } finally { 
-                setMenuReporteAbierto(false); 
-            }
-        },
+handleImprimirBitacora: async () => {
+  try {
+    setProcesandoPdf(true);
+    
+    // Pasar SOLO rondas normales y cargas especiales por separado
+    await bitacoraService.generarPdf(
+      rondas,  // Solo rondas normales (VI-101 a VI-106)
+      fechaTrabajo,
+      tipoPintura,
+      getOperarioPorMaquina,
+      cargasEspeciales  // Cargas especiales van aparte
+    );
+    
+    setProcesandoPdf(false);
+  } catch (error) {
+    console.error("Error al generar bitácora:", error);
+    alert("Error al generar el PDF de la bitácora");
+    setProcesandoPdf(false);
+  }
+},
 
         // Handler: Reporte del tablero
         handleReporteTablero: async () => {
             try {
                 const finales = tableroUtils.prepararDatosReporte(
-                    rondas, 
-                    cargasEsmaltesAsignadas, 
-                    cargasEspeciales, 
-                    tipoPintura, 
-                    fechaTrabajo, 
+                    rondas,
+                    cargasEsmaltesAsignadas,
+                    cargasEspeciales,
+                    tipoPintura,
+                    fechaTrabajo,
                     getOperarioPorMaquina
                 );
                 await exportarReporte(finales);
@@ -277,37 +287,37 @@ export const createProduccionHandlers = (dependencies) => {
             e.preventDefault();
             const dataRaw = e.dataTransfer.getData("transferData");
             if (!dataRaw) return;
-            
+
             const origen = JSON.parse(dataRaw);
             let nR = [...rondas.map(f => [...f])];
             let nE = [...cargasEspeciales];
             let cargaEntrante;
-            
+
             if (origen.tipo === 'ronda') {
                 const contenido = nR[origen.f][origen.c];
                 if (Array.isArray(contenido)) {
                     cargaEntrante = { ...contenido[origen.subIndex] };
                     contenido.splice(origen.subIndex, 1);
-                    nR[origen.f][origen.c] = contenido.length === 0 ? null : 
+                    nR[origen.f][origen.c] = contenido.length === 0 ? null :
                         (contenido.length === 1 ? contenido[0] : contenido);
-                } else { 
-                    cargaEntrante = { ...contenido }; 
-                    nR[origen.f][origen.c] = null; 
+                } else {
+                    cargaEntrante = { ...contenido };
+                    nR[origen.f][origen.c] = null;
                 }
-            } else { 
-                cargaEntrante = { ...nE[origen.index] }; 
-                nE.splice(origen.index, 1); 
+            } else {
+                cargaEntrante = { ...nE[origen.index] };
+                nE.splice(origen.index, 1);
             }
-            
+
             cargaEntrante.operario = getOperarioPorMaquina(101 + fDest, fechaTrabajo);
             cargaEntrante.maquina = `VI-${101 + fDest}`;
-            
+
             const destinoActual = nR[fDest][cDest];
-            nR[fDest][cDest] = destinoActual ? 
-                (Array.isArray(destinoActual) ? [...destinoActual, cargaEntrante] : [destinoActual, cargaEntrante]) 
+            nR[fDest][cDest] = destinoActual ?
+                (Array.isArray(destinoActual) ? [...destinoActual, cargaEntrante] : [destinoActual, cargaEntrante])
                 : cargaEntrante;
-            
-            setRondas(nR); 
+
+            setRondas(nR);
             setCargasEspeciales(nE);
         }
     };

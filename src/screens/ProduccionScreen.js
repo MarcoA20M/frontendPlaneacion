@@ -5,6 +5,7 @@ import { useProduccion } from "../hooks/useProduccion";
 // Servicios y Utils
 import { getOperarioPorMaquina } from "../constants/config";
 import { createProduccionHandlers } from "../utils/produccionHandlers";
+import { verificarCargaReciente, verificarCargaPorFolio } from '../services/cargaService';
 
 // Componentes
 import BusquedaSeccion from "../components/BusquedaSeccion";
@@ -59,6 +60,14 @@ export default function ProduccionScreen() {
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
 
+    // --- ESTADO PARA MODAL DE BÚSQUEDA SIN RESULTADOS ---
+    const [mostrarModalSinResultados, setMostrarModalSinResultados] = useState(false);
+    const [terminoBuscado, setTerminoBuscado] = useState("");
+
+    // --- BUSCADOR DE CARGAS ---
+    const [buscarCarga, setBuscarCarga] = useState("");
+    const busquedaRef = useRef(null);
+
     // 🔴 ESTADOS PARA INVENTARIO
     const [alertasInventario, setAlertasInventario] = useState({
         "Vinílica": [],
@@ -87,6 +96,169 @@ export default function ProduccionScreen() {
     // Función para volver al menú principal
     const volverAlMenuPrincipal = () => {
         navigate("/");
+    };
+
+    // --- FUNCIONES DE NAVEGACIÓN DEL CALENDARIO ---
+    const diaAnterior = () => {
+        const nuevaFecha = new Date(fechaCargaBD);
+        nuevaFecha.setDate(nuevaFecha.getDate() - 1);
+        setFechaCargaBD(nuevaFecha);
+    };
+
+    const diaSiguiente = () => {
+        const nuevaFecha = new Date(fechaCargaBD);
+        nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+        setFechaCargaBD(nuevaFecha);
+    };
+
+    const irAHoyCarga = () => {
+        setFechaCargaBD(new Date());
+    };
+
+    // --- FUNCIÓN DE BÚSQUEDA Y ABRIR MODAL DIRECTAMENTE ---
+    const handleBuscarYAbirModal = async (termino) => {
+        if (!termino || termino.trim() === "") {
+            return;
+        }
+
+        if (termino.trim().length < 2) {
+            return;
+        }
+
+        // Buscar en cargas locales primero
+        let todasLasCargas = [];
+
+        if (tipoPintura === "Vinílica") {
+            rondas.forEach(fila => {
+                fila.forEach(celda => {
+                    if (celda) {
+                        if (Array.isArray(celda)) {
+                            todasLasCargas = [...todasLasCargas, ...celda];
+                        } else {
+                            todasLasCargas.push(celda);
+                        }
+                    }
+                });
+            });
+        } else {
+            todasLasCargas = [...cargasEsmaltesAsignadas];
+        }
+
+        todasLasCargas = [...todasLasCargas, ...cargasEspeciales];
+
+        const terminoLower = termino.toLowerCase().trim();
+        let cargaEncontrada = todasLasCargas.find(carga => {
+            return (
+                (carga.codigo && carga.codigo.toLowerCase() === terminoLower) ||
+                (carga.folio && carga.folio.toLowerCase() === terminoLower) ||
+                (carga.lote && carga.lote.toLowerCase() === terminoLower) ||
+                (carga.numeroLote && carga.numeroLote.toLowerCase() === terminoLower)
+            );
+        });
+
+        // Si encuentra localmente, abrir modal de detalle
+        if (cargaEncontrada) {
+            setCargaSeleccionada(cargaEncontrada);
+            setMostrarDetalle(true);
+            setBuscarCarga("");
+            return;
+        }
+
+        // Si no encuentra localmente, buscar en la BD
+        try {
+            // Buscar por folio
+            let folioData = await verificarCargaPorFolio(termino.toUpperCase(), null);
+            
+            if (folioData) {
+                const cargaBD = {
+                    codigo: folioData.codigoProducto || termino.toUpperCase(),
+                    folio: folioData.folio || termino.toUpperCase(),
+                    descripcion: `Carga con folio ${termino.toUpperCase()}`,
+                    nombre: `Carga con folio ${termino.toUpperCase()}`,
+                    operario: folioData.operario || 'No asignado',
+                    litros: folioData.litros || folioData.cantidad || 0,
+                    total: folioData.cantidad || folioData.litros || 0,
+                    tipo: tipoPintura,
+                    conteoLotes: 1,
+                    detallesEnvasado: folioData.detallesEnvasado || [],
+                    idTemp: `bd-folio-${Date.now()}-${Math.random()}`
+                };
+                
+                setCargaSeleccionada(cargaBD);
+                setMostrarDetalle(true);
+                setBuscarCarga("");
+                return;
+            }
+
+            // Buscar por código
+            const codigoBusqueda = termino.toUpperCase();
+            const fechas = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                fechas.push(d.toISOString().split("T")[0]);
+            }
+
+            const promesas = fechas.map(f => {
+                return fetch(`http://localhost:8080/api/cargas/fecha?fecha=${f}`)
+                    .then(res => res.json())
+                    .catch(() => []);
+            });
+            
+            const resultados = await Promise.all(promesas);
+            const todas = resultados.flat();
+            
+            const coincidencias = todas.filter(reg => {
+                const regProducto = reg.producto || reg.producto_id;
+                return String(regProducto) === codigoBusqueda;
+            });
+
+            if (coincidencias.length > 0) {
+                const foliosUnicos = [...new Set(coincidencias.map(c => c.folioHija || c.folio_hija || c.folio).filter(Boolean))];
+                
+                const cargaBD = {
+                    codigo: codigoBusqueda,
+                    folio: foliosUnicos.join(', ') || 'Múltiples folios',
+                    descripcion: coincidencias[0].descripcion || `Carga de ${codigoBusqueda}`,
+                    nombre: coincidencias[0].descripcion || `Carga de ${codigoBusqueda}`,
+                    operario: [...new Set(coincidencias.map(c => c.operario).filter(Boolean))].join(', ') || 'No asignado',
+                    litros: coincidencias.reduce((acc, c) => acc + Number(c.cantidad || 0), 0),
+                    total: coincidencias.reduce((acc, c) => acc + Number(c.cantidad || 0), 0),
+                    tipo: tipoPintura,
+                    conteoLotes: coincidencias.length,
+                    detallesEnvasado: coincidencias.map(c => ({
+                        formato: c.envasadoId || c.envasado_id || c.envasado || 1,
+                        cantidad: Number(c.cantidad || 0)
+                    })),
+                    idTemp: `bd-${Date.now()}-${Math.random()}`
+                };
+                
+                setCargaSeleccionada(cargaBD);
+                setMostrarDetalle(true);
+                setBuscarCarga("");
+            } else {
+                // NO HAY RESULTADOS - Mostrar modal emergente
+                setTerminoBuscado(termino);
+                setMostrarModalSinResultados(true);
+                setBuscarCarga("");
+            }
+        } catch (error) {
+            console.error('Error buscando en BD:', error);
+            setTerminoBuscado(termino);
+            setMostrarModalSinResultados(true);
+            setBuscarCarga("");
+        }
+    };
+
+    // --- FUNCIÓN PARA MANEJAR LA TECLA ENTER ---
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const termino = e.target.value;
+            if (termino.trim() !== "" && termino.trim().length >= 2) {
+                handleBuscarYAbirModal(termino);
+            }
+        }
     };
 
     // --- Cargar Familias desde la API ---
@@ -177,18 +349,18 @@ export default function ProduccionScreen() {
         };
     }, [cargasEsmaltesAsignadas, filtroOperario]);
 
-    // 🔴 HANDLERS MODIFICADO - Incluye setAlertasRevisar
+    // HANDLERS
     const handlers = useMemo(() => {
         return createProduccionHandlers({
-            tipoPintura, 
-            rondas, 
-            cargasEsmaltesAsignadas, 
+            tipoPintura,
+            rondas,
+            cargasEsmaltesAsignadas,
             cargasEspeciales,
-            setRondas, 
-            setCargasEsmaltesAsignadas, 
+            setRondas,
+            setCargasEsmaltesAsignadas,
             setCargasEspeciales,
-            setAnalizandoStock, 
-            setProcesandoPdf, 
+            setAnalizandoStock,
+            setProcesandoPdf,
             setProcesandoReporte,
             setAlertasInventario: (nuevasAlertas) => {
                 setAlertasInventario(prev => ({
@@ -202,14 +374,14 @@ export default function ProduccionScreen() {
                     [tipoPintura]: nuevasRevisar
                 }));
             },
-            setProgreso, 
-            setMenuCargasAbierto, 
+            setProgreso,
+            setMenuCargasAbierto,
             setMenuReporteAbierto,
-            setDatosPlanificador, 
-            setMostrarModalPlanificador, 
+            setDatosPlanificador,
+            setMostrarModalPlanificador,
             setMostrarModalInventario,
-            handleImportExcel, 
-            ordenarCargas, 
+            handleImportExcel,
+            ordenarCargas,
             fechaTrabajo: fechaRotacion
         });
     }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
@@ -240,24 +412,24 @@ export default function ProduccionScreen() {
             .reduce((sum, c) => sum + (c.litros || 0), 0).toFixed(2);
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
-    // Calcular cargas con su consumo individual (para la vista por carga)
+    // Calcular cargas con su consumo individual
     const cargasConConsumo = useMemo(() => {
         const todasLasCargas = [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
-        
+
         return todasLasCargas.map((carga, index) => {
             const folio = carga.folio || carga.lote || carga.numeroLote || `ORD-${index + 1}`;
             const codigo = carga.codigo || carga.codigoProducto || `PROD-${index + 1}`;
             const descripcion = carga.descripcion || carga.nombre || "Sin descripción";
             const litros = carga.litros || 0;
-            
+
             let consumoTotal = carga.consumoTotal || 0;
-            
+
             if (consumoTotal === 0 && carga.materiasPrimas && Array.isArray(carga.materiasPrimas)) {
                 consumoTotal = carga.materiasPrimas.reduce((sum, mp) => sum + (mp.consumo || mp.cantidad || 0), 0);
             }
-            
+
             const materiasPrimas = carga.materiasPrimas || [];
-            
+
             return {
                 id: carga.idTemp || carga.id || index,
                 codigo: codigo,
@@ -278,6 +450,52 @@ export default function ProduccionScreen() {
             };
         });
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
+
+    // --- MODAL DE SIN RESULTADOS ---
+    const ModalSinResultados = () => {
+        if (!mostrarModalSinResultados) return null;
+        
+        return (
+            <div className="modal-overlay" onClick={() => setMostrarModalSinResultados(false)}>
+                <div className="modal-cargas sin-resultados-modal" onClick={(e) => e.stopPropagation()}>
+                    <header className="modal-header">
+                        <h2 style={{ color: '#f59e0b' }}>🔍 Sin resultados</h2>
+                        <button className="close-btn" onClick={() => setMostrarModalSinResultados(false)}>&times;</button>
+                    </header>
+                    <div style={{ padding: '30px 20px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔎</div>
+                        <p style={{ color: '#e0e0e0', fontSize: '16px', marginBottom: '8px' }}>
+                            No se encontraron cargas para
+                        </p>
+                        <p style={{ 
+                            color: '#a855f7', 
+                            fontSize: '20px', 
+                            fontWeight: 'bold',
+                            background: 'rgba(168, 85, 247, 0.1)',
+                            padding: '8px 20px',
+                            borderRadius: '8px',
+                            display: 'inline-block',
+                            marginTop: '4px'
+                        }}>
+                            "{terminoBuscado}"
+                        </p>
+                        <p style={{ color: '#64748b', fontSize: '14px', marginTop: '16px' }}>
+                            Revisa que el código o folio sea correcto
+                        </p>
+                    </div>
+                    <footer className="modal-footer">
+                        <button 
+                            className="btn-guardar" 
+                            onClick={() => setMostrarModalSinResultados(false)}
+                            style={{ background: 'linear-gradient(90deg, #7c3aed, #a855f7)' }}
+                        >
+                            Entendido
+                        </button>
+                    </footer>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="app">
@@ -337,13 +555,54 @@ export default function ProduccionScreen() {
                             </div>
                         )}
                     </div>
-                    <div className="selector-tipo">
-                        {["Vinílica", "Esmalte"].map(t => (
-                            <button key={t} className={tipoPintura === t ? "active" : ""}
-                                onClick={() => { setTipoPintura(t); setFiltroOperario(null); setModoEsmalte(null); }}>
-                                {t}
-                            </button>
-                        ))}
+
+                    {/* SELECTOR DE TIPO Y BUSCADOR SIMPLE */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="selector-tipo">
+                            {["Vinílica", "Esmalte"].map(t => (
+                                <button key={t} className={tipoPintura === t ? "active" : ""}
+                                    onClick={() => {
+                                        setTipoPintura(t);
+                                        setFiltroOperario(null);
+                                        setModoEsmalte(null);
+                                        setBuscarCarga("");
+                                        setMostrarModalSinResultados(false);
+                                    }}>
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* BUSCADOR SIMPLE - SOLO INPUT CON ENTER */}
+                        <div className="buscador-cargas-wrapper">
+                            <div className="buscador-cargas-container-compact">
+                                <div className="buscador-cargas-input-compact">
+                                    <span className="icono-lupa-compact">🔍</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por código o folio (Enter)..."
+                                        value={buscarCarga}
+                                        onChange={(e) => {
+                                            setBuscarCarga(e.target.value);
+                                        }}
+                                        onKeyDown={handleKeyDown}
+                                        title="Busca por código o folio (presiona Enter)"
+                                        autoFocus
+                                    />
+                                    {buscarCarga && (
+                                        <button
+                                            className="btn-limpiar-compact"
+                                            onClick={() => {
+                                                setBuscarCarga("");
+                                                setMostrarModalSinResultados(false);
+                                            }}
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -475,27 +734,50 @@ export default function ProduccionScreen() {
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div className="calendar-picker-container" style={{
-                                display: 'flex', alignItems: 'center', background: '#1e1e1e',
-                                padding: '6px 12px', borderRadius: '8px', border: '1px solid #333',
-                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
-                            }}>
-                                <span style={{ marginRight: '8px' }}>📅</span>
-                                <input
-                                    type="date"
-                                    value={fechaCargaBD.toISOString().split('T')[0]}
-                                    onChange={(e) => {
-                                        const valor = e.target.value;
-                                        if (!valor) return;
-                                        const nuevaFecha = new Date(valor + 'T00:00:00');
-                                        setFechaCargaBD(nuevaFecha);
-                                    }}
-                                    style={{
-                                        background: 'transparent', border: 'none', color: '#00e5ff',
-                                        fontSize: '14px', fontWeight: 'bold', outline: 'none', cursor: 'pointer'
-                                    }}
-                                />
+                            {/* CALENDARIO CON FLECHAS */}
+                            <div className="calendar-wrapper">
+                                <div className="calendar-nav-container">
+                                    <button
+                                        className="calendar-nav-btn"
+                                        onClick={diaAnterior}
+                                        title="Día anterior"
+                                        aria-label="Día anterior"
+                                    >
+                                        ◀
+                                    </button>
+
+                                    <input
+                                        type="date"
+                                        className="calendar-date-input"
+                                        value={fechaCargaBD.toISOString().split('T')[0]}
+                                        onChange={(e) => {
+                                            const valor = e.target.value;
+                                            if (!valor) return;
+                                            const nuevaFecha = new Date(valor + 'T00:00:00');
+                                            setFechaCargaBD(nuevaFecha);
+                                        }}
+                                        title="Seleccionar fecha"
+                                    />
+
+                                    <button
+                                        className="calendar-nav-btn"
+                                        onClick={diaSiguiente}
+                                        title="Día siguiente"
+                                        aria-label="Día siguiente"
+                                    >
+                                        ▶
+                                    </button>
+                                </div>
+
+                                <button
+                                    className="btn-hoy-calendar"
+                                    onClick={irAHoyCarga}
+                                    title="Volver al día de hoy"
+                                >
+                                    📅 Hoy
+                                </button>
                             </div>
+
                             <button
                                 className="btn-family-explorer"
                                 onClick={() => navigate("/familias", {
@@ -532,7 +814,10 @@ export default function ProduccionScreen() {
                 </div>
             </div>
 
-            {/* Modales */}
+            {/* MODAL DE SIN RESULTADOS */}
+            <ModalSinResultados />
+
+            {/* Modales existentes */}
             <ModalPlanificador
                 visible={mostrarModalPlanificador}
                 datos={datosPlanificador}
@@ -621,7 +906,7 @@ export default function ProduccionScreen() {
                 }}
             />
 
-            {/* Modal Resumen de Consumo Global con todas las funcionalidades */}
+            {/* Modal Resumen de Consumo Global */}
             <ModalResumenConsumo
                 visible={mostrarModalResumen}
                 cargando={cargandoResumen}

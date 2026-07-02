@@ -2,7 +2,7 @@
 import { getOperarioPorMaquina } from "../constants/config";
 import { planificadorService } from "../services/planificadorService";
 import { inventarioService } from "../services/inventarioService";
-import { procesarPdfConRondas } from "../services/pdfService";
+import { procesarPdfConRondas, procesarPdfEsmaltes } from "../services/pdfService";
 import { exportarReporte } from "../services/excelService";
 import { bitacoraService } from "../services/bitacoraService";
 import { tableroUtils } from "../utils/tableroUtils";
@@ -10,16 +10,27 @@ import { tableroUtils } from "../utils/tableroUtils";
 export const createProduccionHandlers = (dependencies) => {
     const {
         // Estados y setters del componente
-        tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales,
-        setRondas, setCargasEsmaltesAsignadas, setCargasEspeciales,
-        setAnalizandoStock, setProcesandoPdf, setProcesandoReporte,
+        tipoPintura, 
+        rondas, 
+        cargasEsmaltesAsignadas, 
+        cargasEspeciales,
+        setRondas, 
+        setCargasEsmaltesAsignadas, 
+        setCargasEspeciales,
+        setAnalizandoStock, 
+        setProcesandoPdf, 
+        setProcesandoReporte,
         setAlertasInventario,
-        setAlertasRevisar, // ✅ RECIBIR EL SETTER
-        setProgreso, setMenuCargasAbierto,
-        setMenuReporteAbierto, setDatosPlanificador, setMostrarModalPlanificador,
+        setAlertasRevisar,
+        setProgreso, 
+        setMenuCargasAbierto,
+        setMenuReporteAbierto, 
+        setDatosPlanificador, 
+        setMostrarModalPlanificador,
         setMostrarModalInventario,
         // Funciones del hook useProduccion
-        handleImportExcel, ordenarCargas,
+        handleImportExcel, 
+        ordenarCargas,
         // Otros estados
         fechaTrabajo
     } = dependencies;
@@ -57,7 +68,7 @@ export const createProduccionHandlers = (dependencies) => {
             }
         },
 
-        // ✅ HANDLER CORREGIDO - Analizar stock
+        // Handler: Analizar stock
         handleAnalizarStock: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -74,7 +85,6 @@ export const createProduccionHandlers = (dependencies) => {
                 console.log('✅ Alertas normales:', data.alertas?.length || 0);
                 console.log('✅ Alertas para revisar:', data.revisar?.length || 0);
 
-                // ✅ ACTUALIZAR AMBOS ESTADOS
                 if (setAlertasInventario) {
                     setAlertasInventario(data.alertas || []);
                     console.log('✅ setAlertasInventario llamado con', data.alertas?.length, 'alertas');
@@ -87,7 +97,6 @@ export const createProduccionHandlers = (dependencies) => {
 
                 setProgreso(100);
 
-                // Abrir el modal si hay algún tipo de alerta
                 if (data.alertas?.length > 0 || data.revisar?.length > 0) {
                     console.log('🔔 Abriendo modal con alertas...');
                     setTimeout(() => setMostrarModalInventario(true), 500);
@@ -125,7 +134,7 @@ export const createProduccionHandlers = (dependencies) => {
             }
         },
 
-        // Handler: PDF
+        // Handler: PDF - Soporta Vinílica y Esmaltes
         handlePdfClick: async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -134,27 +143,46 @@ export const createProduccionHandlers = (dependencies) => {
             const idInt = simularProgreso();
 
             try {
-                let tableroAProcesar = tipoPintura === "Vinílica"
-                    ? rondas.map((fila, fIdx) => fila.map(celda => {
-                        if (!celda) return null;
-                        const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
-                        return Array.isArray(celda) ? celda.map(c => ({ ...c, operario: op })) : { ...celda, operario: op };
-                    })) : [cargasEsmaltesAsignadas];
+                let blob;
 
-                const blob = await procesarPdfConRondas(
-                    file,
-                    tableroAProcesar,
-                    cargasEspeciales.filter(c => c.tipo === tipoPintura)
-                );
+                if (tipoPintura === "Vinílica") {
+                    // --- VINÍLICA: Con rondas y máquinas ---
+                    let tableroAProcesar = rondas.map((fila, fIdx) => 
+                        fila.map(celda => {
+                            if (!celda) return null;
+                            const op = getOperarioPorMaquina(101 + fIdx, fechaTrabajo);
+                            return Array.isArray(celda) 
+                                ? celda.map(c => ({ ...c, operario: op })) 
+                                : { ...celda, operario: op };
+                        })
+                    );
 
+                    blob = await procesarPdfConRondas(
+                        file,
+                        tableroAProcesar,
+                        cargasEspeciales.filter(c => c.tipo === tipoPintura)
+                    );
+                } else {
+                    // --- ESMALTES: Sin rondas, solo folios ---
+                    blob = await procesarPdfEsmaltes(
+                        file,
+                        cargasEsmaltesAsignadas
+                    );
+                }
+
+                // Descargar el PDF
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `Reporte_${tipoPintura}.pdf`;
+                document.body.appendChild(a);
                 a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
 
                 setProgreso(100);
             } catch (error) {
+                console.error("Error PDF:", error);
                 alert("Error PDF: " + error.message);
             } finally {
                 clearInterval(idInt);
@@ -243,26 +271,26 @@ export const createProduccionHandlers = (dependencies) => {
             }
         },
 
-handleImprimirBitacora: async () => {
-  try {
-    setProcesandoPdf(true);
-    
-    // Pasar SOLO rondas normales y cargas especiales por separado
-    await bitacoraService.generarPdf(
-      rondas,  // Solo rondas normales (VI-101 a VI-106)
-      fechaTrabajo,
-      tipoPintura,
-      getOperarioPorMaquina,
-      cargasEspeciales  // Cargas especiales van aparte
-    );
-    
-    setProcesandoPdf(false);
-  } catch (error) {
-    console.error("Error al generar bitácora:", error);
-    alert("Error al generar el PDF de la bitácora");
-    setProcesandoPdf(false);
-  }
-},
+        // Handler: Imprimir bitácora
+        handleImprimirBitacora: async () => {
+            try {
+                setProcesandoPdf(true);
+                
+                await bitacoraService.generarPdf(
+                    rondas,
+                    fechaTrabajo,
+                    tipoPintura,
+                    getOperarioPorMaquina,
+                    cargasEspeciales
+                );
+                
+                setProcesandoPdf(false);
+            } catch (error) {
+                console.error("Error al generar bitácora:", error);
+                alert("Error al generar el PDF de la bitácora");
+                setProcesandoPdf(false);
+            }
+        },
 
         // Handler: Reporte del tablero
         handleReporteTablero: async () => {

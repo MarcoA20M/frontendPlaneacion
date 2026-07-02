@@ -1068,3 +1068,402 @@ body, html {
 
 
 
+/* ===== CALENDARIO CON FLECHAS ===== */
+.calendar-nav-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #300d45c4;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid #310143;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+.calendar-nav-container:hover {
+    border-color: #00e5ff;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(0, 229, 255, 0.05);
+}
+
+.calendar-nav-btn {
+    background: transparent;
+    border: none;
+    color: #00e5ff;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    user-select: none;
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(0, 229, 255, 0.15);
+    transform: scale(1.1);
+}
+
+.calendar-nav-btn:active {
+    transform: scale(0.9);
+}
+
+.calendar-date-input {
+    background: transparent;
+    border: none;
+    color: #00e5ff;
+    font-size: 13px;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+    min-width: 130px;
+    text-align: center;
+    font-family: inherit;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.calendar-date-input:hover {
+    background: rgba(86, 4, 134, 0.05);
+}
+
+.calendar-date-input:focus {
+    background: rgba(0, 229, 255, 0.08);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+}
+
+.calendar-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(200%);
+    cursor: pointer;
+    padding: 2px;
+    transition: transform 0.2s ease;
+}
+
+.calendar-date-input::-webkit-calendar-picker-indicator:hover {
+    transform: scale(1.1);
+}
+
+.btn-hoy-calendar {
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid #00e5ff;
+    color: #00e5ff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-hoy-calendar:hover {
+    background: rgba(0, 229, 255, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+}
+
+.btn-hoy-calendar:active {
+    transform: scale(0.95);
+}
+
+.calendar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .calendar-nav-container {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+    .calendar-nav-btn {
+        font-size: 14px;
+        padding: 3px 6px;
+    }
+    .calendar-date-input {
+        font-size: 12px;
+        min-width: 110px;
+        padding: 3px 4px;
+    }
+    .btn-hoy-calendar {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-nav-container {
+        padding: 3px 6px;
+        gap: 3px;
+    }
+    .calendar-nav-btn {
+        font-size: 12px;
+        padding: 2px 4px;
+    }
+    .calendar-date-input {
+        font-size: 10px;
+        min-width: 90px;
+        padding: 2px 3px;
+    }
+    .btn-hoy-calendar {
+        font-size: 9px;
+        padding: 3px 8px;
+    }
+    .calendar-wrapper {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-nav-container {
+        padding: 2px 4px;
+        gap: 2px;
+        border-radius: 6px;
+    }
+    .calendar-nav-btn {
+        font-size: 10px;
+        padding: 2px 3px;
+    }
+    .calendar-date-input {
+        font-size: 9px;
+        min-width: 70px;
+        padding: 2px 2px;
+    }
+    .btn-hoy-calendar {
+        font-size: 8px;
+        padding: 2px 6px;
+        gap: 2px;
+    }
+    .calendar-wrapper {
+        gap: 4px;
+    }
+}
+
+/* ===== BUSCADOR DE CARGAS COMPACTO ESTILO MATERIAS PRIMAS ===== */
+.buscador-cargas-wrapper {
+    position: relative;
+}
+
+.buscador-cargas-container-compact {
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid rgba(192, 0, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.buscador-cargas-container-compact:hover {
+    border-color: rgba(192, 0, 255, 0.4);
+}
+
+.buscador-cargas-container-compact:focus-within {
+    border-color: #a855f7;
+    box-shadow: 0 0 20px rgba(192, 0, 255, 0.08);
+}
+
+.buscador-cargas-input-compact {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    padding: 2px 8px;
+    gap: 6px;
+}
+
+.buscador-cargas-input-compact .icono-lupa-compact {
+    color: #a855f7;
+    font-size: 12px;
+}
+
+.buscador-cargas-input-compact input {
+    background: transparent;
+    border: none;
+    color: #e0e0e0;
+    font-size: 12px;
+    padding: 4px 2px;
+    outline: none;
+    width: 100%;
+    min-width: 120px;
+    font-family: inherit;
+}
+
+.buscador-cargas-input-compact input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 11px;
+}
+
+.buscador-cargas-input-compact .btn-limpiar-compact {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 4px;
+    transition: all 0.2s ease;
+}
+
+.buscador-cargas-input-compact .btn-limpiar-compact:hover {
+    color: #ff5f7e;
+    transform: scale(1.1);
+}
+
+/* Resultados de búsqueda compactos */
+.resultados-busqueda-compact {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border: 1px solid rgba(192, 0, 255, 0.25);
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 3px;
+}
+
+.resultados-busqueda-compact::-webkit-scrollbar {
+    width: 3px;
+}
+
+.resultados-busqueda-compact::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.resultados-busqueda-compact::-webkit-scrollbar-thumb {
+    background: rgba(192, 0, 255, 0.3);
+    border-radius: 10px;
+}
+
+.resultados-busqueda-compact::-webkit-scrollbar-thumb:hover {
+    background: rgba(192, 0, 255, 0.5);
+}
+
+.resultado-item-compact {
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 1px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    font-size: 12px;
+}
+
+.resultado-item-compact:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.resultado-item-compact:hover {
+    background: rgba(192, 0, 255, 0.06);
+}
+
+.resultado-item-compact .codigo-compact {
+    color: #a855f7;
+    font-weight: 600;
+    font-size: 11px;
+    background: rgba(192, 0, 255, 0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+.resultado-item-compact .descripcion-compact {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+}
+
+.resultado-item-compact .info-compact {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.resultado-item-compact .folio-compact {
+    color: #e879f9;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.resultado-item-compact .detalles-compact {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 10px;
+}
+
+/* Mensaje de no resultados compacto */
+.mensaje-no-resultados-compact {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+    border: 1px solid rgba(192, 0, 255, 0.15);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    font-size: 12px;
+}
+
+.mensaje-no-resultados-compact span {
+    color: #a855f7;
+    font-weight: 500;
+}
+
+/* Responsive compacto */
+@media (max-width: 768px) {
+    .buscador-cargas-input-compact input {
+        min-width: 80px;
+        font-size: 11px;
+    }
+
+    .buscador-cargas-input-compact {
+        padding: 2px 6px;
+    }
+
+    .resultado-item-compact {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        padding: 5px 8px;
+    }
+
+    .resultado-item-compact .info-compact {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .resultados-busqueda-compact {
+        max-height: 200px;
+    }
+}
+
+
+
+/* Agregar un pequeño indicador de que se usa Enter */
+.buscador-cargas-input-compact input::after {
+    content: " ↵";
+    color: rgba(255, 255, 255, 0.2);
+}

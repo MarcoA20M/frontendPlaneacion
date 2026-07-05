@@ -5,6 +5,7 @@ import { getOperarioPorMaquina, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../
 import { registrarCarga, eliminarCarga, obtenerCargasPorFecha } from "../services/cargaService";
 import { formulasService } from "../services/formulasService";
 import { materiaPrimaService } from "../services/materiaPrimaService";
+import { operarioService } from "../services/operarioService";
 
 // --- FUNCIÓN DE UTILIDAD: GENERACIÓN DE FOLIOS ---
 const generarFolioAutomatico = (tipo, cola, rondas, esmaltes, especiales) => {
@@ -67,15 +68,122 @@ export function useProduccion() {
     const [buscandoManual, setBuscandoManual] = useState(false);
     const [guardandoBD, setGuardandoBD] = useState(false);
     const [buscandoFecha, setBuscandoFecha] = useState(false);
+    const [operariosEsmaltes, setOperariosEsmaltes] = useState([]);
+    const [cargandoOperarios, setCargandoOperarios] = useState(true);
 
     const CODIGOS_BASES = ["BBE20", "BBE30", "BAL40", "BNE10", "BSP10"];
-    const IGUALADORES = ["Gaspar", "Alberto", "Pedro"];
 
     const normalizarCodigo = (cod) => {
         if (!cod) return "";
         return String(cod).trim().toUpperCase().replace(/^0+/, '') || "0";
     };
 
+    // ============================================================
+    // 🔴 CARGAR OPERARIOS DE ESMALTES DESDE LA API
+    // ============================================================
+    const cargarOperariosEsmaltes = useCallback(async () => {
+        try {
+            console.log('🔄 useProduccion: Cargando operarios de esmaltes desde API...');
+            const esmaltes = await operarioService.getEsmaltes();
+            console.log('📦 useProduccion: getEsmaltes() devolvió:', esmaltes);
+            
+            if (esmaltes && Array.isArray(esmaltes) && esmaltes.length > 0) {
+                setOperariosEsmaltes(esmaltes);
+                console.log('✅ useProduccion: Operarios guardados:', esmaltes);
+                esmaltes.forEach(op => {
+                    console.log(`  • ${op.nombre} - ${op.puesto} (ID: ${op.id})`);
+                });
+            } else {
+                console.warn('⚠️ useProduccion: No se encontraron operarios de esmaltes');
+                setOperariosEsmaltes([]);
+            }
+            setCargandoOperarios(false);
+            return esmaltes;
+        } catch (error) {
+            console.error('❌ useProduccion: Error cargando operarios:', error);
+            setOperariosEsmaltes([]);
+            setCargandoOperarios(false);
+            return [];
+        }
+    }, []);
+
+    // ============================================================
+    // 🔴 OBTENER NOMBRES DE OPERARIOS POR PUESTO DESDE BD
+    // ============================================================
+    const getNombresOperariosEsmaltes = useCallback(async () => {
+        console.log('🔍 useProduccion: Obteniendo nombres de operarios por puesto...');
+        
+        let operarios = operariosEsmaltes;
+        if (!operarios || operarios.length === 0) {
+            operarios = await cargarOperariosEsmaltes();
+        }
+        
+        console.log('📋 useProduccion: Operarios disponibles:', operarios);
+        
+        const activos = operarios.filter(op => op.activo !== false);
+        
+        const preparadores = activos
+            .filter(op => op.puesto?.toLowerCase() === 'preparador')
+            .map(op => op.nombre);
+        
+        const molienda = activos
+            .filter(op => op.puesto?.toLowerCase() === 'molienda')
+            .map(op => op.nombre);
+        
+        const terminados = activos
+            .filter(op => 
+                op.puesto?.toLowerCase() === 'terminado' ||
+                op.puesto?.toLowerCase() === 'igualador' ||
+                op.puesto?.toLowerCase() === 'mezclador'
+            )
+            .map(op => op.nombre);
+        
+        const resultado = {
+            preparadores: preparadores,
+            molienda: molienda,
+            terminados: terminados
+        };
+        
+        console.log('📊 useProduccion - Nombres por puesto:', resultado);
+        console.log(`  • Preparadores: ${resultado.preparadores.join(', ') || 'Ninguno'}`);
+        console.log(`  • Molienda: ${resultado.molienda.join(', ') || 'Ninguno'}`);
+        console.log(`  • Terminados: ${resultado.terminados.join(', ') || 'Ninguno'}`);
+        
+        return resultado;
+    }, [operariosEsmaltes, cargarOperariosEsmaltes]);
+
+    // ============================================================
+    // CARGAR OPERARIOS AL INICIO
+    // ============================================================
+    useEffect(() => {
+        cargarOperariosEsmaltes();
+    }, [cargarOperariosEsmaltes]);
+
+    // ============================================================
+    // ESCUCHAR EVENTOS DE ACTUALIZACIÓN
+    // ============================================================
+    useEffect(() => {
+        const handleOperariosActualizados = (event) => {
+            console.log('🔄 useProduccion: Evento de actualización recibido:', event.detail);
+            if (event.detail && event.detail.operarios) {
+                const esmaltes = event.detail.operarios.filter(op => op.area === 'esmaltes');
+                setOperariosEsmaltes(esmaltes);
+                console.log('✅ useProduccion: Operarios actualizados:', esmaltes);
+            }
+        };
+        
+        window.addEventListener('operariosEsmaltesUpdated', handleOperariosActualizados);
+        window.addEventListener('operariosEsmaltesActualizados', handleOperariosActualizados);
+        
+        return () => {
+            window.removeEventListener('operariosEsmaltesUpdated', handleOperariosActualizados);
+            window.removeEventListener('operariosEsmaltesActualizados', handleOperariosActualizados);
+        };
+    }, []);
+
+    // ============================================================
+    // ORDENAR CARGAS
+    // ============================================================
     const ordenarCargas = useCallback((lista) => [...lista].sort((a, b) => {
         const cubA = a.nivelCubriente || 0;
         const cubB = b.nivelCubriente || 0;
@@ -103,7 +211,9 @@ export function useProduccion() {
         ? producto.envasados.reduce((acc, env) => acc + (cantidades[env.id] || 0) * litrosPorEnvasado(env.id), 0)
         : 0, [producto, cantidades]);
 
-    // --- FUNCIÓN PARA GUARDAR CONSUMOS EN LOCALSTORAGE ---
+    // ============================================================
+    // GUARDAR CONSUMOS
+    // ============================================================
     const guardarConsumosEnLocalStorage = useCallback((consumos) => {
         try {
             const consumosExistentes = JSON.parse(localStorage.getItem('consumosBases') || '[]');
@@ -126,7 +236,6 @@ export function useProduccion() {
         }
     }, []);
 
-    // --- FUNCIÓN PARA CONSUMIR BASES ---
     const consumirBasesDeCargas = useCallback(async (cargas) => {
         if (!cargas || cargas.length === 0) {
             console.log('⚠️ No hay cargas para consumir bases');
@@ -167,7 +276,9 @@ export function useProduccion() {
         }
     }, []);
 
-    // --- CARGAR DATOS DE BD ---
+    // ============================================================
+    // CARGAR DATOS DE BD
+    // ============================================================
     const cargarDatosPorFecha = useCallback(async (fechaInput) => {
         try {
             setBuscandoFecha(true);
@@ -190,8 +301,7 @@ export function useProduccion() {
 
             const mapaOperarioMaquina = {
                 "Isaac": 101, "Juan": 102, "Pedro": 103, "Luis": 104,
-                "Carlos": 105, "Javier": 106, "Miguel": 107, "Roberto": 108,
-                "Aldo": 101, "Germán": 104, "Gaspar": 105, "Alberto": 106
+                "Carlos": 105, "Javier": 106, "Miguel": 107, "Roberto": 108
             };
 
             const mapaCargasBD = {};
@@ -327,9 +437,15 @@ export function useProduccion() {
                 return String(a.folio).localeCompare(String(b.folio));
             });
 
+            // 🔴 OBTENER NOMBRES DINÁMICOS DESDE BD
+            const nombres = await getNombresOperariosEsmaltes();
+            
+            const defaultOperario = nombres.preparadores[0] || nombres.molienda[0] || nombres.terminados[0] || '';
+            console.log('👤 Default operario:', defaultOperario || 'Ninguno');
+
             esmaltesOrdenados.forEach(carga => {
                 if (!carga.operario || carga.operario === "") {
-                    carga.operario = "Aldo";
+                    carga.operario = defaultOperario;
                     carga.textoMaquina = `ESM-001 ${carga.operario}`;
                 } else {
                     carga.textoMaquina = `ESM-001 ${carga.operario}`;
@@ -347,13 +463,15 @@ export function useProduccion() {
         } finally {
             setBuscandoFecha(false);
         }
-    }, [ordenarCargas]);
+    }, [ordenarCargas, getNombresOperariosEsmaltes]);
 
     useEffect(() => {
         cargarDatosPorFecha(new Date().toISOString().split('T')[0]);
     }, [cargarDatosPorFecha]);
 
-    // --- CALCULAR CONSUMO GLOBAL ---
+    // ============================================================
+    // CALCULAR CONSUMO GLOBAL
+    // ============================================================
     const calcularConsumoGlobal = useCallback(async () => {
         const todasLasCargas = [
             ...rondas.flat().filter(Boolean),
@@ -416,7 +534,9 @@ export function useProduccion() {
             .sort((a, b) => b.consumoTotal - a.consumoTotal);
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales]);
 
-    // --- GUARDAR PRODUCCIÓN EN BD - MODIFICADA PARA GUARDAR CONSUMOS EN BD ---
+    // ============================================================
+    // GUARDAR PRODUCCIÓN EN BD
+    // ============================================================
     const guardarProduccionEnBD = async () => {
         const todas = [...colaCargas, ...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales];
         
@@ -439,22 +559,17 @@ export function useProduccion() {
         try {
             setGuardandoBD(true);
 
-            // 🔴 CONSUMIR BASES
             try {
                 const resultadoConsumo = await consumirBasesDeCargas(todas);
                 
                 if (resultadoConsumo && resultadoConsumo.basesConsumidas && resultadoConsumo.basesConsumidas.length > 0) {
                     
-                    // 🔴 GUARDAR EN LOCALSTORAGE
                     guardarConsumosEnLocalStorage(resultadoConsumo.basesConsumidas);
 
-                    // 🔴 GUARDAR EN LA BASE DE DATOS
                     try {
-                        // Obtener todas las materias primas para tener los IDs
                         const todasLasMP = await materiaPrimaService.listarTodas();
                         
                         const consumosParaBD = resultadoConsumo.basesConsumidas.map(b => {
-                            // Buscar la materia prima por código para obtener su ID
                             const mp = todasLasMP.find(m => m.codigo === b.codigo);
                             return {
                                 loteId: b.folio || 'S/F',
@@ -483,7 +598,6 @@ export function useProduccion() {
                         console.error('❌ Error guardando consumos en BD:', error);
                     }
                     
-                    // 🔴 FILTRAR SOLO BBE20 Y BBE30 PARA EL MENSAJE
                     const basesFiltradas = resultadoConsumo.basesConsumidas.filter(b => 
                         b.codigo === 'BBE20' || b.codigo === 'BBE30'
                     );
@@ -530,7 +644,6 @@ export function useProduccion() {
                 }
             }
 
-            // 🔴 GUARDAR EN BD (cargas)
             const registrosParaBD = [];
             todas.forEach(carga => {
                 if (carga.detallesEnvasado) {
@@ -566,7 +679,6 @@ export function useProduccion() {
 
             await registrarCarga(registrosParaBD);
 
-            // 🔴 ACTUALIZAR PANTALLAS
             if (window.recargarBases) {
                 window.recargarBases();
             }
@@ -599,7 +711,9 @@ export function useProduccion() {
         } catch (error) { alert("Error al eliminar."); }
     };
 
-    // --- LOGICA DE PRODUCTOS ---
+    // ============================================================
+    // LOGICA DE PRODUCTOS
+    // ============================================================
     const enriquecerConPlanificador = useCallback((datosProducto) => {
         const planificadorRaw = localStorage.getItem("planificador_data");
         if (!planificadorRaw) return datosProducto;
@@ -704,7 +818,9 @@ export function useProduccion() {
         setCantidades({}); setProducto(null); setCodigo("");
     }, [producto, tipoPintura, totalLitrosActuales, cantidades, ordenarCargas]);
 
-    // --- EXCEL E IMPORTACIÓN ---
+    // ============================================================
+    // EXCEL E IMPORTACIÓN
+    // ============================================================
     const handleImportExcel = async (e, soloRetornar = false) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -789,7 +905,9 @@ export function useProduccion() {
         }
     };
 
-    // --- PLANIFICACIÓN FINAL ---
+    // ============================================================
+    // PLANIFICACIÓN FINAL
+    // ============================================================
     const generarLotesFinales = useCallback(() => {
         if (colaCargas.length === 0 && cargasEspeciales.length === 0) return;
         const procesarLista = (listaActual) => {
@@ -818,10 +936,27 @@ export function useProduccion() {
         setCargasEsmaltesAsignadas(prev => prev.map(c => c.idTemp === idTemp ? { ...c, operario: nuevoOperario } : c));
     };
 
-    const guardarCargasEnRondas = (cargasAGuardar) => {
+    // ============================================================
+    // GUARDAR CARGAS EN RONDAS - CON OPERARIOS DINÁMICOS DESDE BD
+    // ============================================================
+    const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
         const idsAsignados = [];
+        
         if (tipoPintura === "Esmalte") {
+            const nombres = await getNombresOperariosEsmaltes();
+            
+            console.log('📋 useProduccion - Nombres para asignación:', nombres);
+            
+            const preparadores = nombres.preparadores || [];
+            const molienda = nombres.molienda || [];
+            const terminados = nombres.terminados || [];
+
+            console.log('👤 Preparadores:', preparadores.length > 0 ? preparadores : 'Ninguno');
+            console.log('👤 Molienda:', molienda.length > 0 ? molienda : 'Ninguno');
+            console.log('👤 Terminados:', terminados.length > 0 ? terminados : 'Ninguno');
+
             let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
+            
             cargasAGuardar.forEach((carga) => {
                 const listaProcesos = (carga.procesos || []).map(p => p.descripcion.toUpperCase());
                 const codigoUpper = normalizarCodigo(carga.codigoProducto);
@@ -829,16 +964,45 @@ export function useProduccion() {
                 const tieneMolienda = listaProcesos.some(d => d.includes("MOLIENDA"));
                 const tienePreparado = listaProcesos.some(d => d.includes("PREPARADO") || d.includes("DISPERSION"));
                 const tieneEtapaFinal = listaProcesos.some(d => d.includes("IGUALACIÓN") || d.includes("IGUALACION") || d.includes("TERMINADO") || d.includes("AJUSTE"));
+                
                 let ops = [];
-                if (esBase) ops.push("Aldo");
-                else if (tieneMolienda) ops.push("Germán");
-                else if (tienePreparado) ops.push("Aldo");
-                if (tieneEtapaFinal || ops.length === 0) {
-                    const candidatos = (tieneMolienda || tienePreparado || esBase) ? ["Gaspar", "Pedro"] : IGUALADORES;
-                    const balance = candidatos.map(n => ({ n, t: tempAsignadasEsmaltes.filter(c => c.operario.includes(n)).length + (n === "Alberto" ? 3 : 0) })).sort((a, b) => a.t - b.t);
-                    if (!ops.includes(balance[0].n)) ops.push(balance[0].n);
+                
+                if (esBase) {
+                    if (preparadores.length > 0) ops.push(preparadores[0]);
+                } else if (tieneMolienda) {
+                    if (molienda.length > 0) ops.push(molienda[0]);
+                } else if (tienePreparado) {
+                    if (preparadores.length > 0) ops.push(preparadores[0]);
                 }
-                tempAsignadasEsmaltes.push({ ...carga, operario: ops.join(" / "), maquina: "ESM" });
+                
+                if (tieneEtapaFinal || ops.length === 0) {
+                    if (terminados.length > 0) {
+                        const balance = terminados.map(n => ({ 
+                            n, 
+                            t: tempAsignadasEsmaltes.filter(c => c.operario && c.operario.includes(n)).length 
+                        })).sort((a, b) => a.t - b.t);
+                        
+                        if (!ops.includes(balance[0].n)) {
+                            ops.push(balance[0].n);
+                        }
+                    }
+                }
+                
+                if (ops.length === 0) {
+                    if (preparadores.length > 0) ops.push(preparadores[0]);
+                    else if (molienda.length > 0) ops.push(molienda[0]);
+                    else if (terminados.length > 0) ops.push(terminados[0]);
+                    else {
+                        ops.push('');
+                    }
+                }
+                
+                const operarioAsignado = ops.filter(o => o !== '').join(" / ");
+                tempAsignadasEsmaltes.push({ 
+                    ...carga, 
+                    operario: operarioAsignado || '', 
+                    maquina: "ESM" 
+                });
                 idsAsignados.push(carga.idTemp);
             });
             setCargasEsmaltesAsignadas(ordenarCargas(tempAsignadasEsmaltes));
@@ -863,13 +1027,20 @@ export function useProduccion() {
                         }
                     }
                 }
-                if (!asignada) { nuevasEspeciales.push(carga); idsAsignados.push(carga.idTemp); }
+                if (!asignada) { 
+                    nuevasEspeciales.push(carga); 
+                    idsAsignados.push(carga.idTemp); 
+                }
             });
-            setRondas(nuevasRondas); setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+            setRondas(nuevasRondas); 
+            setCargasEspeciales(ordenarCargas(nuevasEspeciales));
         }
         setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
-    };
+    }, [tipoPintura, cargasEsmaltesAsignadas, rondas, cargasEspeciales, ordenarCargas, getNombresOperariosEsmaltes]);
 
+    // ============================================================
+    // RETURN
+    // ============================================================
     return {
         codigo, setCodigo, producto, cantidades, setCantidades, colaCargas, setColaCargas,
         cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
@@ -878,6 +1049,8 @@ export function useProduccion() {
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas,
         ordenarCargas, actualizarOperarioEsmalte, generarLotesFinales,
         guardarProduccionEnBD, handleEliminarCargaBD, cargarDatosPorFecha,
-        calcularConsumoGlobal, consumirBasesDeCargas
+        calcularConsumoGlobal, consumirBasesDeCargas,
+        operariosEsmaltes,
+        cargandoOperarios
     };
 }

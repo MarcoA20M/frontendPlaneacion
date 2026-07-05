@@ -469,7 +469,7 @@ body, html {
   padding: 7px 12px; /* Reducido de 5px 15px */
   border-radius: 15px; /* Reducido de 20px */
 }
-
+  
 .planificador-semanal button {
   background: transparent;
   border: none;

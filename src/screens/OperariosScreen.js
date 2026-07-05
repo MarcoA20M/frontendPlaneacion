@@ -1,197 +1,300 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { operarioService } from "../services/operarioService";
 import "../styles/operarios.css";
 
 export default function OperariosScreen() {
     const navigate = useNavigate();
     const [tabActiva, setTabActiva] = useState("vinilica");
-    // 🔴 NUEVO: Estado para la subsección dentro de Vinílicas
     const [subSeccionVinilica, setSubSeccionVinilica] = useState("maquinas");
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+    const [cargando, setCargando] = useState(false);
 
     // Estado para operarios de Vinílica
-    const [operariosVinilica, setOperariosVinilica] = useState(() => {
-        const guardado = localStorage.getItem("operarios_vinilica");
-        return guardado ? JSON.parse(guardado) : [
-            { id: 1, nombre: "Pedro", puesto: "Preparador", activo: true },
-            { id: 2, nombre: "Carlos", puesto: "Preparador", activo: true },
-            { id: 3, nombre: "Yunior", puesto: "Preparador", activo: true },
-            { id: 4, nombre: "Luis", puesto: "Preparador", activo: true }
-        ];
-    });
+    const [operariosVinilica, setOperariosVinilica] = useState([]);
 
     // Estado para asignación BASE
-    const [configGruposBase, setConfigGruposBase] = useState(() => {
-        const guardado = localStorage.getItem("config_grupos_base_vinilica");
-        return guardado ? JSON.parse(guardado) : {
-            grupo0: {
-                operarioId: 1,
-                maquinas: [101, 102],
-                nombre: "Grupo 0 (VI-101, VI-102)"
-            },
-            grupo1: {
-                operarioId: 2,
-                maquinas: [103, 104],
-                nombre: "Grupo 1 (VI-103, VI-104)"
-            },
-            grupo2: {
-                operarioId: 3,
-                maquinas: [105, 106],
-                nombre: "Grupo 2 (VI-105, VI-106)"
-            },
-            grupo3: {
-                operarioId: 4,
-                maquinas: [107, 108],
-                nombre: "Grupo 3 (VI-107, VI-108)"
-            }
-        };
+    const [configGruposBase, setConfigGruposBase] = useState({
+        grupo0: {
+            operarioId: null,
+            maquinas: [101, 102],
+            nombre: "Grupo 0 (VI-101, VI-102)"
+        },
+        grupo1: {
+            operarioId: null,
+            maquinas: [103, 104],
+            nombre: "Grupo 1 (VI-103, VI-104)"
+        },
+        grupo2: {
+            operarioId: null,
+            maquinas: [105, 106],
+            nombre: "Grupo 2 (VI-105, VI-106)"
+        },
+        grupo3: {
+            operarioId: null,
+            maquinas: [107, 108],
+            nombre: "Grupo 3 (VI-107, VI-108)"
+        }
     });
 
     // Estado para la rotación actual
-    const [semanasRotadas, setSemanasRotadas] = useState(() => {
-        const guardado = localStorage.getItem("semanas_rotadas_vinilica");
-        return guardado ? parseInt(guardado) : 0;
-    });
+    const [semanasRotadas, setSemanasRotadas] = useState(0);
 
-    // Estado para otros operarios (Esmaltes)
-    const [otrosOperarios, setOtrosOperarios] = useState(() => {
-        const guardado = localStorage.getItem("otros_operarios");
-        return guardado ? JSON.parse(guardado) : [
-            { id: 100, nombre: "Aldo", puesto: "Preparador", area: "esmaltes" },
-            { id: 101, nombre: "Germán", puesto: "Molienda", area: "esmaltes" },
-            { id: 102, nombre: "Javier", puesto: "Ayudante", area: "esmaltes" },
-            { id: 103, nombre: "Ricardo", puesto: "Preparador", area: "esmaltes" },
-            { id: 104, nombre: "Beto", puesto: "Mezclador", area: "esmaltes" }
-        ];
-    });
+    // Estado para operarios de Esmaltes
+    const [otrosOperarios, setOtrosOperarios] = useState([]);
 
-    // Estado para operarios especiales (Impermeabilizantes)
-    const [operariosEspeciales, setOperariosEspeciales] = useState(() => {
-        const guardado = localStorage.getItem("operarios_especiales");
-        return guardado ? JSON.parse(guardado) : [
-            { id: 1, nombre: "Lazaro", puesto: "Impermeabilizantes", activo: true }
-        ];
-    });
+    // Estado para operarios especiales
+    const [operariosEspeciales, setOperariosEspeciales] = useState([]);
 
-    // Flag para evitar bucles infinitos de actualización
-    const [actualizandoDesdeSelector, setActualizandoDesdeSelector] = useState(false);
+    // Puestos disponibles para Esmaltes (SOLO 3)
+    const puestosEsmaltes = [
+        { valor: "Preparador", label: "🧪 Preparador" },
+        { valor: "Molienda", label: "⚙️ Molienda" },
+        { valor: "Terminado", label: "✅ Terminado/Igualado" }
+    ];
+
+    // Flag para evitar bucles
     const [actualizandoDesdeDrag, setActualizandoDesdeDrag] = useState(false);
 
-    // Función para calcular la configuración actual basada en el orden de los operarios
-    const calcularConfigActual = () => {
-        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
-
-        const asignacionBase = gruposOrden.map((grupo, idx) => {
-            if (idx < operariosVinilica.length) {
-                return operariosVinilica[idx].id;
+    // ========== FUNCIÓN PARA RECARGAR CONFIGURACIÓN ==========
+    const cargarConfiguracion = async () => {
+        try {
+            const config = await operarioService.getConfiguracionVinilica();
+            console.log("📦 Configuración recargada:", config);
+            
+            if (config && config.gruposBase) {
+                const gruposMapeados = {};
+                const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+                
+                gruposOrden.forEach(grupoId => {
+                    if (config.gruposBase[grupoId]) {
+                        const grupoData = config.gruposBase[grupoId];
+                        gruposMapeados[grupoId] = {
+                            operarioId: grupoData.operarioId || null,
+                            maquinas: grupoData.maquinas || [101, 102],
+                            nombre: grupoData.nombre || `Grupo ${grupoId}`
+                        };
+                    } else {
+                        gruposMapeados[grupoId] = configGruposBase[grupoId];
+                    }
+                });
+                
+                setConfigGruposBase(gruposMapeados);
+                console.log("✅ Grupos actualizados:", gruposMapeados);
             }
-            return configGruposBase[grupo]?.operarioId || null;
-        });
-
-        const rotacionAplicada = [...asignacionBase];
-        for (let i = 0; i < semanasRotadas; i++) {
-            const ultimo = rotacionAplicada.pop();
-            rotacionAplicada.unshift(ultimo);
+        } catch (error) {
+            console.error("Error recargando configuración:", error);
         }
-
-        const configActual = {};
-        gruposOrden.forEach((grupo, idx) => {
-            configActual[grupo] = {
-                ...configGruposBase[grupo],
-                operarioId: rotacionAplicada[idx]
-            };
-        });
-
-        return configActual;
     };
 
-    const [configGrupos, setConfigGrupos] = useState(() => calcularConfigActual());
+    // ========== CARGAR DATOS DESDE BACKEND ==========
+   // ========== CARGAR DATOS DESDE BACKEND ==========
+const cargarDatos = async () => {
+    setCargando(true);
+    try {
+        console.log('🔄 Cargando datos de operarios...');
+        
+        // Cargar Vinílicas
+        const vinilica = await operarioService.getVinilica();
+        console.log('✅ Vinílicas cargadas:', vinilica);
+        
+        // Cargar configuración de rotación
+        const config = await operarioService.getConfiguracionVinilica();
+        console.log("📦 Configuración recibida:", config);
+        
+        // ORDENAR LOS OPERARIOS SEGÚN LA CONFIGURACIÓN DE GRUPOS BASE
+        let operariosOrdenados = [...vinilica];
+        
+        if (config && config.gruposBase) {
+            const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+            const ordenIds = gruposOrden.map(grupoId => config.gruposBase[grupoId]?.operarioId).filter(id => id !== null && id !== undefined);
+            
+            if (ordenIds.length > 0) {
+                const operariosMap = new Map();
+                vinilica.forEach(op => operariosMap.set(op.id, op));
+                
+                const nuevosOperarios = [];
+                const idsUsados = new Set();
+                
+                ordenIds.forEach(id => {
+                    if (operariosMap.has(id) && !idsUsados.has(id)) {
+                        nuevosOperarios.push(operariosMap.get(id));
+                        idsUsados.add(id);
+                    }
+                });
+                
+                vinilica.forEach(op => {
+                    if (!idsUsados.has(op.id)) {
+                        nuevosOperarios.push(op);
+                    }
+                });
+                
+                operariosOrdenados = nuevosOperarios;
+                console.log("✅ Operarios reordenados:", operariosOrdenados.map(o => o.nombre));
+            }
+        }
+        
+        setOperariosVinilica(operariosOrdenados);
 
-    // Actualizar cuando cambie el orden de operarios o la rotación
-    useEffect(() => {
-        const nuevaConfig = calcularConfigActual();
-        setConfigGrupos(nuevaConfig);
-    }, [semanasRotadas, configGruposBase, operariosVinilica]);
+        // ============================================================
+        // 🔴 Cargar Esmaltes - USANDO getAll() Y FILTRANDO EN FRONTEND
+        // ============================================================
+        console.log('🔄 Cargando operarios de esmaltes...');
+        
+        let esmaltes = [];
+        
+        // 1. PRIMERO: Intentar con getAll() - ESTE DEBE FUNCIONAR
+        try {
+            const todos = await operarioService.getAll();
+            console.log('📦 getAll() - TODOS los operarios:', todos);
+            console.log('📦 Cantidad total de operarios:', todos.length);
+            
+            // Mostrar cada operario para depuración
+            todos.forEach((op, index) => {
+                console.log(`  ${index + 1}. ID: ${op.id}, Nombre: "${op.nombre}", Area: "${op.area}", Puesto: "${op.puesto}"`);
+            });
+            
+            // Filtrar por área 'esmaltes'
+            esmaltes = todos.filter(op => op.area === 'esmaltes');
+            console.log('✅ Esmaltes filtrados por area === "esmaltes":', esmaltes);
+            
+            // Si no encuentra por 'area', intentar por 'puesto'
+            if (esmaltes.length === 0) {
+                console.log('⚠️ No se encontraron por "area", intentando por "puesto"...');
+                esmaltes = todos.filter(op => {
+                    const puesto = (op.puesto || '').toLowerCase();
+                    return puesto === 'molienda' || 
+                           puesto === 'terminado' || 
+                           puesto === 'preparador' ||
+                           puesto === 'igualador';
+                });
+                console.log('✅ Esmaltes filtrados por puesto:', esmaltes);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error en getAll():', error);
+        }
+        
+        // 2. Si aún no hay datos, intentar con getEsmaltes()
+        if (!esmaltes || esmaltes.length === 0) {
+            console.log('🔄 Intentando con getEsmaltes()...');
+            try {
+                esmaltes = await operarioService.getEsmaltes();
+                console.log('📦 getEsmaltes():', esmaltes);
+            } catch (error) {
+                console.warn('⚠️ Error en getEsmaltes():', error);
+            }
+        }
+        
+        // 3. Si aún no hay datos, array vacío (SIN FALLBACK ESTÁTICO)
+        if (!esmaltes || esmaltes.length === 0) {
+            console.warn('⚠️ No se encontraron operarios de esmaltes en la BD');
+            esmaltes = [];
+        }
+        
+        // Asegurar que todos tengan area 'esmaltes'
+        const esmaltesConArea = esmaltes.map(op => ({
+            ...op,
+            area: op.area || 'esmaltes'
+        }));
+        
+        setOtrosOperarios(esmaltesConArea);
+        console.log('✅ Estado otrosOperarios actualizado:', esmaltesConArea);
+        console.log(`📊 Total de operarios de esmaltes: ${esmaltesConArea.length}`);
+        
+        // Mostrar los nombres
+        if (esmaltesConArea.length > 0) {
+            console.log('📋 Operarios de esmaltes:');
+            esmaltesConArea.forEach(op => {
+                console.log(`  • ${op.nombre} - ${op.puesto} (ID: ${op.id})`);
+            });
+        } else {
+            console.log('📋 No hay operarios de esmaltes en la BD');
+        }
 
-    // Guardar en localStorage
-    useEffect(() => {
-        localStorage.setItem("operarios_vinilica", JSON.stringify(operariosVinilica));
-        localStorage.setItem("config_grupos_base_vinilica", JSON.stringify(configGruposBase));
-        localStorage.setItem("semanas_rotadas_vinilica", semanasRotadas.toString());
-        localStorage.setItem("otros_operarios", JSON.stringify(otrosOperarios));
-        localStorage.setItem("operarios_especiales", JSON.stringify(operariosEspeciales));
+        // Cargar Especiales
+        const especiales = await operarioService.getEspeciales();
+        setOperariosEspeciales(especiales);
+        
+        // Configurar grupos base
+        if (config && config.gruposBase) {
+            const gruposMapeados = {};
+            const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+            
+            gruposOrden.forEach(grupoId => {
+                if (config.gruposBase[grupoId]) {
+                    const grupoData = config.gruposBase[grupoId];
+                    gruposMapeados[grupoId] = {
+                        operarioId: grupoData.operarioId || null,
+                        maquinas: grupoData.maquinas || [101, 102],
+                        nombre: grupoData.nombre || `Grupo ${grupoId}`
+                    };
+                }
+            });
+            
+            setConfigGruposBase(gruposMapeados);
+            console.log("✅ Grupos mapeados:", gruposMapeados);
+        }
+        
+        if (config && config.semanasRotadas !== undefined) {
+            setSemanasRotadas(config.semanasRotadas);
+        } else {
+            setSemanasRotadas(0);
+        }
 
+        // Disparar eventos para otros componentes
         window.dispatchEvent(new CustomEvent("vinilicaConfigUpdated", {
-            detail: {
-                operarios: operariosVinilica,
-                grupos: configGrupos,
-                semanasRotadas
+            detail: { 
+                operarios: operariosOrdenados, 
+                grupos: config?.gruposBase, 
+                semanasRotadas: config?.semanasRotadas || 0 
             }
         }));
         
-        // Disparar evento para operarios especiales
         window.dispatchEvent(new CustomEvent("operariosEspecialesUpdated", {
-            detail: {
-                operarios: operariosEspeciales
-            }
+            detail: { operarios: especiales }
         }));
-    }, [operariosVinilica, configGruposBase, semanasRotadas, otrosOperarios, operariosEspeciales, configGrupos]);
 
-    // Guardar para API
+        window.dispatchEvent(new CustomEvent("operariosEsmaltesUpdated", {
+            detail: { operarios: esmaltesConArea }
+        }));
+
+        console.log('✅ Todos los datos cargados correctamente');
+        console.log('📊 Resumen final:');
+        console.log(`   - Vinílicas: ${operariosOrdenados.length}`);
+        console.log(`   - Esmaltes: ${esmaltesConArea.length}`);
+        console.log(`   - Especiales: ${especiales.length}`);
+
+    } catch (error) {
+        console.error("❌ Error cargando datos:", error);
+        mostrarMensaje("❌ Error al cargar datos del servidor", "error");
+    } finally {
+        setCargando(false);
+    }
+};
+
+    // Cargar datos al montar
     useEffect(() => {
-        const configParaAPI = {
-            operarios: operariosVinilica.map(op => ({ id: op.id, nombre: op.nombre })),
-            gruposBase: configGruposBase,
-            semanasRotadas: semanasRotadas,
-            ultimaActualizacion: new Date().toISOString()
-        };
-        localStorage.setItem("configuracion_rotacion_api", JSON.stringify(configParaAPI));
-    }, [operariosVinilica, configGruposBase, semanasRotadas]);
+        cargarDatos();
+    }, []);
+
+    // Guardar cambios en backend cuando cambien los operarios Vinílica
+    useEffect(() => {
+        if (operariosVinilica.length > 0 && !actualizandoDesdeDrag) {
+            const ids = operariosVinilica.map(op => op.id);
+            operarioService.reordenarVinilica(ids)
+                .then(() => {
+                    cargarConfiguracion();
+                })
+                .catch(err => {
+                    console.error("Error guardando orden:", err);
+                });
+        }
+    }, [operariosVinilica]);
 
     const mostrarMensaje = (texto, tipo = "success") => {
         setMensaje({ texto, tipo });
         setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
-    };
-
-    // ========== FUNCIÓN PARA REORDENAR LA TABLA SEGÚN LOS SELECTORES ==========
-    const reordenarTablaDesdeSelectores = (nuevosGruposBase) => {
-        if (actualizandoDesdeDrag) return;
-
-        setActualizandoDesdeSelector(true);
-
-        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
-        const ordenDesdeSelectores = gruposOrden.map(grupo => nuevosGruposBase[grupo]?.operarioId).filter(id => id !== null && id !== undefined);
-
-        const operariosMap = new Map();
-        operariosVinilica.forEach(op => operariosMap.set(op.id, op));
-
-        const nuevosOperariosOrdenados = [];
-        const idsUsados = new Set();
-
-        ordenDesdeSelectores.forEach(id => {
-            if (operariosMap.has(id) && !idsUsados.has(id)) {
-                nuevosOperariosOrdenados.push(operariosMap.get(id));
-                idsUsados.add(id);
-            }
-        });
-
-        operariosVinilica.forEach(op => {
-            if (!idsUsados.has(op.id)) {
-                nuevosOperariosOrdenados.push(op);
-            }
-        });
-
-        const idsActuales = operariosVinilica.map(op => op.id).join(',');
-        const idsNuevos = nuevosOperariosOrdenados.map(op => op.id).join(',');
-
-        if (idsActuales !== idsNuevos) {
-            setOperariosVinilica(nuevosOperariosOrdenados);
-            setSemanasRotadas(0);
-        }
-
-        setTimeout(() => {
-            setActualizandoDesdeSelector(false);
-        }, 50);
     };
 
     // ========== DRAG AND DROP ==========
@@ -213,7 +316,7 @@ export default function OperariosScreen() {
         e.dataTransfer.dropEffect = "move";
     };
 
-    const handleDrop = (e, dropIndex) => {
+    const handleDrop = async (e, dropIndex) => {
         e.preventDefault();
 
         if (dragIndex === null || dragIndex === dropIndex) {
@@ -229,30 +332,27 @@ export default function OperariosScreen() {
 
         setOperariosVinilica(nuevosOperarios);
 
-        const nuevosGruposBase = { ...configGruposBase };
-        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+        try {
+            const ids = nuevosOperarios.map(op => op.id);
+            await operarioService.reordenarVinilica(ids);
+            
+            // RESETEAR ROTACIÓN A 0 DESPUÉS DE REORDENAR
+            setSemanasRotadas(0);
+            
+            await cargarConfiguracion();
+            
+            mostrarMensaje(`🔄 ${temp.nombre} ↔ ${nuevosOperarios[dropIndex].nombre}`, "success");
+        } catch (error) {
+            console.error("Error guardando orden:", error);
+            mostrarMensaje("❌ Error al guardar el orden", "error");
+            await cargarDatos();
+        }
 
-        gruposOrden.forEach((grupo, idx) => {
-            if (idx < nuevosOperarios.length) {
-                nuevosGruposBase[grupo] = {
-                    ...nuevosGruposBase[grupo],
-                    operarioId: nuevosOperarios[idx].id
-                };
-            }
-        });
-
-        setConfigGruposBase(nuevosGruposBase);
-        setSemanasRotadas(0);
-
-        mostrarMensaje(`🔄 ${nuevosOperarios[dragIndex].nombre} ↔ ${nuevosOperarios[dropIndex].nombre}`, "success");
-
-        setTimeout(() => {
-            setActualizandoDesdeDrag(false);
-        }, 50);
+        setActualizandoDesdeDrag(false);
     };
 
     // ========== CRUD OPERARIOS VINÍLICA ==========
-    const agregarOperarioVinilica = (nombre) => {
+    const agregarOperarioVinilica = async (nombre) => {
         if (!nombre.trim()) {
             mostrarMensaje("❌ El nombre no puede estar vacío", "error");
             return;
@@ -261,90 +361,149 @@ export default function OperariosScreen() {
             mostrarMensaje(`❌ "${nombre}" ya existe`, "error");
             return;
         }
-        const nuevoId = Math.max(...operariosVinilica.map(op => op.id), 0) + 1;
-        setOperariosVinilica([...operariosVinilica, {
-            id: nuevoId,
-            nombre: nombre.trim(),
-            puesto: "Preparador",
-            activo: true
-        }]);
-        mostrarMensaje(`✅ "${nombre}" agregado correctamente`);
+
+        try {
+            const nuevo = await operarioService.crear({
+                nombre: nombre.trim(),
+                puesto: "Preparador",
+                area: "vinilica",
+                activo: true
+            });
+            setOperariosVinilica([...operariosVinilica, nuevo]);
+            mostrarMensaje(`✅ "${nombre}" agregado correctamente`);
+            await cargarDatos();
+        } catch (error) {
+            mostrarMensaje("❌ Error al agregar operario", "error");
+        }
     };
 
-    const editarOperarioVinilica = (id, nuevoNombre) => {
+    const editarOperarioVinilica = async (id, nuevoNombre) => {
         if (!nuevoNombre.trim()) return;
         if (operariosVinilica.some(op => op.nombre.toLowerCase() === nuevoNombre.toLowerCase() && op.id !== id)) {
             mostrarMensaje(`❌ "${nuevoNombre}" ya existe`, "error");
             return;
         }
-        setOperariosVinilica(prev => prev.map(op =>
-            op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
-        ));
-        mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
-    };
 
-    const eliminarOperarioVinilica = (id) => {
-        const operario = operariosVinilica.find(op => op.id === id);
-        if (window.confirm(`¿Eliminar a "${operario.nombre}" de Vinílicas?`)) {
-            const nuevosOperarios = operariosVinilica.filter(op => op.id !== id);
-            setOperariosVinilica(nuevosOperarios);
-
-            const nuevosGruposBase = { ...configGruposBase };
-            const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
-
-            gruposOrden.forEach((grupo, idx) => {
-                if (idx < nuevosOperarios.length) {
-                    nuevosGruposBase[grupo] = {
-                        ...nuevosGruposBase[grupo],
-                        operarioId: nuevosOperarios[idx].id
-                    };
-                } else if (nuevosGruposBase[grupo]?.operarioId === id) {
-                    nuevosGruposBase[grupo] = {
-                        ...nuevosGruposBase[grupo],
-                        operarioId: null
-                    };
-                }
-            });
-
-            setConfigGruposBase(nuevosGruposBase);
-            setSemanasRotadas(0);
-            mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
+        try {
+            const operario = operariosVinilica.find(op => op.id === id);
+            await operarioService.actualizar(id, { ...operario, nombre: nuevoNombre.trim() });
+            setOperariosVinilica(prev => prev.map(op =>
+                op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
+            ));
+            mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al actualizar", "error");
         }
     };
 
-    // ========== CRUD OTROS OPERARIOS (ESMALTES) ==========
-    const agregarOtroOperario = (nombre, puesto, area) => {
+    const eliminarOperarioVinilica = async (id) => {
+        const operario = operariosVinilica.find(op => op.id === id);
+        if (window.confirm(`¿Eliminar a "${operario.nombre}" de Vinílicas?`)) {
+            try {
+                await operarioService.eliminar(id);
+                const nuevosOperarios = operariosVinilica.filter(op => op.id !== id);
+                setOperariosVinilica(nuevosOperarios);
+
+                const nuevosGruposBase = { ...configGruposBase };
+                const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+
+                gruposOrden.forEach((grupo, idx) => {
+                    if (idx < nuevosOperarios.length) {
+                        nuevosGruposBase[grupo] = {
+                            ...nuevosGruposBase[grupo],
+                            operarioId: nuevosOperarios[idx].id
+                        };
+                    } else if (nuevosGruposBase[grupo]?.operarioId === id) {
+                        nuevosGruposBase[grupo] = {
+                            ...nuevosGruposBase[grupo],
+                            operarioId: null
+                        };
+                    }
+                });
+
+                setConfigGruposBase(nuevosGruposBase);
+                setSemanasRotadas(0);
+                mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
+            } catch (error) {
+                mostrarMensaje("❌ Error al eliminar", "error");
+            }
+        }
+    };
+
+    // ========== CRUD OPERARIOS ESMALTES ==========
+    const agregarOtroOperario = async (nombre, puesto, area) => {
         if (!nombre.trim()) {
             mostrarMensaje("❌ El nombre no puede estar vacío", "error");
             return;
         }
-        const nuevoId = Math.max(...otrosOperarios.map(op => op.id), 0) + 1;
-        setOtrosOperarios([...otrosOperarios, {
-            id: nuevoId,
-            nombre: nombre.trim(),
-            puesto: puesto.trim() || "Sin puesto",
-            area: area
-        }]);
-        mostrarMensaje(`✅ "${nombre}" agregado a ${area}`);
-    };
+        if (!puesto) {
+            mostrarMensaje("❌ Debes seleccionar un puesto", "error");
+            return;
+        }
 
-    const editarOtroOperario = (id, campo, valor) => {
-        setOtrosOperarios(prev => prev.map(op =>
-            op.id === id ? { ...op, [campo]: valor } : op
-        ));
-        mostrarMensaje(`✏️ Actualizado`);
-    };
-
-    const eliminarOtroOperario = (id) => {
-        const operario = otrosOperarios.find(op => op.id === id);
-        if (window.confirm(`¿Eliminar a "${operario.nombre}"?`)) {
-            setOtrosOperarios(prev => prev.filter(op => op.id !== id));
-            mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
+        try {
+            const nuevo = await operarioService.crear({
+                nombre: nombre.trim(),
+                puesto: puesto,
+                area: area,
+                activo: true
+            });
+            setOtrosOperarios([...otrosOperarios, nuevo]);
+            
+            const esmaltesFiltrados = [...otrosOperarios, nuevo].filter(op => op.area === "esmaltes");
+            window.dispatchEvent(new CustomEvent("operariosEsmaltesUpdated", {
+                detail: { operarios: esmaltesFiltrados }
+            }));
+            
+            mostrarMensaje(`✅ "${nombre}" agregado a ${area} como ${puesto}`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al agregar", "error");
         }
     };
 
-    // ========== CRUD OPERARIOS ESPECIALES (IMPERMEABILIZANTES) ==========
-    const agregarOperarioEspecial = (nombre) => {
+    const editarOtroOperario = async (id, campo, valor) => {
+        try {
+            const operario = otrosOperarios.find(op => op.id === id);
+            const actualizado = { ...operario, [campo]: valor };
+            await operarioService.actualizar(id, actualizado);
+            setOtrosOperarios(prev => prev.map(op =>
+                op.id === id ? { ...op, [campo]: valor } : op
+            ));
+            
+            const esmaltesFiltrados = otrosOperarios.map(op => 
+                op.id === id ? { ...op, [campo]: valor } : op
+            ).filter(op => op.area === "esmaltes");
+            window.dispatchEvent(new CustomEvent("operariosEsmaltesUpdated", {
+                detail: { operarios: esmaltesFiltrados }
+            }));
+            
+            mostrarMensaje(`✏️ ${campo} actualizado`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al actualizar", "error");
+        }
+    };
+
+    const eliminarOtroOperario = async (id) => {
+        const operario = otrosOperarios.find(op => op.id === id);
+        if (window.confirm(`¿Eliminar a "${operario.nombre}"?`)) {
+            try {
+                await operarioService.eliminar(id);
+                setOtrosOperarios(prev => prev.filter(op => op.id !== id));
+                
+                const esmaltesFiltrados = otrosOperarios.filter(op => op.id !== id && op.area === "esmaltes");
+                window.dispatchEvent(new CustomEvent("operariosEsmaltesUpdated", {
+                    detail: { operarios: esmaltesFiltrados }
+                }));
+                
+                mostrarMensaje(`🗑️ "${operario.nombre}" eliminado`);
+            } catch (error) {
+                mostrarMensaje("❌ Error al eliminar", "error");
+            }
+        }
+    };
+
+    // ========== CRUD OPERARIOS ESPECIALES ==========
+    const agregarOperarioEspecial = async (nombre) => {
         if (!nombre.trim()) {
             mostrarMensaje("❌ El nombre no puede estar vacío", "error");
             return;
@@ -353,46 +512,77 @@ export default function OperariosScreen() {
             mostrarMensaje(`❌ "${nombre}" ya existe en especiales`, "error");
             return;
         }
-        const nuevoId = Math.max(...operariosEspeciales.map(op => op.id), 0) + 1;
-        setOperariosEspeciales([...operariosEspeciales, {
-            id: nuevoId,
-            nombre: nombre.trim(),
-            puesto: "Impermeabilizantes",
-            activo: true
-        }]);
-        mostrarMensaje(`✅ "${nombre}" agregado a Operarios Especiales`);
+
+        try {
+            const nuevo = await operarioService.crear({
+                nombre: nombre.trim(),
+                puesto: "Impermeabilizantes",
+                area: "especial",
+                activo: true
+            });
+            setOperariosEspeciales([...operariosEspeciales, nuevo]);
+            
+            window.dispatchEvent(new CustomEvent("operariosEspecialesUpdated", {
+                detail: { operarios: [...operariosEspeciales, nuevo] }
+            }));
+            
+            mostrarMensaje(`✅ "${nombre}" agregado a Operarios Especiales`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al agregar", "error");
+        }
     };
 
-    const editarOperarioEspecial = (id, nuevoNombre) => {
+    const editarOperarioEspecial = async (id, nuevoNombre) => {
         if (!nuevoNombre.trim()) return;
         if (operariosEspeciales.some(op => op.nombre.toLowerCase() === nuevoNombre.toLowerCase() && op.id !== id)) {
             mostrarMensaje(`❌ "${nuevoNombre}" ya existe en especiales`, "error");
             return;
         }
-        setOperariosEspeciales(prev => prev.map(op =>
-            op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
-        ));
-        mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
-    };
 
-    const eliminarOperarioEspecial = (id) => {
-        const operario = operariosEspeciales.find(op => op.id === id);
-        if (window.confirm(`¿Eliminar a "${operario.nombre}" de Operarios Especiales?`)) {
-            setOperariosEspeciales(prev => prev.filter(op => op.id !== id));
-            mostrarMensaje(`🗑️ "${operario.nombre}" eliminado de Especiales`);
+        try {
+            const operario = operariosEspeciales.find(op => op.id === id);
+            await operarioService.actualizar(id, { ...operario, nombre: nuevoNombre.trim() });
+            setOperariosEspeciales(prev => prev.map(op =>
+                op.id === id ? { ...op, nombre: nuevoNombre.trim() } : op
+            ));
+            mostrarMensaje(`✏️ Nombre actualizado a "${nuevoNombre}"`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al actualizar", "error");
         }
     };
 
-    const toggleActivoEspecial = (id) => {
-        setOperariosEspeciales(prev => prev.map(op =>
-            op.id === id ? { ...op, activo: !op.activo } : op
-        ));
+    const eliminarOperarioEspecial = async (id) => {
         const operario = operariosEspeciales.find(op => op.id === id);
-        mostrarMensaje(`${operario?.activo ? '🔴' : '🟢'} "${operario?.nombre}" ${operario?.activo ? 'desactivado' : 'activado'}`);
+        if (window.confirm(`¿Eliminar a "${operario.nombre}" de Operarios Especiales?`)) {
+            try {
+                await operarioService.eliminar(id);
+                setOperariosEspeciales(prev => prev.filter(op => op.id !== id));
+                mostrarMensaje(`🗑️ "${operario.nombre}" eliminado de Especiales`);
+            } catch (error) {
+                mostrarMensaje("❌ Error al eliminar", "error");
+            }
+        }
+    };
+
+    const toggleActivoEspecial = async (id) => {
+        try {
+            const operario = await operarioService.toggleActivo(id);
+            setOperariosEspeciales(prev => prev.map(op =>
+                op.id === id ? operario : op
+            ));
+            
+            window.dispatchEvent(new CustomEvent("operariosEspecialesUpdated", {
+                detail: { operarios: operariosEspeciales.map(op => op.id === id ? operario : op) }
+            }));
+            
+            mostrarMensaje(`${operario.activo ? '🟢' : '🔴'} "${operario.nombre}" ${operario.activo ? 'activado' : 'desactivado'}`);
+        } catch (error) {
+            mostrarMensaje("❌ Error al cambiar estado", "error");
+        }
     };
 
     // ========== ASIGNACIÓN DE GRUPOS BASE ==========
-    const asignarOperarioAGrupoBase = (grupoId, operarioId) => {
+    const asignarOperarioAGrupoBase = async (grupoId, operarioId) => {
         const operarioIdNum = parseInt(operarioId) || null;
 
         const nuevosGruposBase = {
@@ -405,8 +595,39 @@ export default function OperariosScreen() {
         const operario = operariosVinilica.find(op => op.id === operarioIdNum);
         mostrarMensaje(`📌 ${operario?.nombre || "Nadie"} asignado al ${configGruposBase[grupoId].nombre}`);
 
-        reordenarTablaDesdeSelectores(nuevosGruposBase);
+        // Reordenar los operarios según los selectores
+        const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
+        const ordenDesdeSelectores = gruposOrden.map(grupo => nuevosGruposBase[grupo]?.operarioId).filter(id => id !== null);
+
+        const operariosMap = new Map();
+        operariosVinilica.forEach(op => operariosMap.set(op.id, op));
+
+        const nuevosOperariosOrdenados = [];
+        const idsUsados = new Set();
+
+        ordenDesdeSelectores.forEach(id => {
+            if (operariosMap.has(id) && !idsUsados.has(id)) {
+                nuevosOperariosOrdenados.push(operariosMap.get(id));
+                idsUsados.add(id);
+            }
+        });
+
+        operariosVinilica.forEach(op => {
+            if (!idsUsados.has(op.id)) {
+                nuevosOperariosOrdenados.push(op);
+            }
+        });
+
+        setOperariosVinilica(nuevosOperariosOrdenados);
         setSemanasRotadas(0);
+        
+        // Guardar en el backend
+        try {
+            const ids = nuevosOperariosOrdenados.map(op => op.id);
+            await operarioService.reordenarVinilica(ids);
+        } catch (error) {
+            console.error("Error guardando reorden:", error);
+        }
     };
 
     // ========== ROTACIÓN SEMANAL ==========
@@ -432,11 +653,15 @@ export default function OperariosScreen() {
 
     const operariosFiltrados = () => {
         if (tabActiva === "vinilica") return operariosVinilica;
-        if (tabActiva === "esmaltes") return otrosOperarios.filter(op => op.area === tabActiva);
+        if (tabActiva === "esmaltes") {
+            console.log('🔍 Filtrando esmaltes, otrosOperarios:', otrosOperarios);
+            const filtrados = otrosOperarios.filter(op => op.area === "esmaltes");
+            console.log('✅ Esmaltes filtrados:', filtrados);
+            return filtrados;
+        }
         return [];
     };
 
-    // Vista previa de rotación
     const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
     const previewRotacion = gruposOrden.map((grupo, idx) => {
         const asignacionBase = gruposOrden.map((g, i) => {
@@ -463,11 +688,10 @@ export default function OperariosScreen() {
         };
     });
 
-    // Obtener el operario especial activo para mostrar
     const operarioEspecialActivo = operariosEspeciales.find(op => op.activo)?.nombre || "Lazaro";
 
-    // Renderizar contenido según la subsección seleccionada
-    const renderContenidoVinilica = () => {
+    // ========== RENDERIZAR ==========
+    function renderContenidoVinilica() {
         if (subSeccionVinilica === "maquinas") {
             return (
                 <>
@@ -556,7 +780,6 @@ export default function OperariosScreen() {
                             </button>
                         </div>
 
-                        {/* VISTA PREVIA DE ROTACIÓN */}
                         <div className="preview-rotacion-section">
                             <div className="preview-rotacion-title">
                                 <span>🔄</span>
@@ -631,13 +854,10 @@ export default function OperariosScreen() {
                                                 </option>
                                             ))}
                                         </select>
-                                      
                                     </div>
                                 );
                             })}
                         </div>
-
-                       
                     </div>
                 </>
             );
@@ -738,12 +958,21 @@ export default function OperariosScreen() {
                 </div>
             );
         }
-    };
+    }
+
+    if (cargando) {
+        return (
+            <div className="op-screen-container">
+                <div className="op-glass-panel" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                    <h2>Cargando operarios...</h2>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="op-screen-container">
             <div className="op-glass-panel">
-
                 {mensaje.texto && (
                     <div className={`op-toast ${mensaje.tipo}`}>
                         {mensaje.texto}
@@ -762,7 +991,7 @@ export default function OperariosScreen() {
                             className={`op-nav-btn ${tabActiva === "vinilica" ? "active" : ""}`}
                             onClick={() => {
                                 setTabActiva("vinilica");
-                                setSubSeccionVinilica("maquinas"); // Resetear a máquinas al cambiar
+                                setSubSeccionVinilica("maquinas");
                             }}
                         >
                             <span className="nav-icon">💧</span> Vinílicas
@@ -775,7 +1004,6 @@ export default function OperariosScreen() {
                         </button>
                     </nav>
 
-                    {/* 🔴 SUBMENÚ DE VINÍLICAS - Solo aparece cuando Vinílicas está activa */}
                     {tabActiva === "vinilica" && (
                         <>
                             <div className="nav-divider"></div>
@@ -819,7 +1047,7 @@ export default function OperariosScreen() {
                                     ? (subSeccionVinilica === "maquinas"
                                         ? "Gestión de operarios para máquinas VI-101 a VI-108 y rotación semanal"
                                         : "Gestión de operarios para cargas especiales (impermeabilizantes, códigos excluidos)")
-                                    : "Gestión de personal para área de esmaltes"}
+                                    : "Gestión de personal para área de esmaltes con asignación por puesto"}
                             </p>
                         </div>
                     </header>
@@ -834,12 +1062,20 @@ export default function OperariosScreen() {
                                     <span className="count-badge">{operariosFiltrados().length} Operarios</span>
                                 </div>
 
+                                <p className="card-desc" style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>
+                                    <strong>📌 Estos operarios se usan para la asignación automática de cargas de esmaltes.</strong><br />
+                                    • <strong>🧪 Preparador:</strong> Se asigna a cargas con proceso de Preparado/Dispersión<br />
+                                    • <strong>⚙️ Molienda:</strong> Se asigna a cargas con proceso de Molienda<br />
+                                    • <strong>✅ Terminado/Igualado:</strong> Se asigna a cargas con etapa final (Igualación/Terminado/Ajuste)
+                                </p>
+
                                 <div className="op-table-wrapper">
                                     <table className="op-table">
                                         <thead>
                                             <tr>
                                                 <th>Nombre (Editable)</th>
                                                 <th>Puesto</th>
+                                                <th>Área</th>
                                                 <th className="txt-center">Acciones</th>
                                             </tr>
                                         </thead>
@@ -855,12 +1091,29 @@ export default function OperariosScreen() {
                                                         />
                                                     </td>
                                                     <td>
-                                                        <input
-                                                            className="op-input-edit"
+                                                        <select
+                                                            className="op-select-custom"
                                                             value={op.puesto}
                                                             onChange={(e) => editarOtroOperario(op.id, "puesto", e.target.value)}
-                                                            placeholder="Puesto..."
-                                                        />
+                                                            style={{ 
+                                                                background: '#1a1a2e', 
+                                                                color: '#e0e0e0', 
+                                                                border: '1px solid rgba(192, 0, 255, 0.2)',
+                                                                padding: '6px 10px',
+                                                                borderRadius: '6px',
+                                                                fontSize: '13px',
+                                                                width: '100%'
+                                                            }}
+                                                        >
+                                                            {puestosEsmaltes.map((p) => (
+                                                                <option key={p.valor} value={p.valor}>
+                                                                    {p.label}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <span className="op-puesto-tag esmalte">Esmaltes</span>
                                                     </td>
                                                     <td className="txt-center">
                                                         <button
@@ -882,24 +1135,59 @@ export default function OperariosScreen() {
                                         type="text"
                                         id="nuevoNombreEsmalte"
                                         placeholder="Nuevo operario..."
+                                        style={{ flex: 1 }}
                                     />
-                                    <input
-                                        type="text"
-                                        id="nuevoPuesto"
-                                        placeholder="Puesto..."
-                                        style={{ width: '150px' }}
-                                    />
+                                    <select
+                                        id="nuevoPuestoEsmalte"
+                                        className="op-select-custom"
+                                        style={{ 
+                                            background: '#1a1a2e', 
+                                            color: '#e0e0e0', 
+                                            border: '1px solid rgba(192, 0, 255, 0.2)',
+                                            padding: '6px 10px',
+                                            borderRadius: '6px',
+                                            fontSize: '13px',
+                                            width: '200px'
+                                        }}
+                                    >
+                                        <option value="">Seleccionar puesto...</option>
+                                        {puestosEsmaltes.map((p) => (
+                                            <option key={p.valor} value={p.valor}>
+                                                {p.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                     <button onClick={() => {
                                         const nombre = document.getElementById('nuevoNombreEsmalte');
-                                        const puesto = document.getElementById('nuevoPuesto');
-                                        if (nombre.value) {
-                                            agregarOtroOperario(nombre.value, puesto?.value || "Nuevo Puesto", "esmaltes");
+                                        const puesto = document.getElementById('nuevoPuestoEsmalte');
+                                        if (nombre.value && puesto.value) {
+                                            agregarOtroOperario(nombre.value, puesto.value, "esmaltes");
                                             nombre.value = '';
-                                            if (puesto) puesto.value = '';
+                                            puesto.value = '';
+                                        } else if (!nombre.value) {
+                                            mostrarMensaje("❌ Ingresa un nombre", "error");
+                                        } else if (!puesto.value) {
+                                            mostrarMensaje("❌ Selecciona un puesto", "error");
                                         }
                                     }}>
                                         + Agregar
                                     </button>
+                                </div>
+
+                                <div className="info-box" style={{ marginTop: '16px' }}>
+                                    <strong>✨ Los cambios se aplican automáticamente:</strong> 
+                                    Al editar estos nombres y puestos, las cargas de esmaltes se asignarán con los nuevos nombres según el puesto.
+                                    <br /><br />
+                                    <strong>📋 Clasificación por puesto (SOLO 3):</strong>
+                                    <br />
+                                    • <strong>🧪 Preparador:</strong> Cargas con proceso de Preparado/Dispersión
+                                    <br />
+                                    • <strong>⚙️ Molienda:</strong> Cargas con proceso de Molienda
+                                    <br />
+                                    • <strong>✅ Terminado/Igualado:</strong> Cargas con etapa final (Igualación/Terminado/Ajuste)
+                                    <br /><br />
+                                    <strong>💡 Nota:</strong> Para que aparezcan combinaciones de <strong>Preparador + Terminado</strong>, 
+                                    necesitas tener al menos un operario con puesto <strong>"Preparador"</strong> y otro con puesto <strong>"Terminado"</strong>.
                                 </div>
                             </div>
                         )}

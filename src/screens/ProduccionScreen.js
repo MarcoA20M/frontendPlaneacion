@@ -19,6 +19,7 @@ import ModalInventarioBajo from "../components/ModalInventarioBajo";
 import ModalPlanificador from "../components/ModalPlanificador";
 import InfoInventarioProducto from "../components/InfoInventarioProducto";
 import ModalResumenConsumo from "../components/ModalResumenConsumo";
+import Nivebar from "../components/Nivebar";
 
 // Importar la imagen
 import logoPintu from "../assets/PINTU.jpg";
@@ -40,7 +41,9 @@ export default function ProduccionScreen() {
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas, ordenarCargas,
         guardarProduccionEnBD,
         cargarDatosPorFecha,
-        calcularConsumoGlobal
+        calcularConsumoGlobal,
+        operariosEsmaltes,
+        cargandoOperarios
     } = useProduccion();
 
     // --- ESTADOS DE UI Y CONTROL ---
@@ -93,6 +96,15 @@ export default function ProduccionScreen() {
     const [resumenGlobal, setResumenGlobal] = useState([]);
     const [cargandoResumen, setCargandoResumen] = useState(false);
 
+    // 🔴🔴🔴 NUEVO: ESTADO PARA OPERARIOS DE VINÍLICAS 🔴🔴🔴
+    const [operariosPorMaquina, setOperariosPorMaquina] = useState({});
+
+    // 🔴🔴🔴 FUNCIÓN PARA ACTUALIZAR OPERARIOS DE VINÍLICAS 🔴🔴🔴
+    const handleOperariosActualizados = (nuevosOperarios) => {
+        console.log('📊 ProduccionScreen: Operarios Vinílicos actualizados:', nuevosOperarios);
+        setOperariosPorMaquina(nuevosOperarios || {});
+    };
+
     // Función para volver al menú principal
     const volverAlMenuPrincipal = () => {
         navigate("/");
@@ -113,6 +125,23 @@ export default function ProduccionScreen() {
 
     const irAHoyCarga = () => {
         setFechaCargaBD(new Date());
+    };
+
+    // --- FUNCIONES DE NAVEGACIÓN DEL PLANIFICADOR SEMANAL ---
+    const semanaAnterior = () => {
+        const nuevaFecha = new Date(fechaRotacion);
+        nuevaFecha.setDate(nuevaFecha.getDate() - 7);
+        setFechaRotacion(nuevaFecha);
+    };
+
+    const semanaSiguiente = () => {
+        const nuevaFecha = new Date(fechaRotacion);
+        nuevaFecha.setDate(nuevaFecha.getDate() + 7);
+        setFechaRotacion(nuevaFecha);
+    };
+
+    const irAHoyRotacion = () => {
+        setFechaRotacion(new Date());
     };
 
     // --- FUNCIÓN DE BÚSQUEDA Y ABRIR MODAL DIRECTAMENTE ---
@@ -386,22 +415,6 @@ export default function ProduccionScreen() {
         });
     }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
 
-    const semanaAnterior = () => {
-        const nuevaFecha = new Date(fechaRotacion);
-        nuevaFecha.setDate(nuevaFecha.getDate() - 7);
-        setFechaRotacion(nuevaFecha);
-    };
-
-    const semanaSiguiente = () => {
-        const nuevaFecha = new Date(fechaRotacion);
-        nuevaFecha.setDate(nuevaFecha.getDate() + 7);
-        setFechaRotacion(nuevaFecha);
-    };
-
-    const irAHoyRotacion = () => {
-        setFechaRotacion(new Date());
-    };
-
     // Calcular total de cargas y litros para mostrar en el modal
     const totalCargas = useMemo(() => {
         return [...rondas.flat().filter(Boolean), ...cargasEsmaltesAsignadas, ...cargasEspeciales].length;
@@ -507,104 +520,25 @@ export default function ProduccionScreen() {
             />
 
             <div className="container">
-                <div className="header-panel">
-                    <div className="perfil-container" ref={perfilRef}>
-                        <div
-                            className={`perfil-icono ${menuPerfilAbierto ? 'active' : ''}`}
-                            onClick={() => setMenuPerfilAbierto(!menuPerfilAbierto)}
-                        >
-                            <span className="avatar-letra">A</span>
-                            <div className="indicador-online"></div>
-                        </div>
-
-                        {menuPerfilAbierto && (
-                            <div className="perfil-dropdown">
-                                <div className="perfil-header-info">
-                                    <p className="usuario-nombre">Administrador</p>
-                                    <p className="usuario-rol">Sistema de Producción</p>
-                                </div>
-                                <div className="divider-perfil"></div>
-                                <button className="perfil-item" onClick={() => navigate("/mantenimiento")}>🛠️ Mantenimiento</button>
-                                <div className="divider-perfil"></div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="titulo-app">
-                        <div className="logo-clickeable" onClick={volverAlMenuPrincipal} style={{ cursor: 'pointer' }}>
-                            <img
-                                src={logoPintu}
-                                alt="Logo Pinturas"
-                                className="logo-titulo"
-                                style={{ height: '50px', width: 'auto', marginRight: '15px' }}
-                            />
-                        </div>
-                        {datosPlanificador && (
-                            <button className="badge-planificador-btn" onClick={() => setMostrarModalPlanificador(true)}>
-                                📅
-                            </button>
-                        )}
-                        {tipoPintura === "Vinílica" && (
-                            <div className="planificador-semanal">
-                                <button onClick={semanaAnterior}>◀</button>
-                                <div className="fecha-actual-view">
-                                    <strong>Semana: </strong> {fechaRotacion.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                                </div>
-                                <button onClick={semanaSiguiente}>▶</button>
-                                <button className="btn-hoy-reset" onClick={irAHoyRotacion}>Hoy</button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* SELECTOR DE TIPO Y BUSCADOR SIMPLE */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="selector-tipo">
-                            {["Vinílica", "Esmalte"].map(t => (
-                                <button key={t} className={tipoPintura === t ? "active" : ""}
-                                    onClick={() => {
-                                        setTipoPintura(t);
-                                        setFiltroOperario(null);
-                                        setModoEsmalte(null);
-                                        setBuscarCarga("");
-                                        setMostrarModalSinResultados(false);
-                                    }}>
-                                    {t}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* BUSCADOR SIMPLE - SOLO INPUT CON ENTER */}
-                        <div className="buscador-cargas-wrapper">
-                            <div className="buscador-cargas-container-compact">
-                                <div className="buscador-cargas-input-compact">
-                                    <span className="icono-lupa-compact">🔍</span>
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar por código o folio (Enter)..."
-                                        value={buscarCarga}
-                                        onChange={(e) => {
-                                            setBuscarCarga(e.target.value);
-                                        }}
-                                        onKeyDown={handleKeyDown}
-                                        title="Busca por código o folio (presiona Enter)"
-                                        autoFocus
-                                    />
-                                    {buscarCarga && (
-                                        <button
-                                            className="btn-limpiar-compact"
-                                            onClick={() => {
-                                                setBuscarCarga("");
-                                                setMostrarModalSinResultados(false);
-                                            }}
-                                        >
-                                            ✕
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {/* NIVEBAR */}
+                <Nivebar
+                    tipoPintura={tipoPintura}
+                    setTipoPintura={setTipoPintura}
+                    datosPlanificador={datosPlanificador}
+                    setMostrarModalPlanificador={setMostrarModalPlanificador}
+                    fechaCargaBD={fechaCargaBD}
+                    setFechaCargaBD={setFechaCargaBD}
+                    buscarCarga={buscarCarga}
+                    setBuscarCarga={setBuscarCarga}
+                    handleBuscarYAbirModal={handleBuscarYAbirModal}
+                    setMostrarModalSinResultados={setMostrarModalSinResultados}
+                    logoPintu={logoPintu}
+                    volverAlMenuPrincipal={volverAlMenuPrincipal}
+                    menuPerfilAbierto={menuPerfilAbierto}
+                    setMenuPerfilAbierto={setMenuPerfilAbierto}
+                    perfilRef={perfilRef}
+                    fechaRotacion={fechaRotacion}
+                />
 
                 <BusquedaSeccion
                     codigo={codigo} setCodigo={setCodigo} consultar={consultar} producto={producto}
@@ -703,6 +637,8 @@ export default function ProduccionScreen() {
                                     getOperarioPorMaquina={getOperarioPorMaquina}
                                     onFiltrar={setFiltroOperario}
                                     filtroActivo={filtroOperario}
+                                    operariosPorMaquina={operariosPorMaquina}
+                                    operariosEsmaltes={operariosEsmaltes}
                                 />
                                 <button
                                     className="card-op resumen-consumo-btn"
@@ -778,6 +714,7 @@ export default function ProduccionScreen() {
                                 </button>
                             </div>
 
+                            {/* BOTÓN DE FAMILIAS */}
                             <button
                                 className="btn-family-explorer"
                                 onClick={() => navigate("/familias", {
@@ -801,6 +738,7 @@ export default function ProduccionScreen() {
                             setCargaSeleccionada={setCargaSeleccionada}
                             setMostrarDetalle={setMostrarDetalle}
                             filtroOperario={filtroOperario}
+                            onOperariosActualizados={handleOperariosActualizados}
                         />
                     ) : (
                         <TableroEsmaltes

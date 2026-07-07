@@ -124,7 +124,7 @@ export default function ProduccionScreen() {
                 }
             }
         };
-        
+
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
@@ -156,15 +156,15 @@ export default function ProduccionScreen() {
                 const cargasStorage = JSON.parse(datos);
                 // Filtrar solo las del tipo actual
                 const cargasDelTipo = cargasStorage.filter(c => c.tipo === tipoPintura);
-                
+
                 // Verificar si hay diferencias
                 const cargasActuales = colaCargas.filter(c => c.tipo === tipoPintura);
-                
+
                 // Si hay cargas en storage que no están en colaCargas, agregarlas
-                const nuevasCargas = cargasDelTipo.filter(c => 
+                const nuevasCargas = cargasDelTipo.filter(c =>
                     !cargasActuales.some(ex => ex.idTemp === c.idTemp)
                 );
-                
+
                 if (nuevasCargas.length > 0) {
                     console.log('Sincronizando colaCargas con localStorage - agregando:', nuevasCargas.length);
                     setColaCargas(prev => {
@@ -189,13 +189,13 @@ export default function ProduccionScreen() {
             // Obtener cargas actuales del storage
             const storageData = localStorage.getItem(STORAGE_KEY);
             let todasLasCargas = storageData ? JSON.parse(storageData) : [];
-            
+
             // Eliminar las cargas del tipo actual del storage
             todasLasCargas = todasLasCargas.filter(c => c.tipo !== tipoPintura);
-            
+
             // Agregar las cargas actuales
             todasLasCargas = [...todasLasCargas, ...cargasActuales];
-            
+
             // Guardar en storage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(todasLasCargas));
             setCargasEnLocalStorage(todasLasCargas);
@@ -301,7 +301,7 @@ export default function ProduccionScreen() {
         try {
             // Buscar por folio
             let folioData = await verificarCargaPorFolio(termino.toUpperCase(), null);
-            
+
             if (folioData) {
                 const cargaBD = {
                     codigo: folioData.codigoProducto || termino.toUpperCase(),
@@ -316,7 +316,7 @@ export default function ProduccionScreen() {
                     detallesEnvasado: folioData.detallesEnvasado || [],
                     idTemp: `bd-folio-${Date.now()}-${Math.random()}`
                 };
-                
+
                 setCargaSeleccionada(cargaBD);
                 setMostrarDetalle(true);
                 setBuscarCarga("");
@@ -337,10 +337,10 @@ export default function ProduccionScreen() {
                     .then(res => res.json())
                     .catch(() => []);
             });
-            
+
             const resultados = await Promise.all(promesas);
             const todas = resultados.flat();
-            
+
             const coincidencias = todas.filter(reg => {
                 const regProducto = reg.producto || reg.producto_id;
                 return String(regProducto) === codigoBusqueda;
@@ -348,7 +348,7 @@ export default function ProduccionScreen() {
 
             if (coincidencias.length > 0) {
                 const foliosUnicos = [...new Set(coincidencias.map(c => c.folioHija || c.folio_hija || c.folio).filter(Boolean))];
-                
+
                 const cargaBD = {
                     codigo: codigoBusqueda,
                     folio: foliosUnicos.join(', ') || 'Múltiples folios',
@@ -365,7 +365,7 @@ export default function ProduccionScreen() {
                     })),
                     idTemp: `bd-${Date.now()}-${Math.random()}`
                 };
-                
+
                 setCargaSeleccionada(cargaBD);
                 setMostrarDetalle(true);
                 setBuscarCarga("");
@@ -576,7 +576,7 @@ export default function ProduccionScreen() {
     // --- MODAL DE SIN RESULTADOS ---
     const ModalSinResultados = () => {
         if (!mostrarModalSinResultados) return null;
-        
+
         return (
             <div className="modal-overlay" onClick={() => setMostrarModalSinResultados(false)}>
                 <div className="modal-cargas sin-resultados-modal" onClick={(e) => e.stopPropagation()}>
@@ -589,9 +589,9 @@ export default function ProduccionScreen() {
                         <p style={{ color: '#e0e0e0', fontSize: '16px', marginBottom: '8px' }}>
                             No se encontraron cargas para
                         </p>
-                        <p style={{ 
-                            color: '#a855f7', 
-                            fontSize: '20px', 
+                        <p style={{
+                            color: '#a855f7',
+                            fontSize: '20px',
                             fontWeight: 'bold',
                             background: 'rgba(168, 85, 247, 0.1)',
                             padding: '8px 20px',
@@ -606,8 +606,8 @@ export default function ProduccionScreen() {
                         </p>
                     </div>
                     <footer className="modal-footer">
-                        <button 
-                            className="btn-guardar" 
+                        <button
+                            className="btn-guardar"
                             onClick={() => setMostrarModalSinResultados(false)}
                             style={{ background: 'linear-gradient(90deg, #7c3aed, #a855f7)' }}
                         >
@@ -888,36 +888,20 @@ export default function ProduccionScreen() {
                 onClose={() => setMostrarModal(false)}
                 onEliminarCarga={(id) => {
                     setColaCargas(prev => prev.filter(c => c.idTemp !== id));
-                    // Actualizar el contador
-                    try {
-                        const datos = localStorage.getItem(STORAGE_KEY);
-                        if (datos) {
-                            setCargasEnLocalStorage(JSON.parse(datos));
-                        }
-                    } catch {}
+                    // También limpiar localStorage si usas
+                    localStorage.removeItem('cargas_almacenadas');
                 }}
                 onVaciarTodo={() => {
                     setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura));
-                    // Actualizar el contador
-                    try {
-                        const datos = localStorage.getItem(STORAGE_KEY);
-                        if (datos) {
-                            setCargasEnLocalStorage(JSON.parse(datos));
-                        }
-                    } catch {}
+                    localStorage.removeItem('cargas_almacenadas');
                 }}
-                onGuardar={(c) => { 
-                    guardarCargasEnRondas(c); 
+                onGuardar={(c) => {
+                    guardarCargasEnRondas(c);
+                    // LIMPIAR LA COLA DE CARGAS DESPUÉS DE GUARDAR
+                    setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura));
+                    // Limpiar localStorage
+                    localStorage.removeItem('cargas_almacenadas');
                     setMostrarModal(false);
-                    // Actualizar el contador
-                    try {
-                        const datos = localStorage.getItem(STORAGE_KEY);
-                        if (datos) {
-                            setCargasEnLocalStorage(JSON.parse(datos));
-                        } else {
-                            setCargasEnLocalStorage([]);
-                        }
-                    } catch {}
                 }}
                 onGenerarLotes={generarLotesFinales}
                 onSeleccionarCarga={(carga) => {

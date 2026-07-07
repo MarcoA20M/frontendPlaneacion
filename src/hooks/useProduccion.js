@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { buscarProducto } from "../services/productoService";
 import { analizarExcel } from "../services/excelService";
-import { getOperarioPorMaquina, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../constants/config";
+import { getOperarioPorMaquina, getOperarioPorMaquinaSync, CODIGOS_EXCLUIDOS, litrosPorEnvasado } from "../constants/config";
 import { registrarCarga, eliminarCarga, obtenerCargasPorFecha } from "../services/cargaService";
 import { formulasService } from "../services/formulasService";
 import { materiaPrimaService } from "../services/materiaPrimaService";
@@ -661,6 +661,7 @@ export function useProduccion() {
         try {
             setGuardandoBD(true);
 
+            // 🔴 CONSUMIR BASES
             try {
                 const resultadoConsumo = await consumirBasesDeCargas(todas);
                 
@@ -745,6 +746,7 @@ export function useProduccion() {
                 }
             }
 
+            // 🔴 GUARDAR EN BD (cargas)
             const registrosParaBD = [];
             todas.forEach(carga => {
                 if (carga.detallesEnvasado) {
@@ -761,15 +763,15 @@ export function useProduccion() {
                             }
 
                             registrosParaBD.push({
-                                codigoProducto: String(carga.codigoProducto),
+                                codigoProducto: String(carga.codigoProducto || carga.codigo || ''),
                                 envasadoId: Number(detalle.id),
                                 cantidad: Number(detalle.cantidad),
-                                litros: Number(carga.litros),
+                                litros: Number(carga.litros || 0),
                                 tipo: carga.tipo === "Vinílica" ? "V" : "E",
-                                folio: carga.folio,
-                                folioHija: detalle.folioIndividual,
-                                operario: carga.operario || "Sin asignar",
-                                maquina: maquinaGuardar
+                                folio: String(carga.folio || ''),
+                                folioHija: String(detalle.folioIndividual || ''),
+                                operario: String(carga.operario || "Sin asignar"),
+                                maquina: String(maquinaGuardar || '')
                             });
                         }
                     });
@@ -777,9 +779,18 @@ export function useProduccion() {
             });
 
             console.log("📦 Registros a guardar:", registrosParaBD.length);
+            console.log("📦 Primer registro:", JSON.stringify(registrosParaBD[0], null, 2));
 
+            if (registrosParaBD.length === 0) {
+                alert("⚠️ No hay registros válidos para guardar.");
+                setGuardandoBD(false);
+                return;
+            }
+
+            // 🔴 USAR registrarCarga QUE YA FUNCIONABA
             await registrarCarga(registrosParaBD);
 
+            // 🔴 ACTUALIZAR PANTALLAS
             if (window.recargarBases) {
                 window.recargarBases();
             }
@@ -787,11 +798,10 @@ export function useProduccion() {
                 window.recargarCriticos();
             }
 
-            // Limpiar localStorage después de guardar
-            localStorage.removeItem(STORAGE_KEY_RONDAS);
-            localStorage.removeItem(STORAGE_KEY_ESMALTES);
-            localStorage.removeItem(STORAGE_KEY_ESPECIALES);
-            localStorage.removeItem(STORAGE_KEY_COLA);
+            // Limpiar localStorage y estados
+            localStorage.removeItem('cargas_almacenadas');
+            localStorage.removeItem('cola_cargas');
+            
             setColaCargas([]);
             setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
             setCargasEsmaltesAsignadas([]);
@@ -1128,7 +1138,7 @@ export function useProduccion() {
                 console.error('Error guardando esmaltes en localStorage:', error);
             }
         } else {
-            // VINÍLICA - Guardar en rondas
+            // 🔴 VINÍLICA - USAR getOperarioPorMaquinaSync (SINCRÓNICO)
             const nuevasRondas = rondas.map(f => [...f]);
             const nuevasEspeciales = [...cargasEspeciales];
             
@@ -1142,8 +1152,15 @@ export function useProduccion() {
                             const esGran = [104, 108].includes(numM);
                             let cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
                             if (cumpleRegla) {
-                                carga.operario = getOperarioPorMaquina(numM);
-                                nuevasRondas[fila][col] = { ...carga, maquina: numM };
+                                // 🔴 USAR VERSIÓN SINCRÓNICA (NO async)
+                                const operario = getOperarioPorMaquinaSync(numM);
+                                
+                                nuevasRondas[fila][col] = { 
+                                    ...carga, 
+                                    maquina: numM,
+                                    operario: operario,
+                                    textoMaquina: `VI-${numM} ${operario}`
+                                };
                                 asignada = true;
                                 idsAsignados.push(carga.idTemp);
                                 break;
@@ -1152,7 +1169,13 @@ export function useProduccion() {
                     }
                 }
                 if (!asignada) { 
-                    nuevasEspeciales.push(carga); 
+                    // Si no se asignó, asegurar que tenga operario
+                    const operario = carga.operario || 'Sin asignar';
+                    nuevasEspeciales.push({
+                        ...carga,
+                        operario: String(operario),
+                        textoMaquina: `ESPECIAL ${operario}`
+                    }); 
                     idsAsignados.push(carga.idTemp); 
                 }
             });

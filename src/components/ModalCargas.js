@@ -2,9 +2,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import "../styles/modalCargas.css";
 import { reporteModalService } from "../services/reporteModalService";
 
-// Clave para localStorage
-const STORAGE_KEY = 'cargas_almacenadas';
-
 function ModalCargas({
   visible,
   cargas,
@@ -18,51 +15,9 @@ function ModalCargas({
 }) {
   const [filtroMarca, setFiltroMarca] = useState("TODOS");
   const [familias, setFamilias] = useState([]);
-  const [cargasLocales, setCargasLocales] = useState(() => {
-    // Inicializar desde localStorage inmediatamente
-    try {
-      const datosGuardados = localStorage.getItem(STORAGE_KEY);
-      if (datosGuardados) {
-        const parsed = JSON.parse(datosGuardados);
-        console.log('Cargando datos de localStorage en ModalCargas:', parsed.length);
-        return parsed;
-      }
-    } catch (error) {
-      console.error('Error al cargar datos del localStorage:', error);
-    }
-    return [];
-  });
   const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
   const [accionPendiente, setAccionPendiente] = useState(null);
   const [cargaAEliminar, setCargaAEliminar] = useState(null);
-
-  // Guardar en localStorage cuando cambien las cargas locales
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cargasLocales));
-      console.log('Datos guardados en localStorage desde ModalCargas:', cargasLocales.length);
-    } catch (error) {
-      console.error('Error al guardar en localStorage:', error);
-    }
-  }, [cargasLocales]);
-
-  // Sincronizar cargas externas (cuando se agregan desde fuera)
-  useEffect(() => {
-    if (cargas && cargas.length > 0) {
-      console.log('Recibiendo nuevas cargas en ModalCargas:', cargas.length);
-      setCargasLocales(prev => {
-        // Evitar duplicados por idTemp
-        const nuevasCargas = cargas.filter(c => 
-          !prev.some(p => p.idTemp === c.idTemp)
-        );
-        if (nuevasCargas.length > 0) {
-          console.log('Añadiendo nuevas cargas al localStorage:', nuevasCargas.length);
-          return [...prev, ...nuevasCargas];
-        }
-        return prev;
-      });
-    }
-  }, [cargas]);
 
   // Cargar familias desde el backend
   useEffect(() => {
@@ -162,9 +117,9 @@ function ModalCargas({
 
   // 1. Clasificación por marcas usando la tabla familias
   const { cargasClasificadas, marcasDisponibles } = useMemo(() => {
-    if (!cargasLocales || cargasLocales.length === 0) return { cargasClasificadas: [], marcasDisponibles: [] };
+    if (!cargas) return { cargasClasificadas: [], marcasDisponibles: [] };
 
-    const procesadas = cargasLocales.map(c => {
+    const procesadas = cargas.map(c => {
       const marca = encontrarFamilia(c.codigoProducto, c.descripcion);
       return { ...c, marcaComercial: marca };
     });
@@ -180,7 +135,7 @@ function ModalCargas({
     });
 
     return { cargasClasificadas: procesadas, marcasDisponibles: Object.values(marcasMap) };
-  }, [cargasLocales, familias]);
+  }, [cargas, familias]);
 
   const cargasVisibles = useMemo(() => {
     return filtroMarca === "TODOS"
@@ -195,7 +150,7 @@ function ModalCargas({
 
   // Función para eliminar con advertencia
   const handleEliminarConAdvertencia = (idTemp) => {
-    const carga = cargasLocales.find(c => c.idTemp === idTemp);
+    const carga = cargas.find(c => c.idTemp === idTemp);
     setCargaAEliminar(carga);
     setMostrarAdvertencia(true);
     setAccionPendiente({ tipo: 'eliminar', id: idTemp });
@@ -203,7 +158,8 @@ function ModalCargas({
 
   // Función para vaciar todo con advertencia
   const handleVaciarTodoConAdvertencia = () => {
-    if (cargasLocales.length === 0) return;
+    if (cargas.length === 0) return;
+    setCargaAEliminar(null);
     setMostrarAdvertencia(true);
     setAccionPendiente({ tipo: 'vaciar' });
   };
@@ -212,21 +168,10 @@ function ModalCargas({
   const confirmarAccion = () => {
     if (accionPendiente?.tipo === 'eliminar') {
       // Eliminar carga específica
-      const nuevaLista = cargasLocales.filter(c => c.idTemp !== accionPendiente.id);
-      setCargasLocales(nuevaLista);
-      // Llamar al callback original si existe
-      if (onEliminarCarga) {
-        onEliminarCarga(accionPendiente.id);
-      }
+      onEliminarCarga(accionPendiente.id);
     } else if (accionPendiente?.tipo === 'vaciar') {
       // Vaciar todo
-      setCargasLocales([]);
-      // Eliminar del localStorage
-      localStorage.removeItem(STORAGE_KEY);
-      // Llamar al callback original si existe
-      if (onVaciarTodo) {
-        onVaciarTodo();
-      }
+      onVaciarTodo();
     }
     cerrarAdvertencia();
   };
@@ -258,20 +203,11 @@ function ModalCargas({
 
             <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button
+                className="btn-asignar-lotes"
                 onClick={onGenerarLotes}
                 disabled={!hayPendientes || cargasClasificadas.length === 0}
-                style={{
-                  backgroundColor: hayPendientes ? '#f39c12' : '#7f8c8d',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 12px',
-                  borderRadius: '5px',
-                  cursor: hayPendientes ? 'pointer' : 'default',
-                  fontWeight: 'bold',
-                  fontSize: '0.8rem'
-                }}
               >
-                🔢 Asignar Lotes
+                <span className="icono">🔢</span> Asignar Lotes
               </button>
 
               <button
@@ -293,13 +229,7 @@ function ModalCargas({
                 className="btn-guardar-top"
                 disabled={cargasClasificadas.length === 0 || hayPendientes}
                 title={hayPendientes ? "Asigna los lotes antes de guardar" : "Guardar en programación"}
-                onClick={() => { 
-                  onGuardar(cargasClasificadas); 
-                  // Limpiar localStorage después de guardar
-                  localStorage.removeItem(STORAGE_KEY);
-                  setCargasLocales([]);
-                  onClose(); 
-                }}
+                onClick={() => { onGuardar(cargasClasificadas); onClose(); }}
                 style={{
                   opacity: (cargasClasificadas.length === 0 || hayPendientes) ? 0.5 : 1,
                   cursor: (cargasClasificadas.length === 0 || hayPendientes) ? 'not-allowed' : 'pointer'
@@ -354,9 +284,6 @@ function ModalCargas({
           <div className="tabla-seccion">
             <h3 className="titulo-tabla">
               {filtroMarca === "TODOS" ? "Listado General (Ordenado por Cubriente)" : `Filtrado por: ${filtroMarca}`}
-              <span style={{ fontSize: '12px', fontWeight: 'normal', marginLeft: '10px', color: '#888' }}>
-                (Almacenadas en localStorage)
-              </span>
             </h3>
 
             <div className="fila-carga header">
@@ -405,76 +332,88 @@ function ModalCargas({
                   ))}
                 </div>
               ) : (
-                <div className="sin-cargas">No hay cargas en espera.</div>
+                <div className="sin-cargas">No hay datos para esta familia.</div>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal de Advertencia */}
+      {/* Modal de Advertencia - Estilo Críticos */}
       {mostrarAdvertencia && (
-        <div className="modal-overlay" style={{ zIndex: 1000 }}>
-          <div className="modal-advertencia" style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '10px',
-            maxWidth: '500px',
-            width: '90%',
-            margin: 'auto',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            position: 'relative',
-            top: '50%',
-            transform: 'translateY(-50%)'
-          }}>
-            <h3 style={{ color: '#e74c3c', marginBottom: '15px' }}>
-              ⚠️ Confirmar Eliminación
-            </h3>
+        <div className="modal-advertencia-overlay" onClick={cerrarAdvertencia}>
+          <div className="modal-advertencia" onClick={(e) => e.stopPropagation()}>
+            {/* Ícono de advertencia con pulso */}
+            <div className="icono-advertencia icono-pulso">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="#e879f9" strokeWidth="2" strokeOpacity="0.8"/>
+                <path d="M12 8V12" stroke="#e879f9" strokeWidth="2.5" strokeLinecap="round"/>
+                <circle cx="12" cy="16" r="1.5" fill="#e879f9"/>
+              </svg>
+            </div>
+
+            {/* Título */}
+            <h3>⚠️ Confirmar Eliminación</h3>
+            
+            {/* Subtítulo */}
+            <p className="subtitulo">
+              Esta acción no se puede deshacer
+            </p>
+
+            {/* Información de la carga (si es eliminación individual) */}
             {cargaAEliminar && (
-              <div style={{ 
-                background: '#f8f9fa', 
-                padding: '10px', 
-                borderRadius: '5px',
-                marginBottom: '15px',
-                fontSize: '14px'
-              }}>
-                <strong>Código:</strong> {cargaAEliminar.codigoProducto}<br/>
-                <strong>Descripción:</strong> {cargaAEliminar.descripcion || 'Sin descripción'}<br/>
-                <strong>Litros:</strong> {cargaAEliminar.litros?.toFixed(1) || '0'}
+              <div className="carga-info">
+                <div className="info-row">
+                  <span className="label">Código</span>
+                  <span className="value destacado">{cargaAEliminar.codigoProducto || 'N/A'}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Descripción</span>
+                  <span className="value">{cargaAEliminar.descripcion || 'Sin descripción'}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Litros</span>
+                  <span className="value">{cargaAEliminar.litros?.toFixed(1) || '0'} L</span>
+                </div>
+                {cargaAEliminar.folio && (
+                  <div className="info-row">
+                    <span className="label">Folio</span>
+                    <span className="value">{cargaAEliminar.folio}</span>
+                  </div>
+                )}
               </div>
             )}
-            <p style={{ marginBottom: '20px', fontSize: '16px' }}>
-              {accionPendiente?.tipo === 'eliminar' 
-                ? '¿Estás seguro de que deseas eliminar esta carga? Esta acción no se puede deshacer.'
-                : '¿Estás seguro de que deseas eliminar TODAS las cargas almacenadas? Esta acción no se puede deshacer.'
-              }
+
+            {/* Mensaje */}
+            <p className="mensaje">
+              {accionPendiente?.tipo === 'eliminar' ? (
+                <>
+                  ¿Estás seguro de que deseas eliminar <strong>esta carga</strong>?
+                  <span className="texto-secundario">Todos los datos asociados se perderán permanentemente.</span>
+                </>
+              ) : (
+                <>
+                  ¿Estás seguro de que deseas eliminar <strong>TODAS las cargas</strong>?
+                  <span className="texto-secundario">
+                    Esta acción eliminará <strong style={{ color: '#e879f9' }}>{cargas.length}</strong> cargas de forma permanente.
+                  </span>
+                </>
+              )}
             </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+
+            {/* Botones */}
+            <div className="botones">
               <button
+                className="btn-cancelar"
                 onClick={cerrarAdvertencia}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#95a5a6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
               >
                 Cancelar
               </button>
               <button
+                className="btn-eliminar"
                 onClick={confirmarAccion}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
               >
-                Sí, Eliminar
+                {accionPendiente?.tipo === 'eliminar' ? '🗑️ Eliminar Carga' : '🗑️ Eliminar Todo'}
               </button>
             </div>
           </div>

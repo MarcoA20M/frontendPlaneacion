@@ -1,3 +1,8 @@
+/* ============================================
+   MODAL DE CARGAS - SOLO COLORES CAMBIADOS
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -8,19 +13,17 @@
   z-index: 1000;
 }
 
-/* ... Tus estilos base se mantienen, pero agrega o modifica estos: ... */
-
 .modal-cargas {
   width: 900px;
-  height: 85vh; /* Altura fija para controlar el scroll interno */
-  background: #1b1b2f;
+  height: 85vh;
+  background: #1a0a2e;
   border-radius: 14px;
   padding: 24px;
   display: flex;
-  flex-direction: column; /* Organiza header, info y tabla en vertical */
-  box-shadow: 0 0 30px rgba(0, 192, 255, 0.2);
-  border: 1px solid rgba(0, 192, 255, 0.1);
-  overflow: hidden; /* Evita que el modal entero haga scroll */
+  flex-direction: column;
+  box-shadow: 0 0 30px rgba(192, 0, 255, 0.2);
+  border: 1px solid rgba(192, 0, 255, 0.1);
+  overflow: hidden;
 }
 
 .header-actions {
@@ -29,24 +32,23 @@
   gap: 20px;
 }
 
-/* NUEVO BOTÓN SUPERIOR */
 .btn-guardar-top {
-  background: linear-gradient(135deg, #00ffcc 0%, #007bff 100%);
+  background: linear-gradient(135deg, #c000ff 0%, #7c00b3 100%);
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
-  color: #000;
+  color: #fff;
   font-weight: 800;
   text-transform: uppercase;
   font-size: 13px;
   cursor: pointer;
   transition: 0.3s;
-  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+  box-shadow: 0 4px 15px rgba(192, 0, 255, 0.3);
 }
 
 .btn-guardar-top:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5);
+  box-shadow: 0 6px 20px rgba(192, 0, 255, 0.5);
   filter: brightness(1.1);
 }
 
@@ -58,7 +60,7 @@
 }
 
 .tabla-seccion {
-  flex: 1; /* Ocupa todo el espacio restante */
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -66,21 +68,20 @@
 
 .contenedor-scroll-tabla {
   flex: 1;
-  overflow-y: auto; /* Solo esta parte hace scroll */
+  overflow-y: auto;
   padding-right: 8px;
   margin-top: 5px;
 }
 
-/* Personalización del scrollbar para que se vea moderno */
 .contenedor-scroll-tabla::-webkit-scrollbar {
   width: 6px;
 }
+
 .contenedor-scroll-tabla::-webkit-scrollbar-thumb {
-  background: rgba(0, 192, 255, 0.3);
+  background: rgba(192, 0, 255, 0.3);
   border-radius: 10px;
 }
 
-/* Ajuste de celdas para que no se rompan en resoluciones pequeñas */
 .celda.g-2 { flex: 2; min-width: 100px; }
 .celda.g-1 { flex: 1; min-width: 60px; }
 
@@ -92,7 +93,7 @@
 }
 
 .modal-header h2 {
-  color: #00c0ff;
+  color: #e879f9;
   font-size: 24px;
   margin: 0;
 }
@@ -113,10 +114,11 @@
 .info-general {
   display: flex;
   justify-content: space-between;
-  background: #2a2640;
+  background: rgba(0, 0, 0, 0.35);
   padding: 12px 20px;
   border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
 .info-item {
@@ -126,17 +128,17 @@
 
 .label {
   font-size: 14px;
-  color: #ccc;
+  color: rgba(196, 181, 253, 0.5);
 }
 
 .value {
   font-size: 18px;
-  color: #00ffcc;
+  color: #e879f9;
   font-weight: 600;
 }
 
 .titulo-tabla {
-  color: #00c0ff;
+  color: #e879f9;
   font-size: 18px;
   font-weight: 600;
   margin: 15px 0 8px;
@@ -151,16 +153,17 @@
 .fila-carga {
   display: flex;
   justify-content: space-between;
-  background: #2a2640;
+  background: rgba(255, 255, 255, 0.03);
   padding: 10px 15px;
   border-radius: 10px;
-  color: #fff;
+  color: #e0e0e0;
 }
 
 .fila-carga.header {
-  background: #00c0ff22;
+  background: rgba(192, 0, 255, 0.12);
   font-weight: 700;
-  color: #00c0ff;
+  color: #a855f7;
+  border: 1px solid rgba(192, 0, 255, 0.2);
 }
 
 .celda {
@@ -175,7 +178,7 @@
 }
 
 .btn-guardar {
-  background: linear-gradient(135deg, #00c0ff 0%, #007bff 100%);
+  background: linear-gradient(135deg, #c000ff 0%, #7c00b3 100%);
   border: none;
   padding: 12px 25px;
   border-radius: 12px;
@@ -187,20 +190,17 @@
 
 .btn-guardar:hover {
   transform: scale(1.02);
-  box-shadow: 0 6px 15px rgba(0,192,255,0.5);
+  box-shadow: 0 6px 15px rgba(192, 0, 255, 0.5);
 }
 
-
-/* Estilo para el número de la carga */
 .nro-item {
-  flex: 0 0 40px !important; /* Más estrecho que las demás celdas */
-  color: #00c0ff;
+  flex: 0 0 40px !important;
+  color: #a855f7;
   font-weight: 800;
   border-right: 1px solid #ffffff11;
   margin-right: 10px;
 }
 
-/* El contenedor de las acciones (la X) */
 .acciones {
   flex: 0 0 50px !important;
   display: flex;
@@ -208,10 +208,9 @@
   align-items: center;
 }
 
-/* El botón X de cada fila con tu estética */
 .btn-borrar-fila {
-  background: rgba(255, 95, 126, 0.1);
-  border: 1px solid rgba(255, 95, 126, 0.3);
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
   color: #ff5f7e;
   width: 28px;
   height: 28px;
@@ -227,11 +226,10 @@
 .btn-borrar-fila:hover {
   background: #ff5f7e;
   color: #fff;
-  box-shadow: 0 0 12px rgba(255, 95, 126, 0.4);
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.4);
   transform: translateY(-1px);
 }
 
-/* Ajuste para que el contador de la cabecera se vea bien */
 .titulo-con-contador {
   display: flex;
   align-items: center;
@@ -239,30 +237,22 @@
 }
 
 .badge-contador {
-  background: #00c0ff22;
-  color: #00ffcc;
+  background: rgba(192, 0, 255, 0.15);
+  color: #e879f9;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 13px;
-  border: 1px solid #00ffcc44;
+  border: 1px solid rgba(192, 0, 255, 0.3);
 }
 
-/* Estilo para cuando no hay nada */
 .sin-cargas {
   text-align: center;
-  color: #ccc;
+  color: rgba(196, 181, 253, 0.5);
   padding: 40px;
-  background: #2a2640;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
-  border: 1px dashed #ffffff22;
-
-  
+  border: 1px dashed rgba(192, 0, 255, 0.15);
 }
-
-
-
-
-
 
 .modal-overlay {
   position: fixed;
@@ -278,12 +268,12 @@
 .modal-cargas {
   width: 850px;
   max-height: 85vh;
-  background: #1b1b2f;
+  background: #1a0a2e;
   border-radius: 14px;
   padding: 24px;
   overflow-y: auto;
-  box-shadow: 0 0 30px rgba(0, 192, 255, 0.2);
-  border: 1px solid rgba(0, 192, 255, 0.1);
+  box-shadow: 0 0 30px rgba(192, 0, 255, 0.2);
+  border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
 .modal-header {
@@ -300,18 +290,18 @@
 }
 
 .modal-header h2 {
-  color: #00c0ff;
+  color: #e879f9;
   font-size: 24px;
   margin: 0;
 }
 
 .badge-contador {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
+  background: rgba(192, 0, 255, 0.15);
+  color: #e879f9;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 13px;
-  border: 1px solid rgba(0, 255, 204, 0.3);
+  border: 1px solid rgba(192, 0, 255, 0.3);
 }
 
 .close-btn {
@@ -326,110 +316,504 @@
 .info-general {
   display: flex;
   justify-content: space-between;
-  background: #2a2640;
+  background: rgba(0, 0, 0, 0.35);
   padding: 15px 25px;
   border-radius: 12px;
   margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
-.label { font-size: 12px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-.value { font-size: 18px; color: #00ffcc; font-weight: 600; }
+.label { 
+  font-size: 12px; 
+  color: rgba(196, 181, 253, 0.5); 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+}
 
-.tabla-cargas { display: flex; flex-direction: column; gap: 8px; }
+.value { 
+  font-size: 18px; 
+  color: #e879f9; 
+  font-weight: 600; 
+}
+
+.tabla-cargas { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+}
 
 .fila-carga {
   display: flex;
   align-items: center;
-  background: #2a2640;
+  background: rgba(255, 255, 255, 0.03);
   padding: 12px 15px;
   border-radius: 10px;
-  color: #fff;
+  color: #e0e0e0;
   transition: 0.2s;
 }
 
 .fila-carga.header {
-  background: rgba(0, 192, 255, 0.15);
+  background: rgba(192, 0, 255, 0.12);
   font-weight: 700;
-  color: #00c0ff;
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  color: #a855f7;
+  border: 1px solid rgba(192, 0, 255, 0.2);
 }
 
-/* --- CONTROL DE PROPORCIONALIDAD --- */
-.celda { text-align: center; }
-.celda.nro { flex: 0 0 40px; color: #00c0ff; font-weight: bold; }
-.celda.g-2 { flex: 2; } /* Columnas anchas: Codigo, Tipo, Lote */
-.celda.g-1 { flex: 1; text-align: center; } /* Columnas estrechas: Litros, Cubriente */
-.celda.accion { flex: 0 0 50px; display: flex; justify-content: flex-end; }
+.celda { 
+  text-align: center; 
+}
 
+.celda.nro { 
+  flex: 0 0 40px; 
+  color: #a855f7; 
+  font-weight: bold; 
+}
 
+.celda.g-2 { 
+  flex: 2; 
+}
 
+.celda.g-1 { 
+  flex: 1; 
+  text-align: center; 
+}
 
-/* GRID DE MARCAS COMERCIALES - VERSIÓN COMPACTA */
+.celda.accion { 
+  flex: 0 0 50px; 
+  display: flex; 
+  justify-content: flex-end; 
+}
+
 .contenedor-marcas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Reducido de 120px a 80px */
-  gap: 6px; /* Reducido de 12px a 6px */
-  margin-bottom: 6px; /* Reducido de 10px a 6px */
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
   padding: 2px;
 }
 
 .marca-card {
-  background: #2a2640;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px; /* Reducido de 12px a 8px */
-  padding: 4px 6px; /* Reducido de 5px a 4px 6px */
+  border-radius: 8px;
+  padding: 4px 6px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .marca-card h3 {
-  font-size: 10px; /* Reducido de 13px a 10px */
-  color: #ccc;
+  font-size: 10px;
+  color: rgba(196, 181, 253, 0.7);
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px; /* Reducido de 1px a 0.5px */
+  letter-spacing: 0.5px;
 }
 
 .marca-card p {
-  font-size: 12px; /* Reducido de 16px a 12px */
-  color: #00ffcc;
+  font-size: 12px;
+  color: #e879f9;
   font-weight: 700;
-  margin: 2px 0; /* Reducido de 5px a 2px */
+  margin: 2px 0;
 }
 
 .marca-card span {
-  font-size: 12px; /* Reducido de 10px a 8px */
-  color: #888;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
   display: block;
 }
 
 .marca-card:hover {
-  background: rgba(0, 192, 255, 0.1);
-  transform: translateY(-2px); /* Reducido de -3px a -2px */
-  border-color: rgba(0, 192, 255, 0.3);
+  background: rgba(192, 0, 255, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(192, 0, 255, 0.3);
 }
 
 .marca-card.activa {
-  background: rgba(0, 192, 255, 0.2);
-  border: 1px solid #00c0ff;
-  box-shadow: 0 0 10px rgba(0, 192, 255, 0.2); /* Reducido de 15px a 10px */
+  background: rgba(192, 0, 255, 0.15);
+  border: 1px solid #c000ff;
+  box-shadow: 0 0 10px rgba(192, 0, 255, 0.15);
 }
 
 .marca-card.activa h3 {
-  color: #fff;
+  color: #e879f9;
 }
 
-
 .fila-carga.clickable-row {
-    cursor: pointer;
-    transition: background 0.2s ease;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .fila-carga.clickable-row:hover {
-    background-color: rgba(0, 123, 255, 0.1); /* Un azul muy suave */
+  background: rgba(192, 0, 255, 0.06);
+}
+
+/* ============================================
+   MODAL DE ADVERTENCIA - ESTILO CRÍTICOS
+   ============================================ */
+
+.modal-advertencia-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeInOverlay 0.3s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-advertencia {
+    background: linear-gradient(135deg, #1a0a2e 0%, #0f0a1a 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    max-width: 480px;
+    width: 92%;
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(192, 0, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    animation: slideUpModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+               borderGlow 3s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-advertencia::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 70% 20%, rgba(192, 0, 255, 0.08), transparent 50%);
+    pointer-events: none;
+}
+
+.modal-advertencia::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #7c00b3, #c000ff, #e879f9, #c000ff, #7c00b3);
+    background-size: 200% 100%;
+    animation: gradientMove 3s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes slideUpModal {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes borderGlow {
+    0%, 100% { border-color: rgba(192, 0, 255, 0.3); }
+    50% { border-color: rgba(192, 0, 255, 0.6); }
+}
+
+.modal-advertencia .icono-advertencia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.modal-advertencia .icono-advertencia svg {
+    width: 64px;
+    height: 64px;
+    filter: drop-shadow(0 0 20px rgba(192, 0, 255, 0.4));
+}
+
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.modal-advertencia .icono-pulso {
+    animation: pulseIcon 1.8s ease-in-out infinite;
+}
+
+.modal-advertencia h3 {
+    color: #e879f9;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 6px 0;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 30px rgba(192, 0, 255, 0.2);
+}
+
+.modal-advertencia .subtitulo {
+    color: rgba(196, 181, 253, 0.6);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 18px;
+    font-weight: 500;
+}
+
+.modal-advertencia .carga-info {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 12px 0 18px 0;
+    border-left: 3px solid #c000ff;
+    border: 1px solid rgba(192, 0, 255, 0.15);
+    backdrop-filter: blur(4px);
+}
+
+.modal-advertencia .carga-info .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.modal-advertencia .carga-info .info-row:last-child {
+    border-bottom: none;
+}
+
+.modal-advertencia .carga-info .info-row .label {
+    color: rgba(196, 181, 253, 0.6);
+    font-weight: 500;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.modal-advertencia .carga-info .info-row .value {
+    color: #e2e8f0;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.modal-advertencia .carga-info .info-row .value.destacado {
+    color: #e879f9;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.modal-advertencia .mensaje {
+    color: rgba(196, 181, 253, 0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+    margin: 14px 0 24px 0;
+    padding: 0 5px;
+}
+
+.modal-advertencia .mensaje strong {
+    color: #e879f9;
+    font-weight: 600;
+}
+
+.modal-advertencia .mensaje .texto-secundario {
+    font-size: 12px;
+    color: rgba(196, 181, 253, 0.5);
+    display: block;
+    margin-top: 4px;
+}
+
+.modal-advertencia .botones {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.modal-advertencia .btn-cancelar {
+    padding: 11px 28px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(196, 181, 253, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex: 1;
+    letter-spacing: 0.3px;
+}
+
+.modal-advertencia .btn-cancelar:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-advertencia .btn-cancelar:active {
+    transform: translateY(0px);
+}
+
+.modal-advertencia .btn-eliminar {
+    padding: 11px 28px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    flex: 1;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-advertencia .btn-eliminar::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.modal-advertencia .btn-eliminar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(231, 76, 60, 0.45);
+    filter: brightness(1.05);
+}
+
+.modal-advertencia .btn-eliminar:hover::after {
+    opacity: 1;
+}
+
+.modal-advertencia .btn-eliminar:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 15px rgba(231, 76, 60, 0.3);
+}
+
+@media (max-width: 600px) {
+    .modal-advertencia {
+        padding: 24px 18px;
+        max-width: 95%;
+        border-radius: 20px;
+    }
+
+    .modal-advertencia h3 {
+        font-size: 19px;
+    }
+
+    .modal-advertencia .carga-info {
+        padding: 12px 14px;
+        margin: 10px 0 14px 0;
+    }
+
+    .modal-advertencia .carga-info .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        padding: 6px 0;
+    }
+
+    .modal-advertencia .carga-info .info-row .value {
+        font-size: 12px;
+    }
+
+    .modal-advertencia .mensaje {
+        font-size: 13px;
+        margin: 10px 0 18px 0;
+    }
+
+    .modal-advertencia .botones {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-advertencia .btn-cancelar,
+    .modal-advertencia .btn-eliminar {
+        padding: 12px 20px;
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 400px) {
+    .modal-advertencia {
+        padding: 20px 14px;
+    }
+
+    .modal-advertencia .icono-advertencia svg {
+        width: 48px;
+        height: 48px;
+    }
+
+    .modal-advertencia h3 {
+        font-size: 17px;
+    }
+
+    .modal-advertencia .subtitulo {
+        font-size: 11px;
+    }
 }
 
 
 
+/* ============================================
+   BOTÓN ASIGNAR LOTES
+   ============================================ */
+
+.btn-asignar-lotes {
+  background: linear-gradient(135deg, #d00ad7, #58005e);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(170, 9, 143, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-asignar-lotes .icono {
+  font-size: 14px;
+}
+
+.btn-asignar-lotes:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(203, 32, 237, 0.752);
+  filter: brightness(1.05);
+}
+
+.btn-asignar-lotes:disabled {
+  background: #2a2a4a;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}

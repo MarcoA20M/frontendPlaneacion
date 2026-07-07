@@ -1,18 +1,18 @@
 /* --- CONTENEDOR PRINCIPAL: EL "PANEL DE CONTROL" --- */
 .inv-container {
   width: 950px !important;
-  background: #1b1b2f !important;
-  border: 1px solid rgba(0, 192, 255, 0.15);
+  background: #1a0a2e !important;
+  border: 1px solid rgba(192, 0, 255, 0.15);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  position: relative; /* Necesario para el modal interno */
+  position: relative;
 }
 
 /* --- BLOQUE UNIFICADO (TARJETA POR CÓDIGO) --- */
 .bloque-grupo-codigo {
   display: flex;
-  background: #232339;
+  background: rgba(255, 255, 255, 0.03);
   margin-bottom: 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -20,19 +20,19 @@
 }
 
 .bloque-grupo-codigo:hover {
-  border-color: rgba(0, 192, 255, 0.4);
+  border-color: rgba(192, 0, 255, 0.4);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
 /* --- COLUMNA IZQUIERDA: EL CÓDIGO --- */
 .columna-codigo-unificada {
-  width: 90px; /* Reducido de 110px a 75px */
+  width: 90px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, rgba(0, 192, 255, 0.08) 0%, rgba(0, 192, 255, 0.02) 100%);
+  background: linear-gradient(180deg, rgba(192, 0, 255, 0.08) 0%, rgba(192, 0, 255, 0.02) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
   cursor: pointer;
@@ -45,27 +45,25 @@
   left: 0;
   height: 40%;
   width: 3px;
-  background: #00c0ff;
+  background: #c000ff;
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 10px #00c0ff;
+  box-shadow: 0 0 10px rgba(192, 0, 255, 0.4);
 }
 
-
-
 .codigo-resaltado-grande {
-  color: #00c0ff;
+  color: #e879f9;
   font-family: 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  margin: 0; /* Ajusta margen si es necesario */
-  padding: 0; /* Ajusta padding si es necesario */
+  margin: 0;
+  padding: 0;
 }
 
 /* --- COLUMNA DERECHA: PRESENTACIONES --- */
 .columna-presentaciones {
   flex: 1;
-  min-width: 0; /* Permite que el contenido se encoja correctamente */
+  min-width: 0;
 }
 
 /* Para la fila del inventario */
@@ -75,7 +73,7 @@
   padding: 14px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   cursor: help;
-  gap: 16px; /* Espacio entre elementos */
+  gap: 16px;
 }
 
 .sub-fila-inventario:last-child {
@@ -87,14 +85,14 @@
   color: #e2e8f0;
   font-size: 12.5px;
   font-weight: 500;
-  overflow: visible; /* Cambiado de 'hidden' a 'visible' */
-  text-overflow: clip; /* Cambiado de 'ellipsis' a 'clip' */
-  padding-left: 0; /* Reducido de 20px */
-  flex: 2; /* Ocupa más espacio relativo */
-  white-space: normal; /* Permite que el texto haga wrap si es necesario */
-  word-break: break-word; /* Rompe palabras largas si es necesario */
-  min-width: 160px; /* Ancho mínimo para la descripción */
-  line-height: 1.4; /* Mejora legibilidad */
+  overflow: visible;
+  text-overflow: clip;
+  padding-left: 0;
+  flex: 2;
+  white-space: normal;
+  word-break: break-word;
+  min-width: 160px;
+  line-height: 1.4;
 }
 
 .dato-existencia, .dato-salidas {
@@ -108,17 +106,7 @@
 }
 
 .dato-salidas { 
-  color: #94a3b8; 
-}
-
-/* --- BADGES DE ALCANCE PULIDOS --- */
-.badge-alcance-final {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: rgba(196, 181, 253, 0.5); 
 }
 
 /* --- BADGES DE ALCANCE PULIDOS --- */
@@ -133,41 +121,41 @@
   transition: all 0.3s ease;
 }
 
-/* Crítico - ROJO (alcance bajo) */
+/* Crítico - ROJO */
 .badge-alcance-final.crítico {
-  background: rgba(255, 95, 126, 0.15) !important;
-  color: #ff5f7e !important;
-  border: 1px solid rgba(255, 95, 126, 0.3) !important;
-  box-shadow: 0 0 15px rgba(255, 95, 126, 0.1);
+  background: rgba(231, 76, 60, 0.15) !important;
+  color: #e74c3c !important;
+  border: 1px solid rgba(231, 76, 60, 0.3) !important;
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.1);
 }
 
-/* Estancado - NARANJA (alcance medio-bajo) */
+/* Estancado - NARANJA */
 .badge-alcance-final.estancado {
-  background: rgba(246, 173, 85, 0.15) !important;
-  color: #f6ad55 !important;
-  border: 1px solid rgba(246, 173, 85, 0.3) !important;
-  box-shadow: 0 0 15px rgba(246, 173, 85, 0.1);
+  background: rgba(243, 156, 18, 0.15) !important;
+  color: #f39c12 !important;
+  border: 1px solid rgba(243, 156, 18, 0.3) !important;
+  box-shadow: 0 0 15px rgba(243, 156, 18, 0.1);
 }
 
-/* Normal - VERDE (alcance bueno) - Agregar un estilo por defecto */
+/* Normal - VERDE */
 .badge-alcance-final.normal {
-  background: rgba(74, 222, 128, 0.1);
-  color: #4ade80;
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.2);
 }
 
-/* Por defecto - AZUL (cuando no hay clase) */
+/* Por defecto - MORADO */
 .badge-alcance-final {
-  background: rgba(0, 192, 255, 0.1);
-  color: #00c0ff;
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  background: rgba(192, 0, 255, 0.1);
+  color: #e879f9;
+  border: 1px solid rgba(192, 0, 255, 0.2);
 }
 
 /* --- BOTÓN ACCIÓN ESTILO "TARGET" --- */
 .btn-ir-code {
-  background: #1b1b2f;
-  border: 1px solid rgba(0, 192, 255, 0.3);
-  color: #00c0ff;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(192, 0, 255, 0.3);
+  color: #e879f9;
   width: 36px;
   height: 36px;
   border-radius: 10px;
@@ -179,37 +167,37 @@
 }
 
 .btn-ir-code:hover {
-  background: #00c0ff;
-  color: #1b1b2f;
-  box-shadow: 0 0 15px rgba(0, 192, 255, 0.5);
+  background: #c000ff;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(192, 0, 255, 0.5);
   transform: rotate(15deg) scale(1.1);
 }
 
 .contenedor-info-producto {
   display: flex;
   align-items: center;
-  gap: 30px; /* Aumentado de 12px a 16px */
-  flex: 1; /* Ocupa todo el espacio disponible */
+  gap: 30px;
+  flex: 1;
 }
 
 .badge-envasado {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-  border: 1px solid rgba(0, 255, 204, 0.3);
-  padding: 15px 20px; /* Aumentado el padding horizontal de 15px a 20px */
+  background: rgba(192, 0, 255, 0.1);
+  color: #e879f9;
+  border: 1px solid rgba(192, 0, 255, 0.3);
+  padding: 15px 20px;
   border-radius: 4px;
   font-family: 'Roboto Mono', monospace;
   font-size: 12px;
   font-weight: 700;
-  min-width: 90px; /* Aumentado de 40px a 60px */
+  min-width: 90px;
   text-align: center;
-  text-shadow: 0 0 5px rgba(0, 255, 204, 0.2);
+  text-shadow: 0 0 5px rgba(192, 0, 255, 0.2);
 }
 
 /* Efecto hover en la fila para resaltar el envasado */
 .sub-fila-inventario:hover .badge-envasado {
-  background: #00ffcc;
-  color: #1b1b2f;
+  background: #c000ff;
+  color: #fff;
 }
 
 /* --- ESTILOS DEL MODAL EMERGENTE INTERNO --- */
@@ -230,8 +218,8 @@
 
 .emergente-info-card {
   width: 400px;
-  background: #1b1b2f;
-  border: 1px solid rgba(0, 192, 255, 0.3);
+  background: #1a0a2e;
+  border: 1px solid rgba(192, 0, 255, 0.3);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
@@ -239,11 +227,11 @@
 }
 
 .emergente-info-card.ocupado { 
-  border-left: 4px solid #00c0ff; 
+  border-left: 4px solid #c000ff; 
 }
 
 .emergente-info-card.libre { 
-  border-left: 4px solid #00ffcc; 
+  border-left: 4px solid #e879f9; 
 }
 
 .emergente-header { 
@@ -256,20 +244,20 @@
 .emergente-header h3 { 
   margin: 0; 
   font-size: 13px; 
-  color: #64748b; 
+  color: rgba(196, 181, 253, 0.5); 
   letter-spacing: 1px; 
 }
 
 .close-mini-btn { 
   background: none; 
   border: none; 
-  color: #64748b; 
+  color: rgba(196, 181, 253, 0.5); 
   font-size: 24px; 
   cursor: pointer; 
 }
 
 .emergente-titulo-prod { 
-  color: #00c0ff; 
+  color: #e879f9; 
   font-weight: 800; 
   font-size: 18px; 
   margin-bottom: 15px; 
@@ -286,16 +274,16 @@
 }
 
 .txt-highlight { 
-  color: #00ffcc; 
+  color: #e879f9; 
 }
 
 .emergente-footer-aviso { 
-  color: #ff5f7e; 
+  color: #e74c3c; 
   font-size: 12px; 
   font-weight: bold; 
   text-align: center; 
   margin-top: 20px; 
-  background: rgba(255, 95, 126, 0.1); 
+  background: rgba(231, 76, 60, 0.1); 
   padding: 10px; 
   border-radius: 6px; 
 }
@@ -304,9 +292,9 @@
   width: 100%; 
   margin-top: 20px; 
   padding: 12px; 
-  background: #232339; 
-  border: 1px solid #00c0ff; 
-  color: #00c0ff; 
+  background: rgba(255, 255, 255, 0.03); 
+  border: 1px solid #c000ff; 
+  color: #e879f9; 
   border-radius: 8px; 
   cursor: pointer; 
   font-weight: bold; 
@@ -314,56 +302,50 @@
 }
 
 .btn-emergente-cerrar:hover { 
-  background: #00c0ff; 
-  color: #1b1b2f; 
+  background: #c000ff; 
+  color: #fff; 
 }
 
 /* --- CLASES DE APOYO --- */
 .header-tabla-inv { 
-  
   background: transparent; 
   border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
   padding: 10px 0; 
 }
 
 .col-codigo-header {
-  width: 99px; /* Debe coincidir con el ancho de la columna de códigos */
-  text-align: center; /* left, center, right */
-  color: #64748b;
+  width: 99px;
+  text-align: center;
+  color: rgba(196, 181, 253, 0.5);
   font-size: 11px;
   font-weight: 700;
-  padding-left: 0; /* Mover a la derecha */
-  padding-right: 0; /* Mover a la izquierda */
+  padding-left: 0;
+  padding-right: 0;
 }
-
-
-
 
 .txt-left-details { 
   text-align: left; 
   padding-left: 20px; 
-  color: #64748b; 
+  color: rgba(196, 181, 253, 0.5); 
   font-size: 12px; 
 }
 
 .label-small { 
-  color: #64748b; 
+  color: rgba(196, 181, 253, 0.5); 
   font-size: 11px; 
 }
 
-
-
 .txt-cyan { 
-  color: #00c0ff; 
+  color: #e879f9; 
 }
 
 .txt-green { 
-  color: #00ffcc; 
+  color: #e879f9; 
 }
 
 .hint-programar { 
   font-size: 9px; 
-  color: #00c0ff; 
+  color: #e879f9; 
   font-weight: bold; 
   margin-top: 4px; 
   opacity: 0.7; 
@@ -373,7 +355,7 @@
 .verificando { 
   animation: pulse 1.5s infinite; 
   pointer-events: none; 
-  background: rgba(0, 192, 255, 0.2) !important; 
+  background: rgba(192, 0, 255, 0.2) !important; 
 }
 
 /* --- ANIMACIONES --- */
@@ -400,17 +382,16 @@
 }
 
 .descripcion-header {
-  padding-left: 180px !important; /* Aumenta el padding */
+  padding-left: 180px !important;
 }
 
-
-/* --- FOOTER - SOLO REDUCIR EL RECTÁNGULO, MANTENIENDO EL DISEÑO ORIGINAL --- */
+/* --- FOOTER --- */
 .footer-inv-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 16px !important;  /* Solo reduje el padding vertical de 2px a 6px */
-  background: rgb(rgb(27, 27, 47));
+  padding: 6px 16px !important;
+  background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid rgba(255, 255, 255, 0.03);
   margin-top: 0;
 }
@@ -424,19 +405,17 @@
   font-size: 0.85rem !important;
 }
 
-
 .footer-inv-flex {
   display: flex;
-  justify-content: space-between !important;  /* Mantiene separados */
+  justify-content: space-between !important;
   align-items: center;
   padding: 6px 16px !important;
-  background: #1b1b2f;
+  background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid rgba(255, 255, 255, 0.03);
   margin-top: 0;
 }
 
-
-/* ===== PODER CUBRIENTE - MISMO ESTILO QUE EL RESTO ===== */
+/* ===== PODER CUBRIENTE ===== */
 .poder-cubriente-display {
     display: flex;
     flex-direction: row-reverse;
@@ -448,7 +427,7 @@
 .poder-cubriente-numero {
     font-size: 7px;
     font-weight: 800;
-    color: #00c0ff;  /* Mismo color que el código */
+    color: #e879f9;
     line-height: 1.2;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.5px;
@@ -456,23 +435,21 @@
 
 .poder-cubriente-etiqueta {
     font-size: 7px;
-    color: #64748b;  /* Mismo color que los headers */
+    color: rgba(196, 181, 253, 0.5);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
     margin-top: 1px;
 }
 
-/* Mantener el estilo de "PROGRAMAR" oculto pero disponible */
 .hint-programar {
     font-size: 9px;
-    color: #00c0ff;
+    color: #e879f9;
     font-weight: bold;
     margin-top: 4px;
     opacity: 0.7;
     text-align: center;
 }
-
 
 /* ============================================================ */
 /* ===== TABS EN EL HEADER ===== */
@@ -488,7 +465,7 @@
   padding: 4px 12px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -504,8 +481,8 @@
 }
 
 .tab-btn-header.active {
-  color: #00c0ff;
-  background: rgba(0, 192, 255, 0.08);
+  color: #e879f9;
+  background: rgba(192, 0, 255, 0.08);
 }
 
 .tab-btn-header.revisar-tab-header.active {
@@ -516,7 +493,7 @@
 .tab-btn-header .tab-badge-header {
   display: inline-block;
   background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
+  color: rgba(196, 181, 253, 0.5);
   padding: 0 6px;
   border-radius: 8px;
   font-size: 9px;
@@ -525,8 +502,8 @@
 }
 
 .tab-btn-header.active .tab-badge-header {
-  background: rgba(0, 192, 255, 0.12);
-  color: #00c0ff;
+  background: rgba(192, 0, 255, 0.12);
+  color: #e879f9;
 }
 
 .tab-btn-header.revisar-tab-header.active .tab-badge-header {
@@ -541,7 +518,7 @@
 .seccion-vacia {
   padding: 40px 20px;
   text-align: center;
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
   font-style: italic;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 8px;
@@ -551,7 +528,7 @@
 
 .sin-presentaciones {
   padding: 8px 16px;
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
   font-size: 0.8rem;
   text-align: center;
 }
@@ -560,18 +537,16 @@
   padding: 60px 20px;
   text-align: center;
   font-size: 1.1rem;
-  color: #4ade80;
+  color: #2ecc71;
 }
 
-
 /* ===== ESTILOS PARA EL CÁLCULO DE DÍAS DE ALCANCE ===== */
-
 .emergente-calculo-dias {
   margin-top: 16px;
   padding: 16px;
-  background: rgba(0, 192, 255, 0.05);
+  background: rgba(192, 0, 255, 0.05);
   border-radius: 10px;
-  border: 1px solid rgba(0, 192, 255, 0.1);
+  border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
 .calculo-header {
@@ -612,14 +587,14 @@
 
 .calculo-item-destacado {
   grid-column: 1 / -1;
-  background: rgba(0, 192, 255, 0.08);
-  border: 1px solid rgba(0, 192, 255, 0.15);
+  background: rgba(192, 0, 255, 0.08);
+  border: 1px solid rgba(192, 0, 255, 0.15);
   padding: 8px 12px;
 }
 
 .calculo-label {
   font-size: 11px;
-  color: #94a3b8;
+  color: rgba(196, 181, 253, 0.5);
   font-weight: 500;
 }
 
@@ -630,11 +605,11 @@
 }
 
 .calculo-valor.highlight-verde {
-  color: #4ade80;
+  color: #2ecc71;
 }
 
 .calculo-valor.highlight-cyan {
-  color: #00c0ff;
+  color: #e879f9;
   font-size: 15px;
 }
 
@@ -642,8 +617,8 @@
   display: inline-block;
   margin-left: 8px;
   padding: 1px 8px;
-  background: rgba(74, 222, 128, 0.15);
-  color: #4ade80;
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
   border-radius: 10px;
   font-size: 10px;
   font-weight: 600;
@@ -658,7 +633,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 9px;
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
   margin-bottom: 4px;
   padding: 0 2px;
 }
@@ -674,7 +649,7 @@
 
 .calculo-barra-progreso {
   height: 100%;
-  background: linear-gradient(90deg, #00c0ff, #4ade80);
+  background: linear-gradient(90deg, #c000ff, #e879f9);
   border-radius: 3px;
   transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   min-width: 2%;
@@ -696,7 +671,7 @@
   padding: 1px 6px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
+  color: rgba(196, 181, 253, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.05);
   white-space: nowrap;
 }
@@ -707,8 +682,8 @@
 }
 
 .punto-nuevo {
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.2);
+  color: #2ecc71;
+  border-color: rgba(46, 204, 113, 0.2);
 }
 
 /* Responsive */
@@ -722,15 +697,15 @@
   }
 }
 
-
+/* ===== PROCESOS ===== */
 .procesos-info-mini {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: 2px 4px;
-  background: rgba(96, 165, 250, 0.06);
+  background: rgba(192, 0, 255, 0.06);
   border-radius: 4px;
-  border-left: 2px solid #60a5fa;
+  border-left: 2px solid #c000ff;
   width: 100%;
   gap: 2px;
   margin-top: 2px;
@@ -739,7 +714,7 @@
 .lista-procesos-tags-mini {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* Centra los tags */
+  justify-content: center;
   gap: 3px;
   width: 100%;
 }
@@ -752,7 +727,7 @@
   padding: 1px 4px;
   border-radius: 3px;
   font-size: 0.5rem;
-  border: 1px solid rgba(96, 165, 250, 0.08);
+  border: 1px solid rgba(192, 0, 255, 0.08);
 }
 
 .paso-nro-mini {
@@ -761,16 +736,16 @@
   justify-content: center;
   min-width: 14px;
   height: 14px;
-  background: rgba(96, 165, 250, 0.2);
+  background: rgba(192, 0, 255, 0.2);
   border-radius: 50%;
   font-size: 0.45rem;
   font-weight: 700;
-  color: #60a5fa;
+  color: #e879f9;
   flex-shrink: 0;
 }
 
 .paso-desc-mini {
-  color: #94a3b8;
+  color: rgba(196, 181, 253, 0.5);
   font-size: 0.5rem;
   max-width: 55px;
   overflow: hidden;
@@ -780,7 +755,7 @@
 
 .procesos-mas-mini {
   font-size: 0.5rem;
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
   background: rgba(255, 255, 255, 0.04);
   padding: 0px 4px;
   border-radius: 3px;
@@ -789,11 +764,11 @@
 
 /* --- Estilos para procesos en el detalle (popup) --- */
 .procesos-info-detalle {
-  background: rgba(96, 165, 250, 0.05);
+  background: rgba(192, 0, 255, 0.05);
   border-radius: 8px;
   padding: 10px 12px;
   margin: 8px 0 12px 0;
-  border: 1px solid rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(192, 0, 255, 0.1);
 }
 
 .procesos-info-detalle strong {
@@ -824,7 +799,7 @@
 
 .proceso-item-detalle:hover {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(96, 165, 250, 0.15);
+  border-color: rgba(192, 0, 255, 0.15);
 }
 
 .paso-nro-detalle {
@@ -833,11 +808,11 @@
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  background: rgba(96, 165, 250, 0.15);
+  background: rgba(192, 0, 255, 0.15);
   border-radius: 50%;
   font-size: 0.55rem;
   font-weight: 700;
-  color: #60a5fa;
+  color: #e879f9;
   flex-shrink: 0;
 }
 
@@ -849,8 +824,8 @@
 
 /* --- Estilos para el badge de "Procesos" abreviado --- */
 .poder-cubriente-display.procesos-badge {
-  border-left-color: #60a5fa;
-  background: rgba(96, 165, 250, 0.08);
+  border-left-color: #c000ff;
+  background: rgba(192, 0, 255, 0.08);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -862,11 +837,11 @@
 
 .poder-cubriente-display.procesos-badge .poder-cubriente-numero {
   font-size: 0.7rem;
-  color: #60a5fa;
+  color: #e879f9;
 }
 
 .poder-cubriente-display.procesos-badge .poder-cubriente-etiqueta {
-  color: #60a5fa;
+  color: #e879f9;
   font-weight: 600;
   font-size: 0.55rem;
 }
@@ -892,7 +867,7 @@
 }
 
 .info-item span {
-  color: #64748b;
+  color: rgba(196, 181, 253, 0.5);
 }
 
 .info-item strong {
@@ -949,18 +924,15 @@
   }
 }
 
-
-
 /* ============================================
    FOLIO CLICKEABLE
    ============================================ */
 .folio-clickeable {
-    color: #00c0ff;
+    color: #e879f9;
     cursor: pointer;
     transition: all 0.2s ease;
     padding: 2px 10px;
     border-radius: 4px;
-
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -968,10 +940,10 @@
 }
 
 .folio-clickeable:hover {
-    background: rgba(204, 203, 201, 0.2);
-    border-color: rgba(231, 229, 226, 0.4);
+    background: rgba(192, 0, 255, 0.15);
+    border-color: rgba(192, 0, 255, 0.4);
     transform: scale(1.05);
-    box-shadow: 0 0 16px rgba(251, 191, 36, 0.15);
+    box-shadow: 0 0 16px rgba(192, 0, 255, 0.15);
 }
 
 .folio-clickeable:active {

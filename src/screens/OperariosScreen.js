@@ -136,9 +136,7 @@ const cargarDatos = async () => {
         
         setOperariosVinilica(operariosOrdenados);
 
-        // ============================================================
-        // 🔴 Cargar Esmaltes - USANDO getAll() Y FILTRANDO EN FRONTEND
-        // ============================================================
+
         console.log('🔄 Cargando operarios de esmaltes...');
         
         let esmaltes = [];

@@ -250,15 +250,44 @@ export const useProduccionHandlers = (produccion, ui) => {
     }, [rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaTrabajo, simularProgreso, handleImportExcel, setProcesandoReporte, setProgreso, setMenuReporteAbierto]);
 
     // Handler: Imprimir bitácora
-    const handleImprimirBitacora = useCallback(async () => {
-        try {
-            await bitacoraService.generarPdf(rondas, fechaTrabajo, tipoPintura, getOperarioPorMaquina);
-        } catch (e) { 
-            alert("Error: " + e.message); 
-        } finally { 
-            setMenuReporteAbierto(false); 
-        }
-    }, [rondas, fechaTrabajo, tipoPintura, setMenuReporteAbierto]);
+  // hooks/useProduccionHandlers.js - handleImprimirBitacora CORREGIDO
+
+const handleImprimirBitacora = useCallback(async () => {
+    try {
+        setProcesandoReporte(true);
+        
+        console.log('📋 Generando bitácora para:', tipoPintura);
+        
+        // 🔴 CREAR FUNCIÓN SINCRÓNICA PARA OBTENER OPERARIOS
+        const getOperarioSync = (numMaquina, fecha) => {
+            try {
+                const { getOperarioPorMaquinaSync } = require('../constants/config');
+                const operario = getOperarioPorMaquinaSync(numMaquina);
+                return operario || 'Sin asignar';
+            } catch (error) {
+                console.error(`❌ Error obteniendo operario para máquina ${numMaquina}:`, error);
+                return 'Sin asignar';
+            }
+        };
+        
+        // 🔴 LLAMAR AL SERVICIO CON LAS CARGAS CORRECTAS
+        await bitacoraService.generarPdf(
+            rondas,                           // Para Vinílicas
+            fechaTrabajo,                     // Fecha
+            tipoPintura,                      // Tipo
+            getOperarioSync,                  // Función para operarios
+            cargasEspeciales,                 // Cargas especiales
+            cargasEsmaltesAsignadas           // 🔴 NUEVO: Cargas de esmaltes
+        );
+        
+    } catch (error) { 
+        console.error('❌ Error en bitácora:', error);
+        alert("Error al generar bitácora: " + error.message); 
+    } finally { 
+        setProcesandoReporte(false);
+        setMenuReporteAbierto(false); 
+    }
+}, [rondas, cargasEspeciales, cargasEsmaltesAsignadas, tipoPintura, fechaTrabajo, setProcesandoReporte, setMenuReporteAbierto]);
 
     // Handler: Reporte del tablero
     const handleReporteTablero = useCallback(async () => {

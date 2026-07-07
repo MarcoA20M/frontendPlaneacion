@@ -187,9 +187,11 @@
   .resumen-operarios {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     padding: 5px 0;
   }
+
+  
 
   /* Botón de Operario (Copiado de tu .btn-family-explorer) */
   .card-op {
@@ -210,6 +212,37 @@
     white-space: nowrap;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
+
+/* 🔴 ESTO ES LO QUE DEBES MODIFICAR - EL CONTENEDOR PADRE */
+.resumen-operarios2 {
+  display: flex;
+  justify-content: flex-start; /* 🔴 Mueve todo a la izquierda */
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%; /* Ocupa todo el ancho disponible */
+}
+
+/* Tus botones individuales - SIN margin-right: auto */
+.card-op2 {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  /* 🔴 ELIMINA margin-right: auto de aquí */
+}
 
 
   .card-op:hover {

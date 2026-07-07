@@ -22,7 +22,6 @@ function TableroVinilica({
 
     // 🔴 FUNCIÓN PARA NOTIFICAR AL PADRE CUANDO CAMBIEN LOS OPERARIOS
     const notificarOperariosAlPadre = (nuevosOperarios) => {
-        console.log('📤 TableroVinilica: Notificando operarios al padre:', nuevosOperarios);
         if (onOperariosActualizados) {
             onOperariosActualizados(nuevosOperarios);
         }
@@ -31,11 +30,9 @@ function TableroVinilica({
     // 🔴 FUNCIÓN PARA ROTAR - LLAMA AL BACKEND
     const rotar = async (nuevasSemanas) => {
         setCargando(true);
-        console.log(`🔄 TableroVinilica: Rotando con semanas=${nuevasSemanas}`);
         try {
             const response = await fetch(`http://localhost:8080/api/operarios/vinilica/rotar?semanas=${nuevasSemanas}`);
             const data = await response.json();
-            console.log('✅ TableroVinilica: Respuesta del backend:', data);
             setOperariosPorMaquina(data);
             setSemanas(nuevasSemanas);
             
@@ -64,9 +61,7 @@ function TableroVinilica({
             const cargarBase = async () => {
                 setCargando(true);
                 try {
-                    console.log('🔄 TableroVinilica: Cargando orden base...');
                     const base = await operarioService.getBase();
-                    console.log('✅ TableroVinilica: Base cargada:', base);
                     setOperariosPorMaquina(base);
                     setFechaRotacion(new Date());
                     
@@ -92,10 +87,8 @@ function TableroVinilica({
     // 🔴 ESCUCHAR EVENTO DE NAVEGACIÓN DESDE NIVEBAR
     useEffect(() => {
         const handleNavegarSemana = (e) => {
-            console.log('🔄 TableroVinilica: Evento navegarSemana recibido:', e.detail);
             
-            let nuevasSemanas = semanas;
-            
+            let nuevasSemanas = semanas;            
             switch (e.detail.direccion) {
                 case 'anterior':
                     nuevasSemanas = Math.max(0, semanas - 1);

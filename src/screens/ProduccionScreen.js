@@ -101,7 +101,6 @@ export default function ProduccionScreen() {
 
     // 🔴🔴🔴 FUNCIÓN PARA ACTUALIZAR OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const handleOperariosActualizados = (nuevosOperarios) => {
-        console.log('📊 ProduccionScreen: Operarios Vinílicos actualizados:', nuevosOperarios);
         setOperariosPorMaquina(nuevosOperarios || {});
     };
 
@@ -652,17 +651,17 @@ export default function ProduccionScreen() {
                                 </button>
                             </div>
                             {tipoPintura === "Esmalte" && (
-                                <div className="resumen-operarios" style={{ display: 'flex', gap: '8px' }}>
-                                    <button className={`card-op ${modoEsmalte === null ? 'active' : ''}`} onClick={() => setModoEsmalte(null)}>
+                                <div className="resumen-operarios2" style={{ display: 'flex', gap: '8px' }}>
+                                    <button className={`card-op2 ${modoEsmalte === null ? 'active' : ''}`} onClick={() => setModoEsmalte(null)}>
                                         🌍 General ({stats.total})
                                     </button>
-                                    <button className={`card-op ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`} onClick={() => setModoEsmalte('DIRECTO')}>
+                                    <button className={`card-op2 ${modoEsmalte === 'DIRECTO' ? 'active' : ''}`} onClick={() => setModoEsmalte('DIRECTO')}>
                                         🚀 Directos ({stats.directos})
                                     </button>
-                                    <button className={`card-op ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`} onClick={() => setModoEsmalte('MOLIENDA')}>
+                                    <button className={`card-op2 ${modoEsmalte === 'MOLIENDA' ? 'active' : ''}`} onClick={() => setModoEsmalte('MOLIENDA')}>
                                         ⚙️ Molienda ({stats.molienda})
                                     </button>
-                                    <button className={`card-op ${modoEsmalte === 'PREPARADO' ? 'active' : ''}`} onClick={() => setModoEsmalte('PREPARADO')}>
+                                    <button className={`card-op2 ${modoEsmalte === 'PREPARADO' ? 'active' : ''}`} onClick={() => setModoEsmalte('PREPARADO')}>
                                         🧪 Preparado ({stats.preparado})
                                     </button>
                                 </div>

@@ -83,24 +83,18 @@ export function useProduccion() {
     // ============================================================
     const cargarOperariosEsmaltes = useCallback(async () => {
         try {
-            console.log('🔄 useProduccion: Cargando operarios de esmaltes desde API...');
             const esmaltes = await operarioService.getEsmaltes();
-            console.log('📦 useProduccion: getEsmaltes() devolvió:', esmaltes);
             
             if (esmaltes && Array.isArray(esmaltes) && esmaltes.length > 0) {
                 setOperariosEsmaltes(esmaltes);
-                console.log('✅ useProduccion: Operarios guardados:', esmaltes);
                 esmaltes.forEach(op => {
-                    console.log(`  • ${op.nombre} - ${op.puesto} (ID: ${op.id})`);
                 });
             } else {
-                console.warn('⚠️ useProduccion: No se encontraron operarios de esmaltes');
                 setOperariosEsmaltes([]);
             }
             setCargandoOperarios(false);
             return esmaltes;
         } catch (error) {
-            console.error('❌ useProduccion: Error cargando operarios:', error);
             setOperariosEsmaltes([]);
             setCargandoOperarios(false);
             return [];
@@ -111,7 +105,6 @@ export function useProduccion() {
     // 🔴 OBTENER NOMBRES DE OPERARIOS POR PUESTO DESDE BD
     // ============================================================
     const getNombresOperariosEsmaltes = useCallback(async () => {
-        console.log('🔍 useProduccion: Obteniendo nombres de operarios por puesto...');
         
         let operarios = operariosEsmaltes;
         if (!operarios || operarios.length === 0) {
@@ -144,10 +137,7 @@ export function useProduccion() {
             terminados: terminados
         };
         
-        console.log('📊 useProduccion - Nombres por puesto:', resultado);
-        console.log(`  • Preparadores: ${resultado.preparadores.join(', ') || 'Ninguno'}`);
-        console.log(`  • Molienda: ${resultado.molienda.join(', ') || 'Ninguno'}`);
-        console.log(`  • Terminados: ${resultado.terminados.join(', ') || 'Ninguno'}`);
+    
         
         return resultado;
     }, [operariosEsmaltes, cargarOperariosEsmaltes]);
@@ -168,7 +158,6 @@ export function useProduccion() {
             if (event.detail && event.detail.operarios) {
                 const esmaltes = event.detail.operarios.filter(op => op.area === 'esmaltes');
                 setOperariosEsmaltes(esmaltes);
-                console.log('✅ useProduccion: Operarios actualizados:', esmaltes);
             }
         };
         
@@ -230,7 +219,6 @@ export function useProduccion() {
             
             const consumosActualizados = [...consumosExistentes, ...nuevosConsumos];
             localStorage.setItem('consumosBases', JSON.stringify(consumosActualizados));
-            console.log('✅ Consumos guardados en localStorage:', nuevosConsumos.length);
         } catch (error) {
             console.error('Error guardando consumos en localStorage:', error);
         }

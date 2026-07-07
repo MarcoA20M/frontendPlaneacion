@@ -1,6 +1,42 @@
+// services/bitacoraService.js - VERSIÓN CORREGIDA
+
 export const bitacoraService = {
   async generarPdf(rondas, fecha, tipo, getOperario, cargasEspeciales = []) {
-    // Procesar rondas normales (8 máquinas VI-101 a VI-108)
+    // ============================================================
+    // 🔴 1. OBTENER OPERARIOS - RESOLVIENDO PROMESAS
+    // ============================================================
+    
+    // 8 operarios (VI-101 a VI-108)
+    const listaOperarios = [];
+    
+    for (let i = 0; i < 8; i++) {
+      const numMaquina = 101 + i;
+      try {
+        let operario = getOperario(numMaquina, fecha);
+        
+        // 🔴 Si es una Promise, esperar a que resuelva
+        if (operario && typeof operario.then === 'function') {
+          operario = await operario;
+        }
+        
+        // 🔴 Si es un objeto, extraer el nombre
+        if (typeof operario === 'object' && operario !== null) {
+          operario = operario.nombre || operario.name || operario.Nombre || operario.Name || 'Sin asignar';
+        }
+        
+        listaOperarios.push(String(operario || 'Sin asignar'));
+      } catch (error) {
+        console.error(`❌ Error obteniendo operario para máquina ${numMaquina}:`, error);
+        listaOperarios.push('Sin asignar');
+      }
+    }
+    
+    console.log('📋 Operarios para bitácora:', listaOperarios);
+
+    // ============================================================
+    // 🔴 2. PROCESAR RONDAS
+    // ============================================================
+    
     const rondasProcesadas = rondas.map(fila => 
       fila.map(celda => {
         if (!celda) return null;
@@ -12,20 +48,17 @@ export const bitacoraService = {
       })
     );
 
-    // 8 operarios (VI-101 a VI-108)
-    const listaOperarios = Array.from({ length: 8 }, (_, i) => getOperario(101 + i, fecha));
-
-    // Filtrar cargas especiales del tipo actual
+    // ============================================================
+    // 🔴 3. FILTRAR CARGAS ESPECIALES
+    // ============================================================
+    
     const especialesFiltradas = cargasEspeciales.filter(c => c.tipo === tipo);
 
-    // Asegurar que las cargas especiales tengan la estructura correcta
     const especialesFormateadas = especialesFiltradas.map(carga => {
-      // Si tiene detallesEnvasado, asegurar que sea un array
       if (carga.detallesEnvasado && !Array.isArray(carga.detallesEnvasado)) {
         carga.detallesEnvasado = [carga.detallesEnvasado];
       }
       
-      // Si no tiene detallesEnvasado pero tiene envasado, convertirlo
       if (!carga.detallesEnvasado && carga.envasado) {
         const parts = carga.envasado.split('-');
         carga.detallesEnvasado = [{
@@ -37,12 +70,16 @@ export const bitacoraService = {
       return carga;
     });
 
+    // ============================================================
+    // 🔴 4. ENVIAR AL BACKEND
+    // ============================================================
+
     const response = await fetch("http://localhost:5000/generar_bitacora_impresion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         rondas: rondasProcesadas,
-        operarios: listaOperarios,
+        operarios: listaOperarios,  // 🔴 Ahora es una lista de strings
         fecha: fecha.toLocaleDateString('es-ES'),
         tipo,
         cargasEspeciales: especialesFormateadas

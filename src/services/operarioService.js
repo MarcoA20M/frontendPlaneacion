@@ -16,18 +16,14 @@ export const operarioService = {
   },
   
   rotar: async (semanas) => {
-    console.log(`🔄 FRONTEND: Llamando a /vinilica/rotar?semanas=${semanas}`);
     const response = await axios.get(`${API_URL}/vinilica/rotar`, {
       params: { semanas }
     });
-    console.log('✅ FRONTEND: Respuesta de rotar:', response.data);
     return response.data;
   },
   
   getBase: async () => {
-    console.log(`🔄 FRONTEND: Llamando a /vinilica/base`);
     const response = await axios.get(`${API_URL}/vinilica/base`);
-    console.log('✅ FRONTEND: Respuesta de base:', response.data);
     return response.data;
   },
   
@@ -48,9 +44,7 @@ export const operarioService = {
   
   // ========== ESMALTES ==========
   getEsmaltes: async () => {
-    console.log('🔄 FRONTEND: Llamando a /esmaltes');
-    const response = await axios.get(`${API_URL}/esmaltes`);
-    console.log('✅ FRONTEND: Respuesta de getEsmaltes():', response.data);
+   const response = await axios.get(`${API_URL}/esmaltes`);
     return response.data;
   },
   
@@ -61,9 +55,7 @@ export const operarioService = {
   
   // 🔴 NUEVO: Obtener TODOS los operarios
   getAll: async () => {
-    console.log('🔄 FRONTEND: Llamando a /operarios (todos)');
     const response = await axios.get(`${API_URL}`);
-    console.log('✅ FRONTEND: Respuesta de getAll():', response.data);
     return response.data;
   },
   

@@ -37,7 +37,23 @@ export const isCodigoExcluido = (codigo) => {
 };
 
 // ========== LITROS ==========
-export const litrosPorEnvasado = (id) => (id >= 100 ? id / 1000 : id);
+export const litrosPorEnvasado = (id) => {
+    const idNum = Number(id);
+    
+    if (idNum === 19) return 19;
+    if (idNum === 18) return 18;
+    if (idNum === 4) return 4;
+    if (idNum === 1) return 1;
+    if (idNum === 0.75 || idNum === 750) return 0.75;
+    if (idNum === 0.5 || idNum === 500) return 0.5;
+    if (idNum === 0.25 || idNum === 250) return 0.25;
+    if (idNum === 378) return 3.78;
+    if (idNum === 946) return 0.946;
+    if (idNum === 1000) return 1.0;
+    
+    if (idNum >= 100) return idNum / 1000;
+    return idNum;
+};
 
 export const litrosATexto = (l) => {
   if (l === 0.25) return "1/4 L";
@@ -47,12 +63,78 @@ export const litrosATexto = (l) => {
   return `${l} L`;
 };
 
-// ========== 🔴 ROTACIÓN VINÍLICA (USANDO operarioService) ==========
+// ============================================================
+// 🔴 CACHE DE OPERARIOS (SINCRÓNICO)
+// ============================================================
+let operariosCache = null;
+let ultimaActualizacionCache = null;
+const TIEMPO_CACHE = 30000; // 30 segundos
 
-/**
- * Obtiene el operario asignado a una máquina para una fecha específica
- * SIEMPRE va al backend, NO usa cache
- */
+// 🔴 Función para obtener operarios del cache o localStorage (SINCRÓNICA)
+const obtenerOperariosCache = () => {
+    try {
+        // Si el cache es válido, usarlo
+        if (operariosCache && ultimaActualizacionCache && 
+            (Date.now() - ultimaActualizacionCache) < TIEMPO_CACHE) {
+            return operariosCache;
+        }
+        
+        // Intentar del localStorage
+        const guardado = localStorage.getItem("operarios_vinilica");
+        if (guardado) {
+            const data = JSON.parse(guardado);
+            if (data && Object.keys(data).length > 0) {
+                operariosCache = data;
+                ultimaActualizacionCache = Date.now();
+                return data;
+            }
+        }
+    } catch (error) {
+        console.error("Error obteniendo operarios cache:", error);
+    }
+    return null;
+};
+
+// ============================================================
+// 🔴 VERSIÓN SINCRÓNICA DE getOperarioPorMaquina (PARA PDF)
+// ============================================================
+export const getOperarioPorMaquinaSync = (idMaquina) => {
+    const maquinaId = typeof idMaquina === 'string' ? parseInt(idMaquina) : idMaquina;
+    
+    // Fallbacks estáticos
+    const fallbacks = {
+        101: 'Isaac',
+        102: 'Juan',
+        103: 'Pedro',
+        104: 'Luis',
+        105: 'Carlos',
+        106: 'Javier',
+        107: 'Miguel',
+        108: 'Roberto'
+    };
+    
+    try {
+        // Intentar obtener del cache
+        const cache = obtenerOperariosCache();
+        if (cache && cache[maquinaId]) {
+            const operario = cache[maquinaId];
+            if (typeof operario === 'object' && operario !== null) {
+                return operario.nombre || operario.name || fallbacks[maquinaId] || 'Sin asignar';
+            }
+            return String(operario || fallbacks[maquinaId] || 'Sin asignar');
+        }
+        
+        // Fallback estático
+        return fallbacks[maquinaId] || 'Sin asignar';
+    } catch (error) {
+        console.error('❌ Error en getOperarioPorMaquinaSync:', error);
+        return fallbacks[maquinaId] || 'Sin asignar';
+    }
+};
+
+// ============================================================
+// 🔴 VERSIÓN ASYNC ORIGINAL (MANTENER PARA OTROS USOS)
+// ============================================================
 export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), usarRotacion = true) => {
   const maquinaId = typeof idMaquina === 'string' ? parseInt(idMaquina) : idMaquina;
   
@@ -67,24 +149,35 @@ export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), us
   if (!grupoId) return "Operario V";
 
   try {
-    // Obtener rotación desde el backend usando el servicio
     console.log(`🔄 Obteniendo operario para máquina ${maquinaId} en fecha ${fechaRef.toISOString().split('T')[0]}`);
     
     const rotacion = await operarioService.getRotacion(fechaRef);
-    
-    // Buscar el operario para esta máquina
     const operario = rotacion[maquinaId];
+    
+    // Actualizar cache
+    if (operario) {
+        try {
+            const cache = obtenerOperariosCache() || {};
+            cache[maquinaId] = operario;
+            operariosCache = cache;
+            ultimaActualizacionCache = Date.now();
+            localStorage.setItem("operarios_vinilica", JSON.stringify(cache));
+        } catch (e) { /* ignorar */ }
+    }
+    
     return operario || "Desconocido";
     
   } catch (error) {
     console.error('❌ Error obteniendo operario:', error);
-    return "Error";
+    // Fallback a versión sincrónica
+    return getOperarioPorMaquinaSync(maquinaId);
   }
 };
 
-/**
- * Obtiene la configuración completa de rotación para todas las máquinas
- */
+// ============================================================
+// 🔴 FUNCIONES ADICIONALES
+// ============================================================
+
 export const getConfiguracionRotacionActual = async (fechaRef = new Date()) => {
   try {
     const rotacion = await operarioService.getRotacion(fechaRef);
@@ -95,9 +188,6 @@ export const getConfiguracionRotacionActual = async (fechaRef = new Date()) => {
   }
 };
 
-/**
- * Obtiene la configuración base de vinílica (operarios + grupos)
- */
 export const getConfiguracionVinilica = async () => {
   try {
     const config = await operarioService.getConfiguracionVinilica();
@@ -108,9 +198,6 @@ export const getConfiguracionVinilica = async () => {
   }
 };
 
-/**
- * Obtiene la lista de operarios de vinílica en orden
- */
 export const getOperariosVinilica = async () => {
   try {
     const operarios = await operarioService.getVinilica();

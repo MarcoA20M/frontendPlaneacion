@@ -381,15 +381,15 @@
 }
 
 .mini-codigo2 {
-    font-size: 1.5rem; /* Tamaño optimizado para el código */
+    font-size: 1.4rem;
     font-weight: 900;
     color: #fff;
-    margin: 5px 0;
+    margin: -11px 0 5px 0;  /* 🔴 CAMBIADO: antes era 5px 0, ahora 2px arriba */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
 .descripcion-text {
-    font-size: 0.85rem; /* Tamaño optimizado para descripción */
+    font-size: 0.74rem; /* Tamaño optimizado para descripción */
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
     line-height: 1.2;

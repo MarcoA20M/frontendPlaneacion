@@ -52,11 +52,9 @@ function ResumenOperarios({
   };
 
   const cargarDatos = () => {
-    console.log('🔄 ResumenOperarios: Cargando datos...', { tipoPintura, operariosEsmaltes: operariosEsmaltes.length });
     
     if (tipoPintura === "Vinílica") {
       if (!operariosPorMaquina || typeof operariosPorMaquina !== 'object' || Object.keys(operariosPorMaquina).length === 0) {
-        console.log('⏳ ResumenOperarios: Esperando datos de vinílicas...');
         if (!datosCargados) {
           setCargando(true);
         }
@@ -66,7 +64,6 @@ function ResumenOperarios({
     
     if (tipoPintura === "Esmalte") {
       if (!operariosEsmaltes || operariosEsmaltes.length === 0) {
-        console.log('⏳ ResumenOperarios: Esperando datos de esmaltes...');
         if (!datosCargados) {
           setCargando(true);
         }
@@ -74,7 +71,6 @@ function ResumenOperarios({
       }
     }
 
-    console.log('✅ ResumenOperarios: Procesando datos...');
     setCargando(true);
     setError(null);
     const data = {};
@@ -82,7 +78,6 @@ function ResumenOperarios({
     try {
       if (tipoPintura === "Vinílica") {
         const todosLosOperarios = obtenerTodosLosOperarios();
-        console.log('📊 Operarios Vinílicos en orden:', todosLosOperarios);
         
         if (todosLosOperarios.length === 0) {
           setResumen([]);
@@ -127,15 +122,11 @@ function ResumenOperarios({
           }
         });
         
-        console.log('📊 Resumen FINAL Vinílicas:', resultado.map(r => `${r.nombre}: ${r.total}`));
         setResumen(resultado);
         setDatosCargados(true);
         
       } else {
-        // ============================================================
-        // 🔴 ESMALTES - Usar operarios desde la BD
-        // ============================================================
-        console.log('📊 Procesando ESMALTES con operarios:', operariosEsmaltes);
+        
         
         operariosEsmaltes.forEach(op => {
           const nombre = op.nombre;
@@ -174,7 +165,6 @@ function ResumenOperarios({
             return a.nombre.localeCompare(b.nombre);
           });
         
-        console.log('📊 Resumen FINAL Esmaltes:', resultado.map(r => `${r.nombre}: ${r.total}`));
         setResumen(resultado);
         setDatosCargados(true);
       }
@@ -190,7 +180,6 @@ function ResumenOperarios({
   // 🔴 Cuando cambian los operarios de vinílicas
   useEffect(() => {
     if (tipoPintura === "Vinílica" && operariosPorMaquina && Object.keys(operariosPorMaquina).length > 0) {
-      console.log('🔄 ResumenOperarios: operariosPorMaquina cambió');
       cargarDatos();
     }
   }, [operariosPorMaquina]);
@@ -198,14 +187,12 @@ function ResumenOperarios({
   // 🔴 Cuando cambian los operarios de esmaltes
   useEffect(() => {
     if (tipoPintura === "Esmalte" && operariosEsmaltes && operariosEsmaltes.length > 0) {
-      console.log('🔄 ResumenOperarios: operariosEsmaltes cambió, recargando...');
       cargarDatos();
     }
   }, [operariosEsmaltes]);
 
   // 🔴 Cuando cambia el tipo de pintura
   useEffect(() => {
-    console.log('🔄 ResumenOperarios: tipoPintura cambió a', tipoPintura);
     // Forzar recarga con un nuevo key
     setKey(prev => prev + 1);
     if (tipoPintura === "Esmalte" && operariosEsmaltes && operariosEsmaltes.length > 0) {
@@ -232,7 +219,6 @@ function ResumenOperarios({
   // ESCUCHAR EVENTOS
   useEffect(() => {
     const handleRotacionActualizada = (e) => {
-      console.log('🔄 ResumenOperarios: Rotación actualizada');
       setKey(prev => prev + 1);
       if (operariosPorMaquina && Object.keys(operariosPorMaquina).length > 0) {
         cargarDatos();
@@ -242,7 +228,6 @@ function ResumenOperarios({
     window.addEventListener('rotacionActualizada', handleRotacionActualizada);
     
     const handleNavegarSemana = (e) => {
-      console.log('🔄 ResumenOperarios: Navegación de semana');
       setTimeout(() => {
         if (operariosPorMaquina && Object.keys(operariosPorMaquina).length > 0) {
           cargarDatos();

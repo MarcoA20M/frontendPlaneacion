@@ -30,6 +30,8 @@ import "../styles/rondas.css";
 import "../styles/esmaltes.css";
 import "../styles/familias-screen.css";
 
+const STORAGE_KEY = 'cargas_almacenadas';
+
 export default function ProduccionScreen() {
     const navigate = useNavigate();
     const {
@@ -62,6 +64,16 @@ export default function ProduccionScreen() {
     const [progreso, setProgreso] = useState(0);
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
+
+    // --- ESTADO PARA CONTADOR DE CARGAS EN LOCALSTORAGE ---
+    const [cargasEnLocalStorage, setCargasEnLocalStorage] = useState(() => {
+        try {
+            const datos = localStorage.getItem(STORAGE_KEY);
+            return datos ? JSON.parse(datos) : [];
+        } catch {
+            return [];
+        }
+    });
 
     // --- ESTADO PARA MODAL DE BÚSQUEDA SIN RESULTADOS ---
     const [mostrarModalSinResultados, setMostrarModalSinResultados] = useState(false);
@@ -98,6 +110,99 @@ export default function ProduccionScreen() {
 
     // 🔴🔴🔴 NUEVO: ESTADO PARA OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const [operariosPorMaquina, setOperariosPorMaquina] = useState({});
+
+    // --- EFECTO PARA ACTUALIZAR EL CONTADOR CUANDO CAMBIA EL LOCALSTORAGE ---
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === STORAGE_KEY) {
+                try {
+                    const datos = e.newValue ? JSON.parse(e.newValue) : [];
+                    setCargasEnLocalStorage(datos);
+                    console.log('Storage actualizado desde otra pestaña:', datos.length);
+                } catch (error) {
+                    console.error('Error al parsear datos del storage:', error);
+                }
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    // --- EFECTO PARA ACTUALIZAR EL CONTADOR CUANDO SE CIERRA EL MODAL ---
+    useEffect(() => {
+        if (!mostrarModal) {
+            // Cuando se cierra el modal, actualizar el contador
+            try {
+                const datos = localStorage.getItem(STORAGE_KEY);
+                if (datos) {
+                    const parsed = JSON.parse(datos);
+                    setCargasEnLocalStorage(parsed);
+                    console.log('Contador actualizado al cerrar modal:', parsed.length);
+                } else {
+                    setCargasEnLocalStorage([]);
+                }
+            } catch (error) {
+                console.error('Error al leer localStorage al cerrar modal:', error);
+            }
+        }
+    }, [mostrarModal]);
+
+    // --- EFECTO PARA SINCRONIZAR COLA CARGAS CON LOCALSTORAGE ---
+    useEffect(() => {
+        try {
+            const datos = localStorage.getItem(STORAGE_KEY);
+            if (datos) {
+                const cargasStorage = JSON.parse(datos);
+                // Filtrar solo las del tipo actual
+                const cargasDelTipo = cargasStorage.filter(c => c.tipo === tipoPintura);
+                
+                // Verificar si hay diferencias
+                const cargasActuales = colaCargas.filter(c => c.tipo === tipoPintura);
+                
+                // Si hay cargas en storage que no están en colaCargas, agregarlas
+                const nuevasCargas = cargasDelTipo.filter(c => 
+                    !cargasActuales.some(ex => ex.idTemp === c.idTemp)
+                );
+                
+                if (nuevasCargas.length > 0) {
+                    console.log('Sincronizando colaCargas con localStorage - agregando:', nuevasCargas.length);
+                    setColaCargas(prev => {
+                        // Evitar duplicados
+                        const existentes = prev.filter(c => c.tipo === tipoPintura);
+                        const idsExistentes = new Set(existentes.map(c => c.idTemp));
+                        const cargasUnicas = nuevasCargas.filter(c => !idsExistentes.has(c.idTemp));
+                        return [...prev, ...cargasUnicas];
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error sincronizando colaCargas con localStorage:', error);
+        }
+    }, [tipoPintura, mostrarModal]);
+
+    // --- EFECTO PARA GUARDAR COLA CARGAS EN LOCALSTORAGE ---
+    useEffect(() => {
+        // Guardar colaCargas en localStorage cuando cambie
+        try {
+            const cargasActuales = colaCargas.filter(c => c.tipo === tipoPintura);
+            // Obtener cargas actuales del storage
+            const storageData = localStorage.getItem(STORAGE_KEY);
+            let todasLasCargas = storageData ? JSON.parse(storageData) : [];
+            
+            // Eliminar las cargas del tipo actual del storage
+            todasLasCargas = todasLasCargas.filter(c => c.tipo !== tipoPintura);
+            
+            // Agregar las cargas actuales
+            todasLasCargas = [...todasLasCargas, ...cargasActuales];
+            
+            // Guardar en storage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(todasLasCargas));
+            setCargasEnLocalStorage(todasLasCargas);
+        } catch (error) {
+            console.error('Error guardando colaCargas en localStorage:', error);
+        }
+    }, [colaCargas, tipoPintura]);
 
     // 🔴🔴🔴 FUNCIÓN PARA ACTUALIZAR OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const handleOperariosActualizados = (nuevosOperarios) => {
@@ -360,6 +465,11 @@ export default function ProduccionScreen() {
         };
     }, []);
 
+    // --- CALCULAR CONTADOR DE CARGAS EN LOCALSTORAGE PARA EL TIPO ACTUAL ---
+    const contarCargasEnLocalStorage = useMemo(() => {
+        return cargasEnLocalStorage.filter(c => c.tipo === tipoPintura).length;
+    }, [cargasEnLocalStorage, tipoPintura]);
+
     const colaFiltrada = useMemo(() => colaCargas.filter(c => c.tipo === tipoPintura), [colaCargas, tipoPintura]);
 
     const stats = useMemo(() => {
@@ -562,7 +672,7 @@ export default function ProduccionScreen() {
                         <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
                         <div className="dropdown-container">
                             <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>
-                                📂 Gestión ({colaFiltrada.length})
+                                📂 Gestión ({contarCargasEnLocalStorage})
                             </button>
                             {menuCargasAbierto && (
                                 <div className="dropdown-menu">
@@ -588,7 +698,7 @@ export default function ProduccionScreen() {
                                     )}
 
                                     <button className="dropdown-item" onClick={() => { setMostrarModal(true); setMenuCargasAbierto(false); }}>
-                                        📋 Lista Espera ({colaFiltrada.length})
+                                        📋 Lista Espera ({contarCargasEnLocalStorage})
                                     </button>
                                     <label className="dropdown-item label-input">
                                         📊 Importar Excel <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleImportExcelConProgreso} />
@@ -776,9 +886,39 @@ export default function ProduccionScreen() {
                 visible={mostrarModal}
                 cargas={colaFiltrada}
                 onClose={() => setMostrarModal(false)}
-                onEliminarCarga={(id) => setColaCargas(prev => prev.filter(c => c.idTemp !== id))}
-                onVaciarTodo={() => setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura))}
-                onGuardar={(c) => { guardarCargasEnRondas(c); setMostrarModal(false); }}
+                onEliminarCarga={(id) => {
+                    setColaCargas(prev => prev.filter(c => c.idTemp !== id));
+                    // Actualizar el contador
+                    try {
+                        const datos = localStorage.getItem(STORAGE_KEY);
+                        if (datos) {
+                            setCargasEnLocalStorage(JSON.parse(datos));
+                        }
+                    } catch {}
+                }}
+                onVaciarTodo={() => {
+                    setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura));
+                    // Actualizar el contador
+                    try {
+                        const datos = localStorage.getItem(STORAGE_KEY);
+                        if (datos) {
+                            setCargasEnLocalStorage(JSON.parse(datos));
+                        }
+                    } catch {}
+                }}
+                onGuardar={(c) => { 
+                    guardarCargasEnRondas(c); 
+                    setMostrarModal(false);
+                    // Actualizar el contador
+                    try {
+                        const datos = localStorage.getItem(STORAGE_KEY);
+                        if (datos) {
+                            setCargasEnLocalStorage(JSON.parse(datos));
+                        } else {
+                            setCargasEnLocalStorage([]);
+                        }
+                    } catch {}
+                }}
                 onGenerarLotes={generarLotesFinales}
                 onSeleccionarCarga={(carga) => {
                     setCargaSeleccionada(carga);

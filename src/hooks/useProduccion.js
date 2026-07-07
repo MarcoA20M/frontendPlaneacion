@@ -7,6 +7,12 @@ import { formulasService } from "../services/formulasService";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import { operarioService } from "../services/operarioService";
 
+// --- CONSTANTES PARA LOCALSTORAGE ---
+const STORAGE_KEY_RONDAS = 'rondas_vinilica';
+const STORAGE_KEY_ESMALTES = 'cargas_esmaltes_asignadas';
+const STORAGE_KEY_ESPECIALES = 'cargas_especiales';
+const STORAGE_KEY_COLA = 'cola_cargas';
+
 // --- FUNCIÓN DE UTILIDAD: GENERACIÓN DE FOLIOS ---
 const generarFolioAutomatico = (tipo, cola, rondas, esmaltes, especiales) => {
     const hoy = new Date();
@@ -59,11 +65,70 @@ export function useProduccion() {
     const [codigo, setCodigo] = useState("");
     const [producto, setProducto] = useState(null);
     const [cantidades, setCantidades] = useState({});
-    const [colaCargas, setColaCargas] = useState([]);
-    const [cargasEspeciales, setCargasEspeciales] = useState([]);
+    
+    // --- INICIALIZAR COLA CARGAS DESDE LOCALSTORAGE ---
+    const [colaCargas, setColaCargas] = useState(() => {
+        try {
+            const guardado = localStorage.getItem(STORAGE_KEY_COLA);
+            if (guardado) {
+                const parsed = JSON.parse(guardado);
+                console.log('📥 Cargando colaCargas desde localStorage:', parsed.length);
+                return parsed;
+            }
+        } catch (error) {
+            console.error('Error cargando colaCargas de localStorage:', error);
+        }
+        return [];
+    });
+
+    // --- INICIALIZAR CARGAS ESPECIALES DESDE LOCALSTORAGE ---
+    const [cargasEspeciales, setCargasEspeciales] = useState(() => {
+        try {
+            const guardado = localStorage.getItem(STORAGE_KEY_ESPECIALES);
+            if (guardado) {
+                const parsed = JSON.parse(guardado);
+                console.log('📥 Cargando cargasEspeciales desde localStorage:', parsed.length);
+                return parsed;
+            }
+        } catch (error) {
+            console.error('Error cargando cargasEspeciales de localStorage:', error);
+        }
+        return [];
+    });
+
     const [tipoPintura, setTipoPintura] = useState("Vinílica");
-    const [rondas, setRondas] = useState(Array.from({ length: 8 }, () => Array(6).fill(null)));
-    const [cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas] = useState([]);
+    
+    // --- INICIALIZAR RONDAS DESDE LOCALSTORAGE ---
+    const [rondas, setRondas] = useState(() => {
+        try {
+            const guardado = localStorage.getItem(STORAGE_KEY_RONDAS);
+            if (guardado) {
+                const parsed = JSON.parse(guardado);
+                console.log('📥 Cargando rondas desde localStorage:', parsed.length);
+                return parsed;
+            }
+        } catch (error) {
+            console.error('Error cargando rondas de localStorage:', error);
+        }
+        // 8 máquinas x 6 rondas
+        return Array.from({ length: 8 }, () => Array(6).fill(null));
+    });
+
+    // --- INICIALIZAR ESMALTES ASIGNADOS DESDE LOCALSTORAGE ---
+    const [cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas] = useState(() => {
+        try {
+            const guardado = localStorage.getItem(STORAGE_KEY_ESMALTES);
+            if (guardado) {
+                const parsed = JSON.parse(guardado);
+                console.log('📥 Cargando cargasEsmaltesAsignadas desde localStorage:', parsed.length);
+                return parsed;
+            }
+        } catch (error) {
+            console.error('Error cargando cargasEsmaltesAsignadas de localStorage:', error);
+        }
+        return [];
+    });
+
     const [cargandoExcel, setCargandoExcel] = useState(false);
     const [buscandoManual, setBuscandoManual] = useState(false);
     const [guardandoBD, setGuardandoBD] = useState(false);
@@ -79,6 +144,66 @@ export function useProduccion() {
     };
 
     // ============================================================
+    // 🔴 GUARDAR EN LOCALSTORAGE CUANDO CAMBIEN LOS DATOS
+    // ============================================================
+    
+    // Guardar colaCargas en localStorage
+    useEffect(() => {
+        try {
+            if (colaCargas.length > 0) {
+                localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaCargas));
+            } else {
+                localStorage.removeItem(STORAGE_KEY_COLA);
+            }
+        } catch (error) {
+            console.error('Error guardando colaCargas en localStorage:', error);
+        }
+    }, [colaCargas]);
+
+    // Guardar cargasEspeciales en localStorage
+    useEffect(() => {
+        try {
+            if (cargasEspeciales.length > 0) {
+                localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(cargasEspeciales));
+            } else {
+                localStorage.removeItem(STORAGE_KEY_ESPECIALES);
+            }
+        } catch (error) {
+            console.error('Error guardando cargasEspeciales en localStorage:', error);
+        }
+    }, [cargasEspeciales]);
+
+    // Guardar rondas en localStorage
+    useEffect(() => {
+        try {
+            if (rondas && rondas.length > 0) {
+                const tieneDatos = rondas.some(fila => fila.some(celda => celda !== null));
+                if (tieneDatos) {
+                    localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(rondas));
+                    console.log('💾 Rondas guardadas en localStorage');
+                } else {
+                    localStorage.removeItem(STORAGE_KEY_RONDAS);
+                }
+            }
+        } catch (error) {
+            console.error('Error guardando rondas en localStorage:', error);
+        }
+    }, [rondas]);
+
+    // Guardar cargasEsmaltesAsignadas en localStorage
+    useEffect(() => {
+        try {
+            if (cargasEsmaltesAsignadas.length > 0) {
+                localStorage.setItem(STORAGE_KEY_ESMALTES, JSON.stringify(cargasEsmaltesAsignadas));
+            } else {
+                localStorage.removeItem(STORAGE_KEY_ESMALTES);
+            }
+        } catch (error) {
+            console.error('Error guardando cargasEsmaltesAsignadas en localStorage:', error);
+        }
+    }, [cargasEsmaltesAsignadas]);
+
+    // ============================================================
     // 🔴 CARGAR OPERARIOS DE ESMALTES DESDE LA API
     // ============================================================
     const cargarOperariosEsmaltes = useCallback(async () => {
@@ -87,8 +212,6 @@ export function useProduccion() {
             
             if (esmaltes && Array.isArray(esmaltes) && esmaltes.length > 0) {
                 setOperariosEsmaltes(esmaltes);
-                esmaltes.forEach(op => {
-                });
             } else {
                 setOperariosEsmaltes([]);
             }
@@ -105,13 +228,10 @@ export function useProduccion() {
     // 🔴 OBTENER NOMBRES DE OPERARIOS POR PUESTO DESDE BD
     // ============================================================
     const getNombresOperariosEsmaltes = useCallback(async () => {
-        
         let operarios = operariosEsmaltes;
         if (!operarios || operarios.length === 0) {
             operarios = await cargarOperariosEsmaltes();
         }
-        
-        console.log('📋 useProduccion: Operarios disponibles:', operarios);
         
         const activos = operarios.filter(op => op.activo !== false);
         
@@ -131,15 +251,11 @@ export function useProduccion() {
             )
             .map(op => op.nombre);
         
-        const resultado = {
+        return {
             preparadores: preparadores,
             molienda: molienda,
             terminados: terminados
         };
-        
-    
-        
-        return resultado;
     }, [operariosEsmaltes, cargarOperariosEsmaltes]);
 
     // ============================================================
@@ -425,11 +541,9 @@ export function useProduccion() {
                 return String(a.folio).localeCompare(String(b.folio));
             });
 
-            // 🔴 OBTENER NOMBRES DINÁMICOS DESDE BD
             const nombres = await getNombresOperariosEsmaltes();
             
             const defaultOperario = nombres.preparadores[0] || nombres.molienda[0] || nombres.terminados[0] || '';
-            console.log('👤 Default operario:', defaultOperario || 'Ninguno');
 
             esmaltesOrdenados.forEach(carga => {
                 if (!carga.operario || carga.operario === "") {
@@ -551,7 +665,6 @@ export function useProduccion() {
                 const resultadoConsumo = await consumirBasesDeCargas(todas);
                 
                 if (resultadoConsumo && resultadoConsumo.basesConsumidas && resultadoConsumo.basesConsumidas.length > 0) {
-                    
                     guardarConsumosEnLocalStorage(resultadoConsumo.basesConsumidas);
 
                     try {
@@ -673,6 +786,16 @@ export function useProduccion() {
             if (window.recargarCriticos) {
                 window.recargarCriticos();
             }
+
+            // Limpiar localStorage después de guardar
+            localStorage.removeItem(STORAGE_KEY_RONDAS);
+            localStorage.removeItem(STORAGE_KEY_ESMALTES);
+            localStorage.removeItem(STORAGE_KEY_ESPECIALES);
+            localStorage.removeItem(STORAGE_KEY_COLA);
+            setColaCargas([]);
+            setRondas(Array.from({ length: 8 }, () => Array(6).fill(null)));
+            setCargasEsmaltesAsignadas([]);
+            setCargasEspeciales([]);
 
             alert("✅ Producción guardada con éxito");
 
@@ -928,20 +1051,21 @@ export function useProduccion() {
     // GUARDAR CARGAS EN RONDAS - CON OPERARIOS DINÁMICOS DESDE BD
     // ============================================================
     const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
+        console.log('📦 guardarCargasEnRondas - Cargas a guardar:', cargasAGuardar?.length || 0);
+        
+        if (!cargasAGuardar || cargasAGuardar.length === 0) {
+            console.warn('⚠️ No hay cargas para guardar');
+            return;
+        }
+
         const idsAsignados = [];
         
         if (tipoPintura === "Esmalte") {
             const nombres = await getNombresOperariosEsmaltes();
             
-            console.log('📋 useProduccion - Nombres para asignación:', nombres);
-            
             const preparadores = nombres.preparadores || [];
             const molienda = nombres.molienda || [];
             const terminados = nombres.terminados || [];
-
-            console.log('👤 Preparadores:', preparadores.length > 0 ? preparadores : 'Ninguno');
-            console.log('👤 Molienda:', molienda.length > 0 ? molienda : 'Ninguno');
-            console.log('👤 Terminados:', terminados.length > 0 ? terminados : 'Ninguno');
 
             let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
             
@@ -993,12 +1117,24 @@ export function useProduccion() {
                 });
                 idsAsignados.push(carga.idTemp);
             });
-            setCargasEsmaltesAsignadas(ordenarCargas(tempAsignadasEsmaltes));
+            
+            const esmaltesOrdenados = ordenarCargas(tempAsignadasEsmaltes);
+            setCargasEsmaltesAsignadas(esmaltesOrdenados);
+            
+            // Guardar en localStorage
+            try {
+                localStorage.setItem(STORAGE_KEY_ESMALTES, JSON.stringify(esmaltesOrdenados));
+            } catch (error) {
+                console.error('Error guardando esmaltes en localStorage:', error);
+            }
         } else {
-            const nuevasRondas = [...rondas.map(f => [...f])];
+            // VINÍLICA - Guardar en rondas
+            const nuevasRondas = rondas.map(f => [...f]);
             const nuevasEspeciales = [...cargasEspeciales];
+            
             cargasAGuardar.forEach((carga) => {
                 let asignada = false;
+                // Buscar espacio en las rondas
                 for (let col = 0; col < 6 && !asignada; col++) {
                     for (let fila = 0; fila < 8; fila++) {
                         if (!nuevasRondas[fila][col]) {
@@ -1020,11 +1156,37 @@ export function useProduccion() {
                     idsAsignados.push(carga.idTemp); 
                 }
             });
-            setRondas(nuevasRondas); 
+            
+            setRondas(nuevasRondas);
             setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+            
+            // Guardar en localStorage
+            try {
+                localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
+                localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
+            } catch (error) {
+                console.error('Error guardando rondas en localStorage:', error);
+            }
+            
+            // Disparar evento para actualizar el tablero
+            window.dispatchEvent(new CustomEvent('rondasActualizadas', { 
+                detail: { rondas: nuevasRondas } 
+            }));
         }
+        
+        // Limpiar la cola de cargas
         setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
-    }, [tipoPintura, cargasEsmaltesAsignadas, rondas, cargasEspeciales, ordenarCargas, getNombresOperariosEsmaltes]);
+        
+        // Guardar cola actualizada en localStorage
+        try {
+            const colaActualizada = colaCargas.filter(c => !idsAsignados.includes(c.idTemp));
+            localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaActualizada));
+        } catch (error) {
+            console.error('Error guardando cola en localStorage:', error);
+        }
+        
+        console.log('✅ guardarCargasEnRondas completado - Cargas asignadas:', idsAsignados.length);
+    }, [tipoPintura, cargasEsmaltesAsignadas, rondas, cargasEspeciales, colaCargas, ordenarCargas, getNombresOperariosEsmaltes]);
 
     // ============================================================
     // RETURN

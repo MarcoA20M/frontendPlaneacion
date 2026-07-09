@@ -1,6 +1,7 @@
 // components/Nivebar.jsx - SOLO DISEÑO, DISPARA EVENTOS
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../hooks/useTheme"; // 👈 Importa el hook
 
 const Nivebar = ({
     tipoPintura,
@@ -18,12 +19,14 @@ const Nivebar = ({
     menuPerfilAbierto,
     setMenuPerfilAbierto,
     perfilRef,
-    // 🔴 Props del planificador (solo para mostrar la fecha)
     fechaRotacion,
 }) => {
     const navigate = useNavigate();
     const [menuPerfilLocal, setMenuPerfilLocal] = useState(false);
     const perfilLocalRef = useRef(null);
+    
+    // 👇 NUEVO: Hook para el tema
+    const { theme, toggleTheme } = useTheme();
 
     // Control de clics fuera del menú de perfil
     useEffect(() => {
@@ -48,10 +51,9 @@ const Nivebar = ({
         }
     };
 
-    // 🔴 FUNCIONES QUE SOLO DISPARAN EVENTOS
+    // Funciones de navegación
     const semanaAnterior = () => {
         console.log('⬅️ Nivebar: Click en semana anterior');
-        // Disparar evento para que TableroVinilica haga la petición
         window.dispatchEvent(new CustomEvent('navegarSemana', { 
             detail: { direccion: 'anterior' } 
         }));
@@ -69,6 +71,17 @@ const Nivebar = ({
         window.dispatchEvent(new CustomEvent('navegarSemana', { 
             detail: { direccion: 'hoy' } 
         }));
+    };
+
+    // 👇 NUEVO: Función para cambiar tema y cerrar menú
+    const handleToggleTheme = () => {
+        toggleTheme();
+        // Cerrar menú después de cambiar tema
+        if (setMenuPerfilAbierto) {
+            setMenuPerfilAbierto(false);
+        } else {
+            setMenuPerfilLocal(false);
+        }
     };
 
     const isMenuPerfilOpen = menuPerfilAbierto !== undefined ? menuPerfilAbierto : menuPerfilLocal;
@@ -99,7 +112,19 @@ const Nivebar = ({
                             <p className="usuario-rol">Sistema de Producción</p>
                         </div>
                         <div className="divider-perfil"></div>
-                        <button className="perfil-item" onClick={() => navigate("/mantenimiento")}>🛠️ Mantenimiento</button>
+                        
+                        <button className="perfil-item" onClick={() => navigate("/mantenimiento")}>
+                            🛠️ Mantenimiento
+                        </button>
+                        
+                        {/* 👇 NUEVO: Botón para cambiar tema */}
+                        <button 
+                            className="perfil-item theme-toggle" 
+                            onClick={handleToggleTheme}
+                        >
+                            {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
+                        </button>
+                        
                         <div className="divider-perfil"></div>
                     </div>
                 )}
@@ -124,7 +149,7 @@ const Nivebar = ({
 
             {/* SELECTOR DE TIPO, PLANIFICADOR SEMANAL Y BUSCADOR */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                {/* 🔴 PLANIFICADOR SEMANAL - SOLO DISEÑO, DISPARA EVENTOS */}
+                {/* PLANIFICADOR SEMANAL */}
                 <div className="planificador-semanal">
                     <button onClick={semanaAnterior} className="btn-semana" title="Semana anterior">◀</button>
                     <div className="fecha-actual-view">

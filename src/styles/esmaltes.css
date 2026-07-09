@@ -33,25 +33,7 @@
     background: rgba(60, 15, 110, 0.9);
 }
 
-/* Badge Naranja Circular */
-.badge-litros {
-    position: absolute;
-    top: -15px;
-    right: -15px;
-    background: #ff9800; 
-    color: white;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    border: 4px solid #1a0633; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    z-index: 10;
-}
+
 
 .badge-val { font-size: 18px; line-height: 1; }
 .badge-unit { font-size: 10px; opacity: 0.9; }
@@ -175,25 +157,7 @@
     background: rgba(60, 15, 110, 0.9);
 }
 
-/* Badge Naranja Circular */
-.badge-litros {
-    position: absolute;
-    top: -15px;
-    right: -15px;
-    background: #ff9800; 
-    color: white;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    border: 4px solid #1a0633; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    z-index: 10;
-}
+
 
 .badge-val { font-size: 18px; line-height: 1; }
 .badge-unit { font-size: 10px; opacity: 0.9; }
@@ -348,7 +312,7 @@
 }
 
 /* Badge de Litraje (Círculo Naranja) */
-.badge-litros {
+.badge-litrosE {
     position: absolute;
     top: -15px;
     right: -15px;
@@ -371,7 +335,7 @@
 .badge-unit { font-size: 10px; opacity: 0.9; }
 
 /* Tipografía de la Tarjeta */
-.mini-label {
+.mini-labelE {
     font-size: 0.65rem;
     color: #e0b0ff;
     text-transform: uppercase;
@@ -443,7 +407,7 @@
 }
 
 /* Footer del Operario */
-.mini-footer {
+.mini-footerE {
     position: absolute;
     bottom: 8px;
     right: 5px;

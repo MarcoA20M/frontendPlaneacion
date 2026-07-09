@@ -204,7 +204,7 @@
 
 .envasado-formato strong {
   font-size: 1rem;
-  color: #bb8af0;
+color: #c4b5fd;
 }
 
 .formato-nombre {
@@ -243,17 +243,58 @@
   padding: 5px 0;
 }
 
-/* Selector de operario */
+/* ANTES */
 .select-operario-detalle {
-  width: 100%;
-  padding: 10px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid #9b30ff;
-  border-radius: 8px;
   color: white;
-  font-weight: bold;
+  /* Sin flecha personalizada */
+}
+
+.select-operario-detalle option {
+  /* No tenía estilos específicos */
+}
+
+/* AHORA */
+.select-operario-detalle {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.5);  /* Más oscuro para mejor contraste */
+  border: 1px solid rgba(155, 48, 255, 0.4);
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  appearance: none;  /* Quita la flecha nativa */
+  -webkit-appearance: none;
+  /* Flecha personalizada morada */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239b30ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.select-operario-detalle option {
+  background: #1a0a2e;  /* Fondo oscuro para las opciones */
+  color: #ffffff;
+  padding: 8px;
+}
+
+.select-operario-detalle:hover {
+  border-color: rgba(155, 48, 255, 0.7);
+  background-color: rgba(155, 48, 255, 0.1);
+}
+
+.select-operario-detalle:focus {
+  outline: none;
+  border-color: #9b30ff;
+  box-shadow: 0 0 15px rgba(155, 48, 255, 0.3);
+}
+
+.select-operario-detalle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .select-operario-detalle:hover {
@@ -398,7 +439,7 @@
 
 /* Estilos para operario */
 .data.operario {
-  color: #bc13fe;
+   color: #e879f9;
   font-weight: bold;
 }
 

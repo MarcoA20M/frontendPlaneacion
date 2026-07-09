@@ -1,9 +1,172 @@
+/* styles/global.css */
+
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) */
+  --app-bg: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
+  --app-text: #fff;
+  --header-text: #f0f0f0;
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: #6a1a9e;
+  --input-text: #fff;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --primary-gradient: linear-gradient(90deg, #00c0ff 0%, #007bff 100%);
+  --primary-color: #00c0ff;
+  --secondary-color: #00ffcc;
+  --text-muted: #ffffffcc;
+  --perfil-bg: #232339;
+  --perfil-border: rgba(0, 192, 255, 0.3);
+  --dropdown-bg: #1b1b2f;
+  --dropdown-border: rgba(0, 192, 255, 0.2);
+  --dropdown-text: #e2e8f0;
+  --planificador-bg: #2c3e50;
+  --planificador-text: white;
+  --badge-planificador-bg: #2c3e50;
+  --inventario-bg: rgba(0, 0, 0, 0.4);
+  --inventario-border: rgba(255, 255, 255, 0.1);
+  --inventario-th-bg: rgba(60, 20, 90, 0.7);
+  --inventario-th-text: #00e5ff;
+  --inventario-td-text: #fff;
+  --buscador-bg: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+  --buscador-border: rgba(192, 0, 255, 0.2);
+  --buscador-input-text: #e0e0e0;
+  --buscador-placeholder: rgba(255, 255, 255, 0.25);
+  --resultado-bg: linear-gradient(135deg, #1a0a2e, #0f0a1a);
+  --resultado-border: rgba(192, 0, 255, 0.25);
+  --resultado-hover: rgba(192, 0, 255, 0.06);
+  --resultado-codigo: #a855f7;
+  --resultado-folio: #e879f9;
+  --family-panel-bg: rgba(15, 12, 28, 0.6);
+  --family-panel-border: rgba(255, 255, 255, 0.08);
+  --family-card-bg: rgba(255, 255, 255, 0.04);
+  --family-card-hover: rgba(255, 255, 255, 0.08);
+  --family-name: rgba(255, 255, 255, 0.95);
+  --family-meta: rgba(255, 255, 255, 0.5);
+  --family-badge-bg: rgba(0, 229, 255, 0.15);
+  --family-badge-text: #00e5ff;
+  --btn-explorer-bg: rgba(255, 255, 255, 0.08);
+  --btn-explorer-border: rgba(255, 255, 255, 0.15);
+  --btn-explorer-text: #ffffff;
+  --btn-explorer-active-bg: #00e5ff;
+  --btn-explorer-active-text: #002b36;
+  --contador-color: #00ffcc;
+  --contador-bg: rgba(0, 255, 200, 0.1);
+  --contador-border: rgba(0, 255, 200, 0.2);
+  --contador-span-bg: rgba(0, 0, 0, 0.3);
+  --proceso-border: #00c0ff;
+  --proceso-paso-bg: linear-gradient(90deg, #00c0ff, #007bff);
+  --proceso-paso-text: white;
+  --proceso-desc: #d1d1d1;
+  --proceso-item-bg: rgba(0, 0, 0, 0.2);
+  --proceso-item-hover: rgba(0, 192, 255, 0.15);
+  --overlay-bg: rgba(0, 0, 0, 0.75);
+  --overlay-content-bg: white;
+  --overlay-text: #333;
+  --overlay-spinner: #6f42c1;
+  --overlay-progress-bg: #eee;
+  --overlay-progress-bar: linear-gradient(90deg, #6f42c1, #00d2ff);
+  --overlay-percentage: #6f42c1;
+  --overlay-p-text: #666;
+  --calendar-bg: #300d45c4;
+  --calendar-border: #310143;
+  --calendar-text: #00e5ff;
+  --calendar-btn-hover: rgba(0, 229, 255, 0.15);
+  --calendar-input-hover: rgba(86, 4, 134, 0.05);
+  --calendar-input-focus: rgba(0, 229, 255, 0.08);
+  --calendar-hoy-bg: rgba(0, 229, 255, 0.1);
+  --calendar-hoy-border: #00e5ff;
+  --calendar-hoy-text: #00e5ff;
+}
+
+/* === TEMA CLARO === */
+.light-theme {
+  --app-bg: linear-gradient(135deg, #f0f4ff 0%, #e8edf5 40%, #dce3ef 100%);
+  --app-text: #1a1a2e;
+  --header-text: #1a1a2e;
+  --input-bg: rgba(255, 255, 255, 0.8);
+  --input-border: #b8c5d6;
+  --input-text: #1a1a2e;
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-hover-bg: rgba(79, 70, 229, 0.08);
+  --primary-gradient: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+  --primary-color: #4f46e5;
+  --secondary-color: #4f46e5;
+  --text-muted: #1a1a2ecc;
+  --perfil-bg: #e8edf5;
+  --perfil-border: rgba(79, 70, 229, 0.3);
+  --dropdown-bg: #ffffff;
+  --dropdown-border: rgba(79, 70, 229, 0.2);
+  --dropdown-text: #1a1a2e;
+  --planificador-bg: #e8edf5;
+  --planificador-text: #1a1a2e;
+  --badge-planificador-bg: #e8edf5;
+  --inventario-bg: rgba(255, 255, 255, 0.6);
+  --inventario-border: rgba(0, 0, 0, 0.08);
+  --inventario-th-bg: rgba(79, 70, 229, 0.1);
+  --inventario-th-text: #4f46e5;
+  --inventario-td-text: #1a1a2e;
+  --buscador-bg: linear-gradient(135deg, #ffffff, #f0f4ff);
+  --buscador-border: rgba(79, 70, 229, 0.2);
+  --buscador-input-text: #1a1a2e;
+  --buscador-placeholder: rgba(0, 0, 0, 0.3);
+  --resultado-bg: #ffffff;
+  --resultado-border: rgba(79, 70, 229, 0.2);
+  --resultado-hover: rgba(79, 70, 229, 0.05);
+  --resultado-codigo: #4f46e5;
+  --resultado-folio: #6d28d9;
+  --family-panel-bg: rgba(255, 255, 255, 0.7);
+  --family-panel-border: rgba(0, 0, 0, 0.06);
+  --family-card-bg: rgba(255, 255, 255, 0.6);
+  --family-card-border: rgba(0, 0, 0, 0.05);
+  --family-card-hover: rgba(79, 70, 229, 0.05);
+  --family-name: #1a1a2e;
+  --family-meta: #64748b;
+  --family-badge-bg: rgba(79, 70, 229, 0.1);
+  --family-badge-text: #4f46e5;
+  --btn-explorer-bg: rgba(0, 0, 0, 0.05);
+  --btn-explorer-border: rgba(0, 0, 0, 0.1);
+  --btn-explorer-text: #1a1a2e;
+  --btn-explorer-active-bg: #4f46e5;
+  --btn-explorer-active-text: #ffffff;
+  --contador-color: #4f46e5;
+  --contador-bg: rgba(79, 70, 229, 0.08);
+  --contador-border: rgba(79, 70, 229, 0.2);
+  --contador-span-bg: rgba(79, 70, 229, 0.15);
+  --proceso-border: #4f46e5;
+  --proceso-paso-bg: linear-gradient(90deg, #4f46e5, #6366f1);
+  --proceso-paso-text: white;
+  --proceso-desc: #1a1a2e;
+  --proceso-item-bg: rgba(0, 0, 0, 0.04);
+  --proceso-item-hover: rgba(79, 70, 229, 0.08);
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --overlay-content-bg: white;
+  --overlay-text: #1a1a2e;
+  --overlay-spinner: #4f46e5;
+  --overlay-progress-bg: #e8edf5;
+  --overlay-progress-bar: linear-gradient(90deg, #4f46e5, #6366f1);
+  --overlay-percentage: #4f46e5;
+  --overlay-p-text: #64748b;
+  --calendar-bg: #FFFFFF;
+  --calendar-border: #e5e7eb;
+  --calendar-text: #7E57C2;
+  --calendar-btn-hover: rgba(79, 70, 229, 0.08);
+  --calendar-input-hover: rgba(79, 70, 229, 0.05);
+  --calendar-input-focus: rgba(79, 70, 229, 0.08);
+  --calendar-hoy-bg: #7e57c221;
+  --calendar-hoy-border: #7E57C2;
+  --calendar-hoy-text: #7E57C2;
+}
+
 /* ===== 1. GLOBAL & APP LAYOUT ===== */
 body, html {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
   height: 100%;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .app {
@@ -12,10 +175,11 @@ body, html {
   justify-content: flex-start;
   align-items: flex-start;
   padding: 20px;
-  background: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
-  color: #fff;
+  background: var(--app-bg);
+  color: var(--app-text);
   width: 100%;
   box-sizing: border-box;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -32,13 +196,15 @@ body, html {
   gap: 25px;
   flex-wrap: wrap;
   margin-bottom: 30px;
+  position: relative;
 }
 
 .header-panel h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #f0f0f0;
+  color: var(--header-text);
   margin: 45px 0 0 0;
+  transition: color 0.3s ease;
 }
 
 .titulo-app {
@@ -48,11 +214,12 @@ body, html {
 }
 
 .tablero-titulo {
-  color: white;
+  color: var(--app-text);
   font-size: 1.4rem;
   margin-bottom: 20px;
   font-weight: 800;
   letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 /* ===== 3. BUSQUEDA & SELECTORES ===== */
@@ -67,7 +234,7 @@ body, html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 70px;    /* <--- Ajusta este valor (20px, 30px, etc.) */
+  margin-top: 70px;
   flex-wrap: wrap;
   width: 100%;
 }
@@ -75,29 +242,30 @@ body, html {
 .busqueda input {
   padding: 10px 18px;
   border-radius: 12px;
-  border: 1px solid #6a1a9e;
+  border: 1px solid var(--input-border);
   width: 130px;
   font-size: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--input-bg);
+  color: var(--input-text);
+  transition: all 0.3s ease;
 }
 
 .busqueda button {
   padding: 12px 25px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(90deg, #00c0ff 0%, #007bff 100%);
+  background: var(--primary-gradient);
   color: #fff;
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
 .busqueda button:hover {
   filter: brightness(1.1);
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 192, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
 }
 
 .selector-tipo {
@@ -112,56 +280,57 @@ body, html {
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s;
-  color: #fff;
-  background: #444;
+  transition: all 0.3s ease;
+  color: var(--app-text);
+  background: var(--card-bg);
 }
 
 .selector-tipo button.active {
-  background: linear-gradient(90deg, #00c0ff 0%, #007bff 100%);
-  box-shadow: 0 6px 12px rgba(0,192,255,0.5);
+  background: var(--primary-gradient);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.5);
   transform: scale(1.05);
+  color: #fff;
 }
 
 /* ===== 4. PRODUCTO & DESCRIPCION ===== */
 .descripcion-producto {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   padding: 10px 15px;
   border-radius: 12px;
   backdrop-filter: blur(10px);
-  margin-top: -8%; /* Cambiado de -3% a -6% para subirlo más */
+  margin-top: -8%;
   margin-left: 10%;
   width: fit-content;
   min-width: 350px;
   max-width: 350px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
 }
-
 
 .nombre-producto {
   font-size: 20px;
   font-weight: 600;
-  color: #00c0ff;
+  color: var(--primary-color);
   margin-bottom: 4px;
+  transition: color 0.3s ease;
 }
 
 .poder-cubriente {
   font-size: 14px;
   font-weight: 500;
-  color: #ffffffcc;
+  color: var(--text-muted);
 }
 
 .poder-cubriente span {
   font-weight: 800;
-  color: #00ffcc;
+  color: var(--secondary-color);
 }
 
 /* ===== 5. TABLA & FILAS DE ENVASE ===== */
 .producto-panel {
   display: flex;
   flex-direction: column;
-  /* gap: 20px;  ELIMINADO - Usaremos margin-bottom en su lugar */
 }
 
 .tabla {
@@ -178,25 +347,26 @@ body, html {
   width: 120px;
   padding: 15px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   text-align: center;
   font-size: 15px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .fila:hover {
   transform: translateY(-2px);
-  background: rgba(0, 192, 255, 0.15);
-  box-shadow: 0 6px 15px rgba(0, 192, 255, 0.3);
+  background: var(--card-hover-bg);
+  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
 }
 
 .fila .litros-text {
   font-size: 16px;
   font-weight: 700;
-  color: #00c0ff;
+  color: var(--primary-color);
   margin-bottom: 5px;
+  transition: color 0.3s ease;
 }
 
 .fila input {
@@ -204,13 +374,14 @@ body, html {
   padding: 6px 8px;
   border-radius: 8px;
   border: none;
-  background: #2a2640;
-  color: #fff;
+  background: var(--input-bg);
+  color: var(--input-text);
   text-align: center;
   font-weight: 600;
   font-size: 13px;
   margin-bottom: 5px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
 
 /* ===== 6. BOTONES PRINCIPALES ===== */
@@ -236,14 +407,15 @@ body, html {
   color: #fff;
   font-size: 12px;
   text-transform: uppercase;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   box-sizing: border-box;
   letter-spacing: 0.3px;
 }
+
 .agregar-btn { 
-  background: linear-gradient(135deg, #00c0ff 0%, #007bff 100%); 
-  box-shadow: 0 6px 15px rgba(0, 192, 255, 0.4);
+  background: var(--primary-gradient);
+  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
 }
 
 .agregar-btn.secondary { 
@@ -289,10 +461,10 @@ body, html {
 }
 
 .btn-family-explorer {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--btn-explorer-bg);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  border: 1px solid var(--btn-explorer-border);
+  color: var(--btn-explorer-text);
   padding: 10px 24px;
   border-radius: 50px;
   cursor: pointer;
@@ -303,27 +475,28 @@ body, html {
 }
 
 .btn-family-explorer:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--family-card-hover);
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--primary-color);
 }
 
 .btn-family-explorer.active {
-  background: #00e5ff;
-  color: #002b36;
+  background: var(--btn-explorer-active-bg);
+  color: var(--btn-explorer-active-text);
   font-weight: 700;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
 }
 
 .families-glass-panel {
-  background: rgba(15, 12, 28, 0.6);
+  background: var(--family-panel-bg);
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--family-panel-border);
   border-radius: 24px;
   padding: 24px;
   margin-bottom: 30px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   animation: smoothFadeIn 0.5s ease;
+  transition: all 0.3s ease;
 }
 
 .families-grid-layout {
@@ -333,8 +506,8 @@ body, html {
 }
 
 .family-card-premium {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--family-card-bg);
+  border: 1px solid var(--family-card-border);
   border-radius: 18px;
   padding: 16px;
   cursor: pointer;
@@ -342,8 +515,8 @@ body, html {
 }
 
 .family-card-premium:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(0, 229, 255, 0.3);
+  background: var(--family-card-hover);
+  border-color: var(--primary-color);
   transform: scale(1.02);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
@@ -357,7 +530,7 @@ body, html {
 .family-icon {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, #00e5ff, #1200ff);
+  background: var(--primary-gradient);
   color: #ffffff;
   border-radius: 14px;
   display: flex;
@@ -376,24 +549,27 @@ body, html {
 .family-name { 
   font-weight: 600; 
   font-size: 0.95rem; 
-  color: rgba(255, 255, 255, 0.95); 
+  color: var(--family-name);
+  transition: color 0.3s ease;
 }
 
 .family-meta { 
   font-size: 0.75rem; 
-  color: rgba(255, 255, 255, 0.5); 
+  color: var(--family-meta);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: color 0.3s ease;
 }
 
 .family-badge {
   margin-left: auto;
-  background: rgba(0, 229, 255, 0.15);
-  color: #00e5ff;
+  background: var(--family-badge-bg);
+  color: var(--family-badge-text);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 700;
+  transition: all 0.3s ease;
 }
 
 /* ===== 8. INVENTARIO & LAYOUT DINAMICO ===== */
@@ -411,11 +587,12 @@ body, html {
 .inventario-column {
   flex: 0 1 auto;
   margin-left: auto;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--inventario-bg);
   border-radius: 8px;
   padding: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--inventario-border);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
 
 .tabla-inventario-tecnica {
@@ -424,28 +601,31 @@ body, html {
 }
 
 .tabla-inventario-tecnica th {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(60, 20, 90, 0.7);
-  color: #00e5ff;
+  border: 1px solid var(--inventario-border);
+  background: var(--inventario-th-bg);
+  color: var(--inventario-th-text);
   font-size: 0.55rem;
   padding: 6px 10px;
   text-transform: uppercase;
   white-space: nowrap;
+  transition: all 0.3s ease;
 }
 
 .tabla-inventario-tecnica td {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--inventario-border);
   padding: 8px 10px;
   font-size: 0.85rem;
   text-align: center;
-  color: #fff;
+  color: var(--inventario-td-text);
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .tipo-envase-cell {
-  color: #00e5ff !important;
+  color: var(--primary-color) !important;
   font-size: 0.7rem !important;
   text-align: left !important;
+  transition: color 0.3s ease;
 }
 
 .alcance-alerta {
@@ -454,43 +634,46 @@ body, html {
 }
 
 .placeholder-text {
-  color: #555;
+  color: var(--text-muted);
   font-size: 0.7rem;
   font-style: italic;
   padding: 20px !important;
 }
 
-/* ===== 9. PLANIFICADOR DE FECHA - VERSIÓN COMPACTA ===== */
+/* ===== 9. PLANIFICADOR DE FECHA ===== */
 .planificador-semanal {
   display: flex;
   align-items: center;
-  background: #2c3e50;
-  color: white;
-  padding: 7px 12px; /* Reducido de 5px 15px */
-  border-radius: 15px; /* Reducido de 20px */
+  background: var(--planificador-bg);
+  color: var(--planificador-text);
+  padding: 7px 12px;
+  border-radius: 15px;
+  transition: all 0.3s ease;
 }
-  
+
 .planificador-semanal button {
   background: transparent;
   border: none;
-  color: white;
+  color: var(--planificador-text);
   cursor: pointer;
-  font-size: 1rem; /* Reducido de 1.2rem */
-  padding: 2px 4px; /* Reducido de 0 5px */
+  font-size: 1rem;
+  padding: 2px 4px;
+  transition: all 0.3s ease;
 }
 
 .planificador-semanal .btn-hoy-reset {
   background: #e74c3c;
-  font-size: 0.6rem; /* Reducido de 0.7rem */
+  color: white;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  padding: 2px 6px; /* Reducido de 2px 8px */
-  border-radius: 8px; /* Reducido de 10px */
-  margin-left: 3px; /* Reducido de 5px */
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 3px;
 }
 
 .fecha-actual-view {
-  font-size: 0.8rem; /* Reducido de 0.9rem */
-  min-width: 90px; /* Reducido de 100px */
+  font-size: 0.8rem;
+  min-width: 90px;
   text-align: center;
 }
 
@@ -498,9 +681,9 @@ body, html {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #2c3e50;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--badge-planificador-bg);
+  color: var(--planificador-text);
+  border: 1px solid var(--glass-border);
   padding: 8px 12px;
   border-radius: 20px;
   font-weight: 600;
@@ -512,7 +695,7 @@ body, html {
 }
 
 .badge-planificador-btn:hover {
-  background-color: #34495e;
+  background-color: var(--card-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
@@ -587,8 +770,8 @@ body, html {
   position: absolute;
   top: 110%;
   right: 0;
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 100;
@@ -604,31 +787,32 @@ body, html {
   position: absolute;
   bottom: 100%;
   left: 0;
-  background-color: white;
+  background: var(--dropdown-bg);
   min-width: 200px;
   box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
   border-radius: 8px;
   z-index: 1000;
   padding: 10px 0;
   margin-bottom: 5px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--dropdown-border);
 }
 
 .dropdown-option, .dropdown-item {
   display: block;
   padding: 10px 15px;
-  color: #333;
+  color: var(--dropdown-text);
   cursor: pointer;
   font-size: 14px;
   text-align: left;
   width: 100%;
   background: none;
   border: none;
+  transition: all 0.2s ease;
 }
 
 .dropdown-option:hover, .dropdown-item:hover {
-  background-color: #f8f9fa;
-  color: #007bff;
+  background-color: var(--card-hover-bg);
+  color: var(--primary-color);
 }
 
 .dropdown-item.label-input {
@@ -693,15 +877,23 @@ body, html {
 .input-mini {
   padding: 6px;
   font-size: 13px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--card-border);
   border-radius: 4px;
   width: 120px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  transition: all 0.3s ease;
 }
 
 .input-mini-table {
   width: 50px;
   padding: 2px 4px;
   font-size: 12px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .fila-mini {
@@ -716,14 +908,15 @@ body, html {
 .procesos-info {
   margin-top: 10px;
   padding-top: 1px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--card-border);
 }
 
 .procesos-info strong {
-  color: #00ffcc;
+  color: var(--secondary-color);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: color 0.3s ease;
 }
 
 .lista-procesos-tags {
@@ -736,21 +929,21 @@ body, html {
 .proceso-item {
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--proceso-item-bg);
   padding: 5px 10px;
   border-radius: 8px;
-  border-left: 3px solid #00c0ff;
-  transition: all 0.2s;
+  border-left: 3px solid var(--proceso-border);
+  transition: all 0.2s ease;
 }
 
 .proceso-item:hover {
   transform: translateX(5px);
-  background: rgba(0, 192, 255, 0.15);
+  background: var(--proceso-item-hover);
 }
 
 .paso-nro {
-  background: linear-gradient(90deg, #00c0ff, #007bff);
-  color: white;
+  background: var(--proceso-paso-bg);
+  color: var(--proceso-paso-text);
   min-width: 18px;
   height: 18px;
   border-radius: 4px;
@@ -763,11 +956,12 @@ body, html {
 }
 
 .paso-desc {
-  color: #d1d1d1;
+  color: var(--proceso-desc);
   font-size: 12.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
 /* ===== 14. LOADING OVERLAY & PROGRESS ===== */
@@ -777,7 +971,7 @@ body, html {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--overlay-bg);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
@@ -786,21 +980,22 @@ body, html {
 }
 
 .overlay-content {
-  background: white;
-  color: #333;
+  background: var(--overlay-content-bg);
+  color: var(--overlay-text);
   padding: 40px;
   border-radius: 24px;
   width: 90%;
   max-width: 400px;
   text-align: center;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
 }
 
 .spinner-large {
   width: 60px;
   height: 60px;
-  border: 6px solid #f0f0f0;
-  border-top: 6px solid #6f42c1;
+  border: 6px solid var(--overlay-progress-bg);
+  border-top: 6px solid var(--overlay-spinner);
   border-radius: 50%;
   animation: spinApp 1s linear infinite;
   margin: 0 auto 20px;
@@ -817,31 +1012,32 @@ body, html {
 
 .progress-container {
   width: 100%;
-  background-color: #eee;
+  background-color: var(--overlay-progress-bg);
   border-radius: 20px;
   height: 14px;
   margin: 20px 0 10px;
   overflow: hidden;
-  border: 1px solid #ddd;
+  border: 1px solid var(--card-border);
 }
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #6f42c1, #00d2ff);
+  background: var(--overlay-progress-bar);
   transition: width 0.4s cubic-bezier(0.1, 0.5, 0.5, 1);
-  box-shadow: 0 0 10px rgba(111, 66, 193, 0.5);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
 }
 
 .percentage-display {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #6f42c1;
+  color: var(--overlay-percentage);
   margin-bottom: 5px;
+  transition: color 0.3s ease;
 }
 
 .overlay-content p {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--overlay-p-text);
   margin: 0;
 }
 
@@ -853,177 +1049,177 @@ body, html {
 }
 
 .contador-litros-wrapper {
-  margin-top: 15px; /* Ajusta este valor para más o menos espacio */
+  margin-top: 15px;
   width: 100%;
 }
 
 .contador-litros {
   font-size: 18px;
   font-weight: 600;
-  color: #00ffcc;
+  color: var(--contador-color);
   text-align: left;
-  background: rgba(0, 255, 200, 0.1);
+  background: var(--contador-bg);
   padding: 6px 12px;
   border-radius: 20px;
   display: inline-block;
-  border: 1px solid rgba(0, 255, 200, 0.2);
+  border: 1px solid var(--contador-border);
   backdrop-filter: blur(5px);
   letter-spacing: 0.3px;
+  transition: all 0.3s ease;
 }
 
 .contador-litros span {
   font-size: 18px;
   font-weight: 800;
-  color: #ffffff;
-  background: rgba(0, 0, 0, 0.3);
+  color: var(--app-text);
+  background: var(--contador-span-bg);
   padding: 2px 8px;
   border-radius: 12px;
   margin-left: 6px;
   display: inline-block;
+  transition: all 0.3s ease;
 }
 
-/* --- ESTILOS DEL PERFIL / MENÚ SUPERIOR --- */
-.header-panel {
-    position: relative; /* Asegura que el perfil se posicione respecto a esto */
-}
-
+/* ===== PERFIL / MENÚ SUPERIOR ===== */
 .perfil-container {
-    position: absolute;
-    top: -5px;
-    right: 5px;
-    z-index: 1100;
+  position: absolute;
+  top: -5px;
+  right: 5px;
+  z-index: 1100;
 }
 
 .perfil-icono {
-    width: 39px;
-    height: 39px;
-    background: #232339;
-    border: 2px solid rgba(0, 192, 255, 0.3);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+  width: 39px;
+  height: 39px;
+  background: var(--perfil-bg);
+  border: 2px solid var(--perfil-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .perfil-icono:hover, .perfil-icono.active {
-    border-color: #00c0ff;
-    box-shadow: 0 0 15px rgba(0, 192, 255, 0.4);
-    transform: scale(1.05);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
+  transform: scale(1.05);
 }
 
 .avatar-letra {
-    color: #00c0ff;
-    font-weight: 800;
-    font-size: 1.2rem;
+  color: var(--primary-color);
+  font-weight: 800;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
 
 .indicador-online {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
-    background: #2ecc71;
-    border: 2px solid #1b1b2f;
-    border-radius: 50%;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #2ecc71;
+  border: 2px solid var(--perfil-bg);
+  border-radius: 50%;
 }
 
-/* Dropdown del perfil */
 .perfil-dropdown {
-    position: absolute;
-    top: 55px;
-    right: 0;
-    width: 220px;
-    background: #1b1b2f;
-    border: 1px solid rgba(0, 192, 255, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    padding: 10px;
-    animation: fadeInDown 0.2s ease-out;
+  position: absolute;
+  top: 55px;
+  right: 0;
+  width: 220px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  padding: 10px;
+  animation: fadeInDown 0.2s ease-out;
+  transition: all 0.3s ease;
 }
 
 .perfil-header-info {
-    padding: 10px;
-    text-align: right;
+  padding: 10px;
+  text-align: right;
 }
 
 .usuario-nombre {
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    margin: 0;
+  color: var(--app-text);
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0;
+  transition: color 0.3s ease;
 }
 
 .usuario-rol {
-    color: #64748b;
-    font-size: 11px;
-    margin: 2px 0 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin: 2px 0 0 0;
+  transition: color 0.3s ease;
 }
 
 .divider-perfil {
-    height: 1px;
-    background: rgba(255,255,255,0.05);
-    margin: 8px 0;
+  height: 1px;
+  background: var(--card-border);
+  margin: 8px 0;
 }
 
 .perfil-item {
-    width: 100%;
-    padding: 10px 12px;
-    background: transparent;
-    border: none;
-    color: #e2e8f0;
-    text-align: left;
-    font-size: 13px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--dropdown-text);
+  text-align: left;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .perfil-item:hover {
-    background: rgba(0, 192, 255, 0.1);
-    color: #00c0ff;
+  background: var(--card-hover-bg);
+  color: var(--primary-color);
 }
 
 .perfil-item.cerrar-sesion:hover {
-    background: rgba(255, 95, 126, 0.1);
-    color: #ff5f7e;
+  background: rgba(255, 95, 126, 0.1);
+  color: #ff5f7e;
 }
 
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Logo clickeable en el título */
 .logo-clickeable {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
 .logo-clickeable:hover {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 .logo-clickeable:active {
-    transform: scale(0.98);
+  transform: scale(0.98);
 }
 
 .logo-titulo {
-    height: 50px;
-    width: auto;
-    margin-right: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  height: 50px;
+  width: auto;
+  margin-right: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ===== BOTÓN CALCULAR CONSUMO EN BÚSQUEDA ===== */
+/* ===== BOTÓN CALCULAR CONSUMO ===== */
 .btn-calcular-consumo-busqueda {
   background: linear-gradient(90deg, #9b59b6, #8e44ad);
   border: none;
@@ -1048,422 +1244,418 @@ body, html {
   cursor: not-allowed;
 }
 
-
-
-/* Elimina la posición absoluta de consumo-preview-mini */
 .consumo-preview-mini {
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(0, 192, 255, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   overflow: hidden;
   width: 100%;
   max-width: 360px;
   position: absolute;
-  top: 20px;     
-  left: 550px;      
+  top: 20px;
+  left: 550px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.3s ease-out;
   z-index: 100;
+  background: var(--card-bg);
+  transition: all 0.3s ease;
 }
-
-
 
 /* ===== CALENDARIO CON FLECHAS ===== */
 .calendar-nav-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #300d45c4;
-    padding: 4px 10px;
-    border-radius: 8px;
-    border: 1px solid #310143;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--calendar-bg);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--calendar-border);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
 }
 
 .calendar-nav-container:hover {
-    border-color: #00e5ff;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(0, 229, 255, 0.05);
+  border-color: var(--primary-color);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(79, 70, 229, 0.05);
 }
 
 .calendar-nav-btn {
-    background: transparent;
-    border: none;
-    color: #00e5ff;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    user-select: none;
+  background: transparent;
+  border: none;
+  color: var(--calendar-text);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
 }
 
 .calendar-nav-btn:hover {
-    background: rgba(0, 229, 255, 0.15);
-    transform: scale(1.1);
+  background: var(--calendar-btn-hover);
+  transform: scale(1.1);
 }
 
 .calendar-nav-btn:active {
-    transform: scale(0.9);
+  transform: scale(0.9);
 }
 
 .calendar-date-input {
-    background: transparent;
-    border: none;
-    color: #00e5ff;
-    font-size: 13px;
-    font-weight: bold;
-    outline: none;
-    cursor: pointer;
-    min-width: 130px;
-    text-align: center;
-    font-family: inherit;
-    padding: 4px 6px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    letter-spacing: 0.5px;
+  background: transparent;
+  border: none;
+  color: var(--calendar-text);
+  font-size: 13px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+  min-width: 130px;
+  text-align: center;
+  font-family: inherit;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
 }
 
 .calendar-date-input:hover {
-    background: rgba(86, 4, 134, 0.05);
+  background: var(--calendar-input-hover);
 }
 
 .calendar-date-input:focus {
-    background: rgba(0, 229, 255, 0.08);
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+  background: var(--calendar-input-focus);
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.1);
 }
 
 .calendar-date-input::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(200%);
-    cursor: pointer;
-    padding: 2px;
-    transition: transform 0.2s ease;
+  filter: var(--calendar-picker-filter, invert(1) brightness(200%));
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.2s ease;
+}
+
+.light-theme .calendar-date-input::-webkit-calendar-picker-indicator {
+  --calendar-picker-filter: invert(0.5);
 }
 
 .calendar-date-input::-webkit-calendar-picker-indicator:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 .btn-hoy-calendar {
-    background: rgba(0, 229, 255, 0.1);
-    border: 1px solid #00e5ff;
-    color: #00e5ff;
-    padding: 5px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    font-family: inherit;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  background: var(--calendar-hoy-bg);
+  border: 1px solid var(--calendar-hoy-border);
+  color: var(--calendar-hoy-text);
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .btn-hoy-calendar:hover {
-    background: rgba(0, 229, 255, 0.2);
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+  background: var(--calendar-btn-hover);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(79, 70, 229, 0.2);
 }
 
 .btn-hoy-calendar:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 .calendar-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-    .calendar-nav-container {
-        padding: 4px 8px;
-        gap: 4px;
-    }
-    .calendar-nav-btn {
-        font-size: 14px;
-        padding: 3px 6px;
-    }
-    .calendar-date-input {
-        font-size: 12px;
-        min-width: 110px;
-        padding: 3px 4px;
-    }
-    .btn-hoy-calendar {
-        font-size: 11px;
-        padding: 4px 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    .calendar-nav-container {
-        padding: 3px 6px;
-        gap: 3px;
-    }
-    .calendar-nav-btn {
-        font-size: 12px;
-        padding: 2px 4px;
-    }
-    .calendar-date-input {
-        font-size: 10px;
-        min-width: 90px;
-        padding: 2px 3px;
-    }
-    .btn-hoy-calendar {
-        font-size: 9px;
-        padding: 3px 8px;
-    }
-    .calendar-wrapper {
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 480px) {
-    .calendar-nav-container {
-        padding: 2px 4px;
-        gap: 2px;
-        border-radius: 6px;
-    }
-    .calendar-nav-btn {
-        font-size: 10px;
-        padding: 2px 3px;
-    }
-    .calendar-date-input {
-        font-size: 9px;
-        min-width: 70px;
-        padding: 2px 2px;
-    }
-    .btn-hoy-calendar {
-        font-size: 8px;
-        padding: 2px 6px;
-        gap: 2px;
-    }
-    .calendar-wrapper {
-        gap: 4px;
-    }
-}
-
-/* ===== BUSCADOR DE CARGAS COMPACTO ESTILO MATERIAS PRIMAS ===== */
+/* ===== BUSCADOR DE CARGAS COMPACTO ===== */
 .buscador-cargas-wrapper {
-    position: relative;
+  position: relative;
 }
 
 .buscador-cargas-container-compact {
-    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
-    border-radius: 8px;
-    padding: 2px;
-    border: 1px solid rgba(192, 0, 255, 0.2);
-    transition: all 0.3s ease;
+  background: var(--buscador-bg);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--buscador-border);
+  transition: all 0.3s ease;
 }
 
 .buscador-cargas-container-compact:hover {
-    border-color: rgba(192, 0, 255, 0.4);
+  border-color: var(--primary-color);
 }
 
 .buscador-cargas-container-compact:focus-within {
-    border-color: #a855f7;
-    box-shadow: 0 0 20px rgba(192, 0, 255, 0.08);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 20px rgba(79, 70, 229, 0.08);
 }
 
 .buscador-cargas-input-compact {
-    display: flex;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 6px;
-    padding: 2px 8px;
-    gap: 6px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  padding: 2px 8px;
+  gap: 6px;
+}
+
+.light-theme .buscador-cargas-input-compact {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .buscador-cargas-input-compact .icono-lupa-compact {
-    color: #a855f7;
-    font-size: 12px;
+  color: var(--primary-color);
+  font-size: 12px;
 }
 
 .buscador-cargas-input-compact input {
-    background: transparent;
-    border: none;
-    color: #e0e0e0;
-    font-size: 12px;
-    padding: 4px 2px;
-    outline: none;
-    width: 100%;
-    min-width: 120px;
-    font-family: inherit;
+  background: transparent;
+  border: none;
+  color: var(--buscador-input-text);
+  font-size: 12px;
+  padding: 4px 2px;
+  outline: none;
+  width: 100%;
+  min-width: 120px;
+  font-family: inherit;
+  transition: color 0.3s ease;
 }
 
 .buscador-cargas-input-compact input::placeholder {
-    color: rgba(255, 255, 255, 0.25);
-    font-size: 11px;
+  color: var(--buscador-placeholder);
+  font-size: 11px;
 }
 
 .buscador-cargas-input-compact .btn-limpiar-compact {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    font-size: 11px;
-    padding: 2px 4px;
-    transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: var(--buscador-placeholder);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
 }
 
 .buscador-cargas-input-compact .btn-limpiar-compact:hover {
-    color: #ff5f7e;
-    transform: scale(1.1);
+  color: #ff5f7e;
+  transform: scale(1.1);
 }
 
 /* Resultados de búsqueda compactos */
 .resultados-busqueda-compact {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
-    border: 1px solid rgba(192, 0, 255, 0.25);
-    border-radius: 8px;
-    max-height: 250px;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    padding: 3px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--resultado-bg);
+  border: 1px solid var(--resultado-border);
+  border-radius: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  padding: 3px;
+  transition: all 0.3s ease;
 }
 
 .resultados-busqueda-compact::-webkit-scrollbar {
-    width: 3px;
+  width: 3px;
 }
 
 .resultados-busqueda-compact::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
 }
 
 .resultados-busqueda-compact::-webkit-scrollbar-thumb {
-    background: rgba(192, 0, 255, 0.3);
-    border-radius: 10px;
-}
-
-.resultados-busqueda-compact::-webkit-scrollbar-thumb:hover {
-    background: rgba(192, 0, 255, 0.5);
+  background: var(--primary-color);
+  border-radius: 10px;
 }
 
 .resultado-item-compact {
-    padding: 6px 10px;
-    border-radius: 6px;
-    margin-bottom: 1px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-    font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 12px;
 }
 
 .resultado-item-compact:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .resultado-item-compact:hover {
-    background: rgba(192, 0, 255, 0.06);
+  background: var(--resultado-hover);
 }
 
 .resultado-item-compact .codigo-compact {
-    color: #a855f7;
-    font-weight: 600;
-    font-size: 11px;
-    background: rgba(192, 0, 255, 0.08);
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-right: 6px;
+  color: var(--resultado-codigo);
+  font-weight: 600;
+  font-size: 11px;
+  background: rgba(79, 70, 229, 0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+  transition: color 0.3s ease;
 }
 
 .resultado-item-compact .descripcion-compact {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 11px;
+  color: var(--text-muted);
+  font-size: 11px;
+  transition: color 0.3s ease;
 }
 
 .resultado-item-compact .info-compact {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .resultado-item-compact .folio-compact {
-    color: #e879f9;
-    font-size: 11px;
-    font-weight: 500;
+  color: var(--resultado-folio);
+  font-size: 11px;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .resultado-item-compact .detalles-compact {
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 10px;
+  color: var(--text-muted);
+  font-size: 10px;
+  transition: color 0.3s ease;
 }
 
-/* Mensaje de no resultados compacto */
 .mensaje-no-resultados-compact {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #1a0a2e, #0f0a1a);
-    border: 1px solid rgba(192, 0, 255, 0.15);
-    border-radius: 8px;
-    padding: 16px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.3);
-    z-index: 1000;
-    font-size: 12px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--resultado-bg);
+  border: 1px solid var(--resultado-border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  z-index: 1000;
+  font-size: 12px;
+  transition: all 0.3s ease;
 }
 
 .mensaje-no-resultados-compact span {
-    color: #a855f7;
-    font-weight: 500;
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
-/* Responsive compacto */
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .calendar-nav-container {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .calendar-nav-btn {
+    font-size: 14px;
+    padding: 3px 6px;
+  }
+  .calendar-date-input {
+    font-size: 12px;
+    min-width: 110px;
+    padding: 3px 4px;
+  }
+  .btn-hoy-calendar {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
 @media (max-width: 768px) {
-    .buscador-cargas-input-compact input {
-        min-width: 80px;
-        font-size: 11px;
-    }
-
-    .buscador-cargas-input-compact {
-        padding: 2px 6px;
-    }
-
-    .resultado-item-compact {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 3px;
-        padding: 5px 8px;
-    }
-
-    .resultado-item-compact .info-compact {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .resultados-busqueda-compact {
-        max-height: 200px;
-    }
+  .calendar-nav-container {
+    padding: 3px 6px;
+    gap: 3px;
+  }
+  .calendar-nav-btn {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+  .calendar-date-input {
+    font-size: 10px;
+    min-width: 90px;
+    padding: 2px 3px;
+  }
+  .btn-hoy-calendar {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+  .calendar-wrapper {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .buscador-cargas-input-compact input {
+    min-width: 80px;
+    font-size: 11px;
+  }
+  .buscador-cargas-input-compact {
+    padding: 2px 6px;
+  }
+  .resultado-item-compact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 5px 8px;
+  }
+  .resultado-item-compact .info-compact {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .resultados-busqueda-compact {
+    max-height: 200px;
+  }
 }
 
+@media (max-width: 480px) {
+  .calendar-nav-container {
+    padding: 2px 4px;
+    gap: 2px;
+    border-radius: 6px;
+  }
+  .calendar-nav-btn {
+    font-size: 10px;
+    padding: 2px 3px;
+  }
+  .calendar-date-input {
+    font-size: 9px;
+    min-width: 70px;
+    padding: 2px 2px;
+  }
+  .btn-hoy-calendar {
+    font-size: 8px;
+    padding: 2px 6px;
+    gap: 2px;
+  }
+  .calendar-wrapper {
+    gap: 4px;
+  }
+}
 
-
-/* Agregar un pequeño indicador de que se usa Enter */
 .buscador-cargas-input-compact input::after {
-    content: " ↵";
-    color: rgba(255, 255, 255, 0.2);
+  content: " ↵";
+  color: var(--buscador-placeholder);
 }

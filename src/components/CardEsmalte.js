@@ -44,13 +44,13 @@ const CardEsmalte = ({ carga, onClick }) => {
       onClick={onClick}
     >
       <div style={{ position: 'absolute', top: '10px', right: '60px', textAlign: 'right' }}>
-        <span className="mini-label">Lote</span>
+        <span className="mini-labelE">Lote</span>
         <span className="val-neon" style={{ display: 'block', fontSize: '0.9rem' }}>
           {carga.folio || carga.lote || 'S/F'}
         </span>
       </div>
 
-      <div className="badge-litros">
+      <div className="badge-litrosE">
         <span className="badge-val">{carga.litros?.toFixed(0) || '0'}</span>
         <span className="badge-unit">LTS</span>
       </div>
@@ -102,7 +102,7 @@ const CardEsmalte = ({ carga, onClick }) => {
         </div>
       </div>
 
-      <div className="mini-footer" style={{ textTransform: 'none' }}>
+      <div className="mini-footerE" style={{ textTransform: 'none' }}>
         {carga.operario || 'Área Esmaltes'}
       </div>
     </div>

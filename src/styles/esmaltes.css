@@ -1,250 +1,87 @@
-.esmaltes-full-view {
-    margin-top: 60px;
-    width: 100%;
+/* ============================================
+   ESMALTES - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
+
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --esm-header-border: #bc13fe;
+  --esm-header-color: #fff;
+  --esm-header-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
+  --esm-card-bg: rgba(45, 10, 85, 0.7);
+  --esm-card-shadow: 0 0 25px rgba(188, 19, 254, 0.2);
+  --esm-card-border: rgba(188, 19, 254, 0.3);
+  --esm-card-border-left: #bc13fe;
+  --esm-card-hover-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
+  --esm-card-hover-bg: rgba(60, 15, 110, 0.9);
+  --esm-badge-bg: #ff9800;
+  --esm-badge-text: white;
+  --esm-badge-border: #1a0633;
+  --esm-badge-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  --esm-label-color: #e0b0ff;
+  --esm-codigo-color: #fff;
+  --esm-codigo-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  --esm-desc-color: rgba(255, 255, 255, 0.8);
+  --esm-divider-color: rgba(255, 255, 255, 0.2);
+  --esm-proceso-bg: rgba(0, 243, 255, 0.05);
+  --esm-proceso-border: #00f3ff;
+  --esm-proceso-paso-bg: #00f3ff;
+  --esm-proceso-paso-color: #000;
+  --esm-proceso-paso-shadow: 0 0 5px #00f3ff;
+  --esm-proceso-desc: #fff;
+  --esm-val-neon: #fff;
+  --esm-footer-color: #bc13fe;
+  --esm-footer-bg: rgba(0, 0, 0, 0.3);
+  --esm-footer-border: rgba(188, 19, 254, 0.3);
+  --esm-empty-color: rgba(255, 255, 255, 0.2);
+  --esm-empty-border: rgba(188, 19, 254, 0.3);
+  --esm-lote-color: rgba(255, 255, 255, 0.9);
+  --esm-proceso-sep-color: rgba(255, 255, 255, 0.3);
+  --esm-proceso-text-color: rgba(255, 255, 255, 0.8);
 }
 
-.esmaltes-header-neon {
-    margin-bottom: 30px;
-    border-left: 4px solid #bc13fe;
-    padding-left: 15px;
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --esm-header-border: #8B7AA8;
+  --esm-header-color: #5B4B7A;
+  --esm-header-shadow: 0 0 10px rgba(139, 122, 168, 0.3);
+  --esm-card-bg: #ffffff;
+  --esm-card-shadow: 0 2px 12px rgba(60, 52, 70, 0.06);
+  --esm-card-border: #EDE8F5;
+  --esm-card-border-left: #8B7AA8;
+  --esm-card-hover-shadow: 0 8px 30px rgba(139, 122, 168, 0.12);
+  --esm-card-hover-bg: #F8F6FA;
+  --esm-badge-bg: #F4F1F8;
+  --esm-badge-text: #5B4B7A;
+  --esm-badge-border: #ffffff;
+  --esm-badge-shadow: 0 2px 8px rgba(60, 52, 70, 0.08);
+  --esm-label-color: #9E8EB8;
+  --esm-codigo-color: #3D3650;
+  --esm-codigo-shadow: 0 0 5px rgba(60, 52, 70, 0.08);
+  --esm-desc-color: #64748b;
+  --esm-divider-color: rgba(0, 0, 0, 0.08);
+  --esm-proceso-bg: #F8F6FA;
+  --esm-proceso-border: #8B7AA8;
+  --esm-proceso-paso-bg: #8B7AA8;
+  --esm-proceso-paso-color: #ffffff;
+  --esm-proceso-paso-shadow: 0 0 5px rgba(139, 122, 168, 0.3);
+  --esm-proceso-desc: #3D3650;
+  --esm-val-neon: #3D3650;
+  --esm-footer-color: #5B4B7A;
+  --esm-footer-bg: #F4F1F8;
+  --esm-footer-border: #E3DDF0;
+  --esm-empty-color: #C5BCD0;
+  --esm-empty-border: #EDE8F5;
+  --esm-lote-color: #3D3650;
+  --esm-proceso-sep-color: #D5CEE0;
+  --esm-proceso-text-color: #3D3650;
 }
 
-.esmaltes-header-neon h2 {
-    color: #fff;
-    font-size: 1.8rem;
-    letter-spacing: 2px;
-    margin: 0;
-    text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
-}
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
 
-/* Grid de Cards */
-.grid-esmaltes-neon {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    padding-top: 20px;
-}
-
-
-
-.card-esmalte-neon:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
-    background: rgba(60, 15, 110, 0.9);
-}
-
-
-
-.badge-val { font-size: 18px; line-height: 1; }
-.badge-unit { font-size: 10px; opacity: 0.9; }
-
-
-.mini-divider {
-    border-top: 1px dashed rgba(255, 255, 255, 0.2);
-    margin: 15px 0;
-    width: 70%;
-}
-
-.info-grid-interna {
-    display: flex;
-    gap: 20px;
-}
-
-.stat-box { display: flex; flex-direction: column; }
-.val-neon { color: #fff; font-weight: bold; font-size: 14px; }
-
-/* Footer */
-
-
-.empty-state-neon {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 100px;
-    color: rgba(255,255,255,0.2);
-    border: 2px dashed rgba(188, 19, 254, 0.3);
-    border-radius: 20px;
-    font-weight: bold;
-    letter-spacing: 3px;
-}
-
-
-.lista-procesos-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin: 10px 0;
-  background: rgba(0, 243, 255, 0.05);
-  padding: 8px;
-  border-radius: 6px;
-  border-left: 3px solid #00f3ff;
-}
-
-.proceso-tag {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.proc-paso {
-  background: #00f3ff;
-  color: #000;
-  font-weight: 900;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  box-shadow: 0 0 5px #00f3ff;
-}
-
-.proc-desc {
-  color: #fff;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-
-.descripcion-text {
-    font-size: 12px;            /* Tamaño de letra fijo */
-    color: #ffffff;             /* Aseguramos que sea blanco */
-    font-weight: 400;           /* Grosor normal para que no sature */
-    margin: 4px 0;              /* Pegadito al código del producto */
-    height: 32px;               /* Altura fija para que todos los cards midan lo mismo */
-    overflow: hidden;           /* Corta el texto si es muy largo */
-    text-transform: uppercase;  /* Opcional: Todo en mayúsculas para mejor lectura */
-    opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
-}
-
-
-
-
-.esmaltes-full-view {
-    margin-top: 60px;
-    width: 100%;
-}
-
-.esmaltes-header-neon {
-    margin-bottom: 30px;
-    border-left: 4px solid #bc13fe;
-    padding-left: 15px;
-}
-
-.esmaltes-header-neon h2 {
-    color: #fff;
-    font-size: 1.8rem;
-    letter-spacing: 2px;
-    margin: 0;
-    text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
-}
-
-/* Grid de Cards */
-.grid-esmaltes-neon {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    padding-top: 20px;
-}
-
-/* La Card con tus colores */
-
-
-.card-esmalte-neon:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
-    background: rgba(60, 15, 110, 0.9);
-}
-
-
-
-.badge-val { font-size: 18px; line-height: 1; }
-.badge-unit { font-size: 10px; opacity: 0.9; }
-
-
-.mini-divider {
-    border-top: 1px dashed rgba(255, 255, 255, 0.2);
-    margin: 15px 0;
-    width: 70%;
-}
-
-.info-grid-interna {
-    display: flex;
-    gap: 20px;
-}
-
-.stat-box { display: flex; flex-direction: column; }
-.val-neon { color: #fff; font-weight: bold; font-size: 14px; }
-
-/* Footer */
-
-.empty-state-neon {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 100px;
-    color: rgba(255,255,255,0.2);
-    border: 2px dashed rgba(188, 19, 254, 0.3);
-    border-radius: 20px;
-    font-weight: bold;
-    letter-spacing: 3px;
-}
-
-
-.lista-procesos-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin: 10px 0;
-  background: rgba(0, 243, 255, 0.05);
-  padding: 8px;
-  border-radius: 6px;
-  border-left: 3px solid #00f3ff;
-}
-
-.proceso-tag {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.proc-paso {
-  background: #00f3ff;
-  color: #000;
-  font-weight: 900;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 0.7rem;
-  box-shadow: 0 0 5px #00f3ff;
-}
-
-.proc-desc {
-  color: #fff;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-
-.descripcion-text {
-    font-size: 12px;            /* Tamaño de letra fijo */
-    color: #ffffff;             /* Aseguramos que sea blanco */
-    font-weight: 400;           /* Grosor normal para que no sature */
-    margin: 4px 0;              /* Pegadito al código del producto */
-    height: 32px;               /* Altura fija para que todos los cards midan lo mismo */
-    overflow: hidden;           /* Corta el texto si es muy largo */
-    text-transform: uppercase;  /* Opcional: Todo en mayúsculas para mejor lectura */
-    opacity: 0.9;               /* Un poco de transparencia para jerarquía visual */
-}
-
-
-
-
-/* Contenedor Principal */
 .esmaltes-full-view {
     margin-top: 60px;
     width: 100%;
@@ -252,40 +89,53 @@
     box-sizing: border-box;
 }
 
+/* ============================================
+   HEADER
+   ============================================ */
+
 .esmaltes-header-neon {
     margin-bottom: 30px;
-    border-left: 4px solid #bc13fe;
+    border-left: 4px solid var(--esm-header-border);
     padding-left: 15px;
+    transition: border-color 0.3s ease;
 }
 
 .esmaltes-header-neon h2 {
-    color: #fff;
+    color: var(--esm-header-color);
     font-size: 1.8rem;
     letter-spacing: 2px;
     margin: 0;
-    text-shadow: 0 0 10px rgba(188, 19, 254, 0.6);
+    text-shadow: var(--esm-header-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Grid de Tarjetas */
+/* ============================================
+   GRID DE TARJETAS
+   ============================================ */
+
 .grid-esmaltes-neon {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 35px;
+    padding-top: 20px;
 }
 
-/* Tarjeta Base */
+/* ============================================
+   TARJETA BASE
+   ============================================ */
+
 .card-esmalte-neon {
     position: relative;
-    background: rgba(45, 10, 85, 0.7);
+    background: var(--esm-card-bg);
     border-radius: 16px;
-    min-height: 220px; 
+    min-height: 220px;
     display: flex;
     flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    box-shadow: 0 0 25px rgba(188, 19, 254, 0.2);
-    border: 1px solid rgba(188, 19, 254, 0.3);
-    border-left: 6px solid #bc13fe; 
+    box-shadow: var(--esm-card-shadow);
+    border: 1px solid var(--esm-card-border);
+    border-left: 6px solid var(--esm-card-border-left);
     backdrop-filter: blur(5px);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -293,79 +143,109 @@
 
 .card-esmalte-neon:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0 35px rgba(188, 19, 254, 0.5);
-    background: rgba(60, 15, 110, 0.9);
+    box-shadow: var(--esm-card-hover-shadow);
+    background: var(--esm-card-hover-bg);
 }
 
-/* Posicionamiento del Lote (Arriba junto al círculo) */
+/* ============================================
+   LOTE
+   ============================================ */
+
 .lote-container-top {
     position: absolute;
     top: 10px;
-    right: 65px; /* Espacio para no chocar con el círculo */
+    right: 65px;
     text-align: right;
 }
 
 .lote-numero {
     display: block;
-    font-size: 0.95rem !important; /* Ajustable según tu preferencia */
+    font-size: 0.95rem !important;
     font-weight: bold;
+    color: var(--esm-lote-color);
+    transition: color 0.3s ease;
 }
 
-/* Badge de Litraje (Círculo Naranja) */
+/* ============================================
+   BADGE DE LITRAJE
+   ============================================ */
+
 .badge-litrosE {
     position: absolute;
     top: -15px;
     right: -15px;
-    background: #ff9800; 
-    color: white;
+    background: var(--esm-badge-bg);
+    color: var(--esm-badge-text);
     width: 65px;
     height: 65px;
     border-radius: 50%;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    border: 4px solid #1a0633; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    border: 4px solid var(--esm-badge-border);
+    box-shadow: var(--esm-badge-shadow);
     z-index: 10;
+    transition: all 0.3s ease;
 }
 
-.badge-val { font-size: 18px; line-height: 1; }
-.badge-unit { font-size: 10px; opacity: 0.9; }
+.badge-val {
+    font-size: 18px;
+    line-height: 1;
+}
 
-/* Tipografía de la Tarjeta */
+.badge-unit {
+    font-size: 10px;
+    opacity: 0.9;
+}
+
+/* ============================================
+   TIPOGRAFÍA DE LA TARJETA
+   ============================================ */
+
 .mini-labelE {
     font-size: 0.65rem;
-    color: #e0b0ff;
+    color: var(--esm-label-color);
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
     margin: 1px;
+    transition: color 0.3s ease;
 }
 
 .mini-codigo2 {
     font-size: 1.4rem;
     font-weight: 900;
-    color: #fff;
-    margin: -11px 0 5px 0;  /* 🔴 CAMBIADO: antes era 5px 0, ahora 2px arriba */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+    color: var(--esm-codigo-color);
+    margin: -11px 0 5px 0;
+    text-shadow: var(--esm-codigo-shadow);
+    transition: all 0.3s ease;
 }
 
 .descripcion-text {
-    font-size: 0.74rem; /* Tamaño optimizado para descripción */
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.74rem;
+    color: var(--esm-desc-color);
     margin: 0;
     line-height: 1.2;
+    transition: color 0.3s ease;
 }
+
+/* ============================================
+   DIVIDER
+   ============================================ */
 
 .mini-divider {
-    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    border-top: 1px dashed var(--esm-divider-color);
     margin: 15px 0;
     width: 100%;
+    transition: border-color 0.3s ease;
 }
 
-/* Sección de Procesos Corridos */
+/* ============================================
+   SECCIÓN DE PROCESOS
+   ============================================ */
+
 .info-grid-interna {
     display: flex;
     width: 100%;
@@ -389,46 +269,217 @@
 }
 
 .texto-proceso {
-    font-size: 10px !important; /* Tamaño pequeño para optimizar espacio */
+    font-size: 10px !important;
     white-space: nowrap;
+    color: var(--esm-proceso-text-color);
+    transition: color 0.3s ease;
 }
 
 .proceso-separador {
     width: 4px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--esm-proceso-sep-color);
     border-radius: 50%;
     margin: 0 6px;
+    transition: background 0.3s ease;
 }
 
 .val-neon {
-    color: #fff;
+    color: var(--esm-val-neon);
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
-/* Footer del Operario */
+/* ============================================
+   LISTA DE PROCESOS MINI
+   ============================================ */
+
+.lista-procesos-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+    background: var(--esm-proceso-bg);
+    padding: 8px;
+    border-radius: 6px;
+    border-left: 3px solid var(--esm-proceso-border);
+    transition: all 0.3s ease;
+}
+
+.proceso-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.proc-paso {
+    background: var(--esm-proceso-paso-bg);
+    color: var(--esm-proceso-paso-color);
+    font-weight: 900;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    box-shadow: var(--esm-proceso-paso-shadow);
+    transition: all 0.3s ease;
+}
+
+.proc-desc {
+    color: var(--esm-proceso-desc);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+}
+
+/* ============================================
+   FOOTER DEL OPERARIO
+   ============================================ */
+
 .mini-footerE {
     position: absolute;
     bottom: 8px;
     right: 5px;
     font-size: 9.5px;
-    color: #bc13fe; 
+    color: var(--esm-footer-color);
     font-weight: 700;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--esm-footer-bg);
     padding: 4px 12px;
     border-radius: 20px;
-    border: 1px solid rgba(188, 19, 254, 0.3);
+    border: 1px solid var(--esm-footer-border);
     text-transform: uppercase;
+    transition: all 0.3s ease;
 }
 
-/* Estado Vacío */
+/* ============================================
+   ESTADO VACÍO
+   ============================================ */
+
 .empty-state-neon {
     grid-column: 1 / -1;
     text-align: center;
     padding: 80px;
-    color: rgba(255,255,255,0.2);
-    border: 2px dashed rgba(188, 19, 254, 0.3);
+    color: var(--esm-empty-color);
+    border: 2px dashed var(--esm-empty-border);
     border-radius: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
 }
 
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 
+@media (max-width: 768px) {
+    .grid-esmaltes-neon {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .card-esmalte-neon {
+        min-height: 190px;
+        padding: 16px;
+    }
+
+    .mini-codigo2 {
+        font-size: 1.2rem;
+    }
+
+    .badge-litrosE {
+        width: 55px;
+        height: 55px;
+        top: -12px;
+        right: -12px;
+    }
+
+    .badge-val {
+        font-size: 15px;
+    }
+
+    .badge-unit {
+        font-size: 9px;
+    }
+
+    .lote-container-top {
+        right: 50px;
+    }
+
+    .lote-numero {
+        font-size: 0.85rem !important;
+    }
+
+    .esmaltes-full-view {
+        padding: 10px;
+    }
+
+    .esmaltes-header-neon h2 {
+        font-size: 1.4rem;
+    }
+
+    .descripcion-text {
+        font-size: 0.7rem;
+    }
+
+    .mini-footerE {
+        font-size: 8.5px;
+        padding: 3px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-esmaltes-neon {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .card-esmalte-neon {
+        min-height: 170px;
+        padding: 14px;
+    }
+
+    .badge-litrosE {
+        width: 48px;
+        height: 48px;
+        top: -10px;
+        right: -10px;
+    }
+
+    .badge-val {
+        font-size: 13px;
+    }
+
+    .badge-unit {
+        font-size: 8px;
+    }
+
+    .mini-codigo2 {
+        font-size: 1rem;
+    }
+
+    .lote-container-top {
+        right: 45px;
+        top: 8px;
+    }
+
+    .lote-numero {
+        font-size: 0.75rem !important;
+    }
+
+    .proceso-item {
+        flex-wrap: wrap;
+    }
+
+    .texto-proceso {
+        font-size: 8px !important;
+    }
+
+    .proceso-separador {
+        width: 3px;
+        height: 3px;
+        margin: 0 4px;
+    }
+}

@@ -1,60 +1,183 @@
+/* ============================================
+   MANTENIMIENTO - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
+
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --mant-bg: #0a0a12;
+  --mant-container-bg: #1b1b2f;
+  --mant-container-border: rgba(0, 192, 255, 0.2);
+  --mant-container-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  --mant-header-border: rgba(255, 255, 255, 0.05);
+  --mant-btn-back-bg: #232339;
+  --mant-btn-back-border: #00c0ff;
+  --mant-btn-back-color: #00c0ff;
+  --mant-title-color: #fff;
+  --mant-badge-bg: rgba(0, 255, 204, 0.1);
+  --mant-badge-color: #00ffcc;
+  --mant-badge-border: #00ffcc;
+  --mant-subtitulo-color: #00c0ff;
+  --mant-subtitulo-shadow: 0 0 10px rgba(0, 192, 255, 0.3);
+  --mant-card-bg: #232339;
+  --mant-card-border: transparent;
+  --mant-card-hover-border: rgba(0, 192, 255, 0.4);
+  --mant-card-hover-bg: #2a2a45;
+  --mant-card-title: #fff;
+  --mant-card-desc: #94a3b8;
+  --mant-card-btn-border: #00ffcc;
+  --mant-card-btn-color: #00ffcc;
+  --mant-consola-bg: #000;
+  --mant-consola-border: #333;
+  --mant-log-color: #888;
+  --mant-log-success: #00ffcc;
+  --mant-log-warning: #f6ad55;
+  --mant-log-info: #00c0ff;
+  --mant-log-time: #555;
+  --mant-footer-color: #64748b;
+  --mant-btn-panico-bg: rgba(255, 95, 126, 0.1);
+  --mant-btn-panico-color: #ff5f7e;
+  --mant-btn-panico-border: #ff5f7e;
+  --mant-drag-color: #6b7280;
+  --mant-drag-hover-bg: rgba(59, 130, 246, 0.1);
+  --mant-drag-active-bg: rgba(59, 130, 246, 0.2);
+  --mant-drag-over-border: #3b82f6;
+  --mant-drag-over-bg: rgba(59, 130, 246, 0.1);
+  --mant-btn-sync: linear-gradient(135deg, #00c0ff, #0080ff);
+  --mant-btn-sync-shadow: 0 5px 15px rgba(0, 192, 255, 0.3);
+  --mant-op-table-row-hover: rgba(59, 130, 246, 0.1);
+  --mant-drag-hint-color: #6b7280;
+}
+
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --mant-bg: #F4F1F8;
+  --mant-container-bg: #ffffff;
+  --mant-container-border: #E3DDF0;
+  --mant-container-shadow: 0 0 50px rgba(60, 52, 70, 0.08);
+  --mant-header-border: #EDE8F5;
+  --mant-btn-back-bg: #F8F6FA;
+  --mant-btn-back-border: #8B7AA8;
+  --mant-btn-back-color: #5B4B7A;
+  --mant-title-color: #3D3650;
+  --mant-badge-bg: #F4F1F8;
+  --mant-badge-color: #5B4B7A;
+  --mant-badge-border: #E3DDF0;
+  --mant-subtitulo-color: #5B4B7A;
+  --mant-subtitulo-shadow: 0 0 10px rgba(139, 122, 168, 0.15);
+  --mant-card-bg: #FBF9FC;
+  --mant-card-border: #EDE8F5;
+  --mant-card-hover-border: #8B7AA8;
+  --mant-card-hover-bg: #F4F1F8;
+  --mant-card-title: #3D3650;
+  --mant-card-desc: #9E8EB8;
+  --mant-card-btn-border: #8B7AA8;
+  --mant-card-btn-color: #5B4B7A;
+  --mant-consola-bg: #F8F6FA;
+  --mant-consola-border: #EDE8F5;
+  --mant-log-color: #9E8EB8;
+  --mant-log-success: #4A9A7A;
+  --mant-log-warning: #C89A3A;
+  --mant-log-info: #5B4B7A;
+  --mant-log-time: #C5BCD0;
+  --mant-footer-color: #C5BCD0;
+  --mant-btn-panico-bg: rgba(200, 80, 80, 0.08);
+  --mant-btn-panico-color: #C85A5A;
+  --mant-btn-panico-border: rgba(200, 80, 80, 0.2);
+  --mant-drag-color: #C5BCD0;
+  --mant-drag-hover-bg: rgba(139, 122, 168, 0.08);
+  --mant-drag-active-bg: rgba(139, 122, 168, 0.15);
+  --mant-drag-over-border: #8B7AA8;
+  --mant-drag-over-bg: rgba(139, 122, 168, 0.08);
+  --mant-btn-sync: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --mant-btn-sync-shadow: 0 5px 15px rgba(139, 122, 168, 0.25);
+  --mant-op-table-row-hover: rgba(139, 122, 168, 0.06);
+  --mant-drag-hint-color: #C5BCD0;
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+
 .mantenimiento-app {
     min-height: 100vh;
-    background: #0a0a12; /* Fondo ultra oscuro */
+    background: var(--mant-bg);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
     font-family: 'Inter', sans-serif;
+    transition: background 0.3s ease;
 }
 
 .mantenimiento-container {
     width: 1000px;
-    background: #1b1b2f;
-    border: 1px solid rgba(0, 192, 255, 0.2);
+    background: var(--mant-container-bg);
+    border: 1px solid var(--mant-container-border);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--mant-container-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Header */
+/* ============================================
+   HEADER
+   ============================================ */
+
 .mant-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--mant-header-border);
     padding-bottom: 20px;
+    transition: border-color 0.3s ease;
 }
 
 .btn-back {
-    background: #232339;
-    border: 1px solid #00c0ff;
-    color: #00c0ff;
+    background: var(--mant-btn-back-bg);
+    border: 1px solid var(--mant-btn-back-border);
+    color: var(--mant-btn-back-color);
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 192, 255, 0.2);
+}
+
+.light-theme .btn-back:hover {
+    box-shadow: 0 4px 15px rgba(139, 122, 168, 0.2);
 }
 
 .mant-titulo-seccion h1 {
-    color: #fff;
+    color: var(--mant-title-color);
     font-size: 24px;
     letter-spacing: 2px;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .badge-estado {
-    background: rgba(0, 255, 204, 0.1);
-    color: #00ffcc;
-    border: 1px solid #00ffcc;
+    background: var(--mant-badge-bg);
+    color: var(--mant-badge-color);
+    border: 1px solid var(--mant-badge-border);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 800;
+    transition: all 0.3s ease;
 }
 
-/* Grid Layout */
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
 .mant-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
@@ -62,14 +185,18 @@
 }
 
 .sub-titulo-neon {
-    color: #00c0ff;
+    color: var(--mant-subtitulo-color);
     font-size: 14px;
     text-transform: uppercase;
     margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(0, 192, 255, 0.3);
+    text-shadow: var(--mant-subtitulo-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Cards Herramientas */
+/* ============================================
+   CARDS HERRAMIENTAS
+   ============================================ */
+
 .herramientas-grid {
     display: flex;
     flex-direction: column;
@@ -77,90 +204,160 @@
 }
 
 .card-herramienta {
-    background: #232339;
+    background: var(--mant-card-bg);
     padding: 15px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border: 1px solid transparent;
-    transition: 0.3s;
+    border: 1px solid var(--mant-card-border);
+    transition: all 0.3s ease;
 }
 
 .card-herramienta:hover {
-    border-color: rgba(0, 192, 255, 0.4);
-    background: #2a2a45;
+    border-color: var(--mant-card-hover-border);
+    background: var(--mant-card-hover-bg);
 }
 
-.h-icono { font-size: 24px; }
-.h-info h3 { color: #fff; margin: 0; font-size: 16px; }
-.h-info p { color: #94a3b8; font-size: 12px; margin: 4px 0 0 0; }
+.h-icono {
+    font-size: 24px;
+}
+
+.h-info h3 {
+    color: var(--mant-card-title);
+    margin: 0;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.h-info p {
+    color: var(--mant-card-desc);
+    font-size: 12px;
+    margin: 4px 0 0 0;
+    transition: color 0.3s ease;
+}
 
 .h-btn-accion {
     margin-left: auto;
     background: transparent;
-    border: 1px solid #00ffcc;
-    color: #00ffcc;
+    border: 1px solid var(--mant-card-btn-border);
+    color: var(--mant-card-btn-color);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
     font-weight: bold;
+    transition: all 0.3s ease;
 }
 
-/* Consola de Logs (Efecto Matrix/Hacker) */
+.h-btn-accion:hover {
+    background: var(--mant-card-btn-border);
+    color: var(--mant-card-hover-bg);
+}
+
+.light-theme .h-btn-accion:hover {
+    background: var(--mant-card-btn-border);
+    color: #ffffff;
+}
+
+/* ============================================
+   CONSOLA DE LOGS
+   ============================================ */
+
 .consola-logs {
-    background: #000;
+    background: var(--mant-consola-bg);
     border-radius: 10px;
     padding: 15px;
     font-family: 'Roboto Mono', monospace;
     font-size: 11px;
     height: 300px;
     overflow-y: auto;
-    border: 1px solid #333;
+    border: 1px solid var(--mant-consola-border);
+    transition: all 0.3s ease;
 }
 
-.log-line { color: #888; margin-bottom: 6px; }
-.log-line.success { color: #00ffcc; }
-.log-line.warning { color: #f6ad55; }
-.log-line.info { color: #00c0ff; }
-.log-time { color: #555; margin-right: 8px; }
+.consola-logs::-webkit-scrollbar {
+    width: 6px;
+}
+
+.consola-logs::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.light-theme .consola-logs::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.consola-logs::-webkit-scrollbar-thumb {
+    background: var(--mant-subtitulo-color);
+    border-radius: 3px;
+}
+
+.log-line {
+    color: var(--mant-log-color);
+    margin-bottom: 6px;
+    transition: color 0.3s ease;
+}
+
+.log-line.success {
+    color: var(--mant-log-success);
+}
+
+.log-line.warning {
+    color: var(--mant-log-warning);
+}
+
+.log-line.info {
+    color: var(--mant-log-info);
+}
+
+.log-time {
+    color: var(--mant-log-time);
+    margin-right: 8px;
+    transition: color 0.3s ease;
+}
 
 .cursor-terminal {
     display: inline-block;
-    color: #00ffcc;
+    color: var(--mant-log-success);
     animation: parpadeo 1s infinite;
 }
 
-/* Footer */
+/* ============================================
+   FOOTER
+   ============================================ */
+
 .mant-footer {
     margin-top: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #64748b;
+    color: var(--mant-footer-color);
     font-size: 12px;
+    transition: color 0.3s ease;
 }
 
 .btn-pánico {
-    background: rgba(255, 95, 126, 0.1);
-    color: #ff5f7e;
-    border: 1px solid #ff5f7e;
+    background: var(--mant-btn-panico-bg);
+    color: var(--mant-btn-panico-color);
+    border: 1px solid var(--mant-btn-panico-border);
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 800;
+    transition: all 0.3s ease;
 }
 
-@keyframes parpadeo {
-    50% { opacity: 0; }
+.btn-pánico:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 95, 126, 0.2);
 }
 
+/* ============================================
+   DRAG AND DROP
+   ============================================ */
 
-
-
-
-/* Estilos para el drag and drop */
 .draggable-row {
     transition: background-color 0.2s ease;
 }
@@ -170,17 +367,18 @@
 }
 
 .draggable-row[draggable="true"]:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--mant-drag-hover-bg);
 }
 
 .drag-handle {
     cursor: grab;
     user-select: none;
-    color: #6b7280;
+    color: var(--mant-drag-color);
     font-size: 20px;
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
+    transition: color 0.3s ease;
 }
 
 .drag-handle:active {
@@ -190,15 +388,19 @@
 .drag-hint {
     font-size: 12px;
     font-weight: normal;
-    color: #6b7280;
+    color: var(--mant-drag-hint-color);
     margin-left: 10px;
     font-style: italic;
+    transition: color 0.3s ease;
 }
 
-/* Animación para el reordenamiento */
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
 @keyframes dragFeedback {
     0% {
-        background-color: rgba(59, 130, 246, 0.2);
+        background-color: var(--mant-drag-active-bg);
     }
     100% {
         background-color: transparent;
@@ -209,27 +411,38 @@
     animation: dragFeedback 0.3s ease;
 }
 
-/* Mejoras visuales para la tabla */
+@keyframes parpadeo {
+    50% { opacity: 0; }
+}
+
+/* ============================================
+   MEJORAS VISUALES PARA LA TABLA
+   ============================================ */
+
 .op-table tbody tr {
     transition: all 0.2s ease;
 }
 
 .op-table tbody tr.dragging {
     opacity: 0.5;
-    background-color: #3b82f6;
+    background-color: var(--mant-drag-active-bg);
 }
 
-/* Indicador visual para áreas donde se puede soltar */
 .op-table tbody tr.drag-over {
-    border-top: 2px solid #3b82f6;
-    background-color: rgba(59, 130, 246, 0.1);
+    border-top: 2px solid var(--mant-drag-over-border);
+    background-color: var(--mant-drag-over-bg);
 }
 
+.op-table tbody tr:hover {
+    background-color: var(--mant-op-table-row-hover);
+}
 
+/* ============================================
+   BOTÓN DE SINCRONIZACIÓN
+   ============================================ */
 
-/* Botón de sincronización */
 .btn-sync {
-    background: linear-gradient(135deg, #00c0ff, #0080ff);
+    background: var(--mant-btn-sync);
     border: none;
     color: white;
     padding: 6px 12px;
@@ -237,13 +450,109 @@
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn-sync:hover {
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(0, 192, 255, 0.3);
+    box-shadow: var(--mant-btn-sync-shadow);
 }
 
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 
+@media (max-width: 1024px) {
+    .mantenimiento-container {
+        width: 95%;
+        padding: 20px;
+    }
 
+    .mant-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .consola-logs {
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mant-header {
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .mant-titulo-seccion h1 {
+        font-size: 20px;
+    }
+
+    .mant-grid {
+        gap: 15px;
+    }
+
+    .card-herramienta {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .h-btn-accion {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .mant-footer {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .btn-pánico {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .mantenimiento-container {
+        padding: 15px;
+    }
+
+    .mant-titulo-seccion h1 {
+        font-size: 17px;
+        letter-spacing: 1px;
+    }
+
+    .badge-estado {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+
+    .card-herramienta {
+        padding: 12px;
+    }
+
+    .h-info h3 {
+        font-size: 14px;
+    }
+
+    .consola-logs {
+        height: 150px;
+        font-size: 10px;
+        padding: 10px;
+    }
+
+    .btn-back {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .btn-sync {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}

@@ -1,31 +1,102 @@
-// services/pdfService.js - CORRECCIÓN PARA EL FORMATO DE MÁQUINA
+// services/pdfService.js
+// ✅ SIN localStorage - TODO desde BD en tiempo real
 
 import { operarioService } from './operarioService';
-import { getOperarioPorMaquinaSync } from '../constants/config';
 
-// 🔴 Función auxiliar para obtener el operario especial activo
-const getOperarioEspecialActivo = () => {
+// ============================================================
+// 🔴 OBTENER OPERARIO ESPECIAL ACTIVO DESDE BD
+// ============================================================
+const getOperarioEspecialActivo = async () => {
     try {
-        const guardado = localStorage.getItem("operarios_especiales");
-        if (guardado) {
-            const operarios = JSON.parse(guardado);
-            const activo = operarios.find(op => op.activo === true);
-            if (activo) return activo.nombre;
+        console.log('🔄 Obteniendo operario especial desde BD...');
+        
+        const response = await fetch('http://localhost:8080/api/operarios/especiales');
+        
+        if (!response.ok) {
+            console.error('❌ Error al obtener especiales de BD:', response.status);
+            return null;
         }
+        
+        const operarios = await response.json();
+        console.log('📋 Operarios especiales desde BD:', operarios);
+        
+        if (!operarios || operarios.length === 0) {
+            console.warn('⚠️ No hay operarios especiales en BD');
+            return null;
+        }
+        
+        // Buscar el activo
+        const activo = operarios.find(op => op.activo === true);
+        if (activo) {
+            console.log('✅ Operario especial activo desde BD:', activo.nombre);
+            return activo.nombre;
+        }
+        
+        // Si no hay activo, usar el primero
+        console.log('📌 Usando primer operario especial:', operarios[0].nombre);
+        return operarios[0].nombre;
+        
     } catch (error) {
-        console.error("Error al obtener operario especial:", error);
+        console.error('❌ Error obteniendo operario especial de BD:', error);
+        return null;
     }
-    return "Lazaro";
 };
 
+// ============================================================
+// 🔴 OBTENER OPERARIO DE ROTACIÓN DESDE BD
+// ============================================================
+export const getOperarioDeRotacion = async (numMaquina, fechaRef = new Date()) => {
+    try {
+        console.log(`🔄 Buscando operario en rotación para máquina ${numMaquina}...`);
+        
+        const rotacion = await operarioService.getRotacion(fechaRef);
+        console.log(`📊 Rotación para máquina ${numMaquina}:`, rotacion);
+        
+        if (!rotacion) {
+            console.warn(`⚠️ No hay rotación para máquina ${numMaquina}`);
+            return null;
+        }
+        
+        if (rotacion[numMaquina]) {
+            console.log(`✅ Operario directo: ${rotacion[numMaquina]}`);
+            return rotacion[numMaquina];
+        }
+        
+        const grupos = {
+            101: 'grupo0', 102: 'grupo0',
+            103: 'grupo1', 104: 'grupo1',
+            105: 'grupo2', 106: 'grupo2',
+            107: 'grupo3', 108: 'grupo3'
+        };
+        
+        const grupoBuscado = grupos[numMaquina];
+        if (grupoBuscado) {
+            for (const [key, value] of Object.entries(rotacion)) {
+                const keyNum = parseInt(key);
+                if (grupos[keyNum] === grupoBuscado) {
+                    console.log(`🔄 Operario del mismo grupo: ${value}`);
+                    return value;
+                }
+            }
+        }
+        
+        console.warn(`⚠️ No se encontró operario para máquina ${numMaquina}`);
+        return null;
+        
+    } catch (error) {
+        console.error(`❌ Error en getOperarioDeRotacion:`, error);
+        return null;
+    }
+};
 
-
-
-// 🔴 Función para obtener operarios de vinílicas desde BD (ASYNC)
+// ============================================================
+// 🔴 OBTENER OPERARIOS DE VINÍLICAS DESDE BD
+// ============================================================
 const obtenerOperariosVinilica = async () => {
     try {
+        console.log('🔄 Obteniendo operarios vinílicas desde BD...');
         const operarios = await operarioService.getVinilica();
-        console.log('📋 Operarios Vinílicas desde BD:', operarios);
+        console.log('📋 Operarios vinílicas desde BD:', operarios);
         
         let operariosMap = {};
         if (Array.isArray(operarios)) {
@@ -38,130 +109,148 @@ const obtenerOperariosVinilica = async () => {
             operariosMap = operarios;
         }
         
-        try {
-            localStorage.setItem("operarios_vinilica", JSON.stringify(operariosMap));
-        } catch (e) {
-            // Ignorar
-        }
-        
         return operariosMap;
+        
     } catch (error) {
         console.error("❌ Error obteniendo operarios vinílicas:", error);
         return {};
     }
 };
 
-// 🔴 Función auxiliar para formatear el operario como string
+// ============================================================
+// 🔴 OBTENER OPERARIOS DE ESMALTES DESDE BD
+// ============================================================
+const obtenerOperariosEsmaltes = async () => {
+    try {
+        console.log('🔄 Obteniendo operarios de esmaltes desde BD...');
+        const todos = await operarioService.getAll();
+        console.log('📋 Todos los operarios:', todos);
+        
+        const esmaltes = todos.filter(op => op.area === 'esmaltes');
+        console.log('✅ Operarios de esmaltes:', esmaltes);
+        
+        return esmaltes;
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo operarios de esmaltes:', error);
+        return [];
+    }
+};
+
+// ============================================================
+// 🔴 FORMATEAR OPERARIO
+// ============================================================
 const formatearOperario = (operario) => {
-    if (!operario) return 'Sin asignar';
+    if (!operario) return null;
     
     if (typeof operario === 'string') {
-        return operario.trim() || 'Sin asignar';
+        const trimmed = operario.trim();
+        return trimmed || null;
     }
     
     if (typeof operario === 'object' && operario !== null) {
-        const nombre = operario.nombre || operario.name || operario.Nombre || operario.Name;
+        const nombre = operario.nombre || operario.name || operario.Nombre || operario.Name || operario.operario;
         if (nombre && typeof nombre === 'string') {
-            return nombre.trim() || 'Sin asignar';
-        }
-        try {
-            const str = String(operario);
-            if (str && str !== '[object Object]' && str !== '[object Promise]') {
-                return str;
-            }
-        } catch (e) {
-            // Ignorar
+            const trimmed = nombre.trim();
+            return trimmed || null;
         }
     }
     
-    return 'Sin asignar';
+    return null;
 };
 
-// 🔴 Función para obtener operario de una carga específica (SINCRÓNICA)
-const obtenerOperarioDeCarga = (carga, numMaquina, operariosBD) => {
-    let operarioNombre = 'Sin asignar';
-    
+// ============================================================
+// 🔴 OBTENER OPERARIO DE CARGA DESDE BD
+// ============================================================
+const obtenerOperarioDeCarga = async (carga, numMaquina, operariosBD, fechaRef) => {
     try {
-        // 1. Intentar obtener de la carga
+        // 1. Intentar desde la carga
         if (carga.operario) {
             const formateado = formatearOperario(carga.operario);
-            if (formateado !== 'Sin asignar') {
+            if (formateado) {
+                console.log(`👤 Carga tiene operario: ${formateado}`);
                 return formateado;
             }
         }
         
-        // 2. Usar BD
+        // 2. Intentar desde rotación
+        if (numMaquina) {
+            const rotacionOp = await getOperarioDeRotacion(numMaquina, fechaRef);
+            if (rotacionOp) {
+                console.log(`👤 Máquina ${numMaquina} -> Rotación: ${rotacionOp}`);
+                return rotacionOp;
+            }
+        }
+        
+        // 3. Intentar desde BD de vinílicas
         if (numMaquina && operariosBD && operariosBD[numMaquina]) {
             const bdNombre = formatearOperario(operariosBD[numMaquina]);
-            if (bdNombre !== 'Sin asignar') {
-                console.log(`👤 Máquina ${numMaquina} -> Operario desde BD: ${bdNombre}`);
+            if (bdNombre) {
+                console.log(`👤 Máquina ${numMaquina} -> BD Vinílicas: ${bdNombre}`);
                 return bdNombre;
             }
         }
         
-        // 3. Fallback: usar versión sincrónica de config
-        if (numMaquina) {
-            const fallback = getOperarioPorMaquinaSync(numMaquina);
-            const fallbackNombre = formatearOperario(fallback);
-            if (fallbackNombre !== 'Sin asignar') {
-                console.log(`👤 Máquina ${numMaquina} -> Operario desde fallback: ${fallbackNombre}`);
-                return fallbackNombre;
-            }
-        }
+        console.log(`⚠️ Sin operario para máquina ${numMaquina}`);
+        return null;
+        
     } catch (error) {
         console.error('❌ Error en obtenerOperarioDeCarga:', error);
+        return null;
     }
-    
-    return 'Sin asignar';
 };
 
 // ============================================================
-// 🔴 FUNCIÓN PRINCIPAL: PDF VINÍLICAS (CON RONDAS)
+// 🔴 FUNCIÓN PRINCIPAL: PDF CON RONDAS
 // ============================================================
 export const procesarPdfConRondas = async (file, rondas, cargasEspeciales = []) => {
     try {
         console.log('🚀 Iniciando procesarPdfConRondas...');
+        console.log('📦 Cargas especiales recibidas:', cargasEspeciales);
         
-        // Obtener operarios de BD
-        const operariosBD = await obtenerOperariosVinilica();
-        console.log('📋 Operarios BD para PDF:', operariosBD);
-
         const formData = new FormData();
         formData.append("file", file);
         
-        const operarioEspecial = getOperarioEspecialActivo();
-        console.log('👤 Operario especial:', operarioEspecial);
-
+        // 🔴 OBTENER OPERARIO ESPECIAL DESDE BD
+        const operarioEspecial = await getOperarioEspecialActivo();
+        console.log('👤 Operario especial desde BD:', operarioEspecial);
+        
+        // 🔴 OBTENER OPERARIOS VINÍLICAS DESDE BD
+        const operariosBD = await obtenerOperariosVinilica();
+        console.log('📋 Operarios vinílicas desde BD:', operariosBD);
+        
         const todasLasCargas = [];
+        const fechaRef = new Date();
 
+        // ============================================================
         // 🔴 PROCESAR RONDAS
+        // ============================================================
         if (rondas && Array.isArray(rondas)) {
-            rondas.forEach((fila, fIdx) => {
-                if (!fila || !Array.isArray(fila)) return;
+            for (let fIdx = 0; fIdx < rondas.length; fIdx++) {
+                const fila = rondas[fIdx];
+                if (!fila || !Array.isArray(fila)) continue;
                 
                 const numMaquina = 101 + fIdx;
                 
-                fila.forEach((celda, cIdx) => {
-                    if (!celda) return;
+                for (let cIdx = 0; cIdx < fila.length; cIdx++) {
+                    const celda = fila[cIdx];
+                    if (!celda) continue;
 
-                    const procesarCarga = (carga) => {
+                    const procesarCarga = async (carga) => {
                         if (!carga) return null;
                         
                         try {
-                            const operarioNombre = obtenerOperarioDeCarga(carga, numMaquina, operariosBD);
-                            const operarioFinal = String(operarioNombre || 'Sin asignar');
+                            const operarioNombre = await obtenerOperarioDeCarga(carga, numMaquina, operariosBD, fechaRef);
+                            const operarioFinal = operarioNombre || 'Sin asignar';
                             
                             const folio = carga.folio || carga.lote || carga.numeroLote || 
-                                         `V${String(numMaquina).padStart(3, '0')}${String(cIdx + 1).padStart(2, '0')}`;
-
-                            // 🔴🔴🔴 FORMATO CORRECTO DE MÁQUINA: "VI-101"
-                            const maquinaFormateada = `VI-${numMaquina}`;
+                                        `V${String(numMaquina).padStart(3, '0')}${String(cIdx + 1).padStart(2, '0')}`;
 
                             return {
                                 ...carga,
                                 folio: folio,
                                 ronda: cIdx + 1,
-                                maquina: maquinaFormateada,  // 🔴 AHORA ES "VI-101"
+                                maquina: `VI-${numMaquina}`,
                                 operario: operarioFinal,
                                 textoMaquina: `VI-${numMaquina} ${operarioFinal}`,
                                 textoOperario: operarioFinal,
@@ -171,78 +260,123 @@ export const procesarPdfConRondas = async (file, rondas, cargasEspeciales = []) 
                                 nivelCubriente: carga.nivelCubriente || 0
                             };
                         } catch (error) {
-                            console.error('❌ Error procesando carga:', error, carga);
+                            console.error('❌ Error procesando carga:', error);
                             return null;
                         }
                     };
 
                     if (Array.isArray(celda)) {
-                        celda.forEach(c => {
-                            const procesada = procesarCarga(c);
+                        for (const c of celda) {
+                            const procesada = await procesarCarga(c);
                             if (procesada) todasLasCargas.push(procesada);
-                        });
+                        }
                     } else {
-                        const procesada = procesarCarga(celda);
+                        const procesada = await procesarCarga(celda);
                         if (procesada) todasLasCargas.push(procesada);
                     }
-                });
-            });
+                }
+            }
         }
 
+        // ============================================================
         // 🔴 PROCESAR CARGAS ESPECIALES
+        // ============================================================
         if (cargasEspeciales && Array.isArray(cargasEspeciales)) {
-            cargasEspeciales.forEach(esp => {
-                if (!esp) return;
+            console.log('🔄 Procesando cargas especiales...');
+            
+            for (let index = 0; index < cargasEspeciales.length; index++) {
+                const esp = cargasEspeciales[index];
+                if (!esp) continue;
                 
                 try {
-                    let operarioNombre = formatearOperario(esp.operario);
-                    if (operarioNombre === 'Sin asignar') {
-                        operarioNombre = operarioEspecial;
+                    console.log(`📦 Carga especial ${index}:`, esp);
+                    
+                    let operarioFinal = null;
+                    
+                    // 1. Intentar desde esp.operario
+                    if (esp.operario) {
+                        const formateado = formatearOperario(esp.operario);
+                        if (formateado) {
+                            operarioFinal = formateado;
+                            console.log(`✅ Carga ${index} tiene operario propio: ${operarioFinal}`);
+                        }
                     }
                     
-                    const operarioFinal = String(operarioNombre || 'Lazaro');
+                    // 2. Intentar desde esp.nombreOperario
+                    if (!operarioFinal && esp.nombreOperario) {
+                        const formateado = formatearOperario(esp.nombreOperario);
+                        if (formateado) {
+                            operarioFinal = formateado;
+                            console.log(`✅ Carga ${index} tiene nombreOperario: ${operarioFinal}`);
+                        }
+                    }
                     
-                    todasLasCargas.push({
+                    // 3. Intentar desde esp.operarioEspecial
+                    if (!operarioFinal && esp.operarioEspecial) {
+                        const formateado = formatearOperario(esp.operarioEspecial);
+                        if (formateado) {
+                            operarioFinal = formateado;
+                            console.log(`✅ Carga ${index} tiene operarioEspecial: ${operarioFinal}`);
+                        }
+                    }
+                    
+                    // 4. Usar operario especial de BD
+                    if (!operarioFinal && operarioEspecial) {
+                        operarioFinal = operarioEspecial;
+                        console.log(`🔄 Carga ${index} usando operario especial de BD: ${operarioFinal}`);
+                    }
+                    
+                    // 5. Si nada funciona, Sin asignar
+                    if (!operarioFinal) {
+                        operarioFinal = 'Sin asignar';
+                        console.log(`⚠️ Carga ${index} sin operario`);
+                    }
+                    
+                    const cargaEspecial = {
                         ...esp,
-                        folio: esp.folio || esp.lote || esp.numeroLote || 'ESPECIAL',
+                        folio: esp.folio || esp.lote || esp.numeroLote || `ESP-${index + 1}`,
                         ronda: 'ESP',
-                        maquina: 'ESPECIAL',  // 🔴 Las especiales quedan como "ESPECIAL"
+                        maquina: 'ESPECIAL',
                         operario: operarioFinal,
                         textoMaquina: `ESPECIAL ${operarioFinal}`,
                         textoOperario: operarioFinal,
                         codigoProducto: esp.codigoProducto || esp.codigo || 'S/C',
                         litros: esp.litros || 0
+                    };
+                    
+                    console.log(`✅ Carga especial ${index} procesada:`, {
+                        folio: cargaEspecial.folio,
+                        operario: cargaEspecial.operario
                     });
+                    
+                    todasLasCargas.push(cargaEspecial);
+                    
                 } catch (error) {
-                    console.error('❌ Error procesando carga especial:', error, esp);
+                    console.error(`❌ Error procesando carga especial ${index}:`, error);
                 }
-            });
+            }
         }
 
+        // ============================================================
         // 🔴 VERIFICACIÓN FINAL
+        // ============================================================
         todasLasCargas.forEach((c, index) => {
             if (!c.operario || typeof c.operario !== 'string') {
-                console.warn(`⚠️ Carga ${index} tiene operario inválido:`, c.operario);
+                console.warn(`⚠️ Carga ${index} sin operario válido`);
                 c.operario = 'Sin asignar';
                 c.textoOperario = 'Sin asignar';
             }
-            // Asegurar que maquina tenga el formato correcto
-            if (c.maquina && c.maquina !== 'ESPECIAL' && !c.maquina.startsWith('VI-')) {
-                const num = c.maquina.replace(/\D/g, '');
-                if (num) {
-                    c.maquina = `VI-${num}`;
-                }
-            }
         });
 
-        console.log('📤 Cargas finales para PDF:', todasLasCargas.map(c => ({
+        console.log('📤 Cargas finales:', todasLasCargas.map(c => ({
             folio: c.folio,
             maquina: c.maquina,
-            operario: c.operario,
-            tipoOperario: typeof c.operario
+            operario: c.operario
         })));
 
+        // ============================================================
         // 🔴 ENVIAR AL BACKEND
+        // ============================================================
         formData.append("cargas", JSON.stringify({
             cargas: todasLasCargas,
             operarioEspecial: operarioEspecial
@@ -276,6 +410,10 @@ export const procesarPdfEsmaltes = async (file, cargasEsmaltes) => {
     try {
         console.log('🚀 Iniciando procesarPdfEsmaltes...');
         
+        // 🔴 OBTENER OPERARIOS DE ESMALTES DESDE BD
+        const operariosEsmaltes = await obtenerOperariosEsmaltes();
+        console.log('👥 Operarios de esmaltes desde BD:', operariosEsmaltes);
+        
         const formData = new FormData();
         formData.append("file", file);
         
@@ -283,20 +421,46 @@ export const procesarPdfEsmaltes = async (file, cargasEsmaltes) => {
             if (!carga) return null;
             
             try {
-                let operarioNombre = 'Sin asignar';
+                let operarioNombre = null;
+                
+                // Si la carga tiene operario, usarlo
                 if (carga.operario) {
-                    operarioNombre = formatearOperario(carga.operario);
+                    const formateado = formatearOperario(carga.operario);
+                    if (formateado) {
+                        operarioNombre = formateado;
+                    }
+                }
+                
+                // Si no tiene, buscar por puesto
+                if (!operarioNombre && carga.puesto) {
+                    const operario = operariosEsmaltes.find(op => 
+                        op.puesto && op.puesto.toLowerCase() === carga.puesto.toLowerCase()
+                    );
+                    if (operario) {
+                        operarioNombre = operario.nombre;
+                        console.log(`👤 Operario por puesto "${carga.puesto}": ${operarioNombre}`);
+                    }
+                }
+                
+                // Si no tiene, usar el primero disponible
+                if (!operarioNombre && operariosEsmaltes.length > 0) {
+                    operarioNombre = operariosEsmaltes[0].nombre;
+                    console.log(`📌 Usando primer operario de esmaltes: ${operarioNombre}`);
+                }
+                
+                if (!operarioNombre) {
+                    operarioNombre = 'Sin asignar';
                 }
                 
                 return {
                     folio: carga.folio || carga.lote || carga.numeroLote || '?',
                     codigo: carga.codigo || carga.codigoProducto || '?',
                     litros: carga.litros || 0,
-                    operario: String(operarioNombre || 'Área Esmaltes'),
+                    operario: String(operarioNombre),
                     detallesEnvasado: carga.detallesEnvasado || []
                 };
             } catch (error) {
-                console.error('❌ Error formateando carga de esmalte:', error, carga);
+                console.error('❌ Error formateando carga de esmalte:', error);
                 return null;
             }
         }).filter(Boolean);
@@ -317,8 +481,16 @@ export const procesarPdfEsmaltes = async (file, cargasEsmaltes) => {
         
         console.log('✅ PDF de esmaltes procesado exitosamente');
         return await response.blob();
+        
     } catch (error) {
         console.error('❌ Error en procesarPdfEsmaltes:', error);
         throw error;
     }
+};
+
+// ============================================================
+// 🔴 EXPORTAR FUNCIÓN PARA OBTENER OPERARIO ESPECIAL
+// ============================================================
+export const getOperarioEspecialActivoExport = async () => {
+    return await getOperarioEspecialActivo();
 };

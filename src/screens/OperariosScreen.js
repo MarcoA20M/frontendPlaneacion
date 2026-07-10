@@ -1172,7 +1172,7 @@ const cargarDatos = async () => {
                                     </button>
                                 </div>
 
-                                <div className="info-box" style={{ marginTop: '16px' }}>
+                                <div className="info-box2" style={{ marginTop: '16px' }}>
                                     <strong>✨ Los cambios se aplican automáticamente:</strong> 
                                     Al editar estos nombres y puestos, las cargas de esmaltes se asignarán con los nuevos nombres según el puesto.
                                     <br /><br />

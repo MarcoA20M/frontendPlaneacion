@@ -1,35 +1,283 @@
+/* ============================================
+   OPERARIOS - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
+
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --op-bg: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 40%, #1a1a2e 100%);
+  --op-panel-bg: rgba(26, 11, 46, 0.85);
+  --op-sidebar-bg: linear-gradient(180deg, #140926 0%, #1a0f2e 100%);
+  --op-sidebar-border: rgba(156, 39, 176, 0.2);
+  --op-sidebar-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  --op-logo-border: rgba(156, 39, 176, 0.15);
+  --op-dot-bg: #c084fc;
+  --op-dot-shadow: 0 0 12px #c084fc;
+  --op-logo-text: #fff;
+  --op-nav-label: #7a6a8a;
+  --op-nav-btn-color: #aa9aba;
+  --op-nav-btn-hover-bg: rgba(156, 39, 176, 0.15);
+  --op-nav-btn-hover-color: #fff;
+  --op-nav-btn-active-bg: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
+  --op-nav-btn-active-color: #e879f9;
+  --op-nav-btn-active-border: #c084fc;
+  --op-sidebar-footer-border: rgba(255, 255, 255, 0.05);
+  --op-btn-exit-bg: rgba(30, 20, 48, 0.8);
+  --op-btn-exit-border: rgba(255, 255, 255, 0.08);
+  --op-btn-exit-color: #aa9aba;
+  --op-btn-exit-hover-bg: rgba(231, 76, 60, 0.2);
+  --op-btn-exit-hover-color: #e74c3c;
+  --op-btn-exit-hover-border: #e74c3c;
+  --op-main-bg: rgba(18, 10, 30, 0.6);
+  --op-scroll-track: rgba(255, 255, 255, 0.02);
+  --op-scroll-thumb: #9c27b0;
+  --op-title-color: #fff;
+  --op-title-gradient: linear-gradient(135deg, #fff, #e879f9);
+  --op-title-sub: #9a8aaa;
+  --op-card-bg: rgba(30, 20, 50, 0.75);
+  --op-card-border: rgba(156, 39, 176, 0.15);
+  --op-card-hover-border: rgba(192, 132, 252, 0.3);
+  --op-card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --op-card-title-color: #e879f9;
+  --op-badge-bg: rgba(156, 39, 176, 0.15);
+  --op-badge-color: #e879f9;
+  --op-table-th-color: #9a8aaa;
+  --op-table-th-border: rgba(255, 255, 255, 0.05);
+  --op-table-td-border: rgba(255, 255, 255, 0.02);
+  --op-table-row-hover: rgba(156, 39, 176, 0.08);
+  --op-input-bg: rgba(18, 10, 30, 0.9);
+  --op-input-border: rgba(255, 255, 255, 0.08);
+  --op-input-color: #fff;
+  --op-input-focus-border: #c084fc;
+  --op-input-focus-shadow: rgba(156, 39, 176, 0.15);
+  --op-puesto-tag-bg: rgba(156, 39, 176, 0.12);
+  --op-puesto-tag-color: #e879f9;
+  --op-add-border: rgba(255, 255, 255, 0.05);
+  --op-add-input-placeholder: #6a5a7a;
+  --op-add-btn-bg: linear-gradient(135deg, #9c27b0, #6a1a9e);
+  --op-add-btn-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+  --op-preview-border: rgba(156, 39, 176, 0.12);
+  --op-preview-title-color: #e879f9;
+  --op-preview-icon-color: #2ecc71;
+  --op-preview-table-bg: rgba(18, 10, 30, 0.6);
+  --op-preview-th-bg: rgba(156, 39, 176, 0.1);
+  --op-preview-th-color: #e879f9;
+  --op-preview-td-color: #c0b0d0;
+  --op-preview-td-border: rgba(255, 255, 255, 0.03);
+  --op-preview-td-next: #2ecc71;
+  --op-preview-row-hover: rgba(156, 39, 176, 0.06);
+  --op-card-desc: #aa9aba;
+  --op-machine-item-bg: rgba(18, 10, 30, 0.8);
+  --op-machine-item-border: rgba(255, 255, 255, 0.05);
+  --op-machine-item-hover-border: rgba(156, 39, 176, 0.3);
+  --op-machine-id-bg: linear-gradient(135deg, #9c27b0, #6a1a9e);
+  --op-machine-id-color: #fff;
+  --op-machine-label: #baaaca;
+  --op-select-bg: #1f1535;
+  --op-select-border: rgba(255, 255, 255, 0.1);
+  --op-select-color: #fff;
+  --op-select-option-bg: #1f1535;
+  --op-select-hover-border: #c084fc;
+  --op-select-focus-border: #c084fc;
+  --op-operario-asignado-color: #e879f9;
+  --op-operario-asignado-bg: rgba(156, 39, 176, 0.12);
+  --op-btn-rotar-bg: linear-gradient(135deg, #2ecc71, #27ae60);
+  --op-btn-rotar-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+  --op-btn-reset-bg: linear-gradient(135deg, #e74c3c, #c0392b);
+  --op-btn-reset-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  --op-info-box-bg: rgba(156, 39, 176, 0.08);
+  --op-info-box-color: #aa9aba;
+  --op-info-box-border: #c084fc;
+  --op-toast-bg: linear-gradient(135deg, #2ecc71, #27ae60);
+  --op-toast-color: white;
+  --op-toast-error-bg: linear-gradient(135deg, #e74c3c, #c0392b);
+  --op-toast-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  --op-action-delete-bg: rgba(231, 76, 60, 0.1);
+  --op-action-delete-color: #e74c3c;
+  --op-action-delete-hover-bg: #e74c3c;
+  --op-action-delete-hover-color: white;
+  --op-especiales-border: rgba(156, 39, 176, 0.3);
+  --op-puesto-especial-bg: linear-gradient(135deg, #9c27b0, #6a1a9e);
+  --op-puesto-especial-color: #fff;
+  --op-activo-color: #e879f9;
+  --op-activo-bg: rgba(156, 39, 176, 0.2);
+  --op-status-active-bg: rgba(46, 204, 113, 0.2);
+  --op-status-active-color: #2ecc71;
+  --op-status-active-border: rgba(46, 204, 113, 0.3);
+  --op-status-inactive-bg: rgba(149, 165, 166, 0.2);
+  --op-status-inactive-color: #95a5a6;
+  --op-status-inactive-border: rgba(149, 165, 166, 0.3);
+  --op-nav-sub-btn-color: #c084fc;
+  --op-nav-sub-btn-hover-bg: rgba(156, 39, 176, 0.15);
+  --op-nav-sub-btn-hover-color: #fff;
+  --op-nav-sub-btn-active-bg: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
+  --op-nav-sub-btn-active-color: #e879f9;
+  --op-nav-sub-btn-active-border: #c084fc;
+  --op-nav-divider: linear-gradient(90deg, transparent, rgba(156, 39, 176, 0.3), transparent);
+  --op-machine-label-color: white;
+}
+
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --op-bg: linear-gradient(135deg, #F4F1F8 0%, #EDE6F7 40%, #E8E0F0 100%);
+  --op-panel-bg: rgba(255, 255, 255, 0.9);
+  --op-sidebar-bg: linear-gradient(180deg, #F8F6FA 0%, #F4F1F8 100%);
+  --op-sidebar-border: rgba(139, 122, 168, 0.15);
+  --op-sidebar-shadow: 4px 0 20px rgba(60, 52, 70, 0.06);
+  --op-logo-border: rgba(139, 122, 168, 0.1);
+  --op-dot-bg: #8B7AA8;
+  --op-dot-shadow: 0 0 12px rgba(139, 122, 168, 0.3);
+  --op-logo-text: #3D3650;
+  --op-nav-label: #9E8EB8;
+  --op-nav-btn-color: #9E8EB8;
+  --op-nav-btn-hover-bg: rgba(139, 122, 168, 0.08);
+  --op-nav-btn-hover-color: #3D3650;
+  --op-nav-btn-active-bg: #F4F1F8;
+  --op-nav-btn-active-color: #5B4B7A;
+  --op-nav-btn-active-border: #8B7AA8;
+  --op-sidebar-footer-border: rgba(0, 0, 0, 0.05);
+  --op-btn-exit-bg: #F8F6FA;
+  --op-btn-exit-border: rgba(0, 0, 0, 0.06);
+  --op-btn-exit-color: #9E8EB8;
+  --op-btn-exit-hover-bg: rgba(200, 80, 80, 0.08);
+  --op-btn-exit-hover-color: #C85A5A;
+  --op-btn-exit-hover-border: #C85A5A;
+  --op-main-bg: rgba(255, 255, 255, 0.6);
+  --op-scroll-track: rgba(0, 0, 0, 0.02);
+  --op-scroll-thumb: #D5CEE0;
+  --op-title-color: #3D3650;
+  --op-title-gradient: linear-gradient(135deg, #3D3650, #5B4B7A);
+  --op-title-sub: #9E8EB8;
+  --op-card-bg: rgba(255, 255, 255, 0.85);
+  --op-card-border: #EDE8F5;
+  --op-card-hover-border: #8B7AA8;
+  --op-card-hover-shadow: 0 8px 32px rgba(60, 52, 70, 0.06);
+  --op-card-title-color: #5B4B7A;
+  --op-badge-bg: #F4F1F8;
+  --op-badge-color: #5B4B7A;
+  --op-table-th-color: #9E8EB8;
+  --op-table-th-border: #EDE8F5;
+  --op-table-td-border: #F4F1F8;
+  --op-table-row-hover: rgba(139, 122, 168, 0.06);
+  --op-input-bg: #F8F6FA;
+  --op-input-border: #EDE8F5;
+  --op-input-color: #3D3650;
+  --op-input-focus-border: #8B7AA8;
+  --op-input-focus-shadow: rgba(139, 122, 168, 0.15);
+  --op-puesto-tag-bg: #F4F1F8;
+  --op-puesto-tag-color: #5B4B7A;
+  --op-add-border: #EDE8F5;
+  --op-add-input-placeholder: #C5BCD0;
+  --op-add-btn-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --op-add-btn-shadow: 0 4px 12px rgba(139, 122, 168, 0.2);
+  --op-preview-border: #EDE8F5;
+  --op-preview-title-color: #5B4B7A;
+  --op-preview-icon-color: #4A9A7A;
+  --op-preview-table-bg: #FBF9FC;
+  --op-preview-th-bg: #F4F1F8;
+  --op-preview-th-color: #5B4B7A;
+  --op-preview-td-color: #3D3650;
+  --op-preview-td-border: #F4F1F8;
+  --op-preview-td-next: #4A9A7A;
+  --op-preview-row-hover: rgba(139, 122, 168, 0.04);
+  --op-card-desc: #9E8EB8;
+  --op-machine-item-bg: #FBF9FC;
+  --op-machine-item-border: #EDE8F5;
+  --op-machine-item-hover-border: #8B7AA8;
+  --op-machine-id-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --op-machine-id-color: #fff;
+  --op-machine-label: #9E8EB8;
+  --op-select-bg: #F8F6FA;
+  --op-select-border: #EDE8F5;
+  --op-select-color: #3D3650;
+  --op-select-option-bg: #ffffff;
+  --op-select-hover-border: #8B7AA8;
+  --op-select-focus-border: #8B7AA8;
+  --op-operario-asignado-color: #5B4B7A;
+  --op-operario-asignado-bg: #F4F1F8;
+  --op-btn-rotar-bg: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --op-btn-rotar-shadow: 0 4px 12px rgba(74, 154, 122, 0.3);
+  --op-btn-reset-bg: linear-gradient(135deg, #D46A6A, #B85A5A);
+  --op-btn-reset-shadow: 0 4px 12px rgba(200, 80, 80, 0.2);
+  --op-info-box-bg: #F8F6FA;
+  --op-info-box-color: #9E8EB8;
+  --op-info-box-border: #8B7AA8;
+  --op-toast-bg: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --op-toast-color: white;
+  --op-toast-error-bg: linear-gradient(135deg, #D46A6A, #B85A5A);
+  --op-toast-shadow: 0 8px 20px rgba(60, 52, 70, 0.1);
+  --op-action-delete-bg: rgba(200, 80, 80, 0.08);
+  --op-action-delete-color: #C85A5A;
+  --op-action-delete-hover-bg: #C85A5A;
+  --op-action-delete-hover-color: white;
+  --op-especiales-border: #EDE8F5;
+  --op-puesto-especial-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --op-puesto-especial-color: #fff;
+  --op-activo-color: #5B4B7A;
+  --op-activo-bg: #F4F1F8;
+  --op-status-active-bg: rgba(74, 154, 122, 0.12);
+  --op-status-active-color: #3A7A5A;
+  --op-status-active-border: rgba(74, 154, 122, 0.2);
+  --op-status-inactive-bg: rgba(0, 0, 0, 0.04);
+  --op-status-inactive-color: #C5BCD0;
+  --op-status-inactive-border: #EDE8F5;
+  --op-nav-sub-btn-color: #5B4B7A;
+  --op-nav-sub-btn-hover-bg: rgba(139, 122, 168, 0.08);
+  --op-nav-sub-btn-hover-color: #3D3650;
+  --op-nav-sub-btn-active-bg: #F4F1F8;
+  --op-nav-sub-btn-active-color: #5B4B7A;
+  --op-nav-sub-btn-active-border: #8B7AA8;
+  --op-nav-divider: linear-gradient(90deg, transparent, rgba(139, 122, 168, 0.15), transparent);
+  --op-machine-label-color: #3D3650;
+}
+
+/* ============================================
+   RESET GLOBAL
+   ============================================ */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+
 .op-screen-container {
     height: 100vh;
     width: 100vw;
-    background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 40%, #1a1a2e 100%);
+    background: var(--op-bg);
     display: flex;
     overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    transition: background 0.3s ease;
 }
 
 .op-glass-panel {
     width: 100%;
     height: 100%;
-    background: rgba(26, 11, 46, 0.85);
+    background: var(--op-panel-bg);
     backdrop-filter: blur(0px);
     display: flex;
+    transition: background 0.3s ease;
 }
 
-/* --- SIDEBAR MODERNO --- */
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
 .op-sidebar {
     width: 280px;
-    background: linear-gradient(180deg, #140926 0%, #1a0f2e 100%);
+    background: var(--op-sidebar-bg);
     padding: 32px 20px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(156, 39, 176, 0.2);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    border-right: 1px solid var(--op-sidebar-border);
+    box-shadow: var(--op-sidebar-shadow);
+    transition: all 0.3s ease;
 }
 
 .op-logo {
@@ -38,15 +286,15 @@
     gap: 12px;
     margin-bottom: 48px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(156, 39, 176, 0.15);
+    border-bottom: 1px solid var(--op-logo-border);
 }
 
 .op-dot {
     width: 10px;
     height: 10px;
-    background: #c084fc;
+    background: var(--op-dot-bg);
     border-radius: 50%;
-    box-shadow: 0 0 12px #c084fc;
+    box-shadow: var(--op-dot-shadow);
     animation: pulse 2s infinite;
 }
 
@@ -56,21 +304,23 @@
 }
 
 .op-logo h2 {
-    color: #fff;
+    color: var(--op-logo-text);
     font-size: 16px;
     letter-spacing: 2px;
     margin: 0;
     font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 .nav-label {
-    color: #7a6a8a;
+    color: var(--op-nav-label);
     font-size: 10px;
     font-weight: 700;
     margin-bottom: 16px;
     padding-left: 12px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
+    transition: color 0.3s ease;
 }
 
 .op-nav {
@@ -84,7 +334,7 @@
     background: transparent;
     border: none;
     padding: 12px 16px;
-    color: #aa9aba;
+    color: var(--op-nav-btn-color);
     text-align: left;
     border-radius: 12px;
     cursor: pointer;
@@ -97,15 +347,15 @@
 }
 
 .op-nav-btn:hover {
-    background: rgba(156, 39, 176, 0.15);
-    color: #fff;
+    background: var(--op-nav-btn-hover-bg);
+    color: var(--op-nav-btn-hover-color);
     transform: translateX(4px);
 }
 
 .op-nav-btn.active {
-    background: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
-    color: #e879f9;
-    border-left: 2px solid #c084fc;
+    background: var(--op-nav-btn-active-bg);
+    color: var(--op-nav-btn-active-color);
+    border-left: 2px solid var(--op-nav-btn-active-border);
 }
 
 .nav-icon {
@@ -114,15 +364,15 @@
 
 .sidebar-footer {
     padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--op-sidebar-footer-border);
     margin-top: auto;
 }
 
 .op-btn-exit {
     width: 100%;
-    background: rgba(30, 20, 48, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #aa9aba;
+    background: var(--op-btn-exit-bg);
+    border: 1px solid var(--op-btn-exit-border);
+    color: var(--op-btn-exit-color);
     padding: 12px;
     border-radius: 12px;
     cursor: pointer;
@@ -135,19 +385,23 @@
 }
 
 .op-btn-exit:hover {
-    background: rgba(231, 76, 60, 0.2);
-    border-color: #e74c3c;
-    color: #e74c3c;
+    background: var(--op-btn-exit-hover-bg);
+    border-color: var(--op-btn-exit-hover-border);
+    color: var(--op-btn-exit-hover-color);
 }
 
-/* --- MAIN CONTENT --- */
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
 .op-main-content {
     flex-grow: 1;
     padding: 32px 48px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    background: rgba(18, 10, 30, 0.6);
+    background: var(--op-main-bg);
+    transition: background 0.3s ease;
 }
 
 .op-main-content::-webkit-scrollbar {
@@ -155,12 +409,12 @@
 }
 
 .op-main-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--op-scroll-track);
     border-radius: 3px;
 }
 
 .op-main-content::-webkit-scrollbar-thumb {
-    background: #9c27b0;
+    background: var(--op-scroll-thumb);
     border-radius: 3px;
 }
 
@@ -172,23 +426,28 @@
 }
 
 .op-title-group h1 {
-    color: #fff;
+    color: var(--op-title-color);
     font-size: 28px;
     margin: 0;
     font-weight: 700;
-    background: linear-gradient(135deg, #fff, #e879f9);
+    background: var(--op-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    transition: color 0.3s ease;
 }
 
 .op-title-group p {
-    color: #9a8aaa;
+    color: var(--op-title-sub);
     margin-top: 8px;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
-/* --- WORKSPACE GRID --- */
+/* ============================================
+   WORKSPACE GRID
+   ============================================ */
+
 .op-workspace {
     display: grid;
     grid-template-columns: 1fr;
@@ -200,19 +459,22 @@
     grid-template-columns: 1fr 420px;
 }
 
-/* --- CARDS MODERNAS --- */
+/* ============================================
+   CARDS MODERNAS
+   ============================================ */
+
 .op-card {
-    background: rgba(30, 20, 50, 0.75);
+    background: var(--op-card-bg);
     backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 24px;
-    border: 1px solid rgba(156, 39, 176, 0.15);
+    border: 1px solid var(--op-card-border);
     transition: all 0.3s ease;
 }
 
 .op-card:hover {
-    border-color: rgba(192, 132, 252, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: var(--op-card-hover-border);
+    box-shadow: var(--op-card-hover-shadow);
 }
 
 .card-header-flex {
@@ -223,24 +485,29 @@
 }
 
 .op-card-title {
-    color: #e879f9;
+    color: var(--op-card-title-color);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 2px;
     margin: 0;
     font-weight: 700;
+    transition: color 0.3s ease;
 }
 
 .count-badge {
-    background: rgba(156, 39, 176, 0.15);
-    color: #e879f9;
+    background: var(--op-badge-bg);
+    color: var(--op-badge-color);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
+    transition: all 0.3s ease;
 }
 
-/* --- TABLA MODERNA --- */
+/* ============================================
+   TABLA MODERNA
+   ============================================ */
+
 .op-table-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -253,29 +520,31 @@
 
 .op-table th {
     text-align: left;
-    color: #9a8aaa;
+    color: var(--op-table-th-color);
     font-size: 11px;
     padding: 12px 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--op-table-th-border);
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .op-table td {
     padding: 12px 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--op-table-td-border);
+    transition: border-color 0.3s ease;
 }
 
 .row-hover:hover {
-    background: rgba(156, 39, 176, 0.08);
+    background: var(--op-table-row-hover);
     border-radius: 8px;
 }
 
 .op-input-edit {
-    background: rgba(18, 10, 30, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: var(--op-input-bg);
+    border: 1px solid var(--op-input-border);
+    color: var(--op-input-color);
     padding: 8px 12px;
     border-radius: 8px;
     width: 100%;
@@ -284,53 +553,58 @@
 }
 
 .op-input-edit:focus {
-    border-color: #c084fc;
+    border-color: var(--op-input-focus-border);
     outline: none;
-    background: #1a0f2e;
-    box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.15);
+    background: var(--op-input-bg);
+    box-shadow: 0 0 0 3px var(--op-input-focus-shadow);
 }
 
 .op-puesto-tag {
-    background: rgba(156, 39, 176, 0.12);
-    color: #e879f9;
+    background: var(--op-puesto-tag-bg);
+    color: var(--op-puesto-tag-color);
     padding: 4px 12px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-/* --- FORMULARIOS DE AGREGAR --- */
+/* ============================================
+   FORMULARIOS DE AGREGAR
+   ============================================ */
+
 .op-add-operario {
     display: flex;
     gap: 12px;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--op-add-border);
+    transition: border-color 0.3s ease;
 }
 
 .op-add-operario input {
     flex: 1;
     padding: 10px 14px;
-    background: rgba(18, 10, 30, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--op-input-bg);
+    border: 1px solid var(--op-input-border);
     border-radius: 10px;
-    color: #fff;
+    color: var(--op-input-color);
     font-size: 13px;
     transition: all 0.2s ease;
 }
 
 .op-add-operario input::placeholder {
-    color: #6a5a7a;
+    color: var(--op-add-input-placeholder);
 }
 
 .op-add-operario input:focus {
     outline: none;
-    border-color: #c084fc;
+    border-color: var(--op-input-focus-border);
 }
 
 .op-add-operario button {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
+    background: var(--op-add-btn-bg);
     border: none;
     border-radius: 10px;
     color: #fff;
@@ -341,14 +615,17 @@
 
 .op-add-operario button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+    box-shadow: var(--op-add-btn-shadow);
 }
 
-/* --- VISTA PREVIA DE ROTACIÓN --- */
+/* ============================================
+   VISTA PREVIA DE ROTACIÓN
+   ============================================ */
+
 .preview-rotacion-section {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid rgba(156, 39, 176, 0.12);
+    border-top: 1px solid var(--op-preview-border);
 }
 
 .preview-rotacion-title {
@@ -359,23 +636,24 @@
 }
 
 .preview-rotacion-title h4 {
-    color: #e879f9;
+    color: var(--op-preview-title-color);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .preview-rotacion-title span {
-    color: #2ecc71;
+    color: var(--op-preview-icon-color);
     font-size: 20px;
 }
 
 .preview-rotacion-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(18, 10, 30, 0.6);
+    background: var(--op-preview-table-bg);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -383,19 +661,21 @@
 .preview-rotacion-table th {
     text-align: left;
     padding: 12px 16px;
-    background: rgba(156, 39, 176, 0.1);
-    color: #e879f9;
+    background: var(--op-preview-th-bg);
+    color: var(--op-preview-th-color);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
 .preview-rotacion-table td {
     padding: 10px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    color: #c0b0d0;
+    border-bottom: 1px solid var(--op-preview-td-border);
+    color: var(--op-preview-td-color);
     font-size: 13px;
+    transition: all 0.3s ease;
 }
 
 .preview-rotacion-table tr:last-child td {
@@ -403,33 +683,37 @@
 }
 
 .preview-rotacion-table td.next-week {
-    color: #2ecc71;
+    color: var(--op-preview-td-next);
     font-weight: 600;
 }
 
 .preview-rotacion-table tr:hover td {
-    background: rgba(156, 39, 176, 0.06);
+    background: var(--op-preview-row-hover);
 }
 
-/* --- MAQUINARIA PANEL --- */
+/* ============================================
+   MAQUINARIA PANEL
+   ============================================ */
+
 .card-desc {
-    color: #aa9aba;
+    color: var(--op-card-desc);
     font-size: 13px;
     margin-bottom: 20px;
     line-height: 1.5;
+    transition: color 0.3s ease;
 }
 
 .op-machine-item {
-    background: rgba(18, 10, 30, 0.8);
+    background: var(--op-machine-item-bg);
     padding: 16px;
     border-radius: 14px;
     margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--op-machine-item-border);
     transition: all 0.2s ease;
 }
 
 .op-machine-item:hover {
-    border-color: rgba(156, 39, 176, 0.3);
+    border-color: var(--op-machine-item-hover-border);
     transform: translateX(4px);
 }
 
@@ -438,11 +722,12 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+    color: var(--op-machine-label-color);
 }
 
 .machine-id {
-    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
-    color: #fff;
+    background: var(--op-machine-id-bg);
+    color: var(--op-machine-id-color);
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 6px;
@@ -450,17 +735,18 @@
 }
 
 .op-machine-item label {
-    color: #baaaca;
+    color: var(--op-machine-label);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
+    transition: color 0.3s ease;
 }
 
 .op-select-custom {
     width: 100%;
-    background: #1f1535;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--op-select-bg);
+    border: 1px solid var(--op-select-border);
+    color: var(--op-select-color);
     padding: 10px 14px;
     border-radius: 10px;
     cursor: pointer;
@@ -469,30 +755,34 @@
 }
 
 .op-select-custom option {
-    background: #1f1535;
-    color: #fff;
+    background: var(--op-select-option-bg);
+    color: var(--op-select-color);
 }
 
 .op-select-custom:hover {
-    border-color: #c084fc;
+    border-color: var(--op-select-hover-border);
 }
 
 .op-select-custom:focus {
     outline: none;
-    border-color: #c084fc;
+    border-color: var(--op-select-focus-border);
 }
 
 .operario-asignado-actual {
     margin-top: 10px;
     font-size: 12px;
-    color: #e879f9;
+    color: var(--op-operario-asignado-color);
     padding: 6px 10px;
-    background: rgba(156, 39, 176, 0.12);
+    background: var(--op-operario-asignado-bg);
     border-radius: 8px;
     display: inline-block;
+    transition: all 0.3s ease;
 }
 
-/* --- BOTONES DE ROTACIÓN --- */
+/* ============================================
+   BOTONES DE ROTACIÓN
+   ============================================ */
+
 .rotacion-buttons {
     display: flex;
     gap: 10px;
@@ -509,57 +799,61 @@
 }
 
 .btn-rotar {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    background: var(--op-btn-rotar-bg);
     color: white;
 }
 
 .btn-rotar:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    box-shadow: var(--op-btn-rotar-shadow);
 }
 
 .btn-reset {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: var(--op-btn-reset-bg);
     color: white;
 }
 
 .btn-reset:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    box-shadow: var(--op-btn-reset-shadow);
 }
 
-.info-box {
+.info-box2 {
     font-size: 12px;
-    color: #aa9aba;
-    background: rgba(156, 39, 176, 0.08);
+    color: var(--op-info-box-color);
+    background: var(--op-info-box-bg);
     padding: 12px;
     border-radius: 10px;
     margin: 16px 0;
-    border-left: 3px solid #c084fc;
+    border-left: 3px solid var(--op-info-box-border);
+    transition: all 0.3s ease;
 }
 
 .txt-center {
     text-align: center;
 }
 
-/* --- TOAST NOTIFICATIONS --- */
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+
 .op-toast {
     position: fixed;
     top: 24px;
     right: 24px;
     padding: 12px 20px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    color: white;
+    background: var(--op-toast-bg);
+    color: var(--op-toast-color);
     z-index: 1000;
     animation: slideInRight 0.3s ease;
     font-weight: 500;
     font-size: 13px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--op-toast-shadow);
 }
 
 .op-toast.error {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: var(--op-toast-error-bg);
 }
 
 @keyframes slideInRight {
@@ -573,24 +867,126 @@
     }
 }
 
-/* --- BOTONES DE ACCIÓN --- */
+/* ============================================
+   BOTONES DE ACCIÓN
+   ============================================ */
+
 .op-action-btn.delete {
-    background: rgba(231, 76, 60, 0.1);
+    background: var(--op-action-delete-bg);
     border: none;
     cursor: pointer;
     font-size: 16px;
     padding: 6px 10px;
     border-radius: 8px;
     transition: all 0.2s ease;
+    color: var(--op-action-delete-color);
 }
 
 .op-action-btn.delete:hover {
-    background: #e74c3c;
-    color: white;
+    background: var(--op-action-delete-hover-bg);
+    color: var(--op-action-delete-hover-color);
     transform: scale(1.05);
 }
 
-/* --- RESPONSIVE --- */
+/* ============================================
+   ESTILOS PARA OPERARIOS ESPECIALES
+   ============================================ */
+
+.especiales-card {
+    margin-top: 24px;
+    border: 1px solid var(--op-especiales-border);
+}
+
+.op-puesto-tag.especial {
+    background: var(--op-puesto-especial-bg);
+    color: var(--op-puesto-especial-color);
+}
+
+.operario-activo {
+    color: var(--op-activo-color);
+    background: var(--op-activo-bg);
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-left: 8px;
+    transition: all 0.3s ease;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.status-badge.active {
+    background: var(--op-status-active-bg);
+    color: var(--op-status-active-color);
+    border: 1px solid var(--op-status-active-border);
+}
+
+.status-badge.inactive {
+    background: var(--op-status-inactive-bg);
+    color: var(--op-status-inactive-color);
+    border: 1px solid var(--op-status-inactive-border);
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   SUBMENÚ DE VINÍLICAS
+   ============================================ */
+
+.op-nav-sub-btn {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 10px 12px 10px 32px;
+    color: var(--op-nav-sub-btn-color);
+    text-align: left;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.op-nav-sub-btn:hover {
+    background: var(--op-nav-sub-btn-hover-bg);
+    color: var(--op-nav-sub-btn-hover-color);
+    transform: translateX(4px);
+}
+
+.op-nav-sub-btn.active {
+    background: var(--op-nav-sub-btn-active-bg);
+    color: var(--op-nav-sub-btn-active-color);
+    border-left: 2px solid var(--op-nav-sub-btn-active-border);
+}
+
+.nav-divider {
+    height: 1px;
+    background: var(--op-nav-divider);
+    margin: 16px 0;
+}
+
+.op-card.machinery-card {
+    margin-top: -80px;
+    font-size: 10px;
+    right: -24px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
 @media (max-width: 1024px) {
     .op-main-content {
         padding: 24px;
@@ -642,96 +1038,4 @@
     .preview-rotacion-table td {
         padding: 8px 12px;
     }
-}
-
-/* --- ESTILOS PARA OPERARIOS ESPECIALES --- */
-.especiales-card {
-    margin-top: 24px;
-    border: 1px solid rgba(156, 39, 176, 0.3);
-}
-
-.op-puesto-tag.especial {
-    background: linear-gradient(135deg, #9c27b0, #6a1a9e);
-    color: #fff;
-}
-
-.operario-activo {
-    color: #e879f9;
-    background: rgba(156, 39, 176, 0.2);
-    padding: 2px 8px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-}
-
-.status-badge.active {
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-    border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.status-badge.inactive {
-    background: rgba(149, 165, 166, 0.2);
-    color: #95a5a6;
-    border: 1px solid rgba(149, 165, 166, 0.3);
-}
-
-.status-badge:hover {
-    transform: scale(1.05);
-}
-
-/* --- ESTILOS PARA SUBMENÚ DE VINÍLICAS --- */
-.op-nav-sub-btn {
-    width: 100%;
-    background: transparent;
-    border: none;
-    padding: 10px 12px 10px 32px;
-    color: #c084fc;
-    text-align: left;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-}
-
-.op-nav-sub-btn:hover {
-    background: rgba(156, 39, 176, 0.15);
-    color: #fff;
-    transform: translateX(4px);
-}
-
-.op-nav-sub-btn.active {
-    background: linear-gradient(135deg, rgba(156, 39, 176, 0.25), rgba(128, 0, 255, 0.15));
-    color: #e879f9;
-    border-left: 2px solid #c084fc;
-}
-
-.nav-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(156, 39, 176, 0.3), transparent);
-    margin: 16px 0;
-}
-
-.machine-label-group {
-    color: white;
-}
-
-.op-card.machinery-card {
-    margin-top: -80px;
-    font-size: 10px;
-    right: -24px;
 }

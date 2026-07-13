@@ -1,17 +1,123 @@
-/* src/styles/tanqueVisual.css */
+/* ============================================
+   TANQUE VISUAL - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
 
-/* ===== VERSIÓN HORIZONTAL CON TANQUE MÁS GRANDE - ESTILO NEON ===== */
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --tv-container-bg: rgba(255, 255, 255, 0.03);
+  --tv-container-border: rgba(192, 0, 255, 0.15);
+  --tv-container-shadow: 0 4px 20px rgba(192, 0, 255, 0.08);
+  --tv-container-hover-border: rgba(192, 0, 255, 0.25);
+  --tv-container-hover-shadow: 0 4px 30px rgba(192, 0, 255, 0.12);
+  --tv-codigo-color: #e879f9;
+  --tv-codigo-bg: rgba(192, 0, 255, 0.15);
+  --tv-codigo-border: rgba(192, 0, 255, 0.1);
+  --tv-nombre-color: rgba(255, 255, 255, 0.5);
+  --tv-estado-bg: rgba(0, 0, 0, 0.3);
+  --tv-grafico-bg: rgba(0, 0, 0, 0.4);
+  --tv-grafico-border: rgba(192, 0, 255, 0.08);
+  --tv-grafico-shadow: inset 0 0 30px rgba(192, 0, 255, 0.05);
+  --tv-grafico-hover-border: rgba(192, 0, 255, 0.15);
+  --tv-grafico-hover-shadow: inset 0 0 40px rgba(192, 0, 255, 0.08);
+  --tv-tapa-bg: rgba(255, 255, 255, 0.03);
+  --tv-tapa-shadow: 0 -2px 15px rgba(192, 0, 255, 0.1);
+  --tv-tapa-detalle-bg: rgba(192, 0, 255, 0.2);
+  --tv-tapa-detalle-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+  --tv-cuerpo-tanque-bg: rgba(0, 0, 0, 0.5);
+  --tv-cuerpo-tanque-shadow: inset 0 0 40px rgba(192, 0, 255, 0.05);
+  --tv-cuerpo-tanque-after-bg: radial-gradient(ellipse, rgba(192, 0, 255, 0.04) 0%, transparent 70%);
+  --tv-onda-bg: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  --tv-burbuja-bg: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent);
+  --tv-burbuja-shadow-1: 0 0 10px rgba(192, 0, 255, 0.1);
+  --tv-burbuja-shadow-2: 0 0 8px rgba(192, 0, 255, 0.08);
+  --tv-burbuja-shadow-3: 0 0 6px rgba(192, 0, 255, 0.06);
+  --tv-porcentaje-color: #ffffff;
+  --tv-porcentaje-shadow: 0 0 20px rgba(192, 0, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.5);
+  --tv-medicion-color: rgba(255, 255, 255, 0.2);
+  --tv-medicion-before-bg: rgba(192, 0, 255, 0.15);
+  --tv-base-bg: rgba(255, 255, 255, 0.03);
+  --tv-base-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+  --tv-base-detalle-bg: rgba(192, 0, 255, 0.15);
+  --tv-base-detalle-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+  --tv-info-bg: rgba(0, 0, 0, 0.3);
+  --tv-info-border: rgba(192, 0, 255, 0.06);
+  --tv-info-item-bg: rgba(255, 255, 255, 0.02);
+  --tv-info-item-border: rgba(255, 255, 255, 0.03);
+  --tv-info-label-color: rgba(255, 255, 255, 0.3);
+  --tv-info-valor-color: rgba(255, 255, 255, 0.85);
+  --tv-tipo-badge-shadow: 0 0 15px rgba(192, 0, 255, 0.2);
+}
+
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --tv-container-bg: rgba(255, 255, 255, 0.85);
+  --tv-container-border: #EDE8F5;
+  --tv-container-shadow: 0 4px 20px rgba(60, 52, 70, 0.06);
+  --tv-container-hover-border: #8B7AA8;
+  --tv-container-hover-shadow: 0 4px 30px rgba(139, 122, 168, 0.08);
+  --tv-codigo-color: #5B4B7A;
+  --tv-codigo-bg: #F4F1F8;
+  --tv-codigo-border: #E3DDF0;
+  --tv-nombre-color: #9E8EB8;
+  --tv-estado-bg: #F8F6FA;
+  --tv-grafico-bg: #F8F6FA;
+  --tv-grafico-border: #EDE8F5;
+  --tv-grafico-shadow: inset 0 0 30px rgba(139, 122, 168, 0.03);
+  --tv-grafico-hover-border: #8B7AA8;
+  --tv-grafico-hover-shadow: inset 0 0 40px rgba(139, 122, 168, 0.05);
+  --tv-tapa-bg: rgba(255, 255, 255, 0.6);
+  --tv-tapa-shadow: 0 -2px 15px rgba(139, 122, 168, 0.05);
+  --tv-tapa-detalle-bg: rgba(139, 122, 168, 0.15);
+  --tv-tapa-detalle-shadow: 0 0 10px rgba(139, 122, 168, 0.05);
+  --tv-cuerpo-tanque-bg: rgba(0, 0, 0, 0.04);
+  --tv-cuerpo-tanque-shadow: inset 0 0 40px rgba(139, 122, 168, 0.02);
+  --tv-cuerpo-tanque-after-bg: radial-gradient(ellipse, rgba(139, 122, 168, 0.04) 0%, transparent 70%);
+  --tv-onda-bg: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  --tv-burbuja-bg: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+  --tv-burbuja-shadow-1: 0 0 10px rgba(139, 122, 168, 0.05);
+  --tv-burbuja-shadow-2: 0 0 8px rgba(139, 122, 168, 0.04);
+  --tv-burbuja-shadow-3: 0 0 6px rgba(139, 122, 168, 0.03);
+  --tv-porcentaje-color: #3D3650;
+  --tv-porcentaje-shadow: 0 0 20px rgba(139, 122, 168, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  --tv-medicion-color: #C5BCD0;
+  --tv-medicion-before-bg: rgba(139, 122, 168, 0.15);
+  --tv-base-bg: rgba(255, 255, 255, 0.6);
+  --tv-base-shadow: 0 4px 20px rgba(139, 122, 168, 0.03);
+  --tv-base-detalle-bg: rgba(139, 122, 168, 0.15);
+  --tv-base-detalle-shadow: 0 0 10px rgba(139, 122, 168, 0.05);
+  --tv-info-bg: #FBF9FC;
+  --tv-info-border: #EDE8F5;
+  --tv-info-item-bg: #ffffff;
+  --tv-info-item-border: #EDE8F5;
+  --tv-info-label-color: #C5BCD0;
+  --tv-info-valor-color: #3D3650;
+  --tv-tipo-badge-shadow: 0 0 15px rgba(139, 122, 168, 0.08);
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
 .tv-container {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--tv-container-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(192, 0, 255, 0.15);
+    border: 1px solid var(--tv-container-border);
     border-radius: 12px;
     padding: 12px 20px;
     margin-bottom: 16px;
-    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.08);
+    box-shadow: var(--tv-container-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Header */
+.tv-container:hover {
+    border-color: var(--tv-container-hover-border);
+    box-shadow: var(--tv-container-hover-shadow);
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
 .tv-header {
     display: flex;
     justify-content: space-between;
@@ -30,17 +136,19 @@
 .tv-codigo {
     font-weight: 700;
     font-size: 0.9rem;
-    color: #e879f9;
-    background: rgba(192, 0, 255, 0.15);
+    color: var(--tv-codigo-color);
+    background: var(--tv-codigo-bg);
     padding: 2px 10px;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
-    border: 1px solid rgba(192, 0, 255, 0.1);
+    border: 1px solid var(--tv-codigo-border);
+    transition: all 0.3s ease;
 }
 
 .tv-nombre {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--tv-nombre-color);
+    transition: color 0.3s ease;
 }
 
 .tv-estado {
@@ -52,10 +160,13 @@
     font-weight: 600;
     font-size: 0.7rem;
     border: 2px solid;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--tv-estado-bg);
+    transition: background 0.3s ease;
 }
 
-/* Cuerpo horizontal */
+/* ============================================
+   CUERPO HORIZONTAL
+   ============================================ */
 .tv-cuerpo {
     display: flex;
     flex-direction: row;
@@ -70,46 +181,60 @@
     }
 }
 
-/* ===== GRÁFICO DEL TANQUE - ESTILO NEON ===== */
+/* ============================================
+   GRÁFICO DEL TANQUE - ESTILO NEON
+   ============================================ */
 .tv-grafico {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 16px 24px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--tv-grafico-bg);
     border-radius: 10px;
     min-height: 240px;
     min-width: 160px;
     flex-shrink: 0;
-    border: 1px solid rgba(192, 0, 255, 0.08);
-    box-shadow: inset 0 0 30px rgba(192, 0, 255, 0.05);
+    border: 1px solid var(--tv-grafico-border);
+    box-shadow: var(--tv-grafico-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Tapa - estilo neon */
+.tv-grafico:hover {
+    border-color: var(--tv-grafico-hover-border);
+    box-shadow: var(--tv-grafico-hover-shadow);
+}
+
+/* ============================================
+   TAPA - ESTILO NEON
+   ============================================ */
 .tv-tapa {
     width: 130px;
     height: 16px;
     border: 3px solid;
     border-radius: 6px 6px 0 0;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--tv-tapa-bg);
     position: relative;
     border-bottom: none;
-    box-shadow: 0 -2px 15px rgba(192, 0, 255, 0.1);
+    box-shadow: var(--tv-tapa-shadow);
+    transition: all 0.3s ease;
 }
 
 .tv-tapa-detalle {
     width: 35px;
     height: 5px;
-    background: rgba(192, 0, 255, 0.2);
+    background: var(--tv-tapa-detalle-bg);
     border-radius: 2px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+    box-shadow: var(--tv-tapa-detalle-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Cuerpo del tanque - estilo neon */
+/* ============================================
+   CUERPO DEL TANQUE - ESTILO NEON
+   ============================================ */
 .tv-cuerpo-tanque {
     width: 130px;
     height: 200px;
@@ -117,11 +242,26 @@
     border-radius: 0 0 6px 6px;
     position: relative;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.5);
-    box-shadow: inset 0 0 40px rgba(192, 0, 255, 0.05);
+    background: var(--tv-cuerpo-tanque-bg);
+    box-shadow: var(--tv-cuerpo-tanque-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Nivel del líquido */
+.tv-cuerpo-tanque::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 25%;
+    height: 35%;
+    background: var(--tv-cuerpo-tanque-after-bg);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ============================================
+   NIVEL DEL LÍQUIDO
+   ============================================ */
 .tv-nivel {
     position: absolute;
     bottom: 0;
@@ -133,14 +273,16 @@
     justify-content: center;
 }
 
-/* Ondas en el líquido - efecto neón */
+/* ============================================
+   ONDAS EN EL LÍQUIDO - EFECTO NEÓN
+   ============================================ */
 .tv-onda {
     position: absolute;
     top: -5px;
     left: -50%;
     width: 200%;
     height: 10px;
-    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    background: var(--tv-onda-bg);
     animation: tv-onda 3s ease-in-out infinite;
 }
 
@@ -158,11 +300,13 @@
     }
 }
 
-/* Burbujas decorativas - efecto neón */
+/* ============================================
+   BURBUJAS DECORATIVAS - EFECTO NEÓN
+   ============================================ */
 .tv-burbuja {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent);
+    background: var(--tv-burbuja-bg);
     animation: tv-burbuja 4s ease-in-out infinite;
 }
 
@@ -172,7 +316,7 @@
     left: 15%;
     bottom: 20%;
     animation-delay: 0.5s;
-    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+    box-shadow: var(--tv-burbuja-shadow-1);
 }
 
 .tv-burbuja-2 {
@@ -181,7 +325,7 @@
     right: 20%;
     bottom: 40%;
     animation-delay: 1.5s;
-    box-shadow: 0 0 8px rgba(192, 0, 255, 0.08);
+    box-shadow: var(--tv-burbuja-shadow-2);
 }
 
 .tv-burbuja-3 {
@@ -190,7 +334,7 @@
     left: 30%;
     bottom: 60%;
     animation-delay: 2.5s;
-    box-shadow: 0 0 6px rgba(192, 0, 255, 0.06);
+    box-shadow: var(--tv-burbuja-shadow-3);
 }
 
 @keyframes tv-burbuja {
@@ -204,18 +348,23 @@
     }
 }
 
-/* Porcentaje interior - estilo neón */
+/* ============================================
+   PORCENTAJE INTERIOR - ESTILO NEÓN
+   ============================================ */
 .tv-porcentaje-interior {
     position: relative;
     z-index: 2;
     font-weight: 700;
     font-size: 1.1rem;
-    color: #ffffff;
-    text-shadow: 0 0 20px rgba(192, 0, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.5);
+    color: var(--tv-porcentaje-color);
+    text-shadow: var(--tv-porcentaje-shadow);
     pointer-events: none;
+    transition: all 0.3s ease;
 }
 
-/* Mediciones laterales - estilo neón */
+/* ============================================
+   MEDICIONES LATERALES - ESTILO NEÓN
+   ============================================ */
 .tv-mediciones {
     position: absolute;
     right: -24px;
@@ -230,10 +379,11 @@
 
 .tv-medicion {
     font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--tv-medicion-color);
     text-align: right;
     position: relative;
     line-height: 1;
+    transition: color 0.3s ease;
 }
 
 .tv-medicion::before {
@@ -243,42 +393,50 @@
     top: 50%;
     width: 8px;
     height: 2px;
-    background: rgba(192, 0, 255, 0.15);
+    background: var(--tv-medicion-before-bg);
     margin-right: 3px;
+    transition: background 0.3s ease;
 }
 
-/* Base del tanque - estilo neón */
+/* ============================================
+   BASE DEL TANQUE - ESTILO NEÓN
+   ============================================ */
 .tv-base {
     width: 145px;
     height: 10px;
     border: 3px solid;
     border-radius: 0 0 6px 6px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--tv-base-bg);
     border-top: none;
     margin-top: -1px;
-    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+    box-shadow: var(--tv-base-shadow);
+    transition: all 0.3s ease;
 }
 
 .tv-base-detalle {
     width: 40px;
     height: 4px;
-    background: rgba(192, 0, 255, 0.15);
+    background: var(--tv-base-detalle-bg);
     border-radius: 2px;
     margin: 2px auto 0;
-    box-shadow: 0 0 10px rgba(192, 0, 255, 0.1);
+    box-shadow: var(--tv-base-detalle-shadow);
+    transition: all 0.3s ease;
 }
 
-/* ===== INFORMACIÓN DEL TANQUE - ESTILO NEÓN ===== */
+/* ============================================
+   INFORMACIÓN DEL TANQUE - ESTILO NEÓN
+   ============================================ */
 .tv-info {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
     padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--tv-info-bg);
     border-radius: 8px;
     flex: 1;
     min-width: 220px;
-    border: 1px solid rgba(192, 0, 255, 0.06);
+    border: 1px solid var(--tv-info-border);
+    transition: all 0.3s ease;
 }
 
 @media (max-width: 768px) {
@@ -293,23 +451,26 @@
     flex-direction: column;
     gap: 2px;
     padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--tv-info-item-bg);
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--tv-info-item-border);
+    transition: all 0.3s ease;
 }
 
 .tv-info-label {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--tv-info-label-color);
     font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 .tv-info-valor {
     font-size: 0.85rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--tv-info-valor-color);
+    transition: color 0.3s ease;
 }
 
 .tv-tipo-badge {
@@ -319,23 +480,13 @@
     font-weight: 600;
     font-size: 0.65rem;
     color: white;
-    box-shadow: 0 0 15px rgba(192, 0, 255, 0.2);
+    box-shadow: var(--tv-tipo-badge-shadow);
+    transition: all 0.3s ease;
 }
 
-/* Efecto de brillo neón en el tanque */
-.tv-cuerpo-tanque::after {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    width: 25%;
-    height: 35%;
-    background: radial-gradient(ellipse, rgba(192, 0, 255, 0.04) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-/* Efecto de brillo neón en los bordes */
+/* ============================================
+   EFECTOS DE BRILLO NEÓN
+   ============================================ */
 .tv-cuerpo-tanque::before {
     content: '';
     position: absolute;
@@ -349,15 +500,170 @@
     z-index: 0;
 }
 
-/* Efecto de brillo en el contenedor */
-.tv-container:hover {
-    border-color: rgba(192, 0, 255, 0.25);
-    box-shadow: 0 4px 30px rgba(192, 0, 255, 0.12);
-    transition: all 0.3s ease;
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .tv-container {
+        padding: 10px 14px;
+    }
+    
+    .tv-cuerpo {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .tv-grafico {
+        min-height: 200px;
+        min-width: 120px;
+        padding: 12px 16px;
+    }
+    
+    .tv-cuerpo-tanque {
+        width: 110px;
+        height: 160px;
+    }
+    
+    .tv-tapa {
+        width: 110px;
+        height: 14px;
+    }
+    
+    .tv-base {
+        width: 122px;
+        height: 8px;
+    }
+    
+    .tv-info {
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        min-width: 0;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    
+    .tv-mediciones {
+        right: -18px;
+        width: 16px;
+    }
+    
+    .tv-medicion {
+        font-size: 0.5rem;
+    }
+    
+    .tv-medicion::before {
+        width: 6px;
+    }
+    
+    .tv-porcentaje-interior {
+        font-size: 0.95rem;
+    }
+    
+    .tv-info-valor {
+        font-size: 0.75rem;
+    }
 }
 
-.tv-grafico:hover {
-    border-color: rgba(192, 0, 255, 0.15);
-    box-shadow: inset 0 0 40px rgba(192, 0, 255, 0.08);
-    transition: all 0.3s ease;
+@media (max-width: 480px) {
+    .tv-container {
+        padding: 8px 10px;
+    }
+    
+    .tv-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .tv-codigo {
+        font-size: 0.75rem;
+        padding: 1px 8px;
+    }
+    
+    .tv-nombre {
+        font-size: 0.7rem;
+    }
+    
+    .tv-estado {
+        font-size: 0.6rem;
+        padding: 1px 8px;
+    }
+    
+    .tv-grafico {
+        min-height: 160px;
+        min-width: 100px;
+        padding: 10px 12px;
+    }
+    
+    .tv-cuerpo-tanque {
+        width: 90px;
+        height: 130px;
+    }
+    
+    .tv-tapa {
+        width: 90px;
+        height: 12px;
+    }
+    
+    .tv-base {
+        width: 100px;
+        height: 6px;
+    }
+    
+    .tv-info {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        padding: 8px 10px;
+    }
+    
+    .tv-info-item {
+        padding: 4px 8px;
+    }
+    
+    .tv-info-label {
+        font-size: 0.5rem;
+    }
+    
+    .tv-info-valor {
+        font-size: 0.65rem;
+    }
+    
+    .tv-mediciones {
+        right: -14px;
+        width: 12px;
+        padding: 2px 0;
+    }
+    
+    .tv-medicion {
+        font-size: 0.4rem;
+    }
+    
+    .tv-medicion::before {
+        width: 4px;
+        height: 1px;
+    }
+    
+    .tv-porcentaje-interior {
+        font-size: 0.8rem;
+    }
+    
+    .tv-burbuja-1 {
+        width: 5px;
+        height: 5px;
+    }
+    
+    .tv-burbuja-2 {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .tv-burbuja-3 {
+        width: 3px;
+        height: 3px;
+    }
+    
+    .tv-tipo-badge {
+        font-size: 0.55rem;
+        padding: 1px 6px;
+    }
 }

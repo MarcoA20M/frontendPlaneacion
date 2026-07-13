@@ -1,241 +1,260 @@
-/* ========== FAMILIAS GESTION SCREEN - ESTILOS ESPECÍFICOS ========== */
-/* ===== ESTILOS PARA TEXTO BLANCO EN FAMILIAS ===== */
+/* ========== FAMILIAS GESTION SCREEN - CON VARIABLES ========== */
+/* ============================================
+   FAMILIAS GESTIÓN - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
 
-/* Texto del tipo de familia en la lista */
-.item-tipo {
-    font-size: 10px;
-    color: #ffffff !important;  /* Fuerza color blanco */
-    background: rgba(192, 0, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-block;
-    font-weight: 500;
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --fam-bg-container: transparent;
+  --fam-grid-gap: 1.5rem;
+  --fam-lista-bg: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+  --fam-lista-border: rgba(155, 48, 255, 0.2);
+  --fam-lista-header-bg: rgba(0, 0, 0, 0.2);
+  --fam-lista-header-border: rgba(155, 48, 255, 0.2);
+  --fam-item-bg-hover: rgba(155, 48, 255, 0.15);
+  --fam-item-active-bg: linear-gradient(135deg, rgba(155, 48, 255, 0.3), rgba(255, 20, 147, 0.15));
+  --fam-item-active-border: #9b30ff;
+  --fam-item-border: rgba(255, 255, 255, 0.05);
+  --fam-item-nombre-color: #ffffff;
+  --fam-item-tipo-color: rgba(255, 255, 255, 0.7);
+  --fam-item-id-color: rgba(255, 255, 255, 0.4);
+  --fam-placeholder-bg: linear-gradient(135deg, #9b30ff, #7b1fa2);
+  --fam-placeholder-color: white;
+  --fam-tipo-badge-bg: rgba(192, 0, 255, 0.2);
+  --fam-tipo-badge-color: #ffffff;
+  --fam-edicion-panel-bg: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+  --fam-edicion-panel-border: rgba(155, 48, 255, 0.2);
+  --fam-edicion-header-border: rgba(155, 48, 255, 0.2);
+  --fam-edicion-title-color: #ffffff;
+  --fam-edicion-label-color: rgba(255, 255, 255, 0.7);
+  --fam-edicion-input-bg: rgba(0, 0, 0, 0.4);
+  --fam-edicion-input-border: rgba(155, 48, 255, 0.3);
+  --fam-edicion-input-color: white;
+  --fam-edicion-input-focus-border: #9b30ff;
+  --fam-edicion-input-focus-shadow: 0 0 0 3px rgba(155, 48, 255, 0.2);
+  --fam-nombre-valor-color: #9b30ff;
+  --fam-nombre-valor-bg: rgba(155, 48, 255, 0.1);
+  --fam-info-grid-bg: rgba(0, 0, 0, 0.3);
+  --fam-info-grid-border: rgba(192, 0, 255, 0.2);
+  --fam-info-label-color: #a855f7;
+  --fam-info-valor-color: #ffffff;
+  --fam-preview-bg: rgba(155, 48, 255, 0.1);
+  --fam-preview-card-bg: rgba(0, 0, 0, 0.3);
+  --fam-preview-nombre-color: #ffffff;
+  --fam-preview-tipo-color: #e879f9;
+  --fam-preview-id-color: rgba(255, 255, 255, 0.5);
+  --fam-empty-title-color: #ffffff;
+  --fam-empty-sub-color: rgba(255, 255, 255, 0.6);
+  --fam-scroll-track: rgba(155, 48, 255, 0.1);
+  --fam-scroll-thumb: linear-gradient(135deg, #9b30ff, #ff1493);
+  --fam-scroll-thumb-hover: linear-gradient(135deg, #bb5eff, #ff4da6);
+  --fam-btn-agregar-bg: linear-gradient(135deg, #00b894, #009432);
+  --fam-btn-agregar-color: white;
+  --fam-btn-agregar-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
+  --fam-btn-agregar-empty-bg: linear-gradient(135deg, #9b30ff, #7b1fa2);
+  --fam-btn-agregar-empty-shadow: 0 4px 12px rgba(155, 48, 255, 0.4);
+  --fam-btn-eliminar-bg: rgba(255, 95, 126, 0.2);
+  --fam-btn-eliminar-hover-bg: rgba(255, 95, 126, 0.5);
+  --fam-btn-eliminar-color: #ff5f7e;
+  --fam-btn-eliminar-full-bg: rgba(255, 95, 126, 0.15);
+  --fam-btn-eliminar-full-border: #ff5f7e;
+  --fam-btn-eliminar-full-color: #ff5f7e;
+  --fam-btn-eliminar-full-hover-bg: rgba(255, 95, 126, 0.3);
+  --fam-btn-editar-bg: rgba(155, 48, 255, 0.2);
+  --fam-btn-editar-border: #9b30ff;
+  --fam-btn-editar-color: #9b30ff;
+  --fam-btn-editar-hover-bg: rgba(155, 48, 255, 0.4);
+  --fam-btn-guardar-bg: linear-gradient(135deg, #00b894, #009432);
+  --fam-btn-guardar-color: white;
+  --fam-btn-cancelar-bg: rgba(255, 20, 147, 0.2);
+  --fam-btn-cancelar-border: #ff1493;
+  --fam-btn-cancelar-color: #ff1493;
+  --fam-btn-subir-imagen-bg: linear-gradient(135deg, #9b30ff, #7b1fa2);
+  --fam-btn-subir-imagen-color: white;
+  --fam-btn-subir-imagen-shadow: 0 0 10px rgba(155, 48, 255, 0.5);
+  --fam-btn-eliminar-imagen-bg: rgba(255, 20, 147, 0.2);
+  --fam-btn-eliminar-imagen-border: #ff1493;
+  --fam-btn-eliminar-imagen-color: #ff1493;
+  --fam-btn-eliminar-imagen-hover-bg: rgba(255, 20, 147, 0.4);
+  --fam-select-bg: rgba(155, 48, 255, 0.2);
+  --fam-select-border: #9b30ff;
+  --fam-select-color: white;
+  --fam-select-option-bg: #2a0a4a;
+  --fam-toast-success: linear-gradient(135deg, #00b894, #009432);
+  --fam-toast-error: linear-gradient(135deg, #ff4757, #c0392b);
+  --fam-toast-color: white;
+  --fam-modal-overlay: rgba(0, 0, 0, 0.7);
+  --fam-modal-bg: linear-gradient(135deg, rgba(35, 20, 55, 0.98), rgba(25, 15, 45, 0.98));
+  --fam-modal-border: rgba(155, 48, 255, 0.3);
+  --fam-modal-header-border: rgba(155, 48, 255, 0.2);
+  --fam-modal-title-color: white;
+  --fam-modal-close-color: #ff5f7e;
+  --fam-modal-label-color: rgba(255, 255, 255, 0.8);
+  --fam-modal-input-bg: rgba(0, 0, 0, 0.4);
+  --fam-modal-input-border: rgba(155, 48, 255, 0.3);
+  --fam-modal-input-color: white;
+  --fam-modal-input-focus-border: #9b30ff;
+  --fam-modal-input-focus-shadow: 0 0 0 3px rgba(155, 48, 255, 0.2);
+  --fam-modal-btn-cancelar-bg: rgba(255, 95, 126, 0.15);
+  --fam-modal-btn-cancelar-border: #ff5f7e;
+  --fam-modal-btn-cancelar-color: #ff5f7e;
+  --fam-modal-btn-cancelar-hover-bg: rgba(255, 95, 126, 0.3);
+  --fam-modal-btn-agregar-bg: linear-gradient(135deg, #00b894, #009432);
+  --fam-modal-btn-agregar-color: white;
+  --fam-modal-btn-agregar-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
+  --fam-search-input-bg: rgba(0, 0, 0, 0.4);
+  --fam-search-input-border: rgba(155, 48, 255, 0.3);
+  --fam-search-input-color: white;
+  --fam-search-input-focus-border: #9b30ff;
+  --fam-search-input-focus-shadow: 0 0 0 3px rgba(155, 48, 255, 0.2);
+  --fam-clear-filter-bg: rgba(255, 95, 126, 0.2);
+  --fam-clear-filter-color: #ff5f7e;
+  --fam-clear-filter-hover-bg: rgba(255, 95, 126, 0.4);
+  --fam-info-nota-color: rgba(255, 255, 255, 0.5);
+  --fam-info-nota-peligro-color: #ff5f7e;
+  --fam-info-nota-peligro-bg: rgba(255, 95, 126, 0.1);
+  --fam-preview-vacio-color: rgba(255, 255, 255, 0.5);
+  --fam-loading-text-color: #ffffff;
+  --fam-spinner-border: rgba(155, 48, 255, 0.2);
+  --fam-spinner-top: #9b30ff;
+  --fam-spinner-right: #ff1493;
+  --fam-no-data-color: rgba(255, 255, 255, 0.5);
+  --fam-tipo-badge-edicion-bg: linear-gradient(135deg, #9b30ff, #7c00b3);
+  --fam-tipo-badge-edicion-color: #ffffff;
+  --fam-imagen-preview-bg: linear-gradient(135deg, #2a0a4a, #1a0a2e);
+  --fam-imagen-preview-border: rgba(155, 48, 255, 0.3);
+  --fam-imagen-preview-vacio-icon: rgba(255, 255, 255, 0.5);
+  --fam-lista-count-color: #9b30ff;
+  --fam-lista-count-bg: rgba(155, 48, 255, 0.15);
+  --fam-danger-zone-border: rgba(255, 95, 126, 0.3);
 }
 
-/* Texto del ID de familia */
-.item-id {
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.6) !important;
-    margin-top: 4px;
-    font-family: monospace;
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --fam-lista-bg: #ffffff;
+  --fam-lista-border: #EDE8F5;
+  --fam-lista-header-bg: #F8F6FA;
+  --fam-lista-header-border: #EDE8F5;
+  --fam-item-bg-hover: rgba(139, 122, 168, 0.08);
+  --fam-item-active-bg: linear-gradient(135deg, rgba(139, 122, 168, 0.15), rgba(139, 122, 168, 0.05));
+  --fam-item-active-border: #8B7AA8;
+  --fam-item-border: #EDE8F5;
+  --fam-item-nombre-color: #3D3650;
+  --fam-item-tipo-color: #9E8EB8;
+  --fam-item-id-color: #C5BCD0;
+  --fam-placeholder-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --fam-placeholder-color: white;
+  --fam-tipo-badge-bg: #F4F1F8;
+  --fam-tipo-badge-color: #5B4B7A;
+  --fam-edicion-panel-bg: #ffffff;
+  --fam-edicion-panel-border: #EDE8F5;
+  --fam-edicion-header-border: #EDE8F5;
+  --fam-edicion-title-color: #3D3650;
+  --fam-edicion-label-color: #9E8EB8;
+  --fam-edicion-input-bg: #F8F6FA;
+  --fam-edicion-input-border: #EDE8F5;
+  --fam-edicion-input-color: #3D3650;
+  --fam-edicion-input-focus-border: #8B7AA8;
+  --fam-edicion-input-focus-shadow: 0 0 0 3px rgba(139, 122, 168, 0.15);
+  --fam-nombre-valor-color: #5B4B7A;
+  --fam-nombre-valor-bg: #F4F1F8;
+  --fam-info-grid-bg: #F8F6FA;
+  --fam-info-grid-border: #EDE8F5;
+  --fam-info-label-color: #5B4B7A;
+  --fam-info-valor-color: #3D3650;
+  --fam-preview-bg: #F8F6FA;
+  --fam-preview-card-bg: #FBF9FC;
+  --fam-preview-nombre-color: #3D3650;
+  --fam-preview-tipo-color: #5B4B7A;
+  --fam-preview-id-color: #C5BCD0;
+  --fam-empty-title-color: #3D3650;
+  --fam-empty-sub-color: #9E8EB8;
+  --fam-scroll-track: rgba(139, 122, 168, 0.08);
+  --fam-scroll-thumb: linear-gradient(135deg, #8B7AA8, #B5A5C8);
+  --fam-scroll-thumb-hover: linear-gradient(135deg, #6B5B8A, #8B7AA8);
+  --fam-btn-agregar-bg: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --fam-btn-agregar-shadow: 0 4px 12px rgba(74, 154, 122, 0.25);
+  --fam-btn-agregar-empty-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --fam-btn-agregar-empty-shadow: 0 4px 12px rgba(139, 122, 168, 0.2);
+  --fam-btn-eliminar-bg: rgba(200, 80, 80, 0.08);
+  --fam-btn-eliminar-hover-bg: rgba(200, 80, 80, 0.2);
+  --fam-btn-eliminar-color: #C85A5A;
+  --fam-btn-eliminar-full-bg: rgba(200, 80, 80, 0.06);
+  --fam-btn-eliminar-full-border: #C85A5A;
+  --fam-btn-eliminar-full-color: #C85A5A;
+  --fam-btn-eliminar-full-hover-bg: rgba(200, 80, 80, 0.12);
+  --fam-btn-editar-bg: #F4F1F8;
+  --fam-btn-editar-border: #8B7AA8;
+  --fam-btn-editar-color: #5B4B7A;
+  --fam-btn-editar-hover-bg: #EDE8F5;
+  --fam-btn-guardar-bg: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --fam-btn-guardar-color: white;
+  --fam-btn-cancelar-bg: rgba(200, 80, 80, 0.08);
+  --fam-btn-cancelar-border: #C85A5A;
+  --fam-btn-cancelar-color: #C85A5A;
+  --fam-btn-subir-imagen-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --fam-btn-subir-imagen-shadow: 0 0 10px rgba(139, 122, 168, 0.3);
+  --fam-btn-eliminar-imagen-bg: rgba(200, 80, 80, 0.08);
+  --fam-btn-eliminar-imagen-border: #C85A5A;
+  --fam-btn-eliminar-imagen-color: #C85A5A;
+  --fam-btn-eliminar-imagen-hover-bg: rgba(200, 80, 80, 0.15);
+  --fam-select-bg: #F8F6FA;
+  --fam-select-border: #EDE8F5;
+  --fam-select-color: #3D3650;
+  --fam-select-option-bg: #ffffff;
+  --fam-toast-success: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --fam-toast-error: linear-gradient(135deg, #C85A5A, #B85A5A);
+  --fam-toast-color: white;
+  --fam-modal-overlay: rgba(60, 52, 70, 0.6);
+  --fam-modal-bg: #ffffff;
+  --fam-modal-border: #EDE8F5;
+  --fam-modal-header-border: #EDE8F5;
+  --fam-modal-title-color: #3D3650;
+  --fam-modal-close-color: #C85A5A;
+  --fam-modal-label-color: #9E8EB8;
+  --fam-modal-input-bg: #F8F6FA;
+  --fam-modal-input-border: #EDE8F5;
+  --fam-modal-input-color: #3D3650;
+  --fam-modal-input-focus-border: #8B7AA8;
+  --fam-modal-input-focus-shadow: 0 0 0 3px rgba(139, 122, 168, 0.15);
+  --fam-modal-btn-cancelar-bg: rgba(200, 80, 80, 0.08);
+  --fam-modal-btn-cancelar-border: #C85A5A;
+  --fam-modal-btn-cancelar-color: #C85A5A;
+  --fam-modal-btn-cancelar-hover-bg: rgba(200, 80, 80, 0.15);
+  --fam-modal-btn-agregar-bg: linear-gradient(135deg, #4A9A7A, #3A7A5A);
+  --fam-modal-btn-agregar-shadow: 0 4px 12px rgba(74, 154, 122, 0.25);
+  --fam-search-input-bg: #F8F6FA;
+  --fam-search-input-border: #EDE8F5;
+  --fam-search-input-color: #3D3650;
+  --fam-search-input-focus-border: #8B7AA8;
+  --fam-search-input-focus-shadow: 0 0 0 3px rgba(139, 122, 168, 0.15);
+  --fam-clear-filter-bg: rgba(200, 80, 80, 0.08);
+  --fam-clear-filter-color: #C85A5A;
+  --fam-clear-filter-hover-bg: rgba(200, 80, 80, 0.15);
+  --fam-info-nota-color: #C5BCD0;
+  --fam-info-nota-peligro-color: #C85A5A;
+  --fam-info-nota-peligro-bg: rgba(200, 80, 80, 0.06);
+  --fam-preview-vacio-color: #C5BCD0;
+  --fam-loading-text-color: #9E8EB8;
+  --fam-spinner-border: rgba(139, 122, 168, 0.15);
+  --fam-spinner-top: #8B7AA8;
+  --fam-spinner-right: #6B5B8A;
+  --fam-no-data-color: #C5BCD0;
+  --fam-tipo-badge-edicion-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --fam-tipo-badge-edicion-color: white;
+  --fam-imagen-preview-bg: #F8F6FA;
+  --fam-imagen-preview-border: #EDE8F5;
+  --fam-imagen-preview-vacio-icon: #C5BCD0;
+  --fam-lista-count-color: #5B4B7A;
+  --fam-lista-count-bg: #F4F1F8;
+  --fam-danger-zone-border: rgba(200, 80, 80, 0.2);
 }
 
-/* Nombre de la familia en la lista */
-.item-nombre {
-    font-size: 13px;
-    font-weight: 600;
-    color: #ffffff !important;
-    margin-bottom: 4px;
-    display: block;
-}
-
-/* Texto en el panel de edición - Tipo badge */
-.tipo-badge-edicion {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #9b30ff, #7c00b3);
-}
-
-/* Texto de las etiquetas (labels) en edición */
-.edicion-campo label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #e879f9 !important;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-}
-
-/* Información adicional - ID y Tipo */
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(192, 0, 255, 0.2);
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.info-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #a855f7 !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.info-valor {
-    font-size: 14px;
-    font-weight: 500;
-    color: #ffffff !important;
-    font-family: monospace;
-}
-
-/* Vista previa mini */
-.preview-card-mini {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.25);
-    padding: 16px;
-    border-radius: 16px;
-    border: 1px solid rgba(192, 0, 255, 0.25);
-}
-
-.preview-info-mini {
-    flex: 1;
-}
-
-.preview-nombre-mini {
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffffff !important;
-    margin-bottom: 4px;
-}
-
-.preview-tipo-mini {
-    font-size: 11px;
-    font-weight: 500;
-    color: #e879f9 !important;
-    margin-bottom: 4px;
-}
-
-.preview-id-mini {
-    font-size: 10px;
-    font-family: monospace;
-    color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Texto en el área de selección vacía */
-.empty-seleccion h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #ffffff !important;
-    margin-bottom: 8px;
-}
-
-.empty-seleccion p {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.6) !important;
-    margin-bottom: 20px;
-}
-
-/* Texto del loading spinner */
-.loading-spinner p {
-    color: #ffffff !important;
-    margin-top: 12px;
-    font-size: 14px;
-}
-
-/* Texto en el modal de agregar familia */
-.modal-content h3 {
-    color: #ffffff !important;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.form-group label {
-    color: #e879f9 !important;
-    font-size: 12px;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 6px;
-}
-
-/* Texto en el info-box */
-.info-box strong {
-    color: #e879f9 !important;
-}
-
-.info-box ul li {
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-size: 12px;
-    margin-bottom: 4px;
-}
-
-/* Texto del título de la lista */
-.lista-titulo {
-    font-size: 14px;
-    font-weight: 600;
-    color: #e879f9 !important;
-    margin: 0;
-}
-
-.lista-count {
-    font-size: 11px;
-    background: rgba(192, 0, 255, 0.2);
-    padding: 4px 10px;
-    border-radius: 20px;
-    color: #ffffff !important;
-}
-
-/* Texto del encabezado de edición */
-.edicion-header h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #ffffff !important;
-    margin: 0;
-}
-
-/* Texto de las notas informativas */
-.info-nota {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5) !important;
-    margin-top: 8px;
-    font-style: italic;
-}
-
-.info-nota.peligro {
-    color: #ff5f7e !important;
-    background: rgba(255, 95, 126, 0.1);
-    padding: 8px 12px;
-    border-radius: 8px;
-}
-
-/* Texto en preview vacío */
-.preview-vacio p {
-    color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 12px;
-    margin-top: 8px;
-}
-
-/* Placeholder en miniatura */
-.preview-mini-placeholder {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #c000ff, #7c00b3);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: bold;
-    color: #ffffff !important;
-}
-
-.mini-placeholder {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, #c000ff, #7c00b3);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff !important;
-}
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
 .familias-gestion-container {
     width: 100%;
 }
@@ -243,72 +262,98 @@
 .familias-grid-doble {
     display: grid;
     grid-template-columns: 320px 1fr;
-    gap: 1.5rem;
+    gap: var(--fam-grid-gap);
     margin-top: 1rem;
 }
 
-/* ===== LISTA DE FAMILIAS ===== */
+/* ============================================
+   LISTA DE FAMILIAS
+   ============================================ */
 .familias-lista {
-    background: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+    background: var(--fam-lista-bg);
     border-radius: 20px;
-    border: 1px solid rgba(155, 48, 255, 0.2);
+    border: 1px solid var(--fam-lista-border);
     overflow: hidden;
     backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 .lista-titulo {
     padding: 1rem;
     margin: 0;
-    color: white;
+    color: var(--fam-item-nombre-color);
     font-size: 1rem;
-    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
-    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--fam-lista-header-border);
+    background: var(--fam-lista-header-bg);
+    transition: all 0.3s ease;
 }
 
-/* ===== SCROLL BONITO PARA LA LISTA DE FAMILIAS ===== */
+.lista-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--fam-lista-header-border);
+    background: var(--fam-lista-header-bg);
+    transition: all 0.3s ease;
+}
+
+.lista-count {
+    font-size: 0.7rem;
+    color: var(--fam-lista-count-color);
+    background: var(--fam-lista-count-bg);
+    padding: 2px 8px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   SCROLL BONITO PARA LA LISTA
+   ============================================ */
 .lista-items {
     max-height: 500px;
     overflow-y: auto;
     scroll-behavior: smooth;
 }
 
-/* Scrollbar para WebKit (Chrome, Safari, Edge) */
 .lista-items::-webkit-scrollbar {
     width: 6px;
 }
 
 .lista-items::-webkit-scrollbar-track {
-    background: rgba(155, 48, 255, 0.1);
+    background: var(--fam-scroll-track);
     border-radius: 10px;
     margin: 8px 0;
+    transition: background 0.3s ease;
 }
 
 .lista-items::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #9b30ff, #ff1493);
+    background: var(--fam-scroll-thumb);
     border-radius: 10px;
     transition: all 0.3s ease;
 }
 
 .lista-items::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #bb5eff, #ff4da6);
+    background: var(--fam-scroll-thumb-hover);
     cursor: pointer;
 }
 
-/* Scrollbar para Firefox */
 .lista-items {
     scrollbar-width: thin;
     scrollbar-color: #9b30ff rgba(155, 48, 255, 0.1);
 }
 
-/* Efecto de borde neón al hacer scroll - opcional */
 .lista-items {
     scrollbar-gutter: stable;
 }
 
 .lista-items:active::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #c36eff, #ff66b3);
+    background: var(--fam-scroll-thumb-hover);
 }
 
+/* ============================================
+   ITEM DE FAMILIA EN LISTA
+   ============================================ */
 .familia-item-lista {
     display: flex;
     align-items: center;
@@ -316,16 +361,16 @@
     padding: 0.8rem 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--fam-item-border);
 }
 
 .familia-item-lista:hover {
-    background: rgba(155, 48, 255, 0.15);
+    background: var(--fam-item-bg-hover);
 }
 
 .familia-item-lista.active {
-    background: linear-gradient(135deg, rgba(155, 48, 255, 0.3), rgba(255, 20, 147, 0.15));
-    border-left: 3px solid #9b30ff;
+    background: var(--fam-item-active-bg);
+    border-left: 3px solid var(--fam-item-active-border);
 }
 
 .item-imagen-mini {
@@ -345,13 +390,14 @@
 .mini-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
+    background: var(--fam-placeholder-bg);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
     font-weight: bold;
-    color: white;
+    color: var(--fam-placeholder-color);
+    transition: all 0.3s ease;
 }
 
 .item-info-mini {
@@ -361,39 +407,67 @@
 
 .item-nombre {
     display: block;
-    color: white;
+    color: var(--fam-item-nombre-color);
     font-weight: 600;
     font-size: 0.85rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.3s ease;
 }
 
 .item-tipo {
     display: block;
     font-size: 0.65rem;
-    opacity: 0.7;
+    color: var(--fam-item-tipo-color);
+    transition: color 0.3s ease;
 }
 
 .item-id {
     font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--fam-item-id-color);
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
-/* ===== PANEL DE EDICIÓN ===== */
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-eliminar-familia {
+    background: var(--fam-btn-eliminar-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-eliminar-familia:hover {
+    background: var(--fam-btn-eliminar-hover-bg);
+    transform: scale(1.05);
+}
+
+.btn-eliminar-familia:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   PANEL DE EDICIÓN
+   ============================================ */
 .familias-edicion-panel {
-    background: linear-gradient(135deg, rgba(35, 20, 55, 0.7), rgba(25, 15, 45, 0.7));
+    background: var(--fam-edicion-panel-bg);
     border-radius: 20px;
-    border: 1px solid rgba(155, 48, 255, 0.2);
+    border: 1px solid var(--fam-edicion-panel-border);
     padding: 1.5rem;
     backdrop-filter: blur(10px);
-}
-
-/* Scroll para el panel de edición si es necesario */
-.familias-edicion-panel {
     overflow-y: auto;
     max-height: calc(100vh - 200px);
+    transition: all 0.3s ease;
 }
 
 .familias-edicion-panel::-webkit-scrollbar {
@@ -401,15 +475,18 @@
 }
 
 .familias-edicion-panel::-webkit-scrollbar-track {
-    background: rgba(155, 48, 255, 0.1);
+    background: var(--fam-scroll-track);
     border-radius: 10px;
 }
 
 .familias-edicion-panel::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #9b30ff, #ff1493);
+    background: var(--fam-scroll-thumb);
     border-radius: 10px;
 }
 
+/* ============================================
+   EMPTY SELECCIÓN
+   ============================================ */
 .empty-seleccion {
     text-align: center;
     padding: 3rem;
@@ -422,15 +499,20 @@
 }
 
 .empty-seleccion h3 {
-    color: white;
+    color: var(--fam-empty-title-color);
     margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
 }
 
 .empty-seleccion p {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--fam-empty-sub-color);
     font-size: 0.85rem;
+    transition: color 0.3s ease;
 }
 
+/* ============================================
+   EDICIÓN CONTENIDO
+   ============================================ */
 .edicion-contenido {
     display: flex;
     flex-direction: column;
@@ -444,16 +526,18 @@
     flex-wrap: wrap;
     gap: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
+    border-bottom: 1px solid var(--fam-edicion-header-border);
+    transition: border-color 0.3s ease;
 }
 
 .edicion-header h2 {
-    color: white;
+    color: var(--fam-edicion-title-color);
     font-size: 1.3rem;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: color 0.3s ease;
 }
 
 .tipo-badge-edicion {
@@ -461,9 +545,14 @@
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: bold;
+    background: var(--fam-tipo-badge-edicion-bg);
+    color: var(--fam-tipo-badge-edicion-color);
+    transition: all 0.3s ease;
 }
 
-/* ===== CAMPOS DE EDICIÓN ===== */
+/* ============================================
+   CAMPOS DE EDICIÓN
+   ============================================ */
 .edicion-campo {
     display: flex;
     flex-direction: column;
@@ -471,13 +560,16 @@
 }
 
 .edicion-campo label {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--fam-edicion-label-color);
     font-size: 0.85rem;
     font-weight: bold;
     letter-spacing: 1px;
+    transition: color 0.3s ease;
 }
 
-/* Imagen edición */
+/* ============================================
+   IMAGEN EDICIÓN
+   ============================================ */
 .imagen-edicion {
     display: flex;
     gap: 1.5rem;
@@ -490,8 +582,9 @@
     height: 120px;
     border-radius: 16px;
     overflow: hidden;
-    background: linear-gradient(135deg, #2a0a4a, #1a0a2e);
-    border: 2px solid rgba(155, 48, 255, 0.3);
+    background: var(--fam-imagen-preview-bg);
+    border: 2px solid var(--fam-imagen-preview-border);
+    transition: all 0.3s ease;
 }
 
 .imagen-preview img {
@@ -518,7 +611,8 @@
 .preview-vacio p {
     margin: 0;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--fam-preview-vacio-color);
+    transition: color 0.3s ease;
 }
 
 .imagen-botones {
@@ -527,7 +621,7 @@
     flex-wrap: wrap;
 }
 
-.btn-subir-imagen, .btn-eliminar-imagen {
+.btn-subir-imagen {
     padding: 0.5rem 1rem;
     border-radius: 50px;
     font-size: 0.8rem;
@@ -535,35 +629,34 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border: none;
-}
-
-.btn-subir-imagen {
-    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
-    color: white;
+    background: var(--fam-btn-subir-imagen-bg);
+    color: var(--fam-btn-subir-imagen-color);
 }
 
 .btn-subir-imagen:hover:not(:disabled) {
     transform: scale(1.05);
-    box-shadow: 0 0 10px rgba(155, 48, 255, 0.5);
+    box-shadow: var(--fam-btn-subir-imagen-shadow);
 }
 
 .btn-eliminar-imagen {
-    background: rgba(255, 20, 147, 0.2);
-    border: 1px solid #ff1493;
-    color: #ff1493;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--fam-btn-eliminar-imagen-bg);
+    border: 1px solid var(--fam-btn-eliminar-imagen-border);
+    color: var(--fam-btn-eliminar-imagen-color);
 }
 
 .btn-eliminar-imagen:hover {
-    background: rgba(255, 20, 147, 0.4);
+    background: var(--fam-btn-eliminar-imagen-hover-bg);
 }
 
-.info-nota {
-    margin-top: 0.5rem;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Nombre edición */
+/* ============================================
+   NOMBRE EDICIÓN
+   ============================================ */
 .nombre-actual {
     display: flex;
     align-items: center;
@@ -574,40 +667,50 @@
 .nombre-valor {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #9b30ff;
-    background: rgba(155, 48, 255, 0.1);
+    color: var(--fam-nombre-valor-color);
+    background: var(--fam-nombre-valor-bg);
     padding: 0.4rem 1rem;
     border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
-.btn-editar, .btn-guardar, .btn-cancelar {
+.btn-editar {
     padding: 0.4rem 1rem;
     border-radius: 50px;
     font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.3s ease;
     border: none;
-}
-
-.btn-editar {
-    background: rgba(155, 48, 255, 0.2);
-    border: 1px solid #9b30ff;
-    color: #9b30ff;
+    background: var(--fam-btn-editar-bg);
+    border: 1px solid var(--fam-btn-editar-border);
+    color: var(--fam-btn-editar-color);
 }
 
 .btn-editar:hover {
-    background: rgba(155, 48, 255, 0.4);
+    background: var(--fam-btn-editar-hover-bg);
 }
 
 .btn-guardar {
-    background: linear-gradient(135deg, #00b894, #009432);
-    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: var(--fam-btn-guardar-bg);
+    color: var(--fam-btn-guardar-color);
 }
 
 .btn-cancelar {
-    background: rgba(255, 20, 147, 0.2);
-    border: 1px solid #ff1493;
-    color: #ff1493;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    background: var(--fam-btn-cancelar-bg);
+    border: 1px solid var(--fam-btn-cancelar-border);
+    color: var(--fam-btn-cancelar-color);
 }
 
 .nombre-edicion {
@@ -618,20 +721,24 @@
 
 .nombre-edicion input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #9b30ff;
+    background: var(--fam-edicion-input-bg);
+    border: 1px solid var(--fam-edicion-input-border);
     border-radius: 50px;
     padding: 0.5rem 1rem;
-    color: white;
+    color: var(--fam-edicion-input-color);
     font-size: 0.9rem;
+    transition: all 0.3s ease;
 }
 
 .nombre-edicion input:focus {
     outline: none;
-    box-shadow: 0 0 10px rgba(155, 48, 255, 0.3);
+    border-color: var(--fam-edicion-input-focus-border);
+    box-shadow: var(--fam-edicion-input-focus-shadow);
 }
 
-/* Información adicional */
+/* ============================================
+   INFORMACIÓN ADICIONAL
+   ============================================ */
 .info-grid {
     display: flex;
     gap: 1rem;
@@ -639,38 +746,45 @@
 }
 
 .info-item {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--fam-info-grid-bg);
     padding: 0.5rem 1rem;
     border-radius: 12px;
     display: flex;
     gap: 0.5rem;
+    transition: all 0.3s ease;
 }
 
 .info-label {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--fam-info-label-color);
     font-size: 0.8rem;
+    transition: color 0.3s ease;
 }
 
 .info-valor {
-    color: white;
+    color: var(--fam-info-valor-color);
     font-weight: bold;
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
-/* Vista previa */
+/* ============================================
+   VISTA PREVIA
+   ============================================ */
 .preview-campo {
-    background: rgba(155, 48, 255, 0.1);
+    background: var(--fam-preview-bg);
     border-radius: 16px;
     padding: 1rem;
+    transition: background 0.3s ease;
 }
 
 .preview-card-mini {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--fam-preview-card-bg);
     border-radius: 12px;
     padding: 0.8rem;
+    transition: all 0.3s ease;
 }
 
 .preview-imagen-mini {
@@ -689,13 +803,14 @@
 .preview-mini-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
+    background: var(--fam-placeholder-bg);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
     font-weight: bold;
-    color: white;
+    color: var(--fam-placeholder-color);
+    transition: all 0.3s ease;
 }
 
 .preview-info-mini {
@@ -703,35 +818,41 @@
 }
 
 .preview-nombre-mini {
-    color: white;
+    color: var(--fam-preview-nombre-color);
     font-weight: bold;
     font-size: 0.9rem;
+    transition: color 0.3s ease;
 }
 
 .preview-tipo-mini {
     font-size: 0.7rem;
-    color: #9b30ff;
+    color: var(--fam-preview-tipo-color);
+    transition: color 0.3s ease;
 }
 
 .preview-id-mini {
     font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--fam-preview-id-color);
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
-/* Filtros y loading */
+/* ============================================
+   FILTROS Y LOADING
+   ============================================ */
 .tipo-filtro-select {
-    background: rgba(155, 48, 255, 0.2);
-    border: 1px solid #9b30ff;
+    background: var(--fam-select-bg);
+    border: 1px solid var(--fam-select-border);
     border-radius: 50px;
     padding: 0.5rem 1rem;
-    color: white;
+    color: var(--fam-select-color);
     cursor: pointer;
     font-size: 0.85rem;
+    transition: all 0.3s ease;
 }
 
 .tipo-filtro-select option {
-    background: #2a0a4a;
+    background: var(--fam-select-option-bg);
 }
 
 .loading-spinner {
@@ -743,9 +864,9 @@
     width: 50px;
     height: 50px;
     margin: 0 auto 1rem;
-    border: 3px solid rgba(155, 48, 255, 0.2);
-    border-top-color: #9b30ff;
-    border-right-color: #ff1493;
+    border: 3px solid var(--fam-spinner-border);
+    border-top-color: var(--fam-spinner-top);
+    border-right-color: var(--fam-spinner-right);
     border-radius: 50%;
     animation: spin 1s infinite;
 }
@@ -754,14 +875,23 @@
     to { transform: rotate(360deg); }
 }
 
-/* Toast mensajes */
+.loading-spinner p {
+    color: var(--fam-loading-text-color);
+    margin-top: 12px;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+/* ============================================
+   TOAST MENSAGES
+   ============================================ */
 .toast-familias {
     position: fixed;
     top: 20px;
     right: 20px;
     padding: 0.8rem 1.5rem;
     border-radius: 50px;
-    color: white;
+    color: var(--fam-toast-color);
     font-weight: bold;
     z-index: 1000;
     animation: slideInToast 0.3s ease;
@@ -769,11 +899,11 @@
 }
 
 .toast-familias.success {
-    background: linear-gradient(135deg, #00b894, #009432);
+    background: var(--fam-toast-success);
 }
 
 .toast-familias.error {
-    background: linear-gradient(135deg, #ff4757, #c0392b);
+    background: var(--fam-toast-error);
 }
 
 @keyframes slideInToast {
@@ -787,7 +917,9 @@
     }
 }
 
-/* No data */
+/* ============================================
+   NO DATA
+   ============================================ */
 .no-data-premium {
     text-align: center;
     padding: 3rem;
@@ -799,7 +931,9 @@
     opacity: 0.5;
 }
 
-/* Search box */
+/* ============================================
+   SEARCH BOX
+   ============================================ */
 .search-box-wrapper {
     width: 100%;
 }
@@ -814,36 +948,270 @@
 .search-box-with-button input {
     flex: 1;
     padding: 10px 16px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(155, 48, 255, 0.3);
+    background: var(--fam-search-input-bg);
+    border: 1px solid var(--fam-search-input-border);
     border-radius: 50px;
-    color: white;
+    color: var(--fam-search-input-color);
     font-size: 14px;
+    transition: all 0.3s ease;
 }
 
 .search-box-with-button input:focus {
     outline: none;
-    border-color: #9b30ff;
-    box-shadow: 0 0 0 3px rgba(155, 48, 255, 0.2);
+    border-color: var(--fam-search-input-focus-border);
+    box-shadow: var(--fam-search-input-focus-shadow);
 }
 
 .clear-filter {
-    background: rgba(255, 95, 126, 0.2);
+    background: var(--fam-clear-filter-bg);
     border: none;
     border-radius: 50%;
     width: 28px;
     height: 28px;
     cursor: pointer;
-    color: #ff5f7e;
+    color: var(--fam-clear-filter-color);
     transition: all 0.2s;
 }
 
 .clear-filter:hover {
-    background: rgba(255, 95, 126, 0.4);
+    background: var(--fam-clear-filter-hover-bg);
     transform: scale(1.05);
 }
 
-/* Responsive */
+/* ============================================
+   BOTÓN AGREGAR FAMILIA
+   ============================================ */
+.btn-agregar-familia {
+    padding: 10px 20px;
+    background: var(--fam-btn-agregar-bg);
+    border: none;
+    border-radius: 50px;
+    color: var(--fam-btn-agregar-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-agregar-familia:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--fam-btn-agregar-shadow);
+}
+
+.btn-agregar-familia-empty {
+    padding: 12px 24px;
+    background: var(--fam-btn-agregar-empty-bg);
+    border: none;
+    border-radius: 50px;
+    color: var(--fam-btn-agregar-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-agregar-familia-empty:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--fam-btn-agregar-empty-shadow);
+}
+
+/* ============================================
+   ZONA DE PELIGRO
+   ============================================ */
+.eliminar-campo {
+    border-top: 1px solid var(--fam-danger-zone-border);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.btn-eliminar-familia-full {
+    padding: 12px 20px;
+    background: var(--fam-btn-eliminar-full-bg);
+    border: 2px solid var(--fam-btn-eliminar-full-border);
+    border-radius: 12px;
+    color: var(--fam-btn-eliminar-full-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-eliminar-familia-full:hover {
+    background: var(--fam-btn-eliminar-full-hover-bg);
+    transform: scale(1.02);
+}
+
+.btn-eliminar-familia-full:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   INFO NOTAS
+   ============================================ */
+.info-nota {
+    font-size: 11px;
+    color: var(--fam-info-nota-color);
+    margin-top: 8px;
+    font-style: italic;
+    transition: color 0.3s ease;
+}
+
+.info-nota.peligro {
+    color: var(--fam-info-nota-peligro-color);
+    background: var(--fam-info-nota-peligro-bg);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--fam-info-nota-peligro-color);
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--fam-modal-overlay);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: background 0.3s ease;
+}
+
+.modal-content {
+    background: var(--fam-modal-bg);
+    border-radius: 24px;
+    border: 1px solid var(--fam-modal-border);
+    width: 90%;
+    max-width: 450px;
+    animation: modalFadeIn 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--fam-modal-header-border);
+    transition: border-color 0.3s ease;
+}
+
+.modal-header h3 {
+    color: var(--fam-modal-title-color);
+    margin: 0;
+    transition: color 0.3s ease;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--fam-modal-close-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    color: var(--fam-modal-label-color);
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.form-group input, .form-group select {
+    padding: 10px 14px;
+    background: var(--fam-modal-input-bg);
+    border: 1px solid var(--fam-modal-input-border);
+    border-radius: 12px;
+    color: var(--fam-modal-input-color);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--fam-modal-input-focus-border);
+    box-shadow: var(--fam-modal-input-focus-shadow);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+.btn-cancelar-modal {
+    padding: 8px 20px;
+    background: var(--fam-modal-btn-cancelar-bg);
+    border: 1px solid var(--fam-modal-btn-cancelar-border);
+    border-radius: 50px;
+    color: var(--fam-modal-btn-cancelar-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancelar-modal:hover {
+    background: var(--fam-modal-btn-cancelar-hover-bg);
+}
+
+.btn-agregar-modal {
+    padding: 8px 20px;
+    background: var(--fam-modal-btn-agregar-bg);
+    border: none;
+    border-radius: 50px;
+    color: var(--fam-modal-btn-agregar-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-agregar-modal:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--fam-modal-btn-agregar-shadow);
+}
+
+.btn-agregar-modal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 768px) {
     .familias-grid-doble {
         grid-template-columns: 1fr;
@@ -887,253 +1255,8 @@
         flex-direction: column;
         text-align: center;
     }
-}
-
-/* ===== BOTÓN AGREGAR FAMILIA ===== */
-.btn-agregar-familia {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #00b894, #009432);
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.btn-agregar-familia:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
-}
-
-.btn-agregar-familia-empty {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #9b30ff, #7b1fa2);
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1rem;
-}
-
-.btn-agregar-familia-empty:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(155, 48, 255, 0.4);
-}
-
-/* ===== BOTÓN ELIMINAR EN LISTA ===== */
-.item-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-eliminar-familia {
-    background: rgba(255, 95, 126, 0.2);
-    border: none;
-    border-radius: 8px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
-}
-
-.btn-eliminar-familia:hover {
-    background: rgba(255, 95, 126, 0.5);
-    transform: scale(1.05);
-}
-
-.btn-eliminar-familia:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ===== ZONA DE PELIGRO ===== */
-.eliminar-campo {
-    border-top: 1px solid rgba(255, 95, 126, 0.3);
-    padding-top: 1rem;
-    margin-top: 0.5rem;
-}
-
-.btn-eliminar-familia-full {
-    padding: 12px 20px;
-    background: rgba(255, 95, 126, 0.15);
-    border: 2px solid #ff5f7e;
-    border-radius: 12px;
-    color: #ff5f7e;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-eliminar-familia-full:hover {
-    background: rgba(255, 95, 126, 0.3);
-    transform: scale(1.02);
-}
-
-.btn-eliminar-familia-full:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.info-nota.peligro {
-    background: rgba(255, 95, 126, 0.1);
-    border-left: 3px solid #ff5f7e;
-    color: #ff5f7e;
-}
-
-/* ===== MODAL ===== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: linear-gradient(135deg, rgba(35, 20, 55, 0.98), rgba(25, 15, 45, 0.98));
-    border-radius: 24px;
-    border: 1px solid rgba(155, 48, 255, 0.3);
-    width: 90%;
-    max-width: 450px;
-    animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
+    
+    .modal-content {
+        width: 95%;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
-}
-
-.modal-header h3 {
-    color: white;
-    margin: 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #ff5f7e;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.modal-close:hover {
-    transform: scale(1.1);
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1.2rem;
-}
-
-.form-group label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.form-group input, .form-group select {
-    padding: 10px 14px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(155, 48, 255, 0.3);
-    border-radius: 12px;
-    color: white;
-    font-size: 14px;
-}
-
-.form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: #9b30ff;
-    box-shadow: 0 0 0 3px rgba(155, 48, 255, 0.2);
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding: 1rem 1.5rem 1.5rem;
-}
-
-.btn-cancelar-modal {
-    padding: 8px 20px;
-    background: rgba(255, 95, 126, 0.15);
-    border: 1px solid #ff5f7e;
-    border-radius: 50px;
-    color: #ff5f7e;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-cancelar-modal:hover {
-    background: rgba(255, 95, 126, 0.3);
-}
-
-.btn-agregar-modal {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #00b894, #009432);
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-agregar-modal:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
-}
-
-.btn-agregar-modal:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Header de lista */
-.lista-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid rgba(155, 48, 255, 0.2);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.lista-count {
-    font-size: 0.7rem;
-    color: #9b30ff;
-    background: rgba(155, 48, 255, 0.15);
-    padding: 2px 8px;
-    border-radius: 20px;
 }

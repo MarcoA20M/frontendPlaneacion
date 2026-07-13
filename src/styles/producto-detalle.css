@@ -1,12 +1,347 @@
-/* src/styles/producto-detalle.css */
+/* ============================================
+   PRODUCTO DETALLE - SOFT LAVENDER THEME
+   TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
+   ============================================ */
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
+/* === VARIABLES DE COLORES === */
+:root {
+  /* Tema oscuro (default) - Tus colores originales */
+  --pd-bg: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
+  --pd-spinner-border: rgba(192, 0, 255, 0.2);
+  --pd-spinner-top: #c000ff;
+  --pd-spinner-shadow: 0 0 30px rgba(192, 0, 255, 0.2);
+  --pd-loading-p: rgba(255, 255, 255, 0.6);
+  --pd-orb-1-bg: rgba(192, 0, 255, 0.15);
+  --pd-orb-2-bg: rgba(128, 0, 255, 0.1);
+  --pd-orb-3-bg: rgba(192, 0, 255, 0.08);
+  --pd-btn-back-bg: rgba(255, 255, 255, 0.05);
+  --pd-btn-back-border: rgba(255, 255, 255, 0.1);
+  --pd-btn-back-color: #c4b5fd;
+  --pd-btn-back-hover-bg: rgba(192, 0, 255, 0.2);
+  --pd-btn-back-hover-border: rgba(192, 0, 255, 0.4);
+  --pd-btn-action-bg: rgba(255, 255, 255, 0.05);
+  --pd-btn-action-border: rgba(255, 255, 255, 0.08);
+  --pd-btn-action-color: #c4b5fd;
+  --pd-btn-action-hover-bg: rgba(192, 0, 255, 0.15);
+  --pd-btn-action-hover-border: rgba(192, 0, 255, 0.3);
+  --pd-header-info-bg: rgba(255, 255, 255, 0.03);
+  --pd-header-info-border: rgba(255, 255, 255, 0.06);
+  --pd-header-img-border: rgba(192, 0, 255, 0.4);
+  --pd-header-img-shadow: 0 0 20px rgba(192, 0, 255, 0.2);
+  --pd-header-img-familia-border: rgba(192, 0, 255, 0.4);
+  --pd-header-img-familia-shadow: 0 0 20px rgba(192, 0, 255, 0.2);
+  --pd-header-img-familia-bg: rgba(192, 0, 255, 0.1);
+  --pd-header-placeholder-bg: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
+  --pd-header-placeholder-border: rgba(192, 0, 255, 0.3);
+  --pd-header-badge-familia: linear-gradient(135deg, #c000ff, #7c00b3);
+  --pd-header-badge-border: #18002a;
+  --pd-header-badge-shadow: 0 2px 8px rgba(192, 0, 255, 0.3);
+  --pd-title: linear-gradient(135deg, #f0f0f0, #e879f9);
+  --pd-header-alerta-bg: rgba(0, 0, 0, 0.2);
+  --pd-header-alerta-border: rgba(255, 255, 255, 0.06);
+  --pd-header-alerta-critico-bg: rgba(239, 68, 68, 0.15);
+  --pd-header-alerta-critico-border: rgba(239, 68, 68, 0.3);
+  --pd-header-alerta-critico-color: #EF4444;
+  --pd-header-alerta-alerta-bg: rgba(245, 158, 11, 0.15);
+  --pd-header-alerta-alerta-border: rgba(245, 158, 11, 0.3);
+  --pd-header-alerta-alerta-color: #F59E0B;
+  --pd-header-alerta-informacion-bg: rgba(59, 130, 246, 0.15);
+  --pd-header-alerta-informacion-border: rgba(59, 130, 246, 0.3);
+  --pd-header-alerta-informacion-color: #3B82F6;
+  --pd-header-alerta-atencion-bg: rgba(139, 92, 246, 0.15);
+  --pd-header-alerta-atencion-border: rgba(139, 92, 246, 0.3);
+  --pd-header-alerta-atencion-color: #8B5CF6;
+  --pd-tag-code-bg: rgba(192, 0, 255, 0.15);
+  --pd-tag-code-color: #e879f9;
+  --pd-tag-type-bg: rgba(52, 152, 219, 0.15);
+  --pd-tag-type-color: #3498db;
+  --pd-tag-family-bg: rgba(46, 204, 113, 0.15);
+  --pd-tag-family-color: #2ecc71;
+  --pd-tag-family-hover-bg: rgba(46, 204, 113, 0.3);
+  --pd-tag-stock-bg: rgba(16, 185, 129, 0.15);
+  --pd-tag-stock-color: #10B981;
+  --pd-tag-stock-border: rgba(16, 185, 129, 0.3);
+  --pd-card-bg: rgba(255, 255, 255, 0.03);
+  --pd-card-border: rgba(255, 255, 255, 0.06);
+  --pd-card-hover-border: rgba(192, 0, 255, 0.2);
+  --pd-card-hover-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+  --pd-card-title-color: #e879f9;
+  --pd-metric-bg: rgba(0, 0, 0, 0.3);
+  --pd-metric-border: rgba(255, 255, 255, 0.04);
+  --pd-metric-hover-bg: rgba(192, 0, 255, 0.05);
+  --pd-metric-hover-border: rgba(192, 0, 255, 0.1);
+  --pd-metric-label-color: rgba(255, 255, 255, 0.4);
+  --pd-metric-value-color: #fff;
+  --pd-metric-tendencia-positiva: #10B981;
+  --pd-metric-tendencia-negativa: #EF4444;
+  --pd-alcance-item-bg: rgba(0, 0, 0, 0.2);
+  --pd-alcance-item-border: rgba(255, 255, 255, 0.05);
+  --pd-alcance-item-hover-bg: rgba(192, 0, 255, 0.05);
+  --pd-alcance-item-hover-border: rgba(192, 0, 255, 0.15);
+  --pd-alcance-formato-color: #e879f9;
+  --pd-alcance-litros-color: rgba(255, 255, 255, 0.5);
+  --pd-alcance-litros-bg: rgba(255, 255, 255, 0.05);
+  --pd-alcance-dato-border: rgba(255, 255, 255, 0.05);
+  --pd-alcance-label-color: rgba(255, 255, 255, 0.4);
+  --pd-alcance-valor-color: rgba(255, 255, 255, 0.8);
+  --pd-alcance-dias-valor: rgba(255, 255, 255, 0.9);
+  --pd-alcance-barra-bg: rgba(255, 255, 255, 0.06);
+  --pd-alcance-estado-critico-bg: rgba(239, 68, 68, 0.2);
+  --pd-alcance-estado-critico-color: #EF4444;
+  --pd-alcance-estado-alerta-bg: rgba(245, 158, 11, 0.2);
+  --pd-alcance-estado-alerta-color: #F59E0B;
+  --pd-alcance-estado-optimo-bg: rgba(16, 185, 129, 0.2);
+  --pd-alcance-estado-optimo-color: #10B981;
+  --pd-sin-alcance-p: rgba(255, 255, 255, 0.6);
+  --pd-sin-alcance-small: rgba(255, 255, 255, 0.3);
+  --pd-stock-barra-bg: rgba(255, 255, 255, 0.06);
+  --pd-stock-marca-color: rgba(255, 255, 255, 0.2);
+  --pd-stock-item-bg: rgba(0, 0, 0, 0.2);
+  --pd-stock-item-dias-bg: rgba(0, 0, 0, 0.3);
+  --pd-stock-item-dias-border: rgba(255, 255, 255, 0.05);
+  --pd-stock-label-color: rgba(255, 255, 255, 0.4);
+  --pd-stock-value-color: #fff;
+  --pd-historico-mes-color: rgba(255, 255, 255, 0.4);
+  --pd-programacion-item-bg: rgba(0, 0, 0, 0.2);
+  --pd-programacion-item-hover-bg: rgba(192, 0, 255, 0.05);
+  --pd-prog-fecha-color: rgba(255, 255, 255, 0.6);
+  --pd-prog-lote-color: #a855f7;
+  --pd-prog-lote-bg: rgba(168, 85, 247, 0.1);
+  --pd-prog-cantidad-color: #fff;
+  --pd-prioridad-alta-bg: rgba(239, 68, 68, 0.2);
+  --pd-prioridad-alta-color: #EF4444;
+  --pd-prioridad-media-bg: rgba(245, 158, 11, 0.2);
+  --pd-prioridad-media-color: #F59E0B;
+  --pd-prioridad-normal-bg: rgba(59, 130, 246, 0.2);
+  --pd-prioridad-normal-color: #3B82F6;
+  --pd-prog-estado-completada-bg: rgba(46, 204, 113, 0.2);
+  --pd-prog-estado-completada-color: #2ecc71;
+  --pd-prog-estado-en-curso-bg: rgba(245, 158, 11, 0.2);
+  --pd-prog-estado-en-curso-color: #f39c12;
+  --pd-prog-estado-programada-bg: rgba(52, 152, 219, 0.2);
+  --pd-prog-estado-programada-color: #3498db;
+  --pd-critica-item-bg: rgba(0, 0, 0, 0.2);
+  --pd-critica-item-border: #EF4444;
+  --pd-critica-nombre-color: #fff;
+  --pd-critica-codigo-color: #a855f7;
+  --pd-critica-consumo-color: #2ecc71;
+  --pd-critica-barra-bg: rgba(255, 255, 255, 0.06);
+  --pd-critica-stock-color: rgba(255, 255, 255, 0.5);
+  --pd-critica-stock-value: #fff;
+  --pd-critica-mas-color: rgba(255, 255, 255, 0.4);
+  --pd-btn-accion-primary: linear-gradient(135deg, #c000ff, #7c00b3);
+  --pd-btn-accion-primary-color: white;
+  --pd-btn-accion-primary-shadow: 0 4px 20px rgba(192, 0, 255, 0.3);
+  --pd-btn-accion-secondary-bg: rgba(255, 255, 255, 0.05);
+  --pd-btn-accion-secondary-border: rgba(255, 255, 255, 0.08);
+  --pd-btn-accion-secondary-color: #c4b5fd;
+  --pd-btn-accion-secondary-hover-bg: rgba(192, 0, 255, 0.1);
+  --pd-btn-accion-secondary-hover-border: rgba(192, 0, 255, 0.3);
+  --pd-relacionado-item-bg: rgba(0, 0, 0, 0.2);
+  --pd-relacionado-item-hover-bg: rgba(192, 0, 255, 0.1);
+  --pd-relacionado-item-hover-border: rgba(192, 0, 255, 0.3);
+  --pd-relacionado-nombre-color: #fff;
+  --pd-relacionado-codigo-color: rgba(255, 255, 255, 0.4);
+  --pd-fecha-selector-bg: rgba(0, 0, 0, 0.2);
+  --pd-fecha-btn-bg: rgba(255, 255, 255, 0.05);
+  --pd-fecha-btn-border: rgba(255, 255, 255, 0.08);
+  --pd-fecha-btn-color: #c4b5fd;
+  --pd-fecha-btn-hover-bg: rgba(192, 0, 255, 0.2);
+  --pd-fecha-btn-hover-border: rgba(192, 0, 255, 0.3);
+  --pd-fecha-actual-color: #e879f9;
+  --pd-fecha-hoy-bg: rgba(192, 0, 255, 0.2);
+  --pd-fecha-hoy-border: rgba(192, 0, 255, 0.3);
+  --pd-fecha-hoy-color: #e879f9;
+  --pd-fecha-hoy-hover-bg: rgba(192, 0, 255, 0.3);
+  --pd-prog-count-color: rgba(255, 255, 255, 0.5);
+  --pd-prog-count-bg: rgba(0, 0, 0, 0.2);
+  --pd-prog-loading-color: #f39c12;
+  --pd-prog-operario-color: rgba(255, 255, 255, 0.5);
+  --pd-prog-maquina-color: rgba(52, 152, 219, 0.7);
+  --pd-prog-maquina-bg: rgba(52, 152, 219, 0.1);
+  --pd-prog-folio-hija-color: #a855f7;
+  --pd-prog-folio-hija-bg: rgba(168, 85, 247, 0.1);
+  --pd-sin-programaciones-p: rgba(255, 255, 255, 0.6);
+  --pd-sin-programaciones-small: rgba(255, 255, 255, 0.3);
+  --pd-spinner-mini-border: rgba(192, 0, 255, 0.2);
+  --pd-spinner-mini-top: #c000ff;
+  --pd-cargando-programaciones-p: rgba(255, 255, 255, 0.4);
+}
+
+/* === TEMA CLARO - SOFT LAVENDER === */
+.light-theme {
+  --pd-bg: linear-gradient(135deg, #F4F1F8 0%, #EDE6F7 40%, #E8E0F0 100%);
+  --pd-spinner-border: rgba(139, 122, 168, 0.15);
+  --pd-spinner-top: #8B7AA8;
+  --pd-spinner-shadow: 0 0 30px rgba(139, 122, 168, 0.1);
+  --pd-loading-p: #9E8EB8;
+  --pd-orb-1-bg: rgba(139, 122, 168, 0.08);
+  --pd-orb-2-bg: rgba(139, 122, 168, 0.05);
+  --pd-orb-3-bg: rgba(139, 122, 168, 0.04);
+  --pd-btn-back-bg: #F8F6FA;
+  --pd-btn-back-border: #EDE8F5;
+  --pd-btn-back-color: #5B4B7A;
+  --pd-btn-back-hover-bg: #F4F1F8;
+  --pd-btn-back-hover-border: #8B7AA8;
+  --pd-btn-action-bg: #F8F6FA;
+  --pd-btn-action-border: #EDE8F5;
+  --pd-btn-action-color: #5B4B7A;
+  --pd-btn-action-hover-bg: #F4F1F8;
+  --pd-btn-action-hover-border: #8B7AA8;
+  --pd-header-info-bg: #FBF9FC;
+  --pd-header-info-border: #EDE8F5;
+  --pd-header-img-border: #8B7AA8;
+  --pd-header-img-shadow: 0 0 20px rgba(139, 122, 168, 0.1);
+  --pd-header-img-familia-border: #8B7AA8;
+  --pd-header-img-familia-shadow: 0 0 20px rgba(139, 122, 168, 0.1);
+  --pd-header-img-familia-bg: rgba(139, 122, 168, 0.05);
+  --pd-header-placeholder-bg: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --pd-header-placeholder-border: #EDE8F5;
+  --pd-header-badge-familia: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --pd-header-badge-border: #F4F1F8;
+  --pd-header-badge-shadow: 0 2px 8px rgba(139, 122, 168, 0.2);
+  --pd-title: linear-gradient(135deg, #3D3650, #5B4B7A);
+  --pd-header-alerta-bg: #F8F6FA;
+  --pd-header-alerta-border: #EDE8F5;
+  --pd-header-alerta-critico-bg: rgba(200, 80, 80, 0.08);
+  --pd-header-alerta-critico-border: rgba(200, 80, 80, 0.2);
+  --pd-header-alerta-critico-color: #C85A5A;
+  --pd-header-alerta-alerta-bg: rgba(200, 160, 80, 0.08);
+  --pd-header-alerta-alerta-border: rgba(200, 160, 80, 0.2);
+  --pd-header-alerta-alerta-color: #C89A3A;
+  --pd-header-alerta-informacion-bg: rgba(139, 122, 168, 0.08);
+  --pd-header-alerta-informacion-border: rgba(139, 122, 168, 0.2);
+  --pd-header-alerta-informacion-color: #5B4B7A;
+  --pd-header-alerta-atencion-bg: rgba(139, 122, 168, 0.06);
+  --pd-header-alerta-atencion-border: rgba(139, 122, 168, 0.15);
+  --pd-header-alerta-atencion-color: #5B4B7A;
+  --pd-tag-code-bg: #F4F1F8;
+  --pd-tag-code-color: #5B4B7A;
+  --pd-tag-type-bg: #F4F1F8;
+  --pd-tag-type-color: #5B4B7A;
+  --pd-tag-family-bg: rgba(74, 154, 122, 0.08);
+  --pd-tag-family-color: #4A9A7A;
+  --pd-tag-family-hover-bg: rgba(74, 154, 122, 0.15);
+  --pd-tag-stock-bg: rgba(74, 154, 122, 0.08);
+  --pd-tag-stock-color: #4A9A7A;
+  --pd-tag-stock-border: rgba(74, 154, 122, 0.15);
+  --pd-card-bg: #FBF9FC;
+  --pd-card-border: #EDE8F5;
+  --pd-card-hover-border: #8B7AA8;
+  --pd-card-hover-shadow: 0 4px 20px rgba(60, 52, 70, 0.04);
+  --pd-card-title-color: #5B4B7A;
+  --pd-metric-bg: #F8F6FA;
+  --pd-metric-border: #EDE8F5;
+  --pd-metric-hover-bg: #F4F1F8;
+  --pd-metric-hover-border: #8B7AA8;
+  --pd-metric-label-color: #C5BCD0;
+  --pd-metric-value-color: #3D3650;
+  --pd-metric-tendencia-positiva: #4A9A7A;
+  --pd-metric-tendencia-negativa: #C85A5A;
+  --pd-alcance-item-bg: #F8F6FA;
+  --pd-alcance-item-border: #EDE8F5;
+  --pd-alcance-item-hover-bg: #F4F1F8;
+  --pd-alcance-item-hover-border: #8B7AA8;
+  --pd-alcance-formato-color: #5B4B7A;
+  --pd-alcance-litros-color: #9E8EB8;
+  --pd-alcance-litros-bg: #F4F1F8;
+  --pd-alcance-dato-border: #EDE8F5;
+  --pd-alcance-label-color: #C5BCD0;
+  --pd-alcance-valor-color: #3D3650;
+  --pd-alcance-dias-valor: #3D3650;
+  --pd-alcance-barra-bg: #EDE8F5;
+  --pd-alcance-estado-critico-bg: rgba(200, 80, 80, 0.1);
+  --pd-alcance-estado-critico-color: #C85A5A;
+  --pd-alcance-estado-alerta-bg: rgba(200, 160, 80, 0.1);
+  --pd-alcance-estado-alerta-color: #C89A3A;
+  --pd-alcance-estado-optimo-bg: rgba(74, 154, 122, 0.1);
+  --pd-alcance-estado-optimo-color: #4A9A7A;
+  --pd-sin-alcance-p: #9E8EB8;
+  --pd-sin-alcance-small: #C5BCD0;
+  --pd-stock-barra-bg: #EDE8F5;
+  --pd-stock-marca-color: #C5BCD0;
+  --pd-stock-item-bg: #F8F6FA;
+  --pd-stock-item-dias-bg: #F4F1F8;
+  --pd-stock-item-dias-border: #EDE8F5;
+  --pd-stock-label-color: #C5BCD0;
+  --pd-stock-value-color: #3D3650;
+  --pd-historico-mes-color: #C5BCD0;
+  --pd-programacion-item-bg: #F8F6FA;
+  --pd-programacion-item-hover-bg: #F4F1F8;
+  --pd-prog-fecha-color: #9E8EB8;
+  --pd-prog-lote-color: #5B4B7A;
+  --pd-prog-lote-bg: #F4F1F8;
+  --pd-prog-cantidad-color: #3D3650;
+  --pd-prioridad-alta-bg: rgba(200, 80, 80, 0.08);
+  --pd-prioridad-alta-color: #C85A5A;
+  --pd-prioridad-media-bg: rgba(200, 160, 80, 0.08);
+  --pd-prioridad-media-color: #C89A3A;
+  --pd-prioridad-normal-bg: rgba(139, 122, 168, 0.08);
+  --pd-prioridad-normal-color: #5B4B7A;
+  --pd-prog-estado-completada-bg: rgba(74, 154, 122, 0.1);
+  --pd-prog-estado-completada-color: #4A9A7A;
+  --pd-prog-estado-en-curso-bg: rgba(200, 160, 80, 0.1);
+  --pd-prog-estado-en-curso-color: #C89A3A;
+  --pd-prog-estado-programada-bg: rgba(139, 122, 168, 0.1);
+  --pd-prog-estado-programada-color: #5B4B7A;
+  --pd-critica-item-bg: #F8F6FA;
+  --pd-critica-item-border: #C85A5A;
+  --pd-critica-nombre-color: #3D3650;
+  --pd-critica-codigo-color: #5B4B7A;
+  --pd-critica-consumo-color: #4A9A7A;
+  --pd-critica-barra-bg: #EDE8F5;
+  --pd-critica-stock-color: #C5BCD0;
+  --pd-critica-stock-value: #3D3650;
+  --pd-critica-mas-color: #C5BCD0;
+  --pd-btn-accion-primary: linear-gradient(135deg, #8B7AA8, #6B5B8A);
+  --pd-btn-accion-primary-color: white;
+  --pd-btn-accion-primary-shadow: 0 4px 20px rgba(139, 122, 168, 0.2);
+  --pd-btn-accion-secondary-bg: #F8F6FA;
+  --pd-btn-accion-secondary-border: #EDE8F5;
+  --pd-btn-accion-secondary-color: #5B4B7A;
+  --pd-btn-accion-secondary-hover-bg: #F4F1F8;
+  --pd-btn-accion-secondary-hover-border: #8B7AA8;
+  --pd-relacionado-item-bg: #F8F6FA;
+  --pd-relacionado-item-hover-bg: #F4F1F8;
+  --pd-relacionado-item-hover-border: #8B7AA8;
+  --pd-relacionado-nombre-color: #3D3650;
+  --pd-relacionado-codigo-color: #C5BCD0;
+  --pd-fecha-selector-bg: #F8F6FA;
+  --pd-fecha-btn-bg: #F8F6FA;
+  --pd-fecha-btn-border: #EDE8F5;
+  --pd-fecha-btn-color: #9E8EB8;
+  --pd-fecha-btn-hover-bg: #F4F1F8;
+  --pd-fecha-btn-hover-border: #8B7AA8;
+  --pd-fecha-actual-color: #5B4B7A;
+  --pd-fecha-hoy-bg: #F4F1F8;
+  --pd-fecha-hoy-border: #8B7AA8;
+  --pd-fecha-hoy-color: #5B4B7A;
+  --pd-fecha-hoy-hover-bg: #EDE8F5;
+  --pd-prog-count-color: #C5BCD0;
+  --pd-prog-count-bg: #F8F6FA;
+  --pd-prog-loading-color: #C89A3A;
+  --pd-prog-operario-color: #C5BCD0;
+  --pd-prog-maquina-color: #5B4B7A;
+  --pd-prog-maquina-bg: #F4F1F8;
+  --pd-prog-folio-hija-color: #5B4B7A;
+  --pd-prog-folio-hija-bg: #F4F1F8;
+  --pd-sin-programaciones-p: #9E8EB8;
+  --pd-sin-programaciones-small: #C5BCD0;
+  --pd-spinner-mini-border: rgba(139, 122, 168, 0.15);
+  --pd-spinner-mini-top: #8B7AA8;
+  --pd-cargando-programaciones-p: #C5BCD0;
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
 .pd-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #18002a 0%, #3e0766 40%, #1e1e3f 100%);
+    background: var(--pd-bg);
     padding: 20px 30px;
     position: relative;
     overflow-x: hidden;
+    transition: background 0.3s ease;
 }
 
 .pd-container.loading {
@@ -20,11 +355,12 @@
 .pd-spinner-glow {
     width: 50px;
     height: 50px;
-    border: 3px solid rgba(192, 0, 255, 0.2);
-    border-top-color: #c000ff;
+    border: 3px solid var(--pd-spinner-border);
+    border-top-color: var(--pd-spinner-top);
     border-radius: 50%;
     animation: pd-spin 1s linear infinite;
-    box-shadow: 0 0 30px rgba(192, 0, 255, 0.2);
+    box-shadow: var(--pd-spinner-shadow);
+    transition: all 0.3s ease;
 }
 
 @keyframes pd-spin {
@@ -32,12 +368,15 @@
 }
 
 .pd-container.loading p {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pd-loading-p);
     margin-top: 16px;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
-/* ===== ORBES DECORATIVOS ===== */
+/* ============================================
+   ORBES DECORATIVOS
+   ============================================ */
 .pd-orb {
     position: fixed;
     border-radius: 50%;
@@ -51,7 +390,8 @@
     height: 400px;
     top: -100px;
     right: -100px;
-    background: rgba(192, 0, 255, 0.15);
+    background: var(--pd-orb-1-bg);
+    transition: background 0.3s ease;
 }
 
 .pd-orb-2 {
@@ -59,7 +399,8 @@
     height: 300px;
     bottom: -50px;
     left: -50px;
-    background: rgba(128, 0, 255, 0.1);
+    background: var(--pd-orb-2-bg);
+    transition: background 0.3s ease;
 }
 
 .pd-orb-3 {
@@ -68,10 +409,13 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(192, 0, 255, 0.08);
+    background: var(--pd-orb-3-bg);
+    transition: background 0.3s ease;
 }
 
-/* ===== HEADER ===== */
+/* ============================================
+   HEADER
+   ============================================ */
 .pd-header {
     position: relative;
     z-index: 1;
@@ -88,9 +432,9 @@
 }
 
 .pd-btn-back {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #c4b5fd;
+    background: var(--pd-btn-back-bg);
+    border: 1px solid var(--pd-btn-back-border);
+    color: var(--pd-btn-back-color);
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -101,8 +445,8 @@
 }
 
 .pd-btn-back:hover {
-    background: rgba(192, 0, 255, 0.2);
-    border-color: rgba(192, 0, 255, 0.4);
+    background: var(--pd-btn-back-hover-bg);
+    border-color: var(--pd-btn-back-hover-border);
     transform: translateX(-4px);
 }
 
@@ -117,10 +461,10 @@
 
 .pd-btn-action {
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--pd-btn-action-bg);
+    border: 1px solid var(--pd-btn-action-border);
     border-radius: 8px;
-    color: #c4b5fd;
+    color: var(--pd-btn-action-color);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -128,8 +472,8 @@
 }
 
 .pd-btn-action:hover {
-    background: rgba(192, 0, 255, 0.15);
-    border-color: rgba(192, 0, 255, 0.3);
+    background: var(--pd-btn-action-hover-bg);
+    border-color: var(--pd-btn-action-hover-border);
     transform: translateY(-2px);
 }
 
@@ -137,11 +481,12 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--pd-header-info-bg);
     backdrop-filter: blur(10px);
     padding: 20px 24px;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--pd-header-info-border);
+    transition: all 0.3s ease;
 }
 
 .pd-header-imagen {
@@ -154,8 +499,9 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(192, 0, 255, 0.4);
-    box-shadow: 0 0 20px rgba(192, 0, 255, 0.2);
+    border: 2px solid var(--pd-header-img-border);
+    box-shadow: var(--pd-header-img-shadow);
+    transition: all 0.3s ease;
 }
 
 .pd-header-img-familia {
@@ -163,28 +509,30 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(192, 0, 255, 0.4);
-    box-shadow: 0 0 20px rgba(192, 0, 255, 0.2);
-    background: rgba(192, 0, 255, 0.1);
+    border: 2px solid var(--pd-header-img-familia-border);
+    box-shadow: var(--pd-header-img-familia-shadow);
+    background: var(--pd-header-img-familia-bg);
+    transition: all 0.3s ease;
 }
 
 .pd-header-placeholder {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(192, 0, 255, 0.2), rgba(128, 0, 255, 0.1));
-    border: 2px solid rgba(192, 0, 255, 0.3);
+    background: var(--pd-header-placeholder-bg);
+    border: 2px solid var(--pd-header-placeholder-border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 36px;
+    transition: all 0.3s ease;
 }
 
 .pd-header-badge-familia {
     position: absolute;
     bottom: -4px;
     right: -4px;
-    background: linear-gradient(135deg, #c000ff, #7c00b3);
+    background: var(--pd-header-badge-familia);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -192,8 +540,9 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    border: 2px solid #18002a;
-    box-shadow: 0 2px 8px rgba(192, 0, 255, 0.3);
+    border: 2px solid var(--pd-header-badge-border);
+    box-shadow: var(--pd-header-badge-shadow);
+    transition: all 0.3s ease;
 }
 
 .pd-header-text {
@@ -212,7 +561,7 @@
 .pd-title {
     font-size: 26px;
     font-weight: 700;
-    background: linear-gradient(135deg, #f0f0f0, #e879f9);
+    background: var(--pd-title);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
@@ -237,32 +586,33 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--pd-header-alerta-bg);
+    border: 1px solid var(--pd-header-alerta-border);
+    transition: all 0.3s ease;
 }
 
 .pd-header-alerta.pd-alerta-critico {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #EF4444;
+    background: var(--pd-header-alerta-critico-bg);
+    border-color: var(--pd-header-alerta-critico-border);
+    color: var(--pd-header-alerta-critico-color);
 }
 
 .pd-header-alerta.pd-alerta-alerta {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: rgba(245, 158, 11, 0.3);
-    color: #F59E0B;
+    background: var(--pd-header-alerta-alerta-bg);
+    border-color: var(--pd-header-alerta-alerta-border);
+    color: var(--pd-header-alerta-alerta-color);
 }
 
 .pd-header-alerta.pd-alerta-información {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.3);
-    color: #3B82F6;
+    background: var(--pd-header-alerta-informacion-bg);
+    border-color: var(--pd-header-alerta-informacion-border);
+    color: var(--pd-header-alerta-informacion-color);
 }
 
 .pd-header-alerta.pd-alerta-atención {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: rgba(139, 92, 246, 0.3);
-    color: #8B5CF6;
+    background: var(--pd-header-alerta-atencion-bg);
+    border-color: var(--pd-header-alerta-atencion-border);
+    color: var(--pd-header-alerta-atencion-color);
 }
 
 .pd-header-tags {
@@ -279,39 +629,44 @@
 }
 
 .pd-tag-code {
-    background: rgba(192, 0, 255, 0.15);
-    color: #e879f9;
+    background: var(--pd-tag-code-bg);
+    color: var(--pd-tag-code-color);
+    transition: all 0.3s ease;
 }
 
 .pd-tag-type {
-    background: rgba(52, 152, 219, 0.15);
-    color: #3498db;
+    background: var(--pd-tag-type-bg);
+    color: var(--pd-tag-type-color);
+    transition: all 0.3s ease;
 }
 
 .pd-tag-family {
-    background: rgba(46, 204, 113, 0.15);
-    color: #2ecc71;
+    background: var(--pd-tag-family-bg);
+    color: var(--pd-tag-family-color);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .pd-tag-family:hover {
-    background: rgba(46, 204, 113, 0.3);
+    background: var(--pd-tag-family-hover-bg);
     transform: scale(1.05);
 }
 
 .pd-tag-stock {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10B981;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: var(--pd-tag-stock-bg);
+    color: var(--pd-tag-stock-color);
+    border: 1px solid var(--pd-tag-stock-border);
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .pd-tag-alcance {
     font-weight: 600;
 }
 
-/* ===== CONTENIDO PRINCIPAL ===== */
+/* ============================================
+   CONTENIDO PRINCIPAL
+   ============================================ */
 .pd-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -332,32 +687,37 @@
     gap: 20px;
 }
 
-/* ===== CARDS ===== */
+/* ============================================
+   CARDS
+   ============================================ */
 .pd-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--pd-card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--pd-card-border);
     border-radius: 16px;
     padding: 20px;
     transition: all 0.3s;
 }
 
 .pd-card:hover {
-    border-color: rgba(192, 0, 255, 0.2);
-    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+    border-color: var(--pd-card-hover-border);
+    box-shadow: var(--pd-card-hover-shadow);
 }
 
 .pd-card-title {
     font-size: 15px;
     font-weight: 600;
-    color: #e879f9;
+    color: var(--pd-card-title-color);
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: color 0.3s ease;
 }
 
-/* ===== MÉTRICAS ===== */
+/* ============================================
+   MÉTRICAS
+   ============================================ */
 .pd-metrics-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -375,15 +735,15 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--pd-metric-bg);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--pd-metric-border);
     transition: all 0.3s;
 }
 
 .pd-metric:hover {
-    background: rgba(192, 0, 255, 0.05);
-    border-color: rgba(192, 0, 255, 0.1);
+    background: var(--pd-metric-hover-bg);
+    border-color: var(--pd-metric-hover-border);
 }
 
 .pd-metric-icon {
@@ -398,15 +758,17 @@
 
 .pd-metric-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-metric-label-color);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    transition: color 0.3s ease;
 }
 
 .pd-metric-value {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--pd-metric-value-color);
+    transition: color 0.3s ease;
 }
 
 .pd-metric-tendencia {
@@ -416,26 +778,28 @@
 }
 
 .pd-metric-tendencia.positiva {
-    color: #10B981;
+    color: var(--pd-metric-tendencia-positiva);
 }
 
 .pd-metric-tendencia.negativa {
-    color: #EF4444;
+    color: var(--pd-metric-tendencia-negativa);
 }
 
-/* ===== ALCANCE POR ENVASADO ===== */
+/* ============================================
+   ALCANCE POR ENVASADO
+   ============================================ */
 .pd-card-alcance {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--pd-card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--pd-card-border);
     border-radius: 16px;
     padding: 20px;
     transition: all 0.3s;
 }
 
 .pd-card-alcance:hover {
-    border-color: rgba(192, 0, 255, 0.2);
-    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.05);
+    border-color: var(--pd-card-hover-border);
+    box-shadow: var(--pd-card-hover-shadow);
 }
 
 .pd-alcance-grid {
@@ -451,16 +815,16 @@
 }
 
 .pd-alcance-item {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pd-alcance-item-bg);
     border-radius: 12px;
     padding: 12px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--pd-alcance-item-border);
     transition: all 0.3s;
 }
 
 .pd-alcance-item:hover {
-    background: rgba(192, 0, 255, 0.05);
-    border-color: rgba(192, 0, 255, 0.15);
+    background: var(--pd-alcance-item-hover-bg);
+    border-color: var(--pd-alcance-item-hover-border);
     transform: translateY(-2px);
 }
 
@@ -470,22 +834,24 @@
     align-items: center;
     margin-bottom: 8px;
     padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--pd-alcance-dato-border);
 }
 
 .pd-alcance-formato {
     font-size: 13px;
     font-weight: 600;
-    color: #e879f9;
+    color: var(--pd-alcance-formato-color);
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
 .pd-alcance-litros {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--pd-alcance-litros-color);
+    background: var(--pd-alcance-litros-bg);
     padding: 2px 8px;
     border-radius: 10px;
+    transition: all 0.3s ease;
 }
 
 .pd-alcance-detalles {
@@ -504,26 +870,29 @@
 
 .pd-alcance-dato.pd-alcance-dias {
     grid-column: span 3;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--pd-alcance-dato-border);
     padding-top: 6px;
     margin-top: 2px;
 }
 
 .pd-alcance-label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-alcance-label-color);
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    transition: color 0.3s ease;
 }
 
 .pd-alcance-valor {
     font-size: 12px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--pd-alcance-valor-color);
+    transition: color 0.3s ease;
 }
 
 .pd-alcance-dias .pd-alcance-valor {
     font-size: 13px;
+    color: var(--pd-alcance-dias-valor);
 }
 
 .pd-alcance-barra-container {
@@ -536,10 +905,11 @@
 .pd-alcance-barra {
     flex: 1;
     height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--pd-alcance-barra-bg);
     border-radius: 2px;
     overflow: hidden;
     position: relative;
+    transition: background 0.3s ease;
 }
 
 .pd-alcance-barra::after {
@@ -562,18 +932,18 @@
 }
 
 .pd-alcance-estado.critico {
-    background: rgba(239, 68, 68, 0.2);
-    color: #EF4444;
+    background: var(--pd-alcance-estado-critico-bg);
+    color: var(--pd-alcance-estado-critico-color);
 }
 
 .pd-alcance-estado.alerta {
-    background: rgba(245, 158, 11, 0.2);
-    color: #F59E0B;
+    background: var(--pd-alcance-estado-alerta-bg);
+    color: var(--pd-alcance-estado-alerta-color);
 }
 
 .pd-alcance-estado.óptimo {
-    background: rgba(16, 185, 129, 0.2);
-    color: #10B981;
+    background: var(--pd-alcance-estado-optimo-bg);
+    color: var(--pd-alcance-estado-optimo-color);
 }
 
 .pd-sin-alcance {
@@ -589,17 +959,21 @@
 }
 
 .pd-sin-alcance p {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pd-sin-alcance-p);
     font-size: 13px;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .pd-sin-alcance small {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--pd-sin-alcance-small);
     font-size: 11px;
+    transition: color 0.3s ease;
 }
 
-/* ===== STOCK ===== */
+/* ============================================
+   STOCK
+   ============================================ */
 .pd-stock-container {
     display: flex;
     flex-direction: column;
@@ -613,10 +987,11 @@
 .pd-stock-barra-container {
     width: 100%;
     height: 12px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--pd-stock-barra-bg);
     border-radius: 6px;
     overflow: hidden;
     position: relative;
+    transition: background 0.3s ease;
 }
 
 .pd-stock-barra {
@@ -634,7 +1009,8 @@
 
 .pd-stock-marca {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--pd-stock-marca-color);
+    transition: color 0.3s ease;
 }
 
 .pd-stock-detalles {
@@ -653,32 +1029,37 @@
 .pd-stock-item {
     text-align: center;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pd-stock-item-bg);
     border-radius: 8px;
+    transition: background 0.3s ease;
 }
 
 .pd-stock-item.pd-stock-dias {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--pd-stock-item-dias-bg);
+    border: 1px solid var(--pd-stock-item-dias-border);
 }
 
 .pd-stock-label {
     display: block;
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-stock-label-color);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    transition: color 0.3s ease;
 }
 
 .pd-stock-value {
     display: block;
     font-size: 16px;
     font-weight: 700;
-    color: #fff;
+    color: var(--pd-stock-value-color);
     margin-top: 2px;
+    transition: color 0.3s ease;
 }
 
-/* ===== HISTÓRICO ===== */
+/* ============================================
+   HISTÓRICO
+   ============================================ */
 .pd-historico-barras {
     display: flex;
     align-items: flex-end;
@@ -712,10 +1093,13 @@
 
 .pd-historico-mes {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-historico-mes-color);
+    transition: color 0.3s ease;
 }
 
-/* ===== PROGRAMACIONES ===== */
+/* ============================================
+   PROGRAMACIONES
+   ============================================ */
 .pd-programaciones-list {
     display: flex;
     flex-direction: column;
@@ -727,7 +1111,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pd-programacion-item-bg);
     border-radius: 10px;
     transition: all 0.3s;
     flex-wrap: wrap;
@@ -735,7 +1119,7 @@
 }
 
 .pd-programacion-item:hover {
-    background: rgba(192, 0, 255, 0.05);
+    background: var(--pd-programacion-item-hover-bg);
     transform: translateX(4px);
 }
 
@@ -754,23 +1138,26 @@
 
 .pd-prog-fecha {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pd-prog-fecha-color);
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .pd-prog-lote {
     font-size: 10px;
-    color: #a855f7;
+    color: var(--pd-prog-lote-color);
     font-family: monospace;
-    background: rgba(168, 85, 247, 0.1);
+    background: var(--pd-prog-lote-bg);
     padding: 2px 8px;
     border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 .pd-prog-cantidad {
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--pd-prog-cantidad-color);
+    transition: color 0.3s ease;
 }
 
 .pd-prog-prioridad {
@@ -782,18 +1169,18 @@
 }
 
 .pd-prioridad-alta {
-    background: rgba(239, 68, 68, 0.2);
-    color: #EF4444;
+    background: var(--pd-prioridad-alta-bg);
+    color: var(--pd-prioridad-alta-color);
 }
 
 .pd-prioridad-media {
-    background: rgba(245, 158, 11, 0.2);
-    color: #F59E0B;
+    background: var(--pd-prioridad-media-bg);
+    color: var(--pd-prioridad-media-color);
 }
 
 .pd-prioridad-normal {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3B82F6;
+    background: var(--pd-prioridad-normal-bg);
+    color: var(--pd-prioridad-normal-color);
 }
 
 .pd-prog-estado {
@@ -804,21 +1191,122 @@
 }
 
 .pd-prog-estado.completada {
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
+    background: var(--pd-prog-estado-completada-bg);
+    color: var(--pd-prog-estado-completada-color);
 }
 
 .pd-prog-estado.en-curso {
-    background: rgba(245, 158, 11, 0.2);
-    color: #f39c12;
+    background: var(--pd-prog-estado-en-curso-bg);
+    color: var(--pd-prog-estado-en-curso-color);
 }
 
 .pd-prog-estado.programada {
-    background: rgba(52, 152, 219, 0.2);
-    color: #3498db;
+    background: var(--pd-prog-estado-programada-bg);
+    color: var(--pd-prog-estado-programada-color);
 }
 
-/* ===== MATERIAS CRÍTICAS ===== */
+.pd-prog-operario {
+    font-size: 10px;
+    color: var(--pd-prog-operario-color);
+    transition: color 0.3s ease;
+}
+
+.pd-prog-maquina {
+    font-size: 10px;
+    color: var(--pd-prog-maquina-color);
+    background: var(--pd-prog-maquina-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.pd-prog-folio-hija {
+    font-size: 10px;
+    color: var(--pd-prog-folio-hija-color);
+    font-family: monospace;
+    background: var(--pd-prog-folio-hija-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   FECHA SELECTOR
+   ============================================ */
+.pd-fecha-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: var(--pd-fecha-selector-bg);
+    padding: 8px 12px;
+    border-radius: 10px;
+    flex-wrap: wrap;
+    transition: background 0.3s ease;
+}
+
+.pd-fecha-btn {
+    padding: 4px 12px;
+    background: var(--pd-fecha-btn-bg);
+    border: 1px solid var(--pd-fecha-btn-border);
+    border-radius: 6px;
+    color: var(--pd-fecha-btn-color);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.pd-fecha-btn:hover {
+    background: var(--pd-fecha-btn-hover-bg);
+    border-color: var(--pd-fecha-btn-hover-border);
+}
+
+.pd-fecha-actual {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--pd-fecha-actual-color);
+    transition: color 0.3s ease;
+}
+
+.pd-fecha-hoy {
+    padding: 4px 12px;
+    background: var(--pd-fecha-hoy-bg);
+    border: 1px solid var(--pd-fecha-hoy-border);
+    border-radius: 6px;
+    color: var(--pd-fecha-hoy-color);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.pd-fecha-hoy:hover {
+    background: var(--pd-fecha-hoy-hover-bg);
+}
+
+.pd-prog-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--pd-prog-count-color);
+    margin-left: auto;
+    background: var(--pd-prog-count-bg);
+    padding: 2px 10px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.pd-prog-loading {
+    font-size: 11px;
+    color: var(--pd-prog-loading-color);
+    margin-left: 8px;
+    transition: color 0.3s ease;
+}
+
+/* ============================================
+   MATERIAS CRÍTICAS
+   ============================================ */
 .pd-criticas-list {
     display: flex;
     flex-direction: column;
@@ -827,9 +1315,10 @@
 
 .pd-critica-item {
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pd-critica-item-bg);
     border-radius: 10px;
-    border-left: 3px solid #EF4444;
+    border-left: 3px solid var(--pd-critica-item-border);
+    transition: background 0.3s ease;
 }
 
 .pd-critica-header {
@@ -844,28 +1333,32 @@
 .pd-critica-nombre {
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--pd-critica-nombre-color);
+    transition: color 0.3s ease;
 }
 
 .pd-critica-codigo {
     font-size: 11px;
-    color: #a855f7;
+    color: var(--pd-critica-codigo-color);
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
 .pd-critica-consumo {
     font-size: 12px;
     font-weight: 600;
-    color: #2ecc71;
+    color: var(--pd-critica-consumo-color);
+    transition: color 0.3s ease;
 }
 
 .pd-critica-barra {
     width: 100%;
     height: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--pd-critica-barra-bg);
     border-radius: 2px;
     overflow: hidden;
     margin: 6px 0;
+    transition: background 0.3s ease;
 }
 
 .pd-critica-barra-lleno {
@@ -876,22 +1369,27 @@
 
 .pd-critica-stock {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--pd-critica-stock-color);
+    transition: color 0.3s ease;
 }
 
 .pd-critica-stock-value {
-    color: #fff;
+    color: var(--pd-critica-stock-value);
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .pd-critica-mas {
     text-align: center;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-critica-mas-color);
     padding: 6px;
+    transition: color 0.3s ease;
 }
 
-/* ===== ACCIONES ===== */
+/* ============================================
+   ACCIONES
+   ============================================ */
 .pd-acciones-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -919,24 +1417,24 @@
 }
 
 .pd-btn-accion-primary {
-    background: linear-gradient(135deg, #c000ff, #7c00b3);
-    color: white;
+    background: var(--pd-btn-accion-primary);
+    color: var(--pd-btn-accion-primary-color);
 }
 
 .pd-btn-accion-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(192, 0, 255, 0.3);
+    box-shadow: var(--pd-btn-accion-primary-shadow);
 }
 
 .pd-btn-accion-secondary {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #c4b5fd;
+    background: var(--pd-btn-accion-secondary-bg);
+    border: 1px solid var(--pd-btn-accion-secondary-border);
+    color: var(--pd-btn-accion-secondary-color);
 }
 
 .pd-btn-accion-secondary:hover {
-    background: rgba(192, 0, 255, 0.1);
-    border-color: rgba(192, 0, 255, 0.3);
+    background: var(--pd-btn-accion-secondary-hover-bg);
+    border-color: var(--pd-btn-accion-secondary-hover-border);
     transform: translateY(-2px);
 }
 
@@ -944,7 +1442,9 @@
     font-size: 16px;
 }
 
-/* ===== PRODUCTOS RELACIONADOS ===== */
+/* ============================================
+   PRODUCTOS RELACIONADOS
+   ============================================ */
 .pd-relacionados-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -962,7 +1462,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pd-relacionado-item-bg);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
@@ -970,8 +1470,8 @@
 }
 
 .pd-relacionado-item:hover {
-    background: rgba(192, 0, 255, 0.1);
-    border-color: rgba(192, 0, 255, 0.3);
+    background: var(--pd-relacionado-item-hover-bg);
+    border-color: var(--pd-relacionado-item-hover-border);
     transform: translateX(4px);
 }
 
@@ -987,105 +1487,20 @@
     display: block;
     font-size: 12px;
     font-weight: 500;
-    color: #fff;
+    color: var(--pd-relacionado-nombre-color);
+    transition: color 0.3s ease;
 }
 
 .pd-relacionado-codigo {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-relacionado-codigo-color);
     font-family: monospace;
+    transition: color 0.3s ease;
 }
 
-/* ===== SELECTOR DE FECHA PARA PROGRAMACIONES ===== */
-.pd-fecha-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 8px 12px;
-    border-radius: 10px;
-    flex-wrap: wrap;
-}
-
-.pd-fecha-btn {
-    padding: 4px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    color: #c4b5fd;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-
-.pd-fecha-btn:hover {
-    background: rgba(192, 0, 255, 0.2);
-    border-color: rgba(192, 0, 255, 0.3);
-}
-
-.pd-fecha-actual {
-    flex: 1;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 500;
-    color: #e879f9;
-}
-
-.pd-fecha-hoy {
-    padding: 4px 12px;
-    background: rgba(192, 0, 255, 0.2);
-    border: 1px solid rgba(192, 0, 255, 0.3);
-    border-radius: 6px;
-    color: #e879f9;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.pd-fecha-hoy:hover {
-    background: rgba(192, 0, 255, 0.3);
-}
-
-.pd-prog-count {
-    font-size: 11px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.5);
-    margin-left: auto;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 10px;
-    border-radius: 12px;
-}
-
-.pd-prog-loading {
-    font-size: 11px;
-    color: #f39c12;
-    margin-left: 8px;
-}
-
-.pd-prog-operario {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.pd-prog-maquina {
-    font-size: 10px;
-    color: rgba(52, 152, 219, 0.7);
-    background: rgba(52, 152, 219, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-.pd-prog-folio-hija {
-    font-size: 10px;
-    color: #a855f7;
-    font-family: monospace;
-    background: rgba(168, 85, 247, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
+/* ============================================
+   SIN PROGRAMACIONES
+   ============================================ */
 .pd-sin-programaciones {
     text-align: center;
     padding: 30px 20px;
@@ -1098,14 +1513,16 @@
 }
 
 .pd-sin-programaciones p {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--pd-sin-programaciones-p);
     font-size: 13px;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
 .pd-sin-programaciones small {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--pd-sin-programaciones-small);
     font-size: 11px;
+    transition: color 0.3s ease;
 }
 
 .pd-cargando-programaciones {
@@ -1120,19 +1537,23 @@
 .pd-spinner-mini {
     width: 24px;
     height: 24px;
-    border: 2px solid rgba(192, 0, 255, 0.2);
-    border-top-color: #c000ff;
+    border: 2px solid var(--pd-spinner-mini-border);
+    border-top-color: var(--pd-spinner-mini-top);
     border-radius: 50%;
     animation: pd-spin 0.8s linear infinite;
+    transition: all 0.3s ease;
 }
 
 .pd-cargando-programaciones p {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--pd-cargando-programaciones-p);
     font-size: 12px;
     margin: 0;
+    transition: color 0.3s ease;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 768px) {
     .pd-container {
         padding: 12px 16px;

@@ -5,7 +5,7 @@ import { familiaService } from "../services/familiaService";
 import { productoService } from "../services/productoService";
 import "../styles/familia-productos.css";
 
-// ===== FUNCIÓN PARA NORMALIZAR CÓDIGO (copiada de useProduccion) =====
+// ===== FUNCIÓN PARA NORMALIZAR CÓDIGO =====
 const normalizarCodigo = (cod) => {
     if (!cod) return "";
     return String(cod).trim().toUpperCase().replace(/^0+/, '') || "0";
@@ -37,19 +37,24 @@ const enriquecerConPlanificador = (producto) => {
         const planificador = JSON.parse(planificadorRaw);
         const codNormalizado = normalizarCodigo(producto.codigo);
         
-        // Buscar coincidencias en el planificador
         const coincidencias = (planificador.data || []).filter(item => {
             const partes = String(item.articulo).split('-');
             const colorEnArticulo = partes.length > 1 ? normalizarCodigo(partes[1]) : "";
             return colorEnArticulo === codNormalizado || normalizarCodigo(item.color) === codNormalizado;
         });
         
+        const totalSalidas = coincidencias.reduce((sum, item) => sum + (parseInt(item.salidas) || 0), 0);
+        const totalExistencia = coincidencias.reduce((sum, item) => sum + (parseInt(item.existencia) || 0), 0);
+        const totalAlcance = coincidencias.reduce((sum, item) => sum + (parseInt(item.alcance) || 0), 0);
+        const promedioAlcance = coincidencias.length > 0 ? Math.round(totalAlcance / coincidencias.length) : 0;
+        
         return {
             ...producto,
             datosPlanificador: coincidencias,
-            salidas: coincidencias[0]?.salidas || 0,
-            existencia: coincidencias[0]?.existencia || 0,
-            alcance: coincidencias[0]?.alcance || 0
+            salidas: totalSalidas,
+            existencia: totalExistencia,
+            alcance: promedioAlcance,
+            cantidadFormatos: coincidencias.length
         };
     } catch (error) {
         console.warn("Error enriqueciendo con planificador:", error);
@@ -66,6 +71,9 @@ export default function FamiliaProductosScreen() {
     const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [busqueda, setBusqueda] = useState("");
     const [imagenFamilia, setImagenFamilia] = useState(null);
+    
+    // ===== ESTADO PARA FILTRO DE VENTAS =====
+    const [filtroVentas, setFiltroVentas] = useState("ninguno"); // "ninguno", "mayor", "menor"
 
     useEffect(() => {
         cargarDatos();
@@ -83,24 +91,36 @@ export default function FamiliaProductosScreen() {
             
             setFamilia(familiaData);
             
-            // Cargar imagen de familia
             const imgUrl = familiaService.getImagenUrl(familiaData.id);
             setImagenFamilia(imgUrl);
             
-            // Cargar productos de esta familia
             const todosProductos = await productoService.listarTodos();
             const productosFiltradosFamilia = todosProductos.filter(p => p.familiaId === familiaData.id);
             
-            // 🔴 ENRIQUECER CADA PRODUCTO CON EL PLANIFICADOR
             const productosEnriquecidos = productosFiltradosFamilia.map(p => enriquecerConPlanificador(p));
             
             setProductos(productosEnriquecidos);
-            setProductosFiltrados(productosEnriquecidos);
+            const ordenados = ordenarPorVentas(productosEnriquecidos, filtroVentas);
+            setProductosFiltrados(ordenados);
             
         } catch (error) {
             console.error("Error cargando datos:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // ===== FUNCIÓN PARA ORDENAR SOLO POR VENTAS =====
+    const ordenarPorVentas = (lista, filtro) => {
+        const copia = [...lista];
+        
+        if (filtro === "mayor") {
+            return copia.sort((a, b) => (b.salidas || 0) - (a.salidas || 0));
+        } else if (filtro === "menor") {
+            return copia.sort((a, b) => (a.salidas || 0) - (b.salidas || 0));
+        } else {
+            // "ninguno" - mantener orden original (por nombre)
+            return copia.sort((a, b) => (a.descripcion || a.nombre || "").localeCompare(b.descripcion || b.nombre || ""));
         }
     };
 
@@ -111,20 +131,28 @@ export default function FamiliaProductosScreen() {
     const handleBusqueda = (e) => {
         const termino = e.target.value.toLowerCase();
         setBusqueda(termino);
-        if (termino === "") {
-            setProductosFiltrados(productos);
-        } else {
-            const filtrados = productos.filter(p => 
+        
+        let filtrados = productos;
+        if (termino !== "") {
+            filtrados = productos.filter(p => 
                 p.descripcion?.toLowerCase().includes(termino) ||
                 p.nombre?.toLowerCase().includes(termino) ||
                 p.codigo?.toLowerCase().includes(termino)
             );
-            setProductosFiltrados(filtrados);
         }
+        
+        const ordenados = ordenarPorVentas(filtrados, filtroVentas);
+        setProductosFiltrados(ordenados);
+    };
+
+    // ===== CAMBIAR FILTRO DE VENTAS =====
+    const handleFiltroVentas = (tipo) => {
+        setFiltroVentas(tipo);
+        const ordenados = ordenarPorVentas(productosFiltrados, tipo);
+        setProductosFiltrados(ordenados);
     };
 
     const handleVerProducto = (producto) => {
-        // 🔴 EL PRODUCTO YA VIENE ENRIQUECIDO CON EL PLANIFICADOR
         navigate("/producto-detalle", { 
             state: { 
                 producto: producto,
@@ -168,21 +196,47 @@ export default function FamiliaProductosScreen() {
                 </div>
             </header>
 
-            {/* Buscador */}
-            <div className="fp-search">
-                <input 
-                    type="text" 
-                    placeholder="🔍 Buscar producto por nombre o código..." 
-                    value={busqueda}
-                    onChange={handleBusqueda}
-                    className="fp-search-input"
-                />
-                {busqueda && (
-                    <button className="fp-clear-search" onClick={() => {
-                        setBusqueda("");
-                        setProductosFiltrados(productos);
-                    }}>✕</button>
-                )}
+            {/* Buscador + Filtro de Ventas */}
+            <div className="fp-search-wrapper">
+                <div className="fp-search">
+                    <input 
+                        type="text" 
+                        placeholder="🔍 Buscar producto por nombre o código..." 
+                        value={busqueda}
+                        onChange={handleBusqueda}
+                        className="fp-search-input"
+                    />
+                    {busqueda && (
+                        <button className="fp-clear-search" onClick={() => {
+                            setBusqueda("");
+                            const ordenados = ordenarPorVentas(productos, filtroVentas);
+                            setProductosFiltrados(ordenados);
+                        }}>✕</button>
+                    )}
+                </div>
+
+                {/* Filtro de Ventas */}
+                <div className="fp-filtro-ventas">
+                    <span className="fp-filtro-label">📊 Ventas:</span>
+                    <button 
+                        className={`fp-filtro-btn ${filtroVentas === "ninguno" ? "active" : ""}`}
+                        onClick={() => handleFiltroVentas("ninguno")}
+                    >
+                        📝 Nombre
+                    </button>
+                    <button 
+                        className={`fp-filtro-btn ${filtroVentas === "mayor" ? "active" : ""}`}
+                        onClick={() => handleFiltroVentas("mayor")}
+                    >
+                        ⬇ Mayor a menor
+                    </button>
+                    <button 
+                        className={`fp-filtro-btn ${filtroVentas === "menor" ? "active" : ""}`}
+                        onClick={() => handleFiltroVentas("menor")}
+                    >
+                        ⬆ Menor a mayor
+                    </button>
+                </div>
             </div>
 
             {/* Grid de productos */}
@@ -202,6 +256,18 @@ export default function FamiliaProductosScreen() {
                                     <span className="fp-card-code">Código: {producto.codigo}</span>
                                     <span className="fp-card-type">
                                         {producto.tipoPinturaId === 1 ? "Esmalte" : "Vinílica"}
+                                    </span>
+                                </div>
+                                {/* Métricas en tarjeta */}
+                                <div className="fp-card-metrics">
+                                    <span className="fp-metric" title="Ventas mensuales">
+                                        📊 {producto.salidas || 0}
+                                    </span>
+                                    <span className="fp-metric" title="Stock actual">
+                                        📦 {producto.existencia || 0}
+                                    </span>
+                                    <span className="fp-metric" title="Días de alcance">
+                                        📈 {producto.alcance || 0}d
                                     </span>
                                 </div>
                                 <div className="fp-card-footer">

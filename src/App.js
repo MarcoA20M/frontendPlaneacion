@@ -15,6 +15,8 @@ import MateriasPrimasScreen from "./screens/MateriasPrimasScreen";
 import FamiliaProductosScreen from "./screens/FamiliaProductosScreen";
 import BasesScreen from './screens/BasesScreen';
 import ConsumosScreen from './screens/ConsumosScreen';
+import ReportesScreen from './screens/ReportesScreen.js';
+
 import ProductoDetalleScreen from "./screens/ProductoDetalleScreen";
 
 
@@ -96,7 +98,7 @@ export default function App() {
         <Route path="/mantenimiento/familias" element={<FamiliasGestionScreen />} />
         <Route path="/consumos" element={<ConsumosScreen />} />
         <Route path="/producto-detalle" element={<ProductoDetalleScreen />} />
-
+        <Route path="/mantenimiento/reportes" element={<ReportesScreen />} />
         <Route path="/familias" element={<FamiliasWrapper />} />
         <Route path="/familia/:idFamilia" element={<FamiliaDetalleWrapper />} />
 

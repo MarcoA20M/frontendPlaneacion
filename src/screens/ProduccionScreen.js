@@ -398,7 +398,7 @@ export default function ProduccionScreen() {
     useEffect(() => {
         const cargarFamilias = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/familias');
+                const response = await fetch('https://pintuplaneacion-backend.onrender.com/api/familias');
                 if (response.ok) {
                     const data = await response.json();
                     setFamilias(data);

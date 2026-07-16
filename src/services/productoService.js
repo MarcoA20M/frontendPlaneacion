@@ -1,48 +1,66 @@
 import axios from "axios";
+import API_URL from "../config/api"; // ajusta la ruta si tu config está en otro lugar
 
-const API_URL = "http://localhost:8080/api/productos";
-const ENVASADOS_URL = "http://localhost:8080/api/envasados";
+const PRODUCTOS_URL = `${API_URL}/productos`;
+const ENVASADOS_URL = `${API_URL}/envasados`;
 
-// Funciones sueltas
+// ===============================
+// PRODUCTOS
+// ===============================
+
 export const buscarProducto = async (codigo) => {
-  const response = await axios.get(`${API_URL}/${codigo}`);
+  const response = await axios.get(`${PRODUCTOS_URL}/${codigo}`);
   return response.data;
 };
+
 
 export const crearProducto = async (producto) => {
-  const response = await axios.post(`${API_URL}`, producto);
+  const response = await axios.post(PRODUCTOS_URL, producto);
   return response.data;
 };
+
 
 export const actualizarProducto = async (codigoActual, producto) => {
-  const response = await axios.put(`${API_URL}/${codigoActual}`, producto);
+  const response = await axios.put(`${PRODUCTOS_URL}/${codigoActual}`, producto);
   return response.data;
 };
 
-// 🔴 NUEVO: Listar todos los productos
+
+// Listar todos los productos
 export const listarProductos = async () => {
-  const response = await axios.get(API_URL);
+  const response = await axios.get(PRODUCTOS_URL);
   return response.data;
 };
 
-// Service object (para compatibilidad con componentes existentes)
+
+// ===============================
+// SERVICE OBJECT
+// ===============================
+
 export const productoService = {
+
   getProductosPorFamilia: async (familiaId) => {
-    const res = await axios.get(`${API_URL}/familia/${familiaId}`);
+    const res = await axios.get(`${PRODUCTOS_URL}/familia/${familiaId}`);
     return res.data;
   },
+
 
   getEnvasadosPorProducto: async (productoId) => {
     const res = await axios.get(`${ENVASADOS_URL}/producto/${productoId}`);
     return res.data;
   },
 
+
   crearProducto: crearProducto,
+
+
   actualizarProducto: actualizarProducto,
-  
-  // 🔴 NUEVO: Agregar listarTodos al service object
+
+
   listarTodos: async () => {
-    const response = await axios.get(API_URL);
+    const response = await axios.get(PRODUCTOS_URL);
     return response.data;
   }
 };
+
+export default productoService;

@@ -31,7 +31,7 @@ function TableroVinilica({
     const rotar = async (nuevasSemanas) => {
         setCargando(true);
         try {
-            const response = await fetch(`http://localhost:8080/api/operarios/vinilica/rotar?semanas=${nuevasSemanas}`);
+            const response = await fetch(`https://pintuplaneacion-backend.onrender.com/api/operarios/vinilica/rotar?semanas=${nuevasSemanas}`);
             const data = await response.json();
             setOperariosPorMaquina(data);
             setSemanas(nuevasSemanas);

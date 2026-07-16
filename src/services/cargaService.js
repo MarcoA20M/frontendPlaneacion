@@ -1,7 +1,7 @@
-// src/services/cargaService.js
 import axios from "axios";
-
 import API_URL_BASE from "../config/api";
+
+const API_URL = `${API_URL_BASE}/cargas`;
 
 export const registrarCarga = (cargas) =>
   axios.post(API_URL, cargas).then((res) => res.data);

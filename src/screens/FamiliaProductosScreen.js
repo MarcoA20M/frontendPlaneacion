@@ -74,6 +74,10 @@ export default function FamiliaProductosScreen() {
     
     // ===== ESTADO PARA FILTRO DE VENTAS =====
     const [filtroVentas, setFiltroVentas] = useState("ninguno"); // "ninguno", "mayor", "menor"
+    
+    // ===== NUEVO: ESTADO PARA FILTRO DE PROCESOS =====
+    const [procesoSeleccionado, setProcesoSeleccionado] = useState("todos");
+    const [procesosDisponibles, setProcesosDisponibles] = useState([]);
 
     useEffect(() => {
         cargarDatos();
@@ -100,6 +104,20 @@ export default function FamiliaProductosScreen() {
             const productosEnriquecidos = productosFiltradosFamilia.map(p => enriquecerConPlanificador(p));
             
             setProductos(productosEnriquecidos);
+            
+            // ===== NUEVO: Extraer procesos únicos =====
+            const procesosUnicos = new Set();
+            productosEnriquecidos.forEach(producto => {
+                if (producto.procesos && producto.procesos.length > 0) {
+                    producto.procesos.forEach(proceso => {
+                        if (proceso.descripcion) {
+                            procesosUnicos.add(proceso.descripcion);
+                        }
+                    });
+                }
+            });
+            setProcesosDisponibles(["todos", ...Array.from(procesosUnicos)]);
+            
             const ordenados = ordenarPorVentas(productosEnriquecidos, filtroVentas);
             setProductosFiltrados(ordenados);
             
@@ -119,9 +137,31 @@ export default function FamiliaProductosScreen() {
         } else if (filtro === "menor") {
             return copia.sort((a, b) => (a.salidas || 0) - (b.salidas || 0));
         } else {
-            // "ninguno" - mantener orden original (por nombre)
             return copia.sort((a, b) => (a.descripcion || a.nombre || "").localeCompare(b.descripcion || b.nombre || ""));
         }
+    };
+
+    // ===== NUEVO: Filtrar por búsqueda + proceso =====
+    const aplicarFiltros = (lista, termino, proceso) => {
+        let resultado = lista;
+        
+        // Filtro por búsqueda
+        if (termino !== "") {
+            resultado = resultado.filter(p => 
+                p.descripcion?.toLowerCase().includes(termino) ||
+                p.nombre?.toLowerCase().includes(termino) ||
+                p.codigo?.toLowerCase().includes(termino)
+            );
+        }
+        
+        // Filtro por proceso
+        if (proceso !== "todos") {
+            resultado = resultado.filter(p => 
+                p.procesos?.some(proc => proc.descripcion === proceso) || false
+            );
+        }
+        
+        return resultado;
     };
 
     const handleVolver = () => {
@@ -132,23 +172,23 @@ export default function FamiliaProductosScreen() {
         const termino = e.target.value.toLowerCase();
         setBusqueda(termino);
         
-        let filtrados = productos;
-        if (termino !== "") {
-            filtrados = productos.filter(p => 
-                p.descripcion?.toLowerCase().includes(termino) ||
-                p.nombre?.toLowerCase().includes(termino) ||
-                p.codigo?.toLowerCase().includes(termino)
-            );
-        }
-        
+        const filtrados = aplicarFiltros(productos, termino, procesoSeleccionado);
         const ordenados = ordenarPorVentas(filtrados, filtroVentas);
         setProductosFiltrados(ordenados);
     };
 
-    // ===== CAMBIAR FILTRO DE VENTAS =====
+    // ===== NUEVO: Cambiar filtro de proceso =====
+    const handleFiltroProceso = (proceso) => {
+        setProcesoSeleccionado(proceso);
+        const filtrados = aplicarFiltros(productos, busqueda, proceso);
+        const ordenados = ordenarPorVentas(filtrados, filtroVentas);
+        setProductosFiltrados(ordenados);
+    };
+
     const handleFiltroVentas = (tipo) => {
         setFiltroVentas(tipo);
-        const ordenados = ordenarPorVentas(productosFiltrados, tipo);
+        const filtrados = aplicarFiltros(productos, busqueda, procesoSeleccionado);
+        const ordenados = ordenarPorVentas(filtrados, tipo);
         setProductosFiltrados(ordenados);
     };
 
@@ -196,94 +236,142 @@ export default function FamiliaProductosScreen() {
                 </div>
             </header>
 
-            {/* Buscador + Filtro de Ventas */}
-            <div className="fp-search-wrapper">
-                <div className="fp-search">
-                    <input 
-                        type="text" 
-                        placeholder="🔍 Buscar producto por nombre o código..." 
-                        value={busqueda}
-                        onChange={handleBusqueda}
-                        className="fp-search-input"
-                    />
-                    {busqueda && (
-                        <button className="fp-clear-search" onClick={() => {
-                            setBusqueda("");
-                            const ordenados = ordenarPorVentas(productos, filtroVentas);
-                            setProductosFiltrados(ordenados);
-                        }}>✕</button>
+            {/* Buscador + Filtros */}
+           {/* Buscador + Filtros - DISEÑO MEJORADO */}
+<div className="fp-search-wrapper">
+    <div className="fp-search-filters-row">
+        {/* Buscador a la izquierda */}
+        <div className="fp-search">
+            <input 
+                type="text" 
+                placeholder="🔍 Buscar producto por nombre o código..." 
+                value={busqueda}
+                onChange={handleBusqueda}
+                className="fp-search-input"
+            />
+            {busqueda && (
+                <button className="fp-clear-search" onClick={() => {
+                    setBusqueda("");
+                    const filtrados = aplicarFiltros(productos, "", procesoSeleccionado);
+                    const ordenados = ordenarPorVentas(filtrados, filtroVentas);
+                    setProductosFiltrados(ordenados);
+                }}>✕</button>
+            )}
+        </div>
+
+        {/* Filtro de Procesos a la derecha */}
+        {procesosDisponibles.length > 1 && (
+            <div className="fp-filtro-procesos">
+                <span className="fp-filtro-label">🔹 Proceso:</span>
+                {procesosDisponibles.map((proceso) => (
+                    <button
+                        key={proceso}
+                        className={`fp-filtro-btn ${procesoSeleccionado === proceso ? "active" : ""}`}
+                        onClick={() => handleFiltroProceso(proceso)}
+                    >
+                        {proceso === "todos" ? "📦 Todos" : proceso}
+                    </button>
+                ))}
+            </div>
+        )}
+    </div>
+
+    {/* Filtro de Ventas (abajo) */}
+    <div className="fp-filtro-ventas">
+        <span className="fp-filtro-label">📊 Ventas:</span>
+        <button 
+            className={`fp-filtro-btn ${filtroVentas === "ninguno" ? "active" : ""}`}
+            onClick={() => handleFiltroVentas("ninguno")}
+        >
+            📝 Nombre
+        </button>
+        <button 
+            className={`fp-filtro-btn ${filtroVentas === "mayor" ? "active" : ""}`}
+            onClick={() => handleFiltroVentas("mayor")}
+        >
+            ⬇ Mayor a menor
+        </button>
+        <button 
+            className={`fp-filtro-btn ${filtroVentas === "menor" ? "active" : ""}`}
+            onClick={() => handleFiltroVentas("menor")}
+        >
+            ⬆ Menor a mayor
+        </button>
+    </div>
+</div>
+
+{/* Grid de productos */}
+<div className="fp-grid">
+    {productosFiltrados.length > 0 ? (
+        productosFiltrados.map((producto, index) => (
+            <div 
+                key={producto.id} 
+                className="fp-card"
+                onClick={() => handleVerProducto(producto)}
+                style={{ animationDelay: `${index * 0.05}s` }}
+            >
+                {/* === ICONO CON IMAGEN DE LA FAMILIA === */}
+                <div className="fp-card-icon">
+                    {imagenFamilia ? (
+                        <img 
+                            src={imagenFamilia} 
+                            alt={familia?.nombre} 
+                            className="fp-card-img" 
+                        />
+                    ) : (
+                        <span className="fp-card-emoji">🎨</span>
                     )}
                 </div>
-
-                {/* Filtro de Ventas */}
-                <div className="fp-filtro-ventas">
-                    <span className="fp-filtro-label">📊 Ventas:</span>
-                    <button 
-                        className={`fp-filtro-btn ${filtroVentas === "ninguno" ? "active" : ""}`}
-                        onClick={() => handleFiltroVentas("ninguno")}
-                    >
-                        📝 Nombre
-                    </button>
-                    <button 
-                        className={`fp-filtro-btn ${filtroVentas === "mayor" ? "active" : ""}`}
-                        onClick={() => handleFiltroVentas("mayor")}
-                    >
-                        ⬇ Mayor a menor
-                    </button>
-                    <button 
-                        className={`fp-filtro-btn ${filtroVentas === "menor" ? "active" : ""}`}
-                        onClick={() => handleFiltroVentas("menor")}
-                    >
-                        ⬆ Menor a mayor
-                    </button>
+                
+                <div className="fp-card-content">
+                    <h3 className="fp-card-title">{producto.descripcion || producto.nombre}</h3>
+                    <div className="fp-card-details">
+                        <span className="fp-card-code">Código: {producto.codigo}</span>
+                        <span className="fp-card-type">
+                            {producto.tipoPinturaId === 1 ? "Esmalte" : "Vinílica"}
+                        </span>
+                    </div>
+                    
+                    {/* Mostrar procesos del producto */}
+                    {producto.procesos && producto.procesos.length > 0 && (
+                        <div className="fp-card-procesos">
+                            {producto.procesos.map((proc, idx) => (
+                                <span key={idx} className="fp-proceso-badge">
+                                    {proc.descripcion}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                    
+                    <div className="fp-card-metrics">
+                        <span className="fp-metric" title="Ventas mensuales">
+                            📊 {producto.salidas || 0}
+                        </span>
+                        <span className="fp-metric" title="Stock actual">
+                            📦 {producto.existencia || 0}
+                        </span>
+                        <span className="fp-metric" title="Días de alcance">
+                            📈 {producto.alcance || 0}d
+                        </span>
+                    </div>
+                    <div className="fp-card-footer">
+                        <span className="fp-card-ver">Ver detalles →</span>
+                    </div>
                 </div>
             </div>
-
-            {/* Grid de productos */}
-            <div className="fp-grid">
-                {productosFiltrados.length > 0 ? (
-                    productosFiltrados.map((producto, index) => (
-                        <div 
-                            key={producto.id} 
-                            className="fp-card"
-                            onClick={() => handleVerProducto(producto)}
-                            style={{ animationDelay: `${index * 0.05}s` }}
-                        >
-                            <div className="fp-card-icon">🎨</div>
-                            <div className="fp-card-content">
-                                <h3 className="fp-card-title">{producto.descripcion || producto.nombre}</h3>
-                                <div className="fp-card-details">
-                                    <span className="fp-card-code">Código: {producto.codigo}</span>
-                                    <span className="fp-card-type">
-                                        {producto.tipoPinturaId === 1 ? "Esmalte" : "Vinílica"}
-                                    </span>
-                                </div>
-                                {/* Métricas en tarjeta */}
-                                <div className="fp-card-metrics">
-                                    <span className="fp-metric" title="Ventas mensuales">
-                                        📊 {producto.salidas || 0}
-                                    </span>
-                                    <span className="fp-metric" title="Stock actual">
-                                        📦 {producto.existencia || 0}
-                                    </span>
-                                    <span className="fp-metric" title="Días de alcance">
-                                        📈 {producto.alcance || 0}d
-                                    </span>
-                                </div>
-                                <div className="fp-card-footer">
-                                    <span className="fp-card-ver">Ver detalles →</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="fp-no-results">
-                        <span className="fp-no-icon">🔍</span>
-                        <h3>No se encontraron productos</h3>
-                        <p>No hay resultados para "{busqueda}"</p>
-                    </div>
-                )}
-            </div>
+        ))
+    ) : (
+        <div className="fp-no-results">
+            <span className="fp-no-icon">🔍</span>
+            <h3>No se encontraron productos</h3>
+            <p>
+                {procesoSeleccionado !== "todos"
+                    ? `No hay productos con el proceso "${procesoSeleccionado}"`
+                    : `No hay resultados para "${busqueda}"`}
+            </p>
+        </div>
+    )}
+</div>
         </div>
     );
 }

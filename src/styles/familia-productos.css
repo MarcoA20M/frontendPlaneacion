@@ -939,3 +939,261 @@
         text-align: center;
     }
 }
+
+
+/* ============================================
+   FILTROS - DISEÑO MEJORADO
+   ============================================ */
+
+.fp-search-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 10;
+}
+
+/* === FILA SUPERIOR: Buscador + Procesos === */
+.fp-search-filters-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Buscador (ocupa espacio flexible) */
+.fp-search {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.fp-search-input {
+    width: 100%;
+    padding: 12px 40px 12px 20px;
+    background: var(--fp-search-input-bg);
+    border: 1px solid var(--fp-search-input-border);
+    border-radius: 30px;
+    color: var(--fp-search-input-color);
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.fp-search-input:focus {
+    outline: none;
+    border-color: var(--fp-search-input-focus-border);
+    box-shadow: var(--fp-search-input-focus-shadow);
+}
+
+.fp-clear-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--fp-clear-search-color);
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+/* === FILTRO DE PROCESOS (EMPUJADO A LA DERECHA) === */
+.fp-filtro-procesos {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--fp-card-bg);
+    border: 1px solid var(--fp-card-border);
+    border-radius: 30px;
+    flex-wrap: wrap;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    
+    /* 🔥 ESTO LO EMPUJA A LA DERECHA */
+    margin-left: auto;
+}
+
+.fp-filtro-procesos:hover {
+    border-color: var(--fp-card-hover-border);
+}
+
+.fp-filtro-label {
+    font-size: 11px;
+    color: var(--fp-subtitle-color);
+    font-weight: 500;
+    margin-right: 2px;
+    transition: color 0.3s ease;
+}
+
+.fp-filtro-btn {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fp-subtitle-color);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fp-filtro-btn:hover {
+    background: var(--fp-btn-back-bg);
+    color: var(--fp-card-title-color);
+    transform: translateY(-1px);
+}
+
+.fp-filtro-btn.active {
+    background: var(--fp-btn-back-hover-bg);
+    border-color: var(--fp-btn-back-border);
+    color: var(--fp-btn-back-color);
+    box-shadow: 0 0 15px rgba(192, 0, 255, 0.08);
+}
+
+/* === FILTRO DE VENTAS (abajo) === */
+.fp-filtro-ventas {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px 0;
+}
+
+/* ============================================
+   BADGES DE PROCESOS EN TARJETAS
+   ============================================ */
+
+.fp-card-procesos {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin: 4px 0 6px;
+}
+
+.fp-proceso-badge {
+    font-size: 9px;
+    padding: 2px 10px;
+    background: var(--fp-card-code-bg);
+    border: 1px solid var(--fp-card-border);
+    border-radius: 12px;
+    color: var(--fp-card-code-color);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.fp-card:hover .fp-proceso-badge {
+    border-color: var(--fp-card-hover-border);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .fp-search-filters-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    /* En móvil, quitamos el margin-left para que no quede a la derecha */
+    .fp-filtro-procesos {
+        margin-left: 0;
+        padding: 8px 14px;
+        border-radius: 20px;
+        justify-content: center;
+    }
+    
+    .fp-filtro-btn {
+        font-size: 9px;
+        padding: 3px 10px;
+    }
+    
+    .fp-filtro-ventas {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .fp-search {
+        min-width: unset;
+    }
+    
+    .fp-filtro-procesos {
+        padding: 6px 10px;
+        gap: 4px;
+        border-radius: 16px;
+    }
+    
+    .fp-filtro-btn {
+        font-size: 8px;
+        padding: 2px 8px;
+    }
+    
+    .fp-filtro-label {
+        font-size: 9px;
+    }
+    
+    .fp-proceso-badge {
+        font-size: 8px;
+        padding: 1px 8px;
+    }
+}
+
+
+
+/* ============================================
+   ICONO CON IMAGEN EN TARJETAS
+   ============================================ */
+
+.fp-card-icon {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--fp-card-code-bg);
+    border: 1px solid var(--fp-card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.fp-card:hover .fp-card-icon {
+    border-color: var(--fp-card-hover-border);
+    transform: scale(1.05);
+}
+
+.fp-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fp-card-emoji {
+    font-size: 28px;
+    opacity: 0.6;
+}
+
+/* ============================================
+   RESPONSIVE - AJUSTE DE IMAGEN
+   ============================================ */
+
+@media (max-width: 480px) {
+    .fp-card-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+    }
+    
+    .fp-card-emoji {
+        font-size: 22px;
+    }
+}

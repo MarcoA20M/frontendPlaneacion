@@ -193,10 +193,12 @@ body, html {
 .header-panel {
   display: flex;
   align-items: center;
-  gap: 25px;
-  flex-wrap: wrap;
+  gap: 20px;
+  flex-wrap: nowrap;
   margin-bottom: 30px;
   position: relative;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .header-panel h1 {
@@ -210,7 +212,8 @@ body, html {
 .titulo-app {
   display: flex;
   align-items: center;
-  gap: 21px;
+  gap: 15px;
+  flex-shrink: 0;
 }
 
 .tablero-titulo {
@@ -222,12 +225,33 @@ body, html {
   transition: color 0.3s ease;
 }
 
+/* ===== 2.1 NIVEBAR ACTIONS CONTAINER - UNA SOLA LÍNEA ===== */
+.nivebar-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+/* Grupo de semana + calendario */
+.semana-calendar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ===== 3. BUSQUEDA & SELECTORES ===== */
 .busqueda {
   display: flex;
   gap: 15px;
   margin-bottom: 30px;
   align-items: center;
+  flex: 0 0 50%;
+  max-width: 260px;  /* 👈 Máximo 400px */
+  min-width: 250px;  /* 👈 Mínimo 250px */
 }
 
 .busqueda-con-descripcion {
@@ -270,26 +294,35 @@ body, html {
 
 .selector-tipo {
   display: flex;
-  gap: 15px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .selector-tipo button {
-  padding: 10px 25px;
+  padding: 10px 25px;  /* Tamaño original restaurado */
   border-radius: 12px;
   border: none;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 16px;  /* Tamaño original restaurado */
   cursor: pointer;
   transition: all 0.3s ease;
   color: var(--app-text);
   background: var(--card-bg);
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
+
 
 .selector-tipo button.active {
   background: var(--primary-gradient);
-  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.5);
-  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+  transform: scale(1.02);
   color: #fff;
+}
+
+.selector-tipo button:not(.active):hover {
+  transform: translateY(-1px);
+  border-color: var(--primary-color);
 }
 
 /* ===== 4. PRODUCTO & DESCRIPCION ===== */
@@ -640,58 +673,79 @@ body, html {
   padding: 20px !important;
 }
 
-/* ===== 9. PLANIFICADOR DE FECHA ===== */
+/* ===== 9. PLANIFICADOR DE FECHA - UNA SOLA LÍNEA ===== */
 .planificador-semanal {
   display: flex;
   align-items: center;
   background: var(--planificador-bg);
   color: var(--planificador-text);
-  padding: 7px 12px;
-  border-radius: 15px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  gap: 4px;
   transition: all 0.3s ease;
+  height: 34px;
+  flex-shrink: 0;
 }
 
-.planificador-semanal button {
+.planificador-semanal .btn-semana {
   background: transparent;
   border: none;
   color: var(--planificador-text);
   cursor: pointer;
-  font-size: 1rem;
-  padding: 2px 4px;
+  font-size: 0.85rem;
+  padding: 2px 6px;
   transition: all 0.3s ease;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.planificador-semanal .btn-semana:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.planificador-semanal .fecha-actual-view {
+  font-size: 0.75rem;
+  padding: 0 6px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .planificador-semanal .btn-hoy-reset {
   background: #e74c3c;
   color: white;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 8px;
-  margin-left: 3px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  line-height: 1.4;
 }
 
-.fecha-actual-view {
-  font-size: 0.8rem;
-  min-width: 90px;
-  text-align: center;
+.planificador-semanal .btn-hoy-reset:hover {
+  background: #c0392b;
+  transform: scale(1.05);
 }
 
 .badge-planificador-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background-color: var(--badge-planificador-bg);
   color: var(--planificador-text);
   border: 1px solid var(--glass-border);
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 6px 10px;
+  border-radius: 16px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  height: 34px;
+  flex-shrink: 0;
 }
 
 .badge-planificador-btn:hover {
@@ -1383,6 +1437,9 @@ body, html {
 /* ===== BUSCADOR DE CARGAS COMPACTO ===== */
 .buscador-cargas-wrapper {
   position: relative;
+  flex: 1;
+  min-width: 150px;
+  max-width: 350px;
 }
 
 .buscador-cargas-container-compact {
@@ -1418,6 +1475,7 @@ body, html {
 .buscador-cargas-input-compact .icono-lupa-compact {
   color: var(--primary-color);
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .buscador-cargas-input-compact input {
@@ -1428,7 +1486,7 @@ body, html {
   padding: 4px 2px;
   outline: none;
   width: 100%;
-  min-width: 120px;
+  min-width: 80px;
   font-family: inherit;
   transition: color 0.3s ease;
 }
@@ -1446,6 +1504,7 @@ body, html {
   font-size: 11px;
   padding: 2px 4px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .buscador-cargas-input-compact .btn-limpiar-compact:hover {
@@ -1565,8 +1624,49 @@ body, html {
   font-weight: 500;
 }
 
-/* ===== RESPONSIVE ===== */
+.buscador-cargas-input-compact input::after {
+  content: " ↵";
+  color: var(--buscador-placeholder);
+}
+
+/* ============================================================ */
+/* ===== RESPONSIVE ============================================ */
+/* ============================================================ */
+
 @media (max-width: 1024px) {
+  .header-panel {
+    gap: 12px;
+  }
+  
+  .nivebar-actions-container {
+    gap: 8px;
+  }
+  
+  .selector-tipo button {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+  
+  .planificador-semanal {
+    padding: 4px 8px;
+    height: 30px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.7rem;
+  }
+  
+  .badge-planificador-btn {
+    height: 30px;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 120px;
+    max-width: 250px;
+  }
+  
   .calendar-nav-container {
     padding: 4px 8px;
     gap: 4px;
@@ -1587,75 +1687,656 @@ body, html {
 }
 
 @media (max-width: 768px) {
-  .calendar-nav-container {
+  .header-panel {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-right: 45px;
+  }
+  
+  .nivebar-actions-container {
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .semana-calendar-group {
+    flex-wrap: wrap;
+  }
+  
+  .planificador-semanal {
+    padding: 4px 8px;
+    height: 28px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.65rem;
+    padding: 0 4px;
+  }
+  
+  .selector-tipo button {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 100px;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .badge-planificador-btn {
+    height: 28px;
+    font-size: 0.65rem;
     padding: 3px 6px;
-    gap: 3px;
   }
-  .calendar-nav-btn {
+  
+  /* Resto de estilos responsive existentes */
+  .app {
+    padding: 12px;
+  }
+  
+  .header-panel h1 {
+    font-size: 24px;
+    margin: 30px 0 0 0;
+  }
+  
+  .logo-titulo {
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .tablero-titulo {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+  
+  .busqueda-con-descripcion {
+    margin-top: 50px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .busqueda input {
+    flex: 1;
+    min-width: 100px;
+    width: auto;
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+  
+  .busqueda button {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+  
+  .descripcion-producto {
+    margin-top: 0;
+    margin-left: 0;
+    min-width: auto;
+    max-width: 100%;
+    width: 100%;
+    padding: 12px 15px;
+  }
+  
+  .nombre-producto {
+    font-size: 18px;
+  }
+  
+  .tabla {
+    gap: 10px;
+  }
+  
+  .fila {
+    width: 100px;
+    padding: 12px 8px;
+  }
+  
+  .fila .litros-text {
+    font-size: 14px;
+  }
+  
+  .fila input {
     font-size: 12px;
-    padding: 2px 4px;
+    padding: 5px 6px;
   }
-  .calendar-date-input {
+  
+  .layout-dinamico-produccion {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .envasado-column {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .inventario-column {
+    margin-left: 0;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .tabla-inventario-tecnica {
+    min-width: 300px;
+    width: 100%;
+  }
+  
+  .tabla-inventario-tecnica th,
+  .tabla-inventario-tecnica td {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+  
+  .tipo-envase-cell {
+    font-size: 0.6rem !important;
+  }
+  
+  .botones-cargas {
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .agregar-btn, .exportar-btn, .eliminar-btn {
+    width: auto;
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+    height: 40px;
     font-size: 10px;
-    min-width: 90px;
-    padding: 2px 3px;
+    padding: 0 8px;
   }
-  .btn-hoy-calendar {
-    font-size: 9px;
+  
+  .panel-header-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .header-left-side {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-family-explorer {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  
+  .families-glass-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  
+  .families-grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  
+  .family-card-premium {
+    padding: 12px;
+  }
+  
+  .family-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .family-name {
+    font-size: 0.85rem;
+  }
+  
+  .family-meta {
+    font-size: 0.65rem;
+  }
+  
+  .calendar-nav-container {
     padding: 3px 8px;
   }
+  
+  .calendar-nav-btn {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+  
+  .calendar-date-input {
+    font-size: 11px;
+    min-width: 100px;
+    padding: 3px 4px;
+  }
+  
+  .btn-hoy-calendar {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+  
   .calendar-wrapper {
     gap: 6px;
     flex-wrap: wrap;
   }
+  
+  .perfil-container {
+    top: -3px;
+    right: 3px;
+  }
+  
+  .perfil-icono {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+  
+  .avatar-letra {
+    font-size: 1rem;
+  }
+  
+  .perfil-dropdown {
+    width: 200px;
+    top: 48px;
+    padding: 8px;
+  }
+  
   .buscador-cargas-input-compact input {
     min-width: 80px;
     font-size: 11px;
   }
+  
   .buscador-cargas-input-compact {
     padding: 2px 6px;
   }
+  
   .resultado-item-compact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
+    flex-wrap: wrap;
     padding: 5px 8px;
   }
+  
   .resultado-item-compact .info-compact {
-    width: 100%;
-    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
   }
+  
   .resultados-busqueda-compact {
     max-height: 200px;
+  }
+  
+  .contador-litros {
+    font-size: 16px;
+    padding: 5px 10px;
+  }
+  
+  .contador-litros span {
+    font-size: 16px;
+    padding: 2px 6px;
+  }
+  
+  .proceso-item {
+    padding: 4px 8px;
+  }
+  
+  .paso-nro {
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+    margin-right: 8px;
+  }
+  
+  .paso-desc {
+    font-size: 11px;
+  }
+  
+  .btn-calcular-consumo-busqueda {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+  
+  .consumo-preview-mini {
+    max-width: 320px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .overlay-content {
+    padding: 30px 20px;
+    max-width: 350px;
+  }
+  
+  .spinner-large {
+    width: 50px;
+    height: 50px;
+    border-width: 5px;
+  }
+  
+  .percentage-display {
+    font-size: 1.3rem;
+  }
+  
+  .envases-section {
+    min-width: auto;
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
+  .header-panel {
+    gap: 6px;
+    padding-right: 38px;
+  }
+  
+  .header-panel h1 {
+    font-size: 18px;
+    margin: 20px 0 0 0;
+  }
+  
+  .titulo-app {
+    gap: 8px;
+  }
+  
+  .logo-titulo {
+    height: 32px;
+    margin-right: 6px;
+  }
+  
+  .tablero-titulo {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  
+  .nivebar-actions-container {
+    gap: 5px;
+  }
+  
+  .planificador-semanal {
+    padding: 3px 6px;
+    height: 24px;
+    gap: 2px;
+  }
+  
+  .planificador-semanal .btn-semana {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.55rem;
+    padding: 0 3px;
+  }
+  
+  .planificador-semanal .btn-hoy-reset {
+    font-size: 0.45rem;
+    padding: 1px 5px;
+  }
+  
+  .selector-tipo {
+    gap: 4px;
+  }
+  
+  .selector-tipo button {
+    font-size: 10px;
+    padding: 3px 8px;
+    min-width: 45px;
+  }
+  
+  .badge-planificador-btn {
+    height: 24px;
+    font-size: 0.55rem;
+    padding: 2px 5px;
+    gap: 3px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 80px;
+  }
+  
+  .buscador-cargas-input-compact input {
+    font-size: 10px;
+    min-width: 50px;
+  }
+  
+  .buscador-cargas-input-compact .icono-lupa-compact {
+    font-size: 10px;
+  }
+  
+  .app {
+    padding: 8px;
+  }
+  
+  .busqueda-con-descripcion {
+    margin-top: 30px;
+  }
+  
+  .busqueda {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .busqueda input {
+    width: 100%;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .busqueda button {
+    width: 100%;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .descripcion-producto {
+    padding: 10px 12px;
+  }
+  
+  .nombre-producto {
+    font-size: 16px;
+  }
+  
+  .poder-cubriente {
+    font-size: 12px;
+  }
+  
+  .tabla {
+    gap: 6px;
+  }
+  
+  .fila {
+    width: 80px;
+    padding: 8px 4px;
+    border-radius: 10px;
+  }
+  
+  .fila .litros-text {
+    font-size: 12px;
+  }
+  
+  .fila input {
+    font-size: 10px;
+    padding: 4px 3px;
+  }
+  
+  .agregar-btn, .exportar-btn, .eliminar-btn {
+    height: 34px;
+    font-size: 9px;
+    padding: 0 6px;
+    min-width: 60px;
+    max-width: 90px;
+    border-radius: 14px;
+  }
+  
+  .btn-family-explorer {
+    font-size: 0.7rem;
+    padding: 6px 12px;
+  }
+  
+  .families-grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+  
+  .family-card-premium {
+    padding: 8px;
+    border-radius: 12px;
+  }
+  
+  .family-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  
+  .family-name {
+    font-size: 0.75rem;
+  }
+  
+  .family-meta {
+    font-size: 0.55rem;
+  }
+  
+  .family-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+  
+  .tabla-inventario-tecnica th {
+    font-size: 0.45rem;
+    padding: 4px 6px;
+  }
+  
+  .tabla-inventario-tecnica td {
+    font-size: 0.6rem;
+    padding: 4px 6px;
+  }
+  
+  .tipo-envase-cell {
+    font-size: 0.5rem !important;
+  }
+  
   .calendar-nav-container {
-    padding: 2px 4px;
+    padding: 2px 6px;
     gap: 2px;
     border-radius: 6px;
   }
+  
   .calendar-nav-btn {
-    font-size: 10px;
-    padding: 2px 3px;
+    font-size: 11px;
+    padding: 2px 4px;
   }
+  
   .calendar-date-input {
     font-size: 9px;
-    min-width: 70px;
-    padding: 2px 2px;
+    min-width: 80px;
+    padding: 2px 3px;
   }
+  
   .btn-hoy-calendar {
     font-size: 8px;
-    padding: 2px 6px;
-    gap: 2px;
+    padding: 3px 6px;
   }
-  .calendar-wrapper {
-    gap: 4px;
+  
+  .perfil-icono {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+  
+  .avatar-letra {
+    font-size: 0.85rem;
+  }
+  
+  .perfil-dropdown {
+    width: 180px;
+    top: 40px;
+    padding: 6px;
+  }
+  
+  .usuario-nombre {
+    font-size: 12px;
+  }
+  
+  .usuario-rol {
+    font-size: 10px;
+  }
+  
+  .perfil-item {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  
+  .btn-calcular-consumo-busqueda {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .consumo-preview-mini {
+    max-width: 280px;
+  }
+  
+  .contador-litros {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+  
+  .contador-litros span {
+    font-size: 14px;
+    padding: 2px 4px;
+  }
+  
+  .resultado-item-compact {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+  
+  .resultado-item-compact .codigo-compact {
+    font-size: 9px;
+  }
+  
+  .resultado-item-compact .descripcion-compact {
+    font-size: 9px;
+  }
+  
+  .resultado-item-compact .folio-compact {
+    font-size: 9px;
+  }
+  
+  .resultados-busqueda-compact {
+    max-height: 160px;
+  }
+  
+  .overlay-content {
+    padding: 20px 16px;
+    max-width: 300px;
+  }
+  
+  .spinner-large {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+  
+  .percentage-display {
+    font-size: 1.1rem;
+  }
+  
+  .overlay-content p {
+    font-size: 0.8rem;
+  }
+  
+  .paso-desc {
+    font-size: 10px;
+  }
+  
+  .procesos-info strong {
+    font-size: 10px;
   }
 }
 
-.buscador-cargas-input-compact input::after {
-  content: " ↵";
-  color: var(--buscador-placeholder);
-}
+

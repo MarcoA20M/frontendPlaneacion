@@ -1,7 +1,7 @@
-// components/Nivebar.jsx - SOLO DISEÑO, DISPARA EVENTOS
+// components/Nivebar.jsx - VERSIÓN MODIFICADA
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../hooks/useTheme"; // 👈 Importa el hook
+import { useTheme } from "../hooks/useTheme";
 
 const Nivebar = ({
     tipoPintura,
@@ -24,11 +24,8 @@ const Nivebar = ({
     const navigate = useNavigate();
     const [menuPerfilLocal, setMenuPerfilLocal] = useState(false);
     const perfilLocalRef = useRef(null);
-    
-    // 👇 NUEVO: Hook para el tema
     const { theme, toggleTheme } = useTheme();
 
-    // Control de clics fuera del menú de perfil
     useEffect(() => {
         const handleClickAfuera = (event) => {
             if (perfilLocalRef.current && !perfilLocalRef.current.contains(event.target)) {
@@ -40,7 +37,6 @@ const Nivebar = ({
         return () => document.removeEventListener("mousedown", handleClickAfuera);
     }, [setMenuPerfilAbierto]);
 
-    // Manejar Enter en el buscador
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -51,7 +47,6 @@ const Nivebar = ({
         }
     };
 
-    // Funciones de navegación
     const semanaAnterior = () => {
         console.log('⬅️ Nivebar: Click en semana anterior');
         window.dispatchEvent(new CustomEvent('navegarSemana', { 
@@ -73,10 +68,8 @@ const Nivebar = ({
         }));
     };
 
-    // 👇 NUEVO: Función para cambiar tema y cerrar menú
     const handleToggleTheme = () => {
         toggleTheme();
-        // Cerrar menú después de cambiar tema
         if (setMenuPerfilAbierto) {
             setMenuPerfilAbierto(false);
         } else {
@@ -117,11 +110,7 @@ const Nivebar = ({
                             🛠️ Mantenimiento
                         </button>
                         
-                        {/* 👇 NUEVO: Botón para cambiar tema */}
-                        <button 
-                            className="perfil-item theme-toggle" 
-                            onClick={handleToggleTheme}
-                        >
+                        <button className="perfil-item theme-toggle" onClick={handleToggleTheme}>
                             {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
                         </button>
                         
@@ -147,19 +136,22 @@ const Nivebar = ({
                 )}
             </div>
 
-            {/* SELECTOR DE TIPO, PLANIFICADOR SEMANAL Y BUSCADOR */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                {/* PLANIFICADOR SEMANAL */}
-                <div className="planificador-semanal">
-                    <button onClick={semanaAnterior} className="btn-semana" title="Semana anterior">◀</button>
-                    <div className="fecha-actual-view">
-                        <strong>Semana: </strong> 
-                        {fechaRotacion?.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+            {/* CONTENEDOR PRINCIPAL: NIVEL SEMANAL + TIPOS + BUSCADOR */}
+            <div className="nivebar-actions-container">
+                {/* NIVEL SEMANAL CON CALENDARIO */}
+                <div className="semana-calendar-group">
+                    <div className="planificador-semanal">
+                        <button onClick={semanaAnterior} className="btn-semana" title="Semana anterior">◀</button>
+                        <div className="fecha-actual-view">
+                            <strong>Semana: </strong> 
+                            {fechaRotacion?.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        </div>
+                        <button onClick={semanaSiguiente} className="btn-semana" title="Semana siguiente">▶</button>
+                        <button className="btn-hoy-reset" onClick={irAHoy}>Hoy</button>
                     </div>
-                    <button onClick={semanaSiguiente} className="btn-semana" title="Semana siguiente">▶</button>
-                    <button className="btn-hoy-reset" onClick={irAHoy}>Hoy</button>
                 </div>
 
+                {/* TIPOS DE PINTURA (Vinílica / Esmalte) */}
                 <div className="selector-tipo">
                     {["Vinílica", "Esmalte"].map(t => (
                         <button

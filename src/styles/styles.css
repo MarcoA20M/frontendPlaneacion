@@ -1,3 +1,17 @@
+
+
+
+
+
+
+
+
+
+
+juanton 
+
+
+
 /* styles/global.css */
 
 /* === VARIABLES DE COLORES === */
@@ -245,6 +259,9 @@ body, html {
   gap: 15px;
   margin-bottom: 30px;
   align-items: center;
+  flex: 0 0 50%;
+  max-width: 260px;  /* 👈 Máximo 400px */
+  min-width: 250px;  /* 👈 Mínimo 250px */
 }
 
 .busqueda-con-descripcion {
@@ -288,14 +305,15 @@ body, html {
 .selector-tipo {
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .selector-tipo button {
-  padding: 8px 20px;
+  padding: 10px 25px;  /* Tamaño original restaurado */
   border-radius: 12px;
   border: none;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: bold;
+  font-size: 16px;  /* Tamaño original restaurado */
   cursor: pointer;
   transition: all 0.3s ease;
   color: var(--app-text);
@@ -303,6 +321,7 @@ body, html {
   border: 1px solid transparent;
   white-space: nowrap;
 }
+
 
 .selector-tipo button.active {
   background: var(--primary-gradient);
@@ -664,16 +683,18 @@ body, html {
   padding: 20px !important;
 }
 
-/* ===== 9. PLANIFICADOR DE FECHA ===== */
+/* ===== 9. PLANIFICADOR DE FECHA - UNA SOLA LÍNEA ===== */
 .planificador-semanal {
   display: flex;
   align-items: center;
   background: var(--planificador-bg);
   color: var(--planificador-text);
-  padding: 7px 12px;
-  border-radius: 15px;
+  padding: 5px 10px;
+  border-radius: 12px;
   gap: 4px;
   transition: all 0.3s ease;
+  height: 34px;
+  flex-shrink: 0;
 }
 
 .planificador-semanal .btn-semana {
@@ -681,33 +702,36 @@ body, html {
   border: none;
   color: var(--planificador-text);
   cursor: pointer;
-  font-size: 1rem;
-  padding: 2px 8px;
+  font-size: 0.85rem;
+  padding: 2px 6px;
   transition: all 0.3s ease;
   border-radius: 4px;
+  line-height: 1;
 }
 
 .planificador-semanal .btn-semana:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .planificador-semanal .fecha-actual-view {
-  font-size: 0.85rem;
-  padding: 0 8px;
+  font-size: 0.75rem;
+  padding: 0 6px;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .planificador-semanal .btn-hoy-reset {
   background: #e74c3c;
   color: white;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   text-transform: uppercase;
-  padding: 2px 10px;
-  border-radius: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.2s ease;
+  line-height: 1.4;
 }
 
 .planificador-semanal .btn-hoy-reset:hover {
@@ -718,18 +742,20 @@ body, html {
 .badge-planificador-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background-color: var(--badge-planificador-bg);
   color: var(--planificador-text);
   border: 1px solid var(--glass-border);
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 6px 10px;
+  border-radius: 16px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  height: 34px;
+  flex-shrink: 0;
 }
 
 .badge-planificador-btn:hover {
@@ -1091,6 +1117,8 @@ body, html {
   width: 100%;
 }
 
+podria ser pero no se 
+
 .contador-litros {
   font-size: 18px;
   font-weight: 600;
@@ -1421,6 +1449,9 @@ body, html {
 /* ===== BUSCADOR DE CARGAS COMPACTO ===== */
 .buscador-cargas-wrapper {
   position: relative;
+  flex: 1;
+  min-width: 150px;
+  max-width: 350px;
 }
 
 .buscador-cargas-container-compact {
@@ -1456,6 +1487,7 @@ body, html {
 .buscador-cargas-input-compact .icono-lupa-compact {
   color: var(--primary-color);
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .buscador-cargas-input-compact input {
@@ -1466,7 +1498,7 @@ body, html {
   padding: 4px 2px;
   outline: none;
   width: 100%;
-  min-width: 120px;
+  min-width: 80px;
   font-family: inherit;
   transition: color 0.3s ease;
 }
@@ -1484,6 +1516,7 @@ body, html {
   font-size: 11px;
   padding: 2px 4px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .buscador-cargas-input-compact .btn-limpiar-compact:hover {
@@ -1613,6 +1646,39 @@ body, html {
 /* ============================================================ */
 
 @media (max-width: 1024px) {
+  .header-panel {
+    gap: 12px;
+  }
+  
+  .nivebar-actions-container {
+    gap: 8px;
+  }
+  
+  .selector-tipo button {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+  
+  .planificador-semanal {
+    padding: 4px 8px;
+    height: 30px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.7rem;
+  }
+  
+  .badge-planificador-btn {
+    height: 30px;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 120px;
+    max-width: 250px;
+  }
+  
   .calendar-nav-container {
     padding: 4px 8px;
     gap: 4px;
@@ -1633,15 +1699,52 @@ body, html {
 }
 
 @media (max-width: 768px) {
-  /* Ajustes generales */
-  .app {
-    padding: 12px;
+  .header-panel {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-right: 45px;
   }
   
-  .header-panel {
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-right: 45px;
+  .nivebar-actions-container {
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .semana-calendar-group {
+    flex-wrap: wrap;
+  }
+  
+  .planificador-semanal {
+    padding: 4px 8px;
+    height: 28px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.65rem;
+    padding: 0 4px;
+  }
+  
+  .selector-tipo button {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 100px;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .badge-planificador-btn {
+    height: 28px;
+    font-size: 0.65rem;
+    padding: 3px 6px;
+  }
+  
+  /* Resto de estilos responsive existentes */
+  .app {
+    padding: 12px;
   }
   
   .header-panel h1 {
@@ -1658,59 +1761,7 @@ body, html {
     font-size: 1.1rem;
     margin-bottom: 15px;
   }
-
-  /* Nivebar actions - responsive */
-  .nivebar-actions-container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .semana-calendar-group {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .planificador-semanal {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 5px 10px;
-  }
-
-  .planificador-semanal .fecha-actual-view {
-    font-size: 0.75rem;
-    padding: 0 4px;
-  }
-
-  .selector-tipo {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .selector-tipo button {
-    padding: 6px 16px;
-    font-size: 13px;
-    flex: 1;
-    min-width: 80px;
-    text-align: center;
-  }
-
-  .buscador-cargas-wrapper {
-    width: 100%;
-  }
-
-  .buscador-cargas-container-compact {
-    width: 100%;
-  }
-
-  .buscador-cargas-input-compact input {
-    min-width: 100px;
-    width: 100%;
-  }
   
-  /* Busqueda */
   .busqueda-con-descripcion {
     margin-top: 50px;
     flex-direction: column;
@@ -1736,7 +1787,6 @@ body, html {
     font-size: 14px;
   }
   
-  /* Descripción producto */
   .descripcion-producto {
     margin-top: 0;
     margin-left: 0;
@@ -1750,7 +1800,6 @@ body, html {
     font-size: 18px;
   }
   
-  /* Tabla envases */
   .tabla {
     gap: 10px;
   }
@@ -1769,7 +1818,6 @@ body, html {
     padding: 5px 6px;
   }
   
-  /* Layout dinámico */
   .layout-dinamico-produccion {
     flex-direction: column;
     gap: 15px;
@@ -1801,7 +1849,6 @@ body, html {
     font-size: 0.6rem !important;
   }
   
-  /* Botones */
   .botones-cargas {
     gap: 10px;
     margin: 15px 0;
@@ -1817,7 +1864,6 @@ body, html {
     padding: 0 8px;
   }
   
-  /* Panel familias */
   .panel-header-actions {
     flex-direction: column;
     gap: 12px;
@@ -1865,7 +1911,6 @@ body, html {
     font-size: 0.65rem;
   }
   
-  /* Calendario */
   .calendar-nav-container {
     padding: 3px 8px;
   }
@@ -1891,7 +1936,6 @@ body, html {
     flex-wrap: wrap;
   }
   
-  /* Perfil */
   .perfil-container {
     top: -3px;
     right: 3px;
@@ -1913,7 +1957,6 @@ body, html {
     padding: 8px;
   }
   
-  /* Buscador */
   .buscador-cargas-input-compact input {
     min-width: 80px;
     font-size: 11px;
@@ -1937,7 +1980,6 @@ body, html {
     max-height: 200px;
   }
   
-  /* Contador */
   .contador-litros {
     font-size: 16px;
     padding: 5px 10px;
@@ -1948,7 +1990,6 @@ body, html {
     padding: 2px 6px;
   }
   
-  /* Procesos */
   .proceso-item {
     padding: 4px 8px;
   }
@@ -1964,7 +2005,6 @@ body, html {
     font-size: 11px;
   }
   
-  /* Botón calcular consumo */
   .btn-calcular-consumo-busqueda {
     padding: 10px 18px;
     font-size: 14px;
@@ -1977,7 +2017,6 @@ body, html {
     transform: translate(-50%, -50%);
   }
   
-  /* Overlay */
   .overlay-content {
     padding: 30px 20px;
     max-width: 350px;
@@ -1993,7 +2032,6 @@ body, html {
     font-size: 1.3rem;
   }
   
-  /* Envases section */
   .envases-section {
     min-width: auto;
     width: 100%;
@@ -2001,12 +2039,8 @@ body, html {
 }
 
 @media (max-width: 480px) {
-  .app {
-    padding: 8px;
-  }
-  
   .header-panel {
-    gap: 10px;
+    gap: 6px;
     padding-right: 38px;
   }
   
@@ -2016,7 +2050,7 @@ body, html {
   }
   
   .titulo-app {
-    gap: 10px;
+    gap: 8px;
   }
   
   .logo-titulo {
@@ -2028,35 +2062,64 @@ body, html {
     font-size: 0.9rem;
     margin-bottom: 10px;
   }
-
-  .planificador-semanal {
-    padding: 4px 8px;
-    gap: 2px;
-  }
-
-  .planificador-semanal .btn-semana {
-    font-size: 0.8rem;
-    padding: 2px 4px;
-  }
-
-  .planificador-semanal .fecha-actual-view {
-    font-size: 0.65rem;
-    padding: 0 4px;
-  }
-
-  .planificador-semanal .btn-hoy-reset {
-    font-size: 0.5rem;
-    padding: 2px 6px;
-  }
-
-  .selector-tipo {
+  
+  .nivebar-actions-container {
     gap: 5px;
   }
-
+  
+  .planificador-semanal {
+    padding: 3px 6px;
+    height: 24px;
+    gap: 2px;
+  }
+  
+  .planificador-semanal .btn-semana {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+  }
+  
+  .planificador-semanal .fecha-actual-view {
+    font-size: 0.55rem;
+    padding: 0 3px;
+  }
+  
+  .planificador-semanal .btn-hoy-reset {
+    font-size: 0.45rem;
+    padding: 1px 5px;
+  }
+  
+  .selector-tipo {
+    gap: 4px;
+  }
+  
   .selector-tipo button {
-    font-size: 11px;
-    padding: 5px 10px;
-    min-width: 60px;
+    font-size: 10px;
+    padding: 3px 8px;
+    min-width: 45px;
+  }
+  
+  .badge-planificador-btn {
+    height: 24px;
+    font-size: 0.55rem;
+    padding: 2px 5px;
+    gap: 3px;
+  }
+  
+  .buscador-cargas-wrapper {
+    min-width: 80px;
+  }
+  
+  .buscador-cargas-input-compact input {
+    font-size: 10px;
+    min-width: 50px;
+  }
+  
+  .buscador-cargas-input-compact .icono-lupa-compact {
+    font-size: 10px;
+  }
+  
+  .app {
+    padding: 8px;
   }
   
   .busqueda-con-descripcion {
@@ -2220,12 +2283,6 @@ body, html {
     padding: 8px 10px;
   }
   
-  .badge-planificador-btn {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 14px;
-  }
-  
   .btn-calcular-consumo-busqueda {
     font-size: 12px;
     padding: 8px 12px;
@@ -2243,11 +2300,6 @@ body, html {
   .contador-litros span {
     font-size: 14px;
     padding: 2px 4px;
-  }
-  
-  .buscador-cargas-input-compact input {
-    font-size: 10px;
-    min-width: 60px;
   }
   
   .resultado-item-compact {
@@ -2298,3 +2350,5 @@ body, html {
     font-size: 10px;
   }
 }
+
+

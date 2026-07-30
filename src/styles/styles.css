@@ -334,6 +334,92 @@ body, html {
   transition: all 0.3s ease;
 }
 
+/* ============================================================ */
+/* ===== RESPONSIVE PARA DESCRIPCION PRODUCTO ===== */
+/* ============================================================ */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 1024px) {
+  .descripcion-producto {
+    min-width: 280px;
+    max-width: 300px;
+    margin-left: 5%;
+    margin-top: -5%;
+  }
+}
+
+/* Móviles grandes y tablets pequeñas */
+@media (max-width: 768px) {
+  .descripcion-producto {
+    width: auto !important;
+    max-width: 220px !important;
+    min-width: 160px !important;
+    padding: 4px 10px !important;
+    max-height: 65px !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    margin-right: 5px !important;
+    transform: translateY(-58px) !important;  /* 👈 SUBE SIN SUPONERPONERSE */
+    border-radius: 10px !important;
+    font-size: 12px !important;
+  }
+  
+  .descripcion-producto .nombre-producto {
+    font-size: 13px !important;
+    margin-bottom: 1px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  .descripcion-producto .poder-cubriente {
+    font-size: 10px !important;
+    margin-bottom: 1px !important;
+  }
+  
+  .descripcion-producto .procesos-info {
+    display: none !important;
+  }
+  
+  .descripcion-producto .procesos-info strong {
+    display: none !important;
+  }
+  
+  .descripcion-producto .lista-procesos-tags {
+    display: none !important;
+  }
+  
+  .descripcion-producto .proceso-item {
+    display: none !important;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .descripcion-producto {
+    max-width: 180px !important;
+    min-width: 130px !important;
+    padding: 3px 8px !important;
+    max-height: 50px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    margin-left: auto !important;
+    margin-right: 3px !important;
+    transform: translateY(-5px) !important;  /* 👈 SUBE SIN SUPONERPONERSE */
+  }
+  
+  .descripcion-producto .nombre-producto {
+    font-size: 11px !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .descripcion-producto .poder-cubriente {
+    font-size: 9px !important;
+  }
+}
+
 .nombre-producto {
   font-size: 20px;
   font-weight: 600;

@@ -2142,6 +2142,54 @@ body, html {
     flex-shrink: 0 !important;
     border-radius: 6px !important;
   }
+
+
+    /* ===== DESCRIPCION PRODUCTO EN MÓVIL ===== */
+  .descripcion-producto {
+    width: auto !important;
+    max-width: 200px !important;
+    min-width: 140px !important;
+    padding: 4px 10px !important;
+    max-height: 55px !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    margin-right: 5px !important;
+    transform: translateY(-52px) !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+  }
+  
+  .descripcion-producto .nombre-producto {
+    font-size: 12px !important;
+    margin-bottom: 1px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 170px !important;
+  }
+  
+  .descripcion-producto .poder-cubriente {
+    font-size: 10px !important;
+    margin-bottom: 1px !important;
+  }
+  
+  .descripcion-producto .procesos-info {
+    display: none !important;
+  }
+  
+  .descripcion-producto .procesos-info strong {
+    display: none !important;
+  }
+  
+  .descripcion-producto .lista-procesos-tags {
+    display: none !important;
+  }
+  
+  .descripcion-producto .proceso-item {
+    display: none !important;
+  }
   
   .descripcion-producto {
     padding: 10px 12px;

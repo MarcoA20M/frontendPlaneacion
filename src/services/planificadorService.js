@@ -1,6 +1,9 @@
 // services/planificadorService.js
-const API_URL = process.env.REACT_APP_API_URL || "https://pythonscriptsplaneacion.onrender.com";
-const BACKEND_JAVA_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+// ⭐ MICROSERVICIO FLASK (procesa Excel) - EN RENDER
+const API_URL = "https://pythonscriptsplaneacion.onrender.com";
+
+// ⭐ BACKEND JAVA (guarda en BD) - EN LOCAL
+const BACKEND_JAVA_URL = "http://localhost:8080";
 
 export const planificadorService = {
     // === MICROSERVICIO FLASK: Procesar Excel ===
@@ -20,7 +23,7 @@ export const planificadorService = {
         return await response.json();
     },
 
-    // === BACKEND JAVA: Guardar planificador en la nube ===
+    // === BACKEND JAVA: Guardar planificador ===
     guardarPlanificador: async (datos) => {
         console.log('📤 Guardando en Java, tipo:', typeof datos);
         
@@ -32,8 +35,6 @@ export const planificadorService = {
                 datosJson = JSON.stringify(datos);
             }
             
-            console.log('📤 Longitud del JSON:', datosJson.length);
-            
             const response = await fetch(`${BACKEND_JAVA_URL}/api/planificador/guardar`, {
                 method: "POST",
                 headers: {
@@ -43,8 +44,6 @@ export const planificadorService = {
                     datos: datosJson
                 })
             });
-
-            console.log('📤 Response status:', response.status);
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -70,27 +69,23 @@ export const planificadorService = {
         }
     },
 
-    // === BACKEND JAVA: Cargar planificador desde la nube ===
+    // === BACKEND JAVA: Cargar planificador ===
     cargarPlanificador: async () => {
         console.log('📥 Cargando planificador desde Java...');
         
         try {
             const response = await fetch(`${BACKEND_JAVA_URL}/api/planificador/cargar`);
 
-            console.log('📥 Response status:', response.status);
-
             if (response.ok) {
                 const data = await response.json();
-                console.log('📥 Datos recibidos:', data);
 
                 if (data.status === 'success' && data.datos) {
                     let datos = data.datos;
                     if (typeof datos === 'string') {
                         try {
                             datos = JSON.parse(datos);
-                            console.log('📥 JSON parseado correctamente');
                         } catch (e) {
-                            console.warn('⚠️ No se pudo parsear el JSON, se usa como string');
+                            console.warn('⚠️ No se pudo parsear el JSON');
                         }
                     }
 
@@ -130,7 +125,7 @@ export const planificadorService = {
         }
     },
 
-    // === UTILIDADES DE LOCALSTORAGE (CACHÉ) ===
+    // === UTILIDADES ===
     guardarEnLocal: (data) => {
         localStorage.setItem("planificador_data", JSON.stringify({
             datos: data,

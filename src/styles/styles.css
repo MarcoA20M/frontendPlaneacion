@@ -270,7 +270,6 @@ body, html {
   transition: all 0.3s ease;
 }
 
-
 .busqueda-con-descripcion {
   display: flex;
   justify-content: space-between;
@@ -279,8 +278,6 @@ body, html {
   flex-wrap: wrap;
   width: 100%;
 }
-
-
 
 .busqueda button:hover {
   filter: brightness(1.1);
@@ -295,11 +292,11 @@ body, html {
 }
 
 .selector-tipo button {
-  padding: 10px 25px;  /* Tamaño original restaurado */
+  padding: 10px 25px;
   border-radius: 12px;
   border: none;
   font-weight: bold;
-  font-size: 16px;  /* Tamaño original restaurado */
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   color: var(--app-text);
@@ -307,7 +304,6 @@ body, html {
   border: 1px solid transparent;
   white-space: nowrap;
 }
-
 
 .selector-tipo button.active {
   background: var(--primary-gradient);
@@ -335,92 +331,6 @@ body, html {
   max-width: 350px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease;
-}
-
-/* ============================================================ */
-/* ===== RESPONSIVE PARA DESCRIPCION PRODUCTO ===== */
-/* ============================================================ */
-
-/* Tablets y pantallas medianas */
-@media (max-width: 1024px) {
-  .descripcion-producto {
-    min-width: 280px;
-    max-width: 300px;
-    margin-left: 5%;
-    margin-top: -5%;
-  }
-}
-
-/* Móviles grandes y tablets pequeñas */
-@media (max-width: 768px) {
-  .descripcion-producto {
-    width: auto !important;
-    max-width: 220px !important;
-    min-width: 160px !important;
-    padding: 4px 10px !important;
-    max-height: 65px !important;
-    min-height: auto !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    margin-left: auto !important;
-    margin-right: 5px !important;
-    transform: translateY(-58px) !important;  /* 👈 SUBE SIN SUPONERPONERSE */
-    border-radius: 10px !important;
-    font-size: 12px !important;
-  }
-  
-  .descripcion-producto .nombre-producto {
-    font-size: 13px !important;
-    margin-bottom: 1px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  .descripcion-producto .poder-cubriente {
-    font-size: 10px !important;
-    margin-bottom: 1px !important;
-  }
-  
-  .descripcion-producto .procesos-info {
-    display: none !important;
-  }
-  
-  .descripcion-producto .procesos-info strong {
-    display: none !important;
-  }
-  
-  .descripcion-producto .lista-procesos-tags {
-    display: none !important;
-  }
-  
-  .descripcion-producto .proceso-item {
-    display: none !important;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .descripcion-producto {
-    max-width: 180px !important;
-    min-width: 130px !important;
-    padding: 3px 8px !important;
-    max-height: 50px !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    margin-left: auto !important;
-    margin-right: 3px !important;
-    transform: translateY(-5px) !important;  /* 👈 SUBE SIN SUPONERPONERSE */
-  }
-  
-  .descripcion-producto .nombre-producto {
-    font-size: 11px !important;
-    margin-bottom: 0 !important;
-  }
-  
-  .descripcion-producto .poder-cubriente {
-    font-size: 9px !important;
-  }
 }
 
 .nombre-producto {
@@ -1189,8 +1099,6 @@ body, html {
   width: 100%;
 }
 
-podria ser pero no se 
-
 .contador-litros {
   font-size: 18px;
   font-weight: 600;
@@ -1814,7 +1722,6 @@ podria ser pero no se
     padding: 3px 6px;
   }
   
-  /* Resto de estilos responsive existentes */
   .app {
     padding: 12px;
   }
@@ -2199,20 +2106,41 @@ podria ser pero no se
   }
   
   .busqueda {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    margin-bottom: 6px !important;
   }
   
   .busqueda input {
-    width: 100%;
-    font-size: 13px;
-    padding: 8px 12px;
+    width: 45% !important;
+    min-width: 45px !important;
+    max-width: 90px !important;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+    flex: 0 1 auto !important;
   }
   
   .busqueda button {
-    width: 100%;
-    font-size: 13px;
-    padding: 8px 12px;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: auto !important;
+    max-width: 45px !important;
+    border-radius: 6px !important;
+    width: auto !important;
+  }
+  
+  .btn-calcular-consumo-busqueda {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    min-width: 26px !important;
+    max-width: 32px !important;
+    flex-shrink: 0 !important;
+    border-radius: 6px !important;
   }
   
   .descripcion-producto {
@@ -2421,75 +2349,4 @@ podria ser pero no se
   .procesos-info strong {
     font-size: 10px;
   }
-
-  /* ============================================================ */
-/* ===== RESPONSIVE PARA BUSCADOR EN MÓVIL ===== */
-/* ============================================================ */
-
-/* Móviles grandes y tablets pequeñas */
-@media (max-width: 768px) {
-  .busqueda {
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-    min-width: auto !important;
-    gap: 6px !important;
-    margin-bottom: 10px !important;
-    flex-wrap: nowrap !important;  /* Para que estén en una línea */
-    justify-content: flex-start !important;
-  }
-  
-  .busqueda input {
-    width: 55% !important;         /* INPUT MÁS PEQUEÑO */
-    min-width: 80px !important;
-    max-width: 160px !important;
-    padding: 6px 10px !important;
-    font-size: 13px !important;
-    flex: 1 !important;
-  }
-  
-  .busqueda button {
-    padding: 6px 12px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    min-width: 55px !important;
-  }
-  
-  .btn-calcular-consumo-busqueda {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-    min-width: 35px !important;
-    flex-shrink: 0 !important;
-  }
 }
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .busqueda {
-    gap: 4px !important;
-    flex-wrap: nowrap !important;
-  }
-  
-  .busqueda input {
-    width: 50% !important;
-    min-width: 55px !important;
-    max-width: 120px !important;
-    padding: 5px 8px !important;
-    font-size: 11px !important;
-  }
-  
-  .busqueda button {
-    padding: 4px 8px !important;
-    font-size: 10px !important;
-    min-width: 40px !important;
-  }
-  
-  .btn-calcular-consumo-busqueda {
-    padding: 4px 6px !important;
-    font-size: 10px !important;
-    min-width: 28px !important;
-  }
-}
-}
-
-

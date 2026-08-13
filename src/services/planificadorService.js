@@ -1,5 +1,5 @@
 // services/planificadorService.js
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "https://pythonscriptsplaneacion.onrender.com";
 const BACKEND_JAVA_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 export const planificadorService = {

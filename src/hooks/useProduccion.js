@@ -6,6 +6,7 @@ import { registrarCarga, eliminarCarga, obtenerCargasPorFecha } from "../service
 import { formulasService } from "../services/formulasService";
 import { materiaPrimaService } from "../services/materiaPrimaService";
 import { operarioService } from "../services/operarioService";
+import { planificadorService } from "../services/planificadorService";
 
 // --- CONSTANTES PARA LOCALSTORAGE ---
 const STORAGE_KEY_RONDAS = 'rondas_vinilica';
@@ -136,6 +137,9 @@ export function useProduccion() {
     const [operariosEsmaltes, setOperariosEsmaltes] = useState([]);
     const [cargandoOperarios, setCargandoOperarios] = useState(true);
 
+    // ⭐ ESTADO PARA SINCRONIZACIÓN AUTOMÁTICA
+    const [sincronizacionActiva, setSincronizacionActiva] = useState(true);
+
     const CODIGOS_BASES = ["BBE20", "BBE30", "BAL40", "BNE10", "BSP10"];
 
     const normalizarCodigo = (cod) => {
@@ -147,7 +151,6 @@ export function useProduccion() {
     // 🔴 GUARDAR EN LOCALSTORAGE CUANDO CAMBIEN LOS DATOS
     // ============================================================
     
-    // Guardar colaCargas en localStorage
     useEffect(() => {
         try {
             if (colaCargas.length > 0) {
@@ -160,7 +163,6 @@ export function useProduccion() {
         }
     }, [colaCargas]);
 
-    // Guardar cargasEspeciales en localStorage
     useEffect(() => {
         try {
             if (cargasEspeciales.length > 0) {
@@ -173,7 +175,6 @@ export function useProduccion() {
         }
     }, [cargasEspeciales]);
 
-    // Guardar rondas en localStorage
     useEffect(() => {
         try {
             if (rondas && rondas.length > 0) {
@@ -190,7 +191,6 @@ export function useProduccion() {
         }
     }, [rondas]);
 
-    // Guardar cargasEsmaltesAsignadas en localStorage
     useEffect(() => {
         try {
             if (cargasEsmaltesAsignadas.length > 0) {
@@ -202,6 +202,166 @@ export function useProduccion() {
             console.error('Error guardando cargasEsmaltesAsignadas en localStorage:', error);
         }
     }, [cargasEsmaltesAsignadas]);
+
+    // ============================================================
+    // 🔴 FUNCIONES DEL PLANIFICADOR EN LA NUBE
+    // ============================================================
+    
+    /**
+     * Guarda el planificador en la nube (Java Backend)
+     */
+    const guardarPlanificadorEnNube = useCallback(async (datos) => {
+        try {
+            console.log('☁️ Guardando planificador en la nube...');
+            const resultado = await planificadorService.guardarPlanificador(datos);
+            console.log('✅ Planificador guardado en la nube:', resultado);
+            return resultado;
+        } catch (error) {
+            console.error('❌ Error guardando planificador en nube:', error);
+            planificadorService.guardarEnLocal(datos);
+            throw error;
+        }
+    }, []);
+
+    /**
+     * Carga el planificador desde la nube (Java Backend)
+     */
+    const cargarPlanificadorDesdeNube = useCallback(async () => {
+        try {
+            console.log('☁️ Cargando planificador desde la nube...');
+            const datos = await planificadorService.cargarPlanificador();
+            if (datos) {
+                console.log('✅ Planificador cargado desde la nube');
+                planificadorService.guardarEnLocal(datos);
+                return datos;
+            }
+            console.log('ℹ️ No hay planificador en la nube, usando caché local');
+            return planificadorService.obtenerDeLocal();
+        } catch (error) {
+            console.error('❌ Error cargando planificador desde nube:', error);
+            return planificadorService.obtenerDeLocal();
+        }
+    }, []);
+
+    /**
+     * Elimina el planificador de la nube
+     */
+    const eliminarPlanificadorDeNube = useCallback(async () => {
+        try {
+            const resultado = await planificadorService.eliminarPlanificador();
+            if (resultado) {
+                console.log('✅ Planificador eliminado de la nube');
+                localStorage.removeItem('planificador_data');
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('❌ Error eliminando planificador de nube:', error);
+            return false;
+        }
+    }, []);
+
+    /**
+     * Handler para cargar Excel y subir a la nube automáticamente
+     */
+    const handleCargarPlanificador = useCallback(async (file) => {
+        if (!file) return null;
+        
+        try {
+            console.log('📂 1. Procesando Excel con Flask...');
+            const data = await planificadorService.cargarExcelPlanificador(file);
+            console.log('📊 2. Datos de Flask:', data.status, 'Total:', data.total);
+            
+            console.log('☁️ 3. Guardando en Java Backend...');
+            await guardarPlanificadorEnNube(data.data || data);
+            
+            planificadorService.guardarEnLocal(data.data || data);
+            
+            window.dispatchEvent(new CustomEvent('planificadorActualizado', {
+                detail: { datos: data.data || data }
+            }));
+            
+            console.log('✅ Planificador procesado y guardado en la nube');
+            return data.data || data;
+            
+        } catch (error) {
+            console.error('❌ Error en handleCargarPlanificador:', error);
+            throw error;
+        }
+    }, [guardarPlanificadorEnNube]);
+
+    /**
+     * Sincronizar planificador desde la nube
+     */
+    const sincronizarPlanificador = useCallback(async () => {
+        try {
+            const datos = await cargarPlanificadorDesdeNube();
+            if (datos) {
+                window.dispatchEvent(new CustomEvent('planificadorSincronizado', {
+                    detail: { datos: datos }
+                }));
+                return datos;
+            }
+            return null;
+        } catch (error) {
+            console.error('❌ Error en sincronizarPlanificador:', error);
+            return null;
+        }
+    }, [cargarPlanificadorDesdeNube]);
+
+    // ============================================================
+    // AUTO-SINCRONIZACIÓN CADA 30 SEGUNDOS
+    // ============================================================
+    useEffect(() => {
+        if (!sincronizacionActiva) return;
+        
+        const interval = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                sincronizarPlanificador();
+            }
+        }, 30000);
+        
+        return () => clearInterval(interval);
+    }, [sincronizacionActiva, sincronizarPlanificador]);
+
+    // ============================================================
+    // CARGAR PLANIFICADOR AL INICIAR
+    // ============================================================
+    useEffect(() => {
+        const inicializar = async () => {
+            const datos = await cargarPlanificadorDesdeNube();
+            if (datos) {
+                console.log('📋 Planificador inicializado desde la nube');
+            }
+        };
+        inicializar();
+    }, [cargarPlanificadorDesdeNube]);
+
+    // ============================================================
+    // ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
+    // ============================================================
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'planificador_data') {
+                sincronizarPlanificador();
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [sincronizarPlanificador]);
+
+    // ============================================================
+    // ESCUCHAR EVENTO DE SINCRONIZACIÓN MANUAL
+    // ============================================================
+    useEffect(() => {
+        const handleSincronizarManual = () => {
+            sincronizarPlanificador();
+        };
+        
+        window.addEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
+        return () => window.removeEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
+    }, [sincronizarPlanificador]);
 
     // ============================================================
     // 🔴 CARGAR OPERARIOS DE ESMALTES DESDE LA API
@@ -661,7 +821,6 @@ export function useProduccion() {
         try {
             setGuardandoBD(true);
 
-            // 🔴 CONSUMIR BASES
             try {
                 const resultadoConsumo = await consumirBasesDeCargas(todas);
                 
@@ -746,7 +905,6 @@ export function useProduccion() {
                 }
             }
 
-            // 🔴 GUARDAR EN BD (cargas)
             const registrosParaBD = [];
             todas.forEach(carga => {
                 if (carga.detallesEnvasado) {
@@ -779,7 +937,6 @@ export function useProduccion() {
             });
 
             console.log("📦 Registros a guardar:", registrosParaBD.length);
-            console.log("📦 Primer registro:", JSON.stringify(registrosParaBD[0], null, 2));
 
             if (registrosParaBD.length === 0) {
                 alert("⚠️ No hay registros válidos para guardar.");
@@ -787,10 +944,8 @@ export function useProduccion() {
                 return;
             }
 
-            // 🔴 USAR registrarCarga QUE YA FUNCIONABA
             await registrarCarga(registrosParaBD);
 
-            // 🔴 ACTUALIZAR PANTALLAS
             if (window.recargarBases) {
                 window.recargarBases();
             }
@@ -798,7 +953,6 @@ export function useProduccion() {
                 window.recargarCriticos();
             }
 
-            // Limpiar localStorage y estados
             localStorage.removeItem('cargas_almacenadas');
             localStorage.removeItem('cola_cargas');
             
@@ -838,7 +992,15 @@ export function useProduccion() {
     const enriquecerConPlanificador = useCallback((datosProducto) => {
         const planificadorRaw = localStorage.getItem("planificador_data");
         if (!planificadorRaw) return datosProducto;
-        const planificador = JSON.parse(planificadorRaw);
+        
+        let planificador;
+        try {
+            const parsed = JSON.parse(planificadorRaw);
+            planificador = parsed.datos || parsed;
+        } catch {
+            return datosProducto;
+        }
+        
         const codNormalizado = normalizarCodigo(datosProducto.codigo);
         const coincidencias = (planificador.data || []).filter(item => {
             const partes = String(item.articulo).split('-');
@@ -1058,7 +1220,7 @@ export function useProduccion() {
     };
 
     // ============================================================
-    // GUARDAR CARGAS EN RONDAS - CON OPERARIOS DINÁMICOS DESDE BD
+    // GUARDAR CARGAS EN RONDAS
     // ============================================================
     const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
         console.log('📦 guardarCargasEnRondas - Cargas a guardar:', cargasAGuardar?.length || 0);
@@ -1131,20 +1293,17 @@ export function useProduccion() {
             const esmaltesOrdenados = ordenarCargas(tempAsignadasEsmaltes);
             setCargasEsmaltesAsignadas(esmaltesOrdenados);
             
-            // Guardar en localStorage
             try {
                 localStorage.setItem(STORAGE_KEY_ESMALTES, JSON.stringify(esmaltesOrdenados));
             } catch (error) {
                 console.error('Error guardando esmaltes en localStorage:', error);
             }
         } else {
-            // 🔴 VINÍLICA - USAR getOperarioPorMaquinaSync (SINCRÓNICO)
             const nuevasRondas = rondas.map(f => [...f]);
             const nuevasEspeciales = [...cargasEspeciales];
             
             cargasAGuardar.forEach((carga) => {
                 let asignada = false;
-                // Buscar espacio en las rondas
                 for (let col = 0; col < 6 && !asignada; col++) {
                     for (let fila = 0; fila < 8; fila++) {
                         if (!nuevasRondas[fila][col]) {
@@ -1152,7 +1311,6 @@ export function useProduccion() {
                             const esGran = [104, 108].includes(numM);
                             let cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
                             if (cumpleRegla) {
-                                // 🔴 USAR VERSIÓN SINCRÓNICA (NO async)
                                 const operario = getOperarioPorMaquinaSync(numM);
                                 
                                 nuevasRondas[fila][col] = { 
@@ -1169,7 +1327,6 @@ export function useProduccion() {
                     }
                 }
                 if (!asignada) { 
-                    // Si no se asignó, asegurar que tenga operario
                     const operario = carga.operario || 'Sin asignar';
                     nuevasEspeciales.push({
                         ...carga,
@@ -1183,7 +1340,6 @@ export function useProduccion() {
             setRondas(nuevasRondas);
             setCargasEspeciales(ordenarCargas(nuevasEspeciales));
             
-            // Guardar en localStorage
             try {
                 localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
                 localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
@@ -1191,16 +1347,13 @@ export function useProduccion() {
                 console.error('Error guardando rondas en localStorage:', error);
             }
             
-            // Disparar evento para actualizar el tablero
             window.dispatchEvent(new CustomEvent('rondasActualizadas', { 
                 detail: { rondas: nuevasRondas } 
             }));
         }
         
-        // Limpiar la cola de cargas
         setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
         
-        // Guardar cola actualizada en localStorage
         try {
             const colaActualizada = colaCargas.filter(c => !idsAsignados.includes(c.idTemp));
             localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaActualizada));
@@ -1219,11 +1372,20 @@ export function useProduccion() {
         cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
         rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,
         cargando: cargandoExcel || guardandoBD, buscandoFecha, buscandoManual, totalLitrosActuales,
+        operariosEsmaltes, cargandoOperarios,
+        
         consultar, agregarCargaManual, handleImportExcel, guardarCargasEnRondas,
         ordenarCargas, actualizarOperarioEsmalte, generarLotesFinales,
         guardarProduccionEnBD, handleEliminarCargaBD, cargarDatosPorFecha,
         calcularConsumoGlobal, consumirBasesDeCargas,
-        operariosEsmaltes,
-        cargandoOperarios
+        
+        // ⭐ NUEVAS FUNCIONES DEL PLANIFICADOR EN LA NUBE
+        guardarPlanificadorEnNube,
+        cargarPlanificadorDesdeNube,
+        eliminarPlanificadorDeNube,
+        handleCargarPlanificador,
+        sincronizarPlanificador,
+        sincronizacionActiva,
+        setSincronizacionActiva
     };
 }

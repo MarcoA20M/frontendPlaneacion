@@ -6,6 +6,7 @@ import { useProduccion } from "../hooks/useProduccion";
 import { getOperarioPorMaquina } from "../constants/config";
 import { createProduccionHandlers } from "../utils/produccionHandlers";
 import { verificarCargaReciente, verificarCargaPorFolio } from '../services/cargaService';
+import { planificadorService } from '../services/planificadorService';
 
 // Componentes
 import BusquedaSeccion from "../components/BusquedaSeccion";
@@ -45,7 +46,12 @@ export default function ProduccionScreen() {
         cargarDatosPorFecha,
         calcularConsumoGlobal,
         operariosEsmaltes,
-        cargandoOperarios
+        cargandoOperarios,
+        // ⭐ NUEVAS FUNCIONES DEL HOOK
+        handleCargarPlanificador,
+        guardarPlanificadorEnNube,
+        cargarPlanificadorDesdeNube,
+        eliminarPlanificadorDeNube
     } = useProduccion();
 
     // --- ESTADOS DE UI Y CONTROL ---
@@ -98,10 +104,18 @@ export default function ProduccionScreen() {
     const [mostrarModalInventario, setMostrarModalInventario] = useState(false);
     const [familias, setFamilias] = useState([]);
     const [mostrarModalPlanificador, setMostrarModalPlanificador] = useState(false);
-    const [datosPlanificador, setDatosPlanificador] = useState(() => {
-        const guardado = localStorage.getItem("planificador_data");
-        return guardado ? JSON.parse(guardado) : null;
-    });
+    
+    // ⭐ ESTADO PARA DATOS DEL PLANIFICADOR
+    const [datosPlanificador, setDatosPlanificador] = useState(null);
+    
+    // ⭐ ESTADO PARA FECHA DE SINCRONIZACIÓN
+    const [fechaSincronizacion, setFechaSincronizacion] = useState(null);
+    
+    // ⭐ ESTADO PARA SABER SI YA ESTÁ GUARDADO EN BD
+    const [planificadorGuardadoEnBD, setPlanificadorGuardadoEnBD] = useState(false);
+    
+    // ⭐ ESTADO PARA GUARDANDO PLANIFICADOR
+    const [guardandoPlanificadorBD, setGuardandoPlanificadorBD] = useState(false);
 
     // Estados para resumen de consumo
     const [mostrarModalResumen, setMostrarModalResumen] = useState(false);
@@ -111,7 +125,75 @@ export default function ProduccionScreen() {
     // 🔴🔴🔴 NUEVO: ESTADO PARA OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const [operariosPorMaquina, setOperariosPorMaquina] = useState({});
 
-    // --- EFECTO PARA ACTUALIZAR EL CONTADOR CUANDO CAMBIA EL LOCALSTORAGE ---
+    // ⭐ FUNCIÓN PARA CARGAR PLANIFICADOR DESDE BD (prioridad)
+    const cargarPlanificadorDesdeBD = async () => {
+        try {
+            console.log('📥 Cargando planificador desde BD...');
+            const datos = await cargarPlanificadorDesdeNube();
+            
+            if (datos) {
+                // ⭐ Si hay datos en la BD, usarlos
+                setDatosPlanificador(datos);
+                setPlanificadorGuardadoEnBD(true);
+                
+                const fecha = planificadorService.obtenerFechaActualizacion();
+                setFechaSincronizacion(fecha);
+                
+                console.log('📋 Planificador cargado desde BD');
+                return true;
+            }
+            
+            // ⭐ Si no hay en BD, buscar en localStorage
+            console.log('📥 No hay datos en BD, buscando en localStorage...');
+            const cacheData = localStorage.getItem("planificador_data");
+            if (cacheData) {
+                try {
+                    const parsed = JSON.parse(cacheData);
+                    let datos = parsed.datos || parsed;
+                    if (datos && datos.data && datos.data.length > 0) {
+                        setDatosPlanificador(datos);
+                        setPlanificadorGuardadoEnBD(false);
+                        setFechaSincronizacion(parsed.fecha_actualizacion || null);
+                        console.log('📋 Planificador cargado desde localStorage');
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error parseando localStorage:', e);
+                }
+            }
+            
+            setDatosPlanificador(null);
+            setPlanificadorGuardadoEnBD(false);
+            return false;
+            
+        } catch (error) {
+            console.error('❌ Error cargando planificador:', error);
+            // Fallback a localStorage
+            const cacheData = localStorage.getItem("planificador_data");
+            if (cacheData) {
+                try {
+                    const parsed = JSON.parse(cacheData);
+                    let datos = parsed.datos || parsed;
+                    if (datos && datos.data && datos.data.length > 0) {
+                        setDatosPlanificador(datos);
+                        setPlanificadorGuardadoEnBD(false);
+                        console.log('📋 Planificador cargado desde localStorage (fallback)');
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error parseando localStorage:', e);
+                }
+            }
+            return false;
+        }
+    };
+
+    // ⭐ CARGAR PLANIFICADOR AL INICIAR (prioridad BD)
+    useEffect(() => {
+        cargarPlanificadorDesdeBD();
+    }, []);
+
+    // ⭐ ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === STORAGE_KEY) {
@@ -123,6 +205,10 @@ export default function ProduccionScreen() {
                     console.error('Error al parsear datos del storage:', error);
                 }
             }
+            if (e.key === 'planificador_data') {
+                // Si cambia el planificador en otra pestaña, recargar desde BD
+                cargarPlanificadorDesdeBD();
+            }
         };
 
         window.addEventListener('storage', handleStorageChange);
@@ -132,7 +218,6 @@ export default function ProduccionScreen() {
     // --- EFECTO PARA ACTUALIZAR EL CONTADOR CUANDO SE CIERRA EL MODAL ---
     useEffect(() => {
         if (!mostrarModal) {
-            // Cuando se cierra el modal, actualizar el contador
             try {
                 const datos = localStorage.getItem(STORAGE_KEY);
                 if (datos) {
@@ -154,13 +239,9 @@ export default function ProduccionScreen() {
             const datos = localStorage.getItem(STORAGE_KEY);
             if (datos) {
                 const cargasStorage = JSON.parse(datos);
-                // Filtrar solo las del tipo actual
                 const cargasDelTipo = cargasStorage.filter(c => c.tipo === tipoPintura);
-
-                // Verificar si hay diferencias
                 const cargasActuales = colaCargas.filter(c => c.tipo === tipoPintura);
 
-                // Si hay cargas en storage que no están en colaCargas, agregarlas
                 const nuevasCargas = cargasDelTipo.filter(c =>
                     !cargasActuales.some(ex => ex.idTemp === c.idTemp)
                 );
@@ -168,7 +249,6 @@ export default function ProduccionScreen() {
                 if (nuevasCargas.length > 0) {
                     console.log('Sincronizando colaCargas con localStorage - agregando:', nuevasCargas.length);
                     setColaCargas(prev => {
-                        // Evitar duplicados
                         const existentes = prev.filter(c => c.tipo === tipoPintura);
                         const idsExistentes = new Set(existentes.map(c => c.idTemp));
                         const cargasUnicas = nuevasCargas.filter(c => !idsExistentes.has(c.idTemp));
@@ -183,20 +263,14 @@ export default function ProduccionScreen() {
 
     // --- EFECTO PARA GUARDAR COLA CARGAS EN LOCALSTORAGE ---
     useEffect(() => {
-        // Guardar colaCargas en localStorage cuando cambie
         try {
             const cargasActuales = colaCargas.filter(c => c.tipo === tipoPintura);
-            // Obtener cargas actuales del storage
             const storageData = localStorage.getItem(STORAGE_KEY);
             let todasLasCargas = storageData ? JSON.parse(storageData) : [];
 
-            // Eliminar las cargas del tipo actual del storage
             todasLasCargas = todasLasCargas.filter(c => c.tipo !== tipoPintura);
-
-            // Agregar las cargas actuales
             todasLasCargas = [...todasLasCargas, ...cargasActuales];
 
-            // Guardar en storage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(todasLasCargas));
             setCargasEnLocalStorage(todasLasCargas);
         } catch (error) {
@@ -258,7 +332,6 @@ export default function ProduccionScreen() {
             return;
         }
 
-        // Buscar en cargas locales primero
         let todasLasCargas = [];
 
         if (tipoPintura === "Vinílica") {
@@ -289,7 +362,6 @@ export default function ProduccionScreen() {
             );
         });
 
-        // Si encuentra localmente, abrir modal de detalle
         if (cargaEncontrada) {
             setCargaSeleccionada(cargaEncontrada);
             setMostrarDetalle(true);
@@ -297,9 +369,7 @@ export default function ProduccionScreen() {
             return;
         }
 
-        // Si no encuentra localmente, buscar en la BD
         try {
-            // Buscar por folio
             let folioData = await verificarCargaPorFolio(termino.toUpperCase(), null);
 
             if (folioData) {
@@ -323,7 +393,6 @@ export default function ProduccionScreen() {
                 return;
             }
 
-            // Buscar por código
             const codigoBusqueda = termino.toUpperCase();
             const fechas = [];
             for (let i = 0; i < 7; i++) {
@@ -370,7 +439,6 @@ export default function ProduccionScreen() {
                 setMostrarDetalle(true);
                 setBuscarCarga("");
             } else {
-                // NO HAY RESULTADOS - Mostrar modal emergente
                 setTerminoBuscado(termino);
                 setMostrarModalSinResultados(true);
                 setBuscarCarga("");
@@ -398,7 +466,7 @@ export default function ProduccionScreen() {
     useEffect(() => {
         const cargarFamilias = async () => {
             try {
-                const response = await fetch('https://pintuplaneacion-backend.onrender.com/api/familias');
+                const response = await fetch('http://localhost:8080/api/familias');
                 if (response.ok) {
                     const data = await response.json();
                     setFamilias(data);
@@ -487,6 +555,167 @@ export default function ProduccionScreen() {
         };
     }, [cargasEsmaltesAsignadas, filtroOperario]);
 
+    // ⭐ HANDLER PARA CARGAR PLANIFICADOR (SOLO PROCESA EL EXCEL)
+    const handleCargarPlanificadorConProgreso = async (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+            console.error('❌ No se seleccionó ningún archivo');
+            return;
+        }
+
+        console.log('📂 Archivo seleccionado:', file.name);
+
+        setAnalizandoStock(true);
+        const idInt = setInterval(() => {
+            setProgreso(prev => Math.min(prev + 10, 90));
+        }, 200);
+
+        try {
+            // ⭐ 1. Procesar con Flask (NO guarda en BD todavía)
+            console.log('📂 1. Procesando archivo con Flask...');
+            const data = await planificadorService.cargarExcelPlanificador(file);
+            
+            console.log('📊 2. Datos recibidos:', data.status, 'Total:', data.total);
+            
+            if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+                throw new Error('No se recibieron datos del Excel');
+            }
+            
+            // ⭐ 2. Guardar en localStorage
+            const datosTemp = {
+                data: data.data,
+                total: data.total,
+                status: data.status
+            };
+            
+            localStorage.setItem("planificador_data", JSON.stringify({
+                datos: datosTemp,
+                fecha_actualizacion: new Date().toISOString()
+            }));
+            
+            // ⭐ 3. Actualizar estado
+            setDatosPlanificador(datosTemp);
+            setPlanificadorGuardadoEnBD(false);
+            setFechaSincronizacion(null);
+            
+            setProgreso(100);
+            
+            // ⭐ 4. ABRIR EL MODAL
+            setTimeout(() => {
+                setMostrarModalPlanificador(true);
+                console.log('✅ Modal abierto con', data.total, 'registros');
+            }, 300);
+            
+            alert(`📋 Planificador cargado con ${data.total} registros\n\nRevisa los datos y haz clic en "Guardar en BD" para guardarlos.`);
+            
+        } catch (error) {
+            console.error('❌ Error al cargar planificador:', error);
+            alert('❌ Error al procesar el archivo: ' + error.message);
+        } finally {
+            clearInterval(idInt);
+            setTimeout(() => {
+                setAnalizandoStock(false);
+                setProgreso(0);
+            }, 600);
+            e.target.value = null;
+        }
+    };
+
+    // ⭐ FUNCIÓN PARA GUARDAR PLANIFICADOR EN BD
+    const handleGuardarPlanificadorEnBD = async () => {
+        // ⭐ Buscar datos en múltiples lugares
+        let datosAGuardar = null;
+        let origen = '';
+        
+        // 1. Desde el estado
+        if (datosPlanificador && datosPlanificador.data && datosPlanificador.data.length > 0) {
+            datosAGuardar = datosPlanificador;
+            origen = 'estado';
+            console.log('📋 Datos desde el estado:', datosAGuardar.total);
+        }
+        
+        // 2. Desde localStorage (planificador_data)
+        if (!datosAGuardar) {
+            const cacheData = localStorage.getItem("planificador_data");
+            if (cacheData) {
+                try {
+                    const parsed = JSON.parse(cacheData);
+                    if (parsed.datos && parsed.datos.data) {
+                        datosAGuardar = parsed.datos;
+                    } else if (parsed.data) {
+                        datosAGuardar = parsed;
+                    } else if (parsed.datos) {
+                        datosAGuardar = parsed.datos;
+                    }
+                    if (datosAGuardar) {
+                        origen = 'planificador_data';
+                        console.log('📋 Datos desde planificador_data:', datosAGuardar?.total);
+                    }
+                } catch (error) {
+                    console.error('Error parseando planificador_data:', error);
+                }
+            }
+        }
+
+        if (!datosAGuardar || !datosAGuardar.data || datosAGuardar.data.length === 0) {
+            alert('⚠️ No hay datos para guardar. Primero carga un planificador.');
+            return;
+        }
+
+        const totalRegistros = datosAGuardar.data.length;
+        
+        if (!window.confirm(
+            `📋 ¿Guardar planificador en la base de datos?\n\n` +
+            `Total de registros: ${totalRegistros}\n` +
+            `Origen: ${origen}\n` +
+            `Estos datos se usarán para el inventario y producción.\n\n` +
+            `⚠️ Esto reemplazará cualquier planificador existente en la base de datos.\n\n` +
+            `¿Continuar?`
+        )) {
+            return;
+        }
+
+        try {
+            setGuardandoPlanificadorBD(true);
+            setProgreso(0);
+
+            const idInt = setInterval(() => {
+                setProgreso(prev => Math.min(prev + 5, 90));
+            }, 100);
+
+            const resultado = await guardarPlanificadorEnNube(datosAGuardar);
+            
+            clearInterval(idInt);
+            setProgreso(100);
+
+            setPlanificadorGuardadoEnBD(true);
+            setFechaSincronizacion(new Date().toISOString());
+            
+            localStorage.setItem("planificador_data", JSON.stringify({
+                datos: datosAGuardar,
+                fecha_actualizacion: new Date().toISOString()
+            }));
+
+            alert(`✅ Planificador guardado exitosamente\n\n${totalRegistros} registros guardados en la base de datos`);
+
+            // Recargar desde BD
+            await cargarPlanificadorDesdeBD();
+
+            setTimeout(() => {
+                setMostrarModalPlanificador(false);
+                setProgreso(0);
+            }, 500);
+
+        } catch (error) {
+            console.error('❌ Error guardando planificador en BD:', error);
+            alert('❌ Error al guardar: ' + error.message);
+            setPlanificadorGuardadoEnBD(false);
+        } finally {
+            setGuardandoPlanificadorBD(false);
+            setProgreso(0);
+        }
+    };
+
     // HANDLERS
     const handlers = useMemo(() => {
         return createProduccionHandlers({
@@ -520,9 +749,11 @@ export default function ProduccionScreen() {
             setMostrarModalInventario,
             handleImportExcel,
             ordenarCargas,
-            fechaTrabajo: fechaRotacion
+            fechaTrabajo: fechaRotacion,
+            handleCargarPlanificador: handleCargarPlanificadorConProgreso
         });
-    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, handleImportExcel, ordenarCargas]);
+    }, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, fechaRotacion, 
+        handleImportExcel, ordenarCargas, handleCargarPlanificadorConProgreso]);
 
     // Calcular total de cargas y litros para mostrar en el modal
     const totalCargas = useMemo(() => {
@@ -624,9 +855,38 @@ export default function ProduccionScreen() {
             <LoadingOverlay
                 cargando={cargando}
                 procesandoPdf={procesandoPdf}
-                procesandoReporte={procesandoReporte || analizandoStock}
+                procesandoReporte={procesandoReporte || analizandoStock || guardandoPlanificadorBD}
                 progreso={progreso}
             />
+
+            {/* ⭐ INDICADOR DE ESTADO DEL PLANIFICADOR */}
+            {datosPlanificador && (
+                <div style={{
+                    position: 'fixed',
+                    top: '70px',
+                    right: '20px',
+                    background: planificadorGuardadoEnBD ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 193, 7, 0.9)',
+                    color: 'white',
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+                }}>
+                    {planificadorGuardadoEnBD ? '✅' : '📋'}
+                    <span>
+                        {planificadorGuardadoEnBD ? 'Guardado en BD' : 'En cache local'}
+                    </span>
+                    {fechaSincronizacion && (
+                        <span style={{ fontSize: '10px', opacity: 0.8 }}>
+                            {new Date(fechaSincronizacion).toLocaleString()}
+                        </span>
+                    )}
+                </div>
+            )}
 
             <div className="container">
                 {/* NIVEBAR */}
@@ -670,6 +930,7 @@ export default function ProduccionScreen() {
 
                     <div className="botones-cargas">
                         <button className="agregar-btn" onClick={agregarCargaManual}>+ Agregar Carga</button>
+                        
                         <div className="dropdown-container">
                             <button className="agregar-btn secondary" onClick={() => setMenuCargasAbierto(!menuCargasAbierto)}>
                                 📂 Gestión ({contarCargasEnLocalStorage})
@@ -677,7 +938,13 @@ export default function ProduccionScreen() {
                             {menuCargasAbierto && (
                                 <div className="dropdown-menu">
                                     <label className="dropdown-item label-input" style={{ borderBottom: '2px solid #00e5ff', color: '#00e5ff', fontWeight: 'bold' }}>
-                                        📅 Cargar Planificador <input type="file" hidden accept=".xlsx, .xls" onChange={handlers.handleCargarPlanificador} />
+                                        📅 Cargar Planificador 
+                                        <input 
+                                            type="file" 
+                                            hidden 
+                                            accept=".xlsx, .xls" 
+                                            onChange={handlers.handleCargarPlanificador}
+                                        />
                                     </label>
 
                                     {alertasInventario[tipoPintura].length > 0 ? (
@@ -706,6 +973,7 @@ export default function ProduccionScreen() {
                                 </div>
                             )}
                         </div>
+
                         <label className="agregar-btn btn-pdf">
                             📄 PDF <input type="file" hidden accept=".pdf" onChange={handlers.handlePdfClick} />
                         </label>
@@ -779,7 +1047,6 @@ export default function ProduccionScreen() {
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {/* CALENDARIO CON FLECHAS */}
                             <div className="calendar-wrapper">
                                 <div className="calendar-nav-container">
                                     <button
@@ -823,7 +1090,6 @@ export default function ProduccionScreen() {
                                 </button>
                             </div>
 
-                            {/* BOTÓN DE FAMILIAS */}
                             <button
                                 className="btn-family-explorer"
                                 onClick={() => navigate("/familias", {
@@ -864,7 +1130,7 @@ export default function ProduccionScreen() {
             {/* MODAL DE SIN RESULTADOS */}
             <ModalSinResultados />
 
-            {/* Modales existentes */}
+            {/* ⭐ MODAL PLANIFICADOR CON BOTÓN GUARDAR EN BD */}
             <ModalPlanificador
                 visible={mostrarModalPlanificador}
                 datos={datosPlanificador}
@@ -876,10 +1142,15 @@ export default function ProduccionScreen() {
                 onClear={() => {
                     if (window.confirm("¿Borrar memoria del planificador?")) {
                         setDatosPlanificador(null);
+                        setPlanificadorGuardadoEnBD(false);
+                        setFechaSincronizacion(null);
                         localStorage.removeItem("planificador_data");
                         setMostrarModalPlanificador(false);
                     }
                 }}
+                onGuardarEnBD={handleGuardarPlanificadorEnBD}
+                guardandoBD={guardandoPlanificadorBD}
+                yaGuardadoEnBD={planificadorGuardadoEnBD}
             />
 
             <ModalCargas
@@ -888,7 +1159,6 @@ export default function ProduccionScreen() {
                 onClose={() => setMostrarModal(false)}
                 onEliminarCarga={(id) => {
                     setColaCargas(prev => prev.filter(c => c.idTemp !== id));
-                    // También limpiar localStorage si usas
                     localStorage.removeItem('cargas_almacenadas');
                 }}
                 onVaciarTodo={() => {
@@ -897,9 +1167,7 @@ export default function ProduccionScreen() {
                 }}
                 onGuardar={(c) => {
                     guardarCargasEnRondas(c);
-                    // LIMPIAR LA COLA DE CARGAS DESPUÉS DE GUARDAR
                     setColaCargas(prev => prev.filter(c => c.tipo !== tipoPintura));
-                    // Limpiar localStorage
                     localStorage.removeItem('cargas_almacenadas');
                     setMostrarModal(false);
                 }}

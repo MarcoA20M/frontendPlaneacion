@@ -1,7 +1,16 @@
 import React from 'react';
 import '../styles/ModalPlanificador.css'; 
 
-export default function ModalPlanificador({ visible, datos, onClose, onSelectCode, onClear }) {
+export default function ModalPlanificador({ 
+    visible, 
+    datos, 
+    onClose, 
+    onSelectCode, 
+    onClear,
+    onGuardarEnBD,
+    guardandoBD,
+    yaGuardadoEnBD
+}) {
     if (!visible || !datos || !datos.data) return null;
 
     return (
@@ -12,7 +21,10 @@ export default function ModalPlanificador({ visible, datos, onClose, onSelectCod
                         <span className="pl-header-icon">📋</span>
                         <div>
                             <h2>Planificador de Producción</h2>
-                            <p>{datos.total} registros encontrados</p>
+                            <p>
+                                {datos.total} registros encontrados
+                                {yaGuardadoEnBD && ' ✅ (Guardado en BD)'}
+                            </p>
                         </div>
                     </div>
                     <button className="pl-btn-x" onClick={onClose}>&times;</button>
@@ -29,6 +41,7 @@ export default function ModalPlanificador({ visible, datos, onClose, onSelectCod
                                     <th className="pl-text-center">Salidas</th>
                                     <th className="pl-text-center">Existencia Actual</th>
                                     <th className="pl-text-center">Alcance (Días)</th>
+                                    <th className="pl-text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,6 +74,17 @@ export default function ModalPlanificador({ visible, datos, onClose, onSelectCod
                 </div>
 
                 <div className="pl-modal-footer">
+                    <button 
+                        className="pl-btn-guardar-bd" 
+                        onClick={onGuardarEnBD}
+                        disabled={guardandoBD || yaGuardadoEnBD}
+                        style={{
+                            background: yaGuardadoEnBD ? '#6b7280' : (guardandoBD ? '#6b7280' : '#10b981'),
+                            cursor: (guardandoBD || yaGuardadoEnBD) ? 'not-allowed' : 'pointer'
+                        }}
+                    >
+                        {yaGuardadoEnBD ? '✅ Ya guardado' : (guardandoBD ? '💾 Guardando...' : '💾 Guardar en BD')}
+                    </button>
                     <button className="pl-btn-clear" onClick={onClear}>Vaciar Planificador</button>
                     <button className="pl-btn-close-modal" onClick={onClose}>Cerrar</button>
                 </div>

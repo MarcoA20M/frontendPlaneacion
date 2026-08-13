@@ -243,17 +243,8 @@ body, html {
   margin-bottom: 30px;
   align-items: center;
   flex: 0 0 50%;
-  max-width: 260px;  /* 👈 Máximo 400px */
-  min-width: 250px;  /* 👈 Mínimo 250px */
-}
-
-.busqueda-con-descripcion {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 70px;
-  flex-wrap: wrap;
-  width: 100%;
+  max-width: 260px;
+  min-width: 250px;
 }
 
 .busqueda input {
@@ -278,6 +269,18 @@ body, html {
   font-size: 16px;
   transition: all 0.3s ease;
 }
+
+
+.busqueda-con-descripcion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 70px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+
 
 .busqueda button:hover {
   filter: brightness(1.1);
@@ -2418,6 +2421,75 @@ podria ser pero no se
   .procesos-info strong {
     font-size: 10px;
   }
+
+  /* ============================================================ */
+/* ===== RESPONSIVE PARA BUSCADOR EN MÓVIL ===== */
+/* ============================================================ */
+
+/* Móviles grandes y tablets pequeñas */
+@media (max-width: 768px) {
+  .busqueda {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+    flex-wrap: nowrap !important;  /* Para que estén en una línea */
+    justify-content: flex-start !important;
+  }
+  
+  .busqueda input {
+    width: 55% !important;         /* INPUT MÁS PEQUEÑO */
+    min-width: 80px !important;
+    max-width: 160px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    flex: 1 !important;
+  }
+  
+  .busqueda button {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: 55px !important;
+  }
+  
+  .btn-calcular-consumo-busqueda {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    min-width: 35px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .busqueda {
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  .busqueda input {
+    width: 50% !important;
+    min-width: 55px !important;
+    max-width: 120px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+  }
+  
+  .busqueda button {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    min-width: 40px !important;
+  }
+  
+  .btn-calcular-consumo-busqueda {
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    min-width: 28px !important;
+  }
+}
 }
 
 

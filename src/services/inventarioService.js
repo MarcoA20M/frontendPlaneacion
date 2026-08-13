@@ -1,4 +1,6 @@
 // services/inventarioService.js
+import { API_URL } from "../constants/config";
+
 export const inventarioService = {
   analizarBajoInventario: async (file) => {
     console.log('🔵 === INICIO analizarBajoInventario ===');
@@ -9,7 +11,8 @@ export const inventarioService = {
     formData.append("file", file);
 
     try {
-      const url = "http://localhost:5000/analizar-inventario";
+      // ⭐ AHORA USA LA URL DE FLASK DESDE CONFIG
+      const url = `${API_URL}/analizar-inventario`;
       console.log('🔵 Enviando petición a:', url);
       
       const response = await fetch(url, {

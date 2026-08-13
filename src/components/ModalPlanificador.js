@@ -15,38 +15,35 @@ export default function ModalPlanificador({
     const [notificacionGuardado, setNotificacionGuardado] = useState(null);
 
     // ⭐ FUNCIÓN PARA GUARDAR Y MOSTRAR NOTIFICACIÓN
-    const handleGuardarConNotificacion = async () => {
-        if (yaGuardadoEnBD) return;
+  // ⭐ MODIFICAR handleGuardarConNotificacion
+const handleGuardarConNotificacion = async () => {
+    if (yaGuardadoEnBD) return;
+    
+    try {
+        await onGuardarEnBD();
         
-        try {
-            // Llamar a la función de guardado que viene por props
-            await onGuardarEnBD();
-            
-            // ⭐ MOSTRAR NOTIFICACIÓN DE ÉXITO
-            setNotificacionGuardado({
-                mensaje: '✅ Guardado en BD',
-                fecha: new Date().toLocaleString()
-            });
+        // ⭐ NOTIFICACIÓN CON EL FORMATO DE TU IMAGEN
+        setNotificacionGuardado({
+            mensaje: '✅ Guardado en BD',
+            fecha: new Date().toLocaleString()
+        });
 
-            // ⭐ OCULTAR NOTIFICACIÓN DESPUÉS DE 5 SEGUNDOS
-            setTimeout(() => {
-                setNotificacionGuardado(null);
-            }, 5000);
+        setTimeout(() => {
+            setNotificacionGuardado(null);
+        }, 5000);
 
-        } catch (error) {
-            console.error('Error al guardar:', error);
-            // ⭐ MOSTRAR NOTIFICACIÓN DE ERROR
-            setNotificacionGuardado({
-                mensaje: '❌ Error al guardar',
-                fecha: new Date().toLocaleString(),
-                esError: true
-            });
-            setTimeout(() => {
-                setNotificacionGuardado(null);
-            }, 5000);
-        }
-    };
-
+    } catch (error) {
+        console.error('Error al guardar:', error);
+        setNotificacionGuardado({
+            mensaje: '❌ Error al guardar',
+            fecha: new Date().toLocaleString(),
+            esError: true
+        });
+        setTimeout(() => {
+            setNotificacionGuardado(null);
+        }, 5000);
+    }
+};
     // ⭐ LIMPIAR NOTIFICACIÓN AL CERRAR EL MODAL
     useEffect(() => {
         if (!visible) {

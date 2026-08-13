@@ -1,9 +1,11 @@
 // services/planificadorService.js
+
 // ⭐ MICROSERVICIO FLASK (procesa Excel) - EN RENDER
 const API_URL = "https://pythonscriptsplaneacion.onrender.com";
 
-// ⭐ BACKEND JAVA (guarda en BD) - EN LOCAL
-const BACKEND_JAVA_URL = "http://localhost:8080";
+// ⭐ BACKEND JAVA (guarda en BD) - EN RENDER
+// CAMBIA esta línea de "http://localhost:8080" a la URL de tu backend en Render
+const BACKEND_JAVA_URL = "https://pintuplaneacion-backend.onrender.com";
 
 export const planificadorService = {
     // === MICROSERVICIO FLASK: Procesar Excel ===
@@ -26,6 +28,7 @@ export const planificadorService = {
     // === BACKEND JAVA: Guardar planificador ===
     guardarPlanificador: async (datos) => {
         console.log('📤 Guardando en Java, tipo:', typeof datos);
+        console.log('📤 URL:', `${BACKEND_JAVA_URL}/api/planificador/guardar`); // ⭐ Verifica la URL en consola
         
         try {
             let datosJson;
@@ -72,6 +75,7 @@ export const planificadorService = {
     // === BACKEND JAVA: Cargar planificador ===
     cargarPlanificador: async () => {
         console.log('📥 Cargando planificador desde Java...');
+        console.log('📥 URL:', `${BACKEND_JAVA_URL}/api/planificador/cargar`); // ⭐ Verifica la URL en consola
         
         try {
             const response = await fetch(`${BACKEND_JAVA_URL}/api/planificador/cargar`);

@@ -70,9 +70,8 @@ export default function ProduccionScreen() {
     const [progreso, setProgreso] = useState(0);
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
-    
-    // ⭐ NOTIFICACIÓN TEMPORAL DE GUARDADO
     const [notificacionGuardado, setNotificacionGuardado] = useState(null);
+
 
     // --- ESTADO PARA CONTADOR DE CARGAS EN LOCALSTORAGE ---
     const [cargasEnLocalStorage, setCargasEnLocalStorage] = useState(() => {
@@ -624,7 +623,7 @@ export default function ProduccionScreen() {
         }
     };
 
-    // ⭐ FUNCIÓN PARA GUARDAR PLANIFICADOR EN BD CON NOTIFICACIÓN TEMPORAL
+    // ⭐ FUNCIÓN PARA GUARDAR PLANIFICADOR EN BD
     const handleGuardarPlanificadorEnBD = async () => {
         // ⭐ Buscar datos en múltiples lugares
         let datosAGuardar = null;
@@ -699,16 +698,7 @@ export default function ProduccionScreen() {
                 fecha_actualizacion: new Date().toISOString()
             }));
 
-            // ⭐ MOSTRAR NOTIFICACIÓN TEMPORAL EN LUGAR DEL ALERT
-            setNotificacionGuardado({
-                mensaje: '✅ Guardado en BD',
-                fecha: new Date().toLocaleString()
-            });
-
-            // ⭐ OCULTAR NOTIFICACIÓN DESPUÉS DE 5 SEGUNDOS
-            setTimeout(() => {
-                setNotificacionGuardado(null);
-            }, 5000);
+            alert(`✅ Planificador guardado exitosamente\n\n${totalRegistros} registros guardados en la base de datos`);
 
             // Recargar desde BD
             await cargarPlanificadorDesdeBD();
@@ -720,15 +710,7 @@ export default function ProduccionScreen() {
 
         } catch (error) {
             console.error('❌ Error guardando planificador en BD:', error);
-            // ⭐ MOSTRAR NOTIFICACIÓN DE ERROR
-            setNotificacionGuardado({
-                mensaje: '❌ Error al guardar',
-                fecha: new Date().toLocaleString(),
-                esError: true
-            });
-            setTimeout(() => {
-                setNotificacionGuardado(null);
-            }, 5000);
+            alert('❌ Error al guardar: ' + error.message);
             setPlanificadorGuardadoEnBD(false);
         } finally {
             setGuardandoPlanificadorBD(false);
@@ -879,61 +861,6 @@ export default function ProduccionScreen() {
                 progreso={progreso}
             />
 
-            {/* ⭐ NOTIFICACIÓN TEMPORAL DE GUARDADO */}
-            {notificacionGuardado && (
-                <div style={{
-                    position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    background: notificacionGuardado.esError ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)',
-                    color: 'white',
-                    padding: '30px 50px',
-                    borderRadius: '16px',
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    zIndex: 99999,
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-                    textAlign: 'center',
-                    animation: 'fadeIn 0.5s ease-out',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '10px',
-                    minWidth: '300px'
-                }}>
-                    <div style={{ fontSize: '48px' }}>
-                        {notificacionGuardado.esError ? '❌' : '✅'}
-                    </div>
-                    <div>{notificacionGuardado.mensaje}</div>
-                    <div style={{ 
-                        fontSize: '14px', 
-                        opacity: 0.8, 
-                        fontWeight: 'normal',
-                        marginTop: '4px'
-                    }}>
-                        {notificacionGuardado.fecha}
-                    </div>
-                    {/* ⭐ BARRA DE PROGRESO QUE SE LLENA EN 5 SEGUNDOS */}
-                    <div style={{
-                        width: '100%',
-                        height: '4px',
-                        background: 'rgba(255,255,255,0.3)',
-                        borderRadius: '2px',
-                        marginTop: '8px',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            width: '100%',
-                            height: '100%',
-                            background: 'white',
-                            borderRadius: '2px',
-                            animation: 'shrinkWidth 5s linear forwards'
-                        }} />
-                    </div>
-                </div>
-            )}
-
             {/* ⭐ INDICADOR DE ESTADO DEL PLANIFICADOR */}
             {datosPlanificador && (
                 <div style={{
@@ -951,15 +878,7 @@ export default function ProduccionScreen() {
                     gap: '8px',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
                 }}>
-                    {planificadorGuardadoEnBD ? '✅' : '📋'}
-                    <span>
-                        {planificadorGuardadoEnBD ? 'Guardado en BD' : 'En cache local'}
-                    </span>
-                    {fechaSincronizacion && (
-                        <span style={{ fontSize: '10px', opacity: 0.8 }}>
-                            {new Date(fechaSincronizacion).toLocaleString()}
-                        </span>
-                    )}
+                    
                 </div>
             )}
 
@@ -1321,38 +1240,6 @@ export default function ProduccionScreen() {
                 onClose={() => setMostrarModalResumen(false)}
                 onGuardar={handleGuardarYcerrar}
             />
-
-            {/* ⭐ ESTILOS CSS PARA ANIMACIONES */}
-            <style>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translate(-50%, -50%) scale(0.8);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) scale(1);
-                    }
-                }
-
-                @keyframes shrinkWidth {
-                    from {
-                        width: 100%;
-                    }
-                    to {
-                        width: 0%;
-                    }
-                }
-
-                @keyframes fadeOut {
-                    from {
-                        opacity: 1;
-                    }
-                    to {
-                        opacity: 0;
-                    }
-                }
-            `}</style>
         </div>
     );
 }

@@ -861,26 +861,7 @@ export default function ProduccionScreen() {
                 progreso={progreso}
             />
 
-            {/* ⭐ INDICADOR DE ESTADO DEL PLANIFICADOR */}
-            {datosPlanificador && (
-                <div style={{
-                    position: 'fixed',
-                    top: '70px',
-                    right: '20px',
-                    background: planificadorGuardadoEnBD ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 193, 7, 0.9)',
-                    color: 'white',
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    zIndex: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-                }}>
-                    
-                </div>
-            )}
+     
 
             <div className="container">
                 {/* NIVEBAR */}

@@ -4,7 +4,7 @@
 import { operarioService } from '../services/operarioService';
 
 // ========== URLS ==========
-export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const API_URL = process.env.REACT_APP_API_URL || "https://pythonscriptsplaneacion.onrender.com";
 export const BACKEND_API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080/api";
 
 // ========== CÓDIGOS EXCLUIDOS ==========

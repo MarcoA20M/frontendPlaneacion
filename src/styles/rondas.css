@@ -87,7 +87,7 @@
   --ronda-especial-footer-strong: #4f46e5;
 }
 
-/* === TU CÓDIGO ORIGINAL CON LAS VARIABLES === */
+/* === TU CÓDIGO ORIGINAL SIN MODIFICAR === */
 
 .rondas-panel {
   margin-top: 40px;
@@ -555,5 +555,374 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ============================================================ */
+/* ===== RESPONSIVE - SIN MODIFICAR EL DISEÑO ORIGINAL ===== */
+/* ============================================================ */
+
+/* === TABLETS (768px - 1024px) === */
+@media (max-width: 1024px) {
+  .rondas-panel {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 15px;
+  }
+
+  .rondas-panel h2 {
+    margin-left: 0;
+    margin-top: 40px;
+    margin-bottom: 30px;
+    font-size: 20px;
+  }
+
+  .tabla-rondas {
+    width: 100%;
+  }
+
+  .fila-ronda {
+    grid-template-columns: 180px repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .etiqueta-ronda {
+    font-size: 14px;
+    padding-right: 10px;
+  }
+
+  .celda-ronda {
+    padding: 8px 4px;
+    gap: 8px;
+  }
+
+  .grid-especial-premium {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    max-height: 300px;
+  }
+
+  .card-op, .card-op2 {
+    padding: 6px 14px;
+    font-size: 0.75rem;
+  }
+
+  .contenedor-especiales-premium {
+    max-width: 320px;
+    margin-right: 10px;
+  }
+}
+
+/* === TABLETS PEQUEÑAS Y MÓVILES GRANDES (480px - 768px) === */
+@media (max-width: 768px) {
+  .rondas-panel {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 10px;
+  }
+
+  .rondas-panel h2 {
+    margin-left: 0;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .tabla-rondas {
+    width: 100%;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 10px;
+  }
+
+  .fila-ronda {
+    grid-template-columns: 140px repeat(6, 80px);
+    gap: 6px;
+    min-width: 620px;
+  }
+
+  .etiqueta-ronda {
+    font-size: 12px;
+    padding-right: 8px;
+  }
+
+  .celda-ronda {
+    padding: 6px 4px;
+    gap: 6px;
+    min-height: 80px;
+  }
+
+  .grid-especial-premium {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 6px;
+    max-height: 250px;
+  }
+
+  .card-especial-v2 {
+    padding: 8px;
+  }
+
+  .code-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .litros-badge {
+    font-size: 8px;
+  }
+
+  .card-body-ex {
+    font-size: 8px;
+  }
+
+  .card-footer-ex {
+    font-size: 7px;
+  }
+
+  .resumen-operarios {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .resumen-operarios2 {
+    gap: 4px;
+  }
+
+  .card-op, .card-op2 {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+  }
+
+  .op-total-badge {
+    font-size: 0.6rem;
+    padding: 1px 6px;
+  }
+
+  .btn-limpiar-filtro {
+    padding: 4px 12px;
+    font-size: 0.7rem;
+  }
+
+  .contenedor-especiales-premium {
+    position: relative;
+    top: 0;
+    max-width: 100%;
+    margin: 10px 0;
+  }
+
+  .header-especial {
+    padding: 8px 12px;
+  }
+
+  .titulo-especial {
+    font-size: 10px;
+  }
+}
+
+/* === MÓVILES PEQUEÑOS (menos de 480px) === */
+@media (max-width: 480px) {
+  .rondas-panel {
+    padding: 0 6px;
+  }
+
+  .rondas-panel h2 {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+
+  .tabla-rondas {
+    gap: 8px;
+  }
+
+  .fila-ronda {
+    grid-template-columns: 100px repeat(6, 65px);
+    gap: 4px;
+    min-width: 490px;
+  }
+
+  .fila-ronda.header {
+    font-size: 12px;
+  }
+
+  .etiqueta-ronda {
+    font-size: 10px;
+    padding-right: 4px;
+  }
+
+  .celda-ronda {
+    padding: 4px 2px;
+    gap: 4px;
+    min-height: 60px;
+  }
+
+  .grid-especial-premium {
+    padding: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 4px;
+    max-height: 200px;
+  }
+
+  .card-especial-v2 {
+    padding: 6px;
+  }
+
+  .card-header-ex {
+    margin-bottom: 4px;
+  }
+
+  .code-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+
+  .litros-badge {
+    font-size: 7px;
+    padding: 1px 4px;
+  }
+
+  .card-body-ex {
+    font-size: 7px;
+    margin-bottom: 4px;
+  }
+
+  .card-footer-ex {
+    font-size: 6px;
+    padding-top: 4px;
+  }
+
+  .card-footer-ex strong {
+    font-size: 7px;
+  }
+
+  .card-op, .card-op2 {
+    padding: 3px 8px;
+    font-size: 0.6rem;
+  }
+
+  .op-total-badge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
+  }
+
+  .btn-limpiar-filtro {
+    padding: 3px 10px;
+    font-size: 0.6rem;
+  }
+
+  .header-especial {
+    padding: 6px 10px;
+  }
+
+  .titulo-especial {
+    font-size: 9px;
+  }
+
+  .toggle-view-btn {
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  .alarma-dot {
+    width: 5px;
+    height: 5px;
+    margin-right: 6px;
+  }
+
+  .contenedor-especiales-premium {
+    border-radius: 8px;
+  }
+
+  .grid-especial-premium {
+    border-radius: 0 0 8px 8px;
+  }
+}
+
+/* === PANTALLAS MUY PEQUEÑAS (menos de 360px) === */
+@media (max-width: 360px) {
+  .fila-ronda {
+    grid-template-columns: 80px repeat(6, 55px);
+    gap: 3px;
+    min-width: 400px;
+  }
+
+  .etiqueta-ronda {
+    font-size: 9px;
+    padding-right: 3px;
+  }
+
+  .celda-ronda {
+    padding: 3px 1px;
+    min-height: 50px;
+  }
+
+  .grid-especial-premium {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 3px;
+    padding: 4px;
+    max-height: 150px;
+  }
+
+  .card-especial-v2 {
+    padding: 4px;
+  }
+
+  .code-badge {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+
+  .litros-badge {
+    font-size: 6px;
+    padding: 1px 3px;
+  }
+
+  .card-body-ex {
+    font-size: 6px;
+  }
+
+  .card-footer-ex {
+    font-size: 5px;
+  }
+
+  .card-footer-ex strong {
+    font-size: 6px;
+  }
+
+  .card-op, .card-op2 {
+    padding: 2px 6px;
+    font-size: 0.5rem;
+  }
+
+  .op-total-badge {
+    font-size: 0.45rem;
+    padding: 1px 3px;
+  }
+}
+
+/* === INDICADOR DE SCROLL PARA MÓVILES === */
+@media (max-width: 768px) {
+  .tabla-rondas::after {
+    content: '← Desliza →';
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    color: var(--ronda-etiqueta-color);
+    opacity: 0.5;
+    padding: 5px 0;
+    letter-spacing: 1px;
+  }
+}
+
+@media (min-width: 769px) {
+  .tabla-rondas::after {
+    display: none;
   }
 }

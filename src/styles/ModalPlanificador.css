@@ -91,3 +91,77 @@
     background: #333; color: #fff; border: none;
     padding: 8px 20px; border-radius: 4px; cursor: pointer;
 }
+
+
+/* ModalPlanificador.css - Agregar al final */
+
+.pl-btn-guardar-bd {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pl-btn-guardar-bd:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.pl-btn-guardar-bd:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pl-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 0 0 12px 12px;
+    flex-wrap: wrap;
+}
+
+.pl-btn-clear {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pl-btn-clear:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.pl-btn-close-modal {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pl-btn-close-modal:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+}

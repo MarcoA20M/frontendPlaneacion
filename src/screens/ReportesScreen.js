@@ -1,7 +1,7 @@
 // src/screens/ReportesScreen.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { reportesService } from "../services/reporteService"; // 🔴 CORREGIDO: reportesService
+import { reportesService } from "../services/reporteService";
 import "../styles/reportes.css";
 
 export default function ReportesScreen() {
@@ -53,7 +53,70 @@ export default function ReportesScreen() {
     };
 
     // ============================================================
-    // 🔴 CORREGIDO: Generar reporte mensual
+    // 🎯 Reporte por Dispersor
+    // ============================================================
+    const handleGenerarReporteDispersores = async () => {
+        if (!archivoSeleccionado) {
+            alert("⚠️ Por favor, selecciona un archivo Excel.");
+            return;
+        }
+
+        setLoading(true);
+        setReportesData([]);
+        
+        try {
+            const formData = new FormData();
+            formData.append('file', archivoSeleccionado);
+
+            const response = await fetch('http://localhost:5000/generar-reporte-dispersores', {
+                method: 'POST',
+                body: formData,
+            });
+
+            // Verificar si la respuesta es JSON (error) o archivo
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al generar el reporte');
+            }
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            // Descargar el archivo Excel
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Reporte_Dispersores_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            setReportesData([{
+                mensaje: "✅ Reporte de dispersores generado y descargado correctamente",
+                archivo: nombreArchivo,
+                fecha: new Date().toLocaleString()
+            }]);
+
+        } catch (error) {
+            console.error("❌ Error generando reporte de dispersores:", error);
+            alert(`❌ Error al generar el reporte:\n${error.message}`);
+            setReportesData([{
+                mensaje: "❌ Error: " + error.message,
+                archivo: nombreArchivo,
+                fecha: new Date().toLocaleString()
+            }]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ============================================================
+    // 📊 Generar reporte mensual
     // ============================================================
     const generarReporte = async () => {
         if (!archivoSeleccionado) {
@@ -66,10 +129,9 @@ export default function ReportesScreen() {
             const formData = new FormData();
             formData.append('file', archivoSeleccionado);
 
-            // 🔴 CORREGIDO: Usar el endpoint mensual
             await reportesService.generarReporteMensual(formData);
-            
-            setReportesData([{ 
+
+            setReportesData([{
                 mensaje: "✅ Reporte mensual generado y descargado correctamente",
                 archivo: nombreArchivo,
                 fecha: new Date().toLocaleString()
@@ -83,6 +145,9 @@ export default function ReportesScreen() {
         }
     };
 
+    // ============================================================
+    // 📦 Analizar Inventario
+    // ============================================================
     const handleAnalizarInventario = async () => {
         if (!archivoSeleccionado) {
             alert("⚠️ Por favor, selecciona un archivo Excel.");
@@ -96,7 +161,7 @@ export default function ReportesScreen() {
 
             const result = await reportesService.analizarInventario(formData);
             setEstadisticas(result);
-            
+
             if (result.alertas && result.alertas.length > 0) {
                 const datos = result.alertas.map(item => ({
                     codigo: item.codigo,
@@ -116,6 +181,9 @@ export default function ReportesScreen() {
         }
     };
 
+    // ============================================================
+    // 📋 Procesar Planificador
+    // ============================================================
     const handleProcesarPlanificador = async () => {
         if (!archivoSeleccionado) {
             alert("⚠️ Por favor, selecciona un archivo Excel.");
@@ -129,7 +197,7 @@ export default function ReportesScreen() {
 
             const result = await reportesService.procesarPlanificador(formData);
             setEstadisticas(result);
-            
+
             if (result.data && result.data.length > 0) {
                 const datos = result.data.slice(0, 50).map(item => ({
                     articulo: item.articulo,
@@ -150,6 +218,9 @@ export default function ReportesScreen() {
         }
     };
 
+    // ============================================================
+    // 🖨️ Bitácora
+    // ============================================================
     const handleGenerarBitacora = async () => {
         alert("🖨️ Funcionalidad de bitácora en desarrollo");
     };
@@ -179,8 +250,8 @@ export default function ReportesScreen() {
                     <div className="config-file-upload">
                         <label className="config-label">📂 Seleccionar Archivo Excel</label>
                         <div className="file-upload-wrapper">
-                            <input 
-                                type="file" 
+                            <input
+                                type="file"
                                 accept=".xlsx,.xls"
                                 onChange={handleFileChange}
                                 className="file-input"
@@ -194,7 +265,7 @@ export default function ReportesScreen() {
                                 )}
                             </label>
                             {nombreArchivo && (
-                                <button 
+                                <button
                                     className="file-clear"
                                     onClick={() => {
                                         setArchivoSeleccionado(null);
@@ -210,34 +281,68 @@ export default function ReportesScreen() {
                     </div>
 
                     <div className="config-actions">
-                        <button 
-                            className="btn-config" 
+                        {/* Botones de reportes */}
+                        <button
+                            className="btn-config"
                             onClick={generarReporte}
                             disabled={loading || !archivoSeleccionado}
                         >
                             {loading ? '⏳ Procesando...' : '📊 Generar Reporte Mensual'}
                         </button>
-                        <button 
-                            className="btn-config btn-export" 
+                        
+                        <button
+                            className="btn-config btn-export"
                             onClick={handleAnalizarInventario}
                             disabled={loading || !archivoSeleccionado}
                         >
                             📦 Analizar Inventario
                         </button>
-                        <button 
-                            className="btn-config btn-export" 
+                        
+                        <button
+                            className="btn-config btn-export"
                             onClick={handleProcesarPlanificador}
                             disabled={loading || !archivoSeleccionado}
                         >
                             📋 Procesar Planificador
                         </button>
-                        <button 
-                            className="btn-config btn-print" 
+                        
+                        {/* 🎯 NUEVO BOTÓN DE DISPERSORES */}
+                        <button
+                            className="btn-config btn-dispersor"
+                            onClick={handleGenerarReporteDispersores}
+                            disabled={loading || !archivoSeleccionado}
+                            style={{
+                                background: "linear-gradient(135deg, #00b894, #00cec9)",
+                                color: "white",
+                                border: "none",
+                                padding: "10px 20px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                fontSize: "14px",
+                                transition: "all 0.3s ease",
+                                boxShadow: "0 4px 15px rgba(0, 206, 201, 0.3)"
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = "scale(1.05)";
+                                e.target.style.boxShadow = "0 6px 25px rgba(0, 206, 201, 0.5)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = "scale(1)";
+                                e.target.style.boxShadow = "0 4px 15px rgba(0, 206, 201, 0.3)";
+                            }}
+                        >
+                            🎯 Reporte por Dispersor
+                        </button>
+                        
+                        <button
+                            className="btn-config btn-print"
                             onClick={handleGenerarBitacora}
                             disabled={loading}
                         >
                             🖨️ Bitácora
                         </button>
+                        
                         <button className="btn-config btn-print" onClick={handleImprimir}>
                             🖨️ Imprimir
                         </button>
@@ -246,7 +351,7 @@ export default function ReportesScreen() {
 
                 <div className="reportes-rapidos">
                     {reportesDisponibles.map(reporte => (
-                        <div 
+                        <div
                             key={reporte.id}
                             className={`reporte-rapido-card`}
                             onClick={() => {

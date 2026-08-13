@@ -11,7 +11,7 @@ export const inventarioService = {
     formData.append("file", file);
 
     try {
-      // ⭐ AHORA USA LA URL DE FLASK DESDE CONFIG
+      // ⭐ LA URL CORRECTA ES: API_URL + /analizar-inventario (SIN /api)
       const url = `${API_URL}/analizar-inventario`;
       console.log('🔵 Enviando petición a:', url);
       
@@ -21,12 +21,11 @@ export const inventarioService = {
       });
 
       console.log('🔵 Status de respuesta:', response.status);
-      console.log('🔵 Response ok?', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Error del servidor:', errorText);
-        throw new Error(`Error en el servidor de análisis: ${response.status} - ${errorText}`);
+        throw new Error(`Error en el servidor de análisis: ${response.status}`);
       }
       
       const data = await response.json();

@@ -1,7 +1,8 @@
 // src/services/operarioService.js
 import axios from 'axios';
 
-const API_URL = `${process.env.REACT_APP_API_URL}/operarios`;
+// ⭐ HARDCODEAR LA URL DIRECTAMENTE (sin importar de config)
+const API_URL = "https://pintuplaneacion-backend.onrender.com/api/operarios";
 
 export const operarioService = {
 
@@ -44,7 +45,7 @@ export const operarioService = {
   
   // ========== ESMALTES ==========
   getEsmaltes: async () => {
-   const response = await axios.get(`${API_URL}/esmaltes`);
+    const response = await axios.get(`${API_URL}/esmaltes`);
     return response.data;
   },
   
@@ -53,7 +54,6 @@ export const operarioService = {
     return response.data;
   },
   
-  // 🔴 NUEVO: Obtener TODOS los operarios
   getAll: async () => {
     const response = await axios.get(`${API_URL}`);
     return response.data;

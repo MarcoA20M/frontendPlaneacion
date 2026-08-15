@@ -4,8 +4,11 @@
 import { operarioService } from '../services/operarioService';
 
 // ========== URLS ==========
-export const API_URL = process.env.REACT_APP_API_URL || "https://pythonscriptsplaneacion.onrender.com";
-export const BACKEND_API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080/api";
+// ⭐ FLASK (microservicio) - EN RENDER
+export const API_URL = "https://pythonscriptsplaneacion.onrender.com";
+
+// ⭐ JAVA (backend) - EN RENDER CON /api
+export const BACKEND_API_URL = "https://pintuplaneacion-backend.onrender.com/api";
 
 // ========== CÓDIGOS EXCLUIDOS ==========
 export const getCodigosExcluidos = () => {
@@ -68,9 +71,8 @@ export const litrosATexto = (l) => {
 // ============================================================
 let operariosCache = null;
 let ultimaActualizacionCache = null;
-const TIEMPO_CACHE = 30000; // 30 segundos
+const TIEMPO_CACHE = 30000;
 
-// Forzar actualización del cache
 let forzarActualizacion = false;
 
 export const forzarRecargaOperarios = () => {
@@ -81,22 +83,18 @@ export const forzarRecargaOperarios = () => {
     console.log('🔄 Cache de operarios forzado a recargar');
 };
 
-// Función para obtener operarios del cache o localStorage
 const obtenerOperariosCache = () => {
     try {
-        // Si forzamos actualización, ignorar cache
         if (forzarActualizacion) {
             forzarActualizacion = false;
             return null;
         }
         
-        // Si el cache es válido, usarlo
         if (operariosCache && ultimaActualizacionCache && 
             (Date.now() - ultimaActualizacionCache) < TIEMPO_CACHE) {
             return operariosCache;
         }
         
-        // Intentar del localStorage
         const guardado = localStorage.getItem("operarios_vinilica");
         if (guardado) {
             const data = JSON.parse(guardado);
@@ -113,13 +111,12 @@ const obtenerOperariosCache = () => {
 };
 
 // ============================================================
-// 🔴 VERSIÓN MEJORADA DE getOperarioPorMaquinaSync (SIN FALLBACKS ESTÁTICOS)
+// 🔴 VERSIÓN MEJORADA DE getOperarioPorMaquinaSync
 // ============================================================
 export const getOperarioPorMaquinaSync = (idMaquina) => {
     const maquinaId = typeof idMaquina === 'string' ? parseInt(idMaquina) : idMaquina;
     
     try {
-        // Intentar obtener del cache
         const cache = obtenerOperariosCache();
         if (cache && cache[maquinaId]) {
             const operario = cache[maquinaId];
@@ -128,10 +125,7 @@ export const getOperarioPorMaquinaSync = (idMaquina) => {
             }
             return String(operario || 'Sin asignar');
         }
-        
-        // ✅ AHORA: Si no hay cache, mostrar "Cargando..." en lugar de fallbacks estáticos
         return 'Cargando...';
-        
     } catch (error) {
         console.error('❌ Error en getOperarioPorMaquinaSync:', error);
         return 'Error';
@@ -139,12 +133,11 @@ export const getOperarioPorMaquinaSync = (idMaquina) => {
 };
 
 // ============================================================
-// 🔴 VERSIÓN MEJORADA DE getOperarioPorMaquina (CON LOGS DETALLADOS)
+// 🔴 VERSIÓN MEJORADA DE getOperarioPorMaquina
 // ============================================================
 export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), usarRotacion = true) => {
   const maquinaId = typeof idMaquina === 'string' ? parseInt(idMaquina) : idMaquina;
   
-  // Mapeo de máquinas a grupos
   const grupos = {
     101: "grupo0", 102: "grupo0",
     103: "grupo1", 104: "grupo1",
@@ -162,15 +155,12 @@ export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), us
     const fechaStr = fechaRef.toISOString().split('T')[0];
     console.log(`🔄 Buscando operario para máquina ${maquinaId} (grupo ${grupoId}) en fecha ${fechaStr}`);
     
-    // Obtener rotación completa
     const rotacion = await operarioService.getRotacion(fechaRef);
     console.log('📊 Rotación completa recibida:', rotacion);
     
-    // Buscar el operario específico
     const operario = rotacion[maquinaId];
     console.log(`🎯 Operario encontrado para máquina ${maquinaId}:`, operario);
     
-    // Actualizar cache con el resultado
     if (operario) {
         try {
             const cache = obtenerOperariosCache() || {};
@@ -185,14 +175,11 @@ export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), us
         return operario;
     }
     
-    // Si no hay operario, buscar por grupo
     if (rotacion && typeof rotacion === 'object') {
-        // Buscar en el grupo correspondiente
         for (const [key, value] of Object.entries(rotacion)) {
             const keyNum = parseInt(key);
             if (grupos[keyNum] === grupoId) {
                 console.log(`🔍 Encontrado operario ${value} en máquina ${keyNum} del mismo grupo ${grupoId}`);
-                // Guardar en cache
                 const cache = obtenerOperariosCache() || {};
                 cache[maquinaId] = value;
                 operariosCache = cache;
@@ -203,13 +190,11 @@ export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), us
         }
     }
     
-    // Si llegamos aquí, no se encontró operario
     console.warn(`⚠️ No se encontró operario para máquina ${maquinaId}`);
     return "Sin asignar";
     
   } catch (error) {
     console.error('❌ Error obteniendo operario:', error);
-    // Intentar obtener del cache como último recurso
     const cache = obtenerOperariosCache();
     if (cache && cache[maquinaId]) {
         console.log(`🔄 Usando cache para máquina ${maquinaId}: ${cache[maquinaId]}`);
@@ -220,7 +205,7 @@ export const getOperarioPorMaquina = async (idMaquina, fechaRef = new Date(), us
 };
 
 // ============================================================
-// 🔴 FUNCIONES ADICIONALES MEJORADAS
+// 🔴 FUNCIONES ADICIONALES
 // ============================================================
 
 export const getConfiguracionRotacionActual = async (fechaRef = new Date()) => {

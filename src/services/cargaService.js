@@ -1,7 +1,10 @@
+// services/cargaService.js
 import axios from "axios";
-import API_URL_BASE from "../config/api";
+// ⭐ IMPORTAR DESDE CONFIG.JS
+import { BACKEND_API_URL } from "../constants/config";
 
-const API_URL = `${API_URL_BASE}/cargas`;
+// ⭐ CONSTRUIR URL CON BACKEND_API_URL
+const API_URL = `${BACKEND_API_URL}/cargas`;
 
 export const registrarCarga = (cargas) =>
   axios.post(API_URL, cargas).then((res) => res.data);
@@ -43,7 +46,6 @@ export const obtenerCargasPorFecha = async (fechaInput) => {
       descripcion: reg.descripcion || "",
       poderCubriente: reg.poderCubriente || reg.nivelCubriente || 0,
       procesos: reg.procesos || [],
-      // Guardar el envasado original para obtener el formato
       envasado: reg.envasado || reg.envasado_id
     };
   });
@@ -55,8 +57,6 @@ export const obtenerCargasHoy = () => obtenerCargasPorFecha(new Date());
 
 // Función para obtener el formato desde el envasado_id
 const obtenerFormatoDesdeEnvasado = (envasadoId) => {
-  // Mapeo de envasado_id a formato en litros
-  // Ajusta estos valores según tu base de datos
   const formatoMap = {
     '1': 0.25,
     '2': 0.5,
@@ -64,7 +64,6 @@ const obtenerFormatoDesdeEnvasado = (envasadoId) => {
     '4': 1,
     '5': 4,
     '6': 19,
-    // Si usas números directamente
     '0.25': 0.25,
     '0.5': 0.5,
     '0.75': 0.75,
@@ -73,7 +72,7 @@ const obtenerFormatoDesdeEnvasado = (envasadoId) => {
     '19': 19
   };
   
-  return formatoMap[envasadoId] || 1; // 1L por defecto
+  return formatoMap[envasadoId] || 1;
 };
 
 export const verificarCargaReciente = async (codigo, envasadoId) => {
@@ -107,7 +106,6 @@ export const verificarCargaReciente = async (codigo, envasadoId) => {
         operarios: [...new Set(coincidencias.map((c) => c.operario))].join(", "),
         total: coincidencias.reduce((acc, curr) => acc + Number(curr.cantidad || 0), 0),
         conteoLotes: coincidencias.length,
-        // Guardar todos los registros para poder consultar individualmente
         registros: coincidencias
       };
     }
@@ -119,10 +117,8 @@ export const verificarCargaReciente = async (codigo, envasadoId) => {
   }
 };
 
-// NUEVA FUNCIÓN: Obtener datos específicos de un folio individual con formato
 export const verificarCargaPorFolio = async (folio, codigo) => {
   try {
-    // Buscar en los últimos 7 días
     const fechas = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date();
@@ -134,7 +130,6 @@ export const verificarCargaPorFolio = async (folio, codigo) => {
     const resultados = await Promise.all(promesas);
     const todas = resultados.flat();
 
-    // Buscar el registro específico por folio y código de producto
     const registro = todas.find((reg) => {
       const folioRegistro = reg.folioHija || reg.folio_hija || reg.folio;
       const regProducto = reg.producto || reg.producto_id;
@@ -142,7 +137,6 @@ export const verificarCargaPorFolio = async (folio, codigo) => {
     });
 
     if (registro) {
-      // Obtener el formato del envasado
       const envasadoId = registro.envasadoId || registro.envasado_id || registro.envasado;
       const formato = obtenerFormatoDesdeEnvasado(envasadoId);
       const cantidad = Number(registro.cantidad || 0);
@@ -151,7 +145,7 @@ export const verificarCargaPorFolio = async (folio, codigo) => {
         folio: registro.folioHija || registro.folio_hija || registro.folio,
         codigoProducto: registro.producto || registro.producto_id,
         cantidad: cantidad,
-        litros: formato * cantidad, // Calcular litros totales
+        litros: formato * cantidad,
         formato: formato,
         operario: registro.operario || "No asignado",
         maquina: registro.maquina || "",

@@ -11,7 +11,7 @@ export const inventarioService = {
     formData.append("file", file);
 
     try {
-      // ⭐ AHORA USA LA URL DE FLASK DESDE CONFIG (SIN /api)
+      // ⭐ AHORA USA LA URL CORRECTA DE FLASK
       const url = `${API_URL}/analizar-inventario`;
       console.log('🔵 Enviando petición a:', url);
       

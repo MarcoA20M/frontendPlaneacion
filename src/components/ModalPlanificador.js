@@ -38,7 +38,6 @@ export default function ModalPlanificador({
                                     <th className="pl-text-center">Salidas</th>
                                     <th className="pl-text-center">Existencia Actual</th>
                                     <th className="pl-text-center">Alcance (Días)</th>
-                                    <th className="pl-text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -52,17 +51,7 @@ export default function ModalPlanificador({
                                         <td className="pl-text-center font-bold">
                                             {item.alcance.toFixed(0)}
                                         </td>
-                                        <td className="pl-text-center">
-                                            <button 
-                                                className="pl-btn-load"
-                                                onClick={() => {
-                                                    onSelectCode(item.color);
-                                                    onClose();
-                                                }}
-                                            >
-                                                Cargar
-                                            </button>
-                                        </td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

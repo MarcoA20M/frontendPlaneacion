@@ -21,10 +21,7 @@ export default function ModalPlanificador({
                         <span className="pl-header-icon">📋</span>
                         <div>
                             <h2>Planificador de Producción</h2>
-                            <p>
-                                {datos.total} registros encontrados
-                                {yaGuardadoEnBD && ' ✅ (Guardado en BD)'}
-                            </p>
+                        
                         </div>
                     </div>
                     <button className="pl-btn-x" onClick={onClose}>&times;</button>
@@ -41,7 +38,6 @@ export default function ModalPlanificador({
                                     <th className="pl-text-center">Salidas</th>
                                     <th className="pl-text-center">Existencia Actual</th>
                                     <th className="pl-text-center">Alcance (Días)</th>
-                                    <th className="pl-text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -55,17 +51,7 @@ export default function ModalPlanificador({
                                         <td className="pl-text-center font-bold">
                                             {item.alcance.toFixed(0)}
                                         </td>
-                                        <td className="pl-text-center">
-                                            <button 
-                                                className="pl-btn-load"
-                                                onClick={() => {
-                                                    onSelectCode(item.color);
-                                                    onClose();
-                                                }}
-                                            >
-                                                Cargar
-                                            </button>
-                                        </td>
+                                       
                                     </tr>
                                 ))}
                             </tbody>

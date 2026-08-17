@@ -89,11 +89,6 @@
   --modal-btn-asignar-hover: 0 6px 25px rgba(203, 32, 237, 0.752);
   --modal-btn-asignar-disabled-bg: #2a2a4a;
   --modal-btn-asignar-disabled-color: rgba(255, 255, 255, 0.3);
-
-  /* Botón PDF */
-  --modal-btn-pdf: linear-gradient(135deg, #e74c3c, #c0392b);
-  --modal-btn-pdf-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-  --modal-btn-pdf-hover: 0 6px 20px rgba(231, 76, 60, 0.4);
 }
 
 /* === TEMA CLARO - SOFT LAVENDER === */
@@ -175,13 +170,9 @@
   --modal-advertencia-btn-eliminar-shadow: 0 4px 20px rgba(200, 80, 80, 0.2);
   --modal-advertencia-btn-eliminar-hover: 0 6px 30px rgba(200, 80, 80, 0.35);
 
+;
   --modal-btn-asignar-disabled-bg: #EDE8F5;
   --modal-btn-asignar-disabled-color: #C5BCD0;
-
-  /* Botón PDF - Tema claro */
-  --modal-btn-pdf: linear-gradient(135deg, #D46A6A, #B85A5A);
-  --modal-btn-pdf-shadow: 0 4px 12px rgba(200, 80, 80, 0.2);
-  --modal-btn-pdf-hover: 0 6px 20px rgba(200, 80, 80, 0.3);
 }
 
 /* ============================================
@@ -230,8 +221,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 .titulo-con-contador {
@@ -271,196 +260,31 @@
 }
 
 /* ============================================
-   HEADER ACTIONS - BOTONES MEJOR ORGANIZADOS
+   HEADER ACTIONS
    ============================================ */
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* Grupo de botones principales */
-.header-actions .btn-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Separador visual entre grupos */
-.header-actions .separador {
-  width: 1px;
-  height: 30px;
-  background: var(--modal-border);
-  margin: 0 6px;
-  opacity: 0.5;
+  gap: 20px;
 }
 
 /* ============================================
-   BOTÓN ASIGNAR LOTES
-   ============================================ */
-
-.btn-asignar-lotes {
-  background: var(--modal-btn-asignar);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--modal-btn-asignar-shadow);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-asignar-lotes .icono {
-  font-size: 14px;
-}
-
-.btn-asignar-lotes:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--modal-btn-asignar-hover);
-  filter: brightness(1.05);
-}
-
-.btn-asignar-lotes:disabled {
-  background: var(--modal-btn-asignar-disabled-bg);
-  color: var(--modal-btn-asignar-disabled-color);
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-/* ============================================
-   BOTÓN PDF
-   ============================================ */
-
-.btn-pdf {
-  background: var(--modal-btn-pdf);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: var(--modal-btn-pdf-shadow);
-}
-
-.btn-pdf:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--modal-btn-pdf-hover);
-  filter: brightness(1.05);
-}
-
-.btn-pdf .icono {
-  font-size: 14px;
-}
-
-/* ============================================
-   BOTÓN BORRAR TODO
-   ============================================ */
-
-.btn-borrar-todo {
-  background: var(--modal-btn-borrar-bg);
-  border: 1px solid var(--modal-btn-borrar-border);
-  color: var(--modal-btn-borrar-color);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-borrar-todo:hover {
-  background: var(--modal-btn-borrar-hover-bg);
-  color: var(--modal-btn-borrar-hover-color);
-  box-shadow: var(--modal-btn-borrar-shadow);
-  transform: translateY(-2px);
-}
-
-.btn-borrar-todo .icono {
-  font-size: 14px;
-}
-
-/* ============================================
-   BOTÓN GUARDAR PRODUCCIÓN
-   ============================================ */
-
-.btn-guardar-produccion {
-  background: var(--modal-btn-primary);
-  border: none;
-  padding: 8px 20px;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: 800;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--modal-btn-primary-shadow);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-guardar-produccion:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--modal-btn-primary-hover);
-  filter: brightness(1.1);
-}
-
-.btn-guardar-produccion:disabled {
-  background: var(--modal-btn-disabled-bg);
-  color: var(--modal-btn-disabled-color);
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.btn-guardar-produccion .icono {
-  font-size: 14px;
-}
-
-/* ============================================
-   BOTÓN GUARDAR TOP (versión compacta)
+   BOTÓN GUARDAR TOP
    ============================================ */
 
 .btn-guardar-top {
   background: var(--modal-btn-primary);
   border: none;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   color: #fff;
-  font-weight: 700;
-  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 13px;
   cursor: pointer;
   transition: 0.3s;
   box-shadow: var(--modal-btn-primary-shadow);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .btn-guardar-top:hover:not(:disabled) {
@@ -475,6 +299,36 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* ============================================
+   TABLA SECCION
+   ============================================ */
+
+.tabla-seccion {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.contenedor-scroll-tabla {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-top: 5px;
+}
+
+.contenedor-scroll-tabla::-webkit-scrollbar {
+  width: 6px;
+}
+
+.contenedor-scroll-tabla::-webkit-scrollbar-thumb {
+  background: var(--modal-scroll-thumb);
+  border-radius: 10px;
+}
+
+.celda.g-2 { flex: 2; min-width: 100px; }
+.celda.g-1 { flex: 1; min-width: 60px; }
 
 /* ============================================
    INFO GENERAL
@@ -510,36 +364,6 @@
   font-weight: 600;
   transition: color 0.3s ease;
 }
-
-/* ============================================
-   TABLA SECCION
-   ============================================ */
-
-.tabla-seccion {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.contenedor-scroll-tabla {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 8px;
-  margin-top: 5px;
-}
-
-.contenedor-scroll-tabla::-webkit-scrollbar {
-  width: 6px;
-}
-
-.contenedor-scroll-tabla::-webkit-scrollbar-thumb {
-  background: var(--modal-scroll-thumb);
-  border-radius: 10px;
-}
-
-.celda.g-2 { flex: 2; min-width: 100px; }
-.celda.g-1 { flex: 1; min-width: 60px; }
 
 /* ============================================
    TABLA CARGAS
@@ -1078,248 +902,59 @@
   transform: translateY(0px);
 }
 
-/* ============================================================ */
-/* ===== RESPONSIVE - SIN MODIFICAR EL DISEÑO ORIGINAL ===== */
-/* ============================================================ */
+/* ============================================
+   BOTÓN ASIGNAR LOTES
+   ============================================ */
 
-/* === TABLETS (768px - 1024px) === */
-@media (max-width: 1024px) {
-  .modal-cargas {
-    width: 90%;
-    max-height: 90vh;
-    padding: 20px;
-  }
-
-  .modal-header h2 {
-    font-size: 22px;
-  }
-
-  .info-general {
-    padding: 12px 18px;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .value {
-    font-size: 16px;
-  }
-
-  .contenedor-marcas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  }
-
-  .modal-advertencia {
-    padding: 28px 30px;
-    max-width: 440px;
-  }
-
-  .modal-advertencia h3 {
-    font-size: 20px;
-  }
-
-  /* Botones responsive */
-  .header-actions {
-    gap: 6px;
-  }
-
-  .header-actions .btn-group {
-    gap: 4px;
-  }
-
-  .header-actions .separador {
-    height: 26px;
-    margin: 0 4px;
-  }
-
-  .btn-asignar-lotes,
-  .btn-pdf,
-  .btn-borrar-todo,
-  .btn-guardar-produccion,
-  .btn-guardar-top {
-    padding: 7px 14px;
-    font-size: 11px;
-  }
+.btn-asignar-lotes {
+  background: var(--modal-btn-asignar);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--modal-btn-asignar-shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* === TABLETS PEQUEÑAS Y MÓVILES GRANDES (480px - 768px) === */
-@media (max-width: 768px) {
-  .modal-cargas {
-    width: 95%;
-    max-height: 92vh;
-    padding: 16px;
-    border-radius: 12px;
-  }
+.btn-asignar-lotes .icono {
+  font-size: 14px;
+}
 
-  .modal-header {
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+.btn-asignar-lotes:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--modal-btn-asignar-hover);
+  filter: brightness(1.05);
+}
 
-  .modal-header h2 {
-    font-size: 18px;
-  }
+.btn-asignar-lotes:disabled {
+  background: var(--modal-btn-asignar-disabled-bg);
+  color: var(--modal-btn-asignar-disabled-color);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
 
-  .titulo-con-contador {
-    gap: 10px;
-  }
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 
-  .badge-contador {
-    font-size: 11px;
-    padding: 3px 10px;
-  }
-
-  .close-btn {
-    font-size: 22px;
-  }
-
-  /* Botones responsive */
-  .header-actions {
-    gap: 6px;
-    width: 100%;
-  }
-
-  .header-actions .btn-group {
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-
-  .header-actions .separador {
-    height: 24px;
-    margin: 0 4px;
-  }
-
-  .btn-asignar-lotes,
-  .btn-pdf,
-  .btn-borrar-todo,
-  .btn-guardar-produccion,
-  .btn-guardar-top {
-    padding: 6px 12px;
-    font-size: 10px;
-    border-radius: 6px;
-  }
-
-  .btn-asignar-lotes .icono,
-  .btn-pdf .icono,
-  .btn-borrar-todo .icono,
-  .btn-guardar-produccion .icono,
-  .btn-guardar-top .icono {
-    font-size: 12px;
-  }
-
-  .info-general {
-    padding: 10px 14px;
-    border-radius: 10px;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .label {
-    font-size: 10px;
-  }
-
-  .value {
-    font-size: 14px;
-  }
-
-  .titulo-tabla {
-    font-size: 15px;
-    margin: 10px 0 6px;
-  }
-
-  .fila-carga {
-    padding: 8px 10px;
-    border-radius: 8px;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-
-  .fila-carga.header {
-    font-size: 12px;
-  }
-
-  .celda.g-2 {
-    min-width: 60px;
-    flex: 1.5;
-  }
-
-  .celda.g-1 {
-    min-width: 40px;
-    flex: 1;
-  }
-
-  .celda.nro {
-    flex: 0 0 30px;
-    font-size: 12px;
-    margin-right: 6px;
-  }
-
-  .nro-item {
-    flex: 0 0 30px !important;
-    font-size: 12px;
-    margin-right: 6px;
-  }
-
-  .contenedor-marcas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-    gap: 4px;
-  }
-
-  .marca-card {
-    padding: 3px 4px;
-    border-radius: 6px;
-  }
-
-  .marca-card h3 {
-    font-size: 7px;
-  }
-
-  .marca-card p {
-    font-size: 10px;
-  }
-
-  .marca-card span {
-    font-size: 10px;
-  }
-
-  .input-cantidad-expresion {
-    font-size: 11px;
-    padding: 4px 6px;
-  }
-
-  .input-cantidad-expresion::placeholder {
-    font-size: 9px;
-  }
-
-  .btn-borrar-fila {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
-
-  .sin-cargas {
-    padding: 25px 15px;
-    font-size: 14px;
-  }
-
-  .modal-footer .btn-guardar {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-
-  /* Modal advertencia */
+@media (max-width: 600px) {
   .modal-advertencia {
-    padding: 24px 20px;
+    padding: 24px 18px;
     max-width: 95%;
-    border-radius: 18px;
+    border-radius: 20px;
   }
 
   .modal-advertencia h3 {
-    font-size: 18px;
-  }
-
-  .modal-advertencia .subtitulo {
-    font-size: 12px;
+    font-size: 19px;
   }
 
   .modal-advertencia .carga-info {
@@ -1327,16 +962,15 @@
     margin: 10px 0 14px 0;
   }
 
-  .modal-advertencia .carga-info .info-row .label {
-    font-size: 9px;
+  .modal-advertencia .carga-info .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 6px 0;
   }
 
   .modal-advertencia .carga-info .info-row .value {
     font-size: 12px;
-  }
-
-  .modal-advertencia .carga-info .info-row .value.destacado {
-    font-size: 13px;
   }
 
   .modal-advertencia .mensaje {
@@ -1344,424 +978,97 @@
     margin: 10px 0 18px 0;
   }
 
-  .modal-advertencia .mensaje .texto-secundario {
-    font-size: 11px;
-  }
-
   .modal-advertencia .botones {
-    flex-direction: row;
+    flex-direction: column;
     gap: 10px;
   }
 
   .modal-advertencia .btn-cancelar,
   .modal-advertencia .btn-eliminar {
-    padding: 10px 20px;
-    font-size: 12px;
-  }
-
-  .modal-advertencia .icono-advertencia svg {
-    width: 50px;
-    height: 50px;
+    padding: 12px 20px;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }
 
-/* === MÓVILES PEQUEÑOS (menos de 480px) === */
-@media (max-width: 480px) {
-  .modal-cargas {
-    width: 98%;
-    max-height: 95vh;
-    padding: 12px;
-    border-radius: 10px;
-  }
-
-  .modal-header h2 {
-    font-size: 16px;
-  }
-
-  .badge-contador {
-    font-size: 10px;
-    padding: 2px 8px;
-  }
-
-  .close-btn {
-    font-size: 20px;
-  }
-
-  /* Botones responsive - apilados */
-  .header-actions {
-    gap: 4px;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-  }
-
-  .header-actions .btn-group {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .header-actions .separador {
-    display: none;
-  }
-
-  .btn-asignar-lotes,
-  .btn-pdf,
-  .btn-borrar-todo,
-  .btn-guardar-produccion,
-  .btn-guardar-top {
-    padding: 6px 10px;
-    font-size: 9px;
-    justify-content: center;
-    flex: 1;
-    min-width: 60px;
-    border-radius: 6px;
-  }
-
-  .btn-asignar-lotes .icono,
-  .btn-pdf .icono,
-  .btn-borrar-todo .icono,
-  .btn-guardar-produccion .icono,
-  .btn-guardar-top .icono {
-    font-size: 11px;
-  }
-
-  .info-general {
-    padding: 8px 10px;
-    border-radius: 8px;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .info-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .label {
-    font-size: 9px;
-  }
-
-  .value {
-    font-size: 13px;
-  }
-
-  .titulo-tabla {
-    font-size: 13px;
-    margin: 8px 0 4px;
-  }
-
-  .fila-carga {
-    padding: 6px 8px;
-    border-radius: 6px;
-    gap: 3px;
-  }
-
-  .fila-carga.header {
-    font-size: 10px;
-    padding: 6px 8px;
-  }
-
-  .celda.g-2 {
-    min-width: 40px;
-    flex: 1.2;
-    font-size: 12px;
-  }
-
-  .celda.g-1 {
-    min-width: 30px;
-    flex: 1;
-    font-size: 12px;
-  }
-
-  .celda.nro {
-    flex: 0 0 24px;
-    font-size: 10px;
-    margin-right: 4px;
-  }
-
-  .nro-item {
-    flex: 0 0 24px !important;
-    font-size: 10px;
-    margin-right: 4px;
-  }
-
-  .contenedor-marcas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-    gap: 3px;
-  }
-
-  .marca-card {
-    padding: 2px 3px;
-    border-radius: 4px;
-  }
-
-  .marca-card h3 {
-    font-size: 6px;
-  }
-
-  .marca-card p {
-    font-size: 8px;
-  }
-
-  .marca-card span {
-    font-size: 8px;
-  }
-
-  .input-cantidad-expresion {
-    font-size: 10px;
-    padding: 3px 4px;
-    border-radius: 4px;
-  }
-
-  .input-cantidad-expresion::placeholder {
-    font-size: 8px;
-  }
-
-  .btn-borrar-fila {
-    width: 20px;
-    height: 20px;
-    font-size: 10px;
-    border-radius: 4px;
-  }
-
-  .sin-cargas {
-    padding: 20px 10px;
-    font-size: 12px;
-  }
-
-  .modal-footer .btn-guardar {
-    padding: 8px 16px;
-    font-size: 11px;
-    border-radius: 8px;
-  }
-
-  .contenedor-scroll-tabla {
-    padding-right: 4px;
-  }
-
-  /* Modal advertencia */
+@media (max-width: 400px) {
   .modal-advertencia {
     padding: 20px 14px;
-    border-radius: 16px;
   }
 
   .modal-advertencia .icono-advertencia svg {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
 
   .modal-advertencia h3 {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .modal-advertencia .subtitulo {
     font-size: 11px;
   }
-
-  .modal-advertencia .carga-info {
-    padding: 10px 12px;
-    border-radius: 10px;
-  }
-
-  .modal-advertencia .carga-info .info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    padding: 4px 0;
-  }
-
-  .modal-advertencia .carga-info .info-row .value {
-    font-size: 11px;
-  }
-
-  .modal-advertencia .carga-info .info-row .value.destacado {
-    font-size: 12px;
-  }
-
-  .modal-advertencia .mensaje {
-    font-size: 12px;
-    margin: 8px 0 14px 0;
-  }
-
-  .modal-advertencia .mensaje .texto-secundario {
-    font-size: 10px;
-  }
-
-  .modal-advertencia .botones {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .modal-advertencia .btn-cancelar,
-  .modal-advertencia .btn-eliminar {
-    padding: 10px 16px;
-    font-size: 11px;
-    border-radius: 10px;
-    width: 100%;
-    justify-content: center;
-  }
 }
 
-/* === PANTALLAS MUY PEQUEÑAS (menos de 360px) === */
-@media (max-width: 360px) {
+@media (max-width: 768px) {
   .modal-cargas {
-    padding: 8px;
-    border-radius: 8px;
+    width: 95%;
+    max-height: 90vh;
+    padding: 16px;
   }
 
   .modal-header h2 {
-    font-size: 14px;
-  }
-
-  .badge-contador {
-    font-size: 9px;
-    padding: 2px 6px;
-  }
-
-  .btn-asignar-lotes,
-  .btn-pdf,
-  .btn-borrar-todo,
-  .btn-guardar-produccion,
-  .btn-guardar-top {
-    padding: 5px 8px;
-    font-size: 8px;
-    min-width: 50px;
-  }
-
-  .btn-asignar-lotes .icono,
-  .btn-pdf .icono,
-  .btn-borrar-todo .icono,
-  .btn-guardar-produccion .icono,
-  .btn-guardar-top .icono {
-    font-size: 10px;
+    font-size: 20px;
   }
 
   .info-general {
-    padding: 6px 8px;
-  }
-
-  .value {
-    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
   }
 
   .fila-carga {
-    padding: 4px 6px;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px 12px;
   }
 
   .celda.g-2 {
-    font-size: 10px;
-    min-width: 30px;
+    min-width: 80px;
   }
 
   .celda.g-1 {
-    font-size: 10px;
-    min-width: 25px;
+    min-width: 50px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-guardar-top {
+    padding: 8px 14px;
+    font-size: 11px;
   }
 
   .contenedor-marcas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
 
   .marca-card {
-    padding: 2px;
+    padding: 3px 4px;
   }
 
   .marca-card h3 {
-    font-size: 5px;
+    font-size: 8px;
   }
 
   .marca-card p {
-    font-size: 7px;
+    font-size: 10px;
   }
 
   .marca-card span {
-    font-size: 7px;
-  }
-
-  .input-cantidad-expresion {
-    font-size: 9px;
-    padding: 2px 3px;
-  }
-
-  .modal-advertencia {
-    padding: 16px 12px;
-  }
-
-  .modal-advertencia h3 {
-    font-size: 14px;
-  }
-
-  .modal-advertencia .mensaje {
-    font-size: 11px;
-  }
-}
-
-/* === MANTENER DISEÑO ORIGINAL EN ESCRITORIO === */
-@media (min-width: 1025px) {
-  .modal-cargas {
-    width: 850px;
-    max-height: 85vh;
-    padding: 24px;
-    border-radius: 14px;
-  }
-
-  .modal-header h2 {
-    font-size: 24px;
-  }
-
-  .info-general {
-    padding: 15px 25px;
-  }
-
-  .value {
-    font-size: 18px;
-  }
-
-  .fila-carga {
-    padding: 12px 15px;
-  }
-
-  .contenedor-marcas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  }
-
-  .modal-advertencia {
-    padding: 32px 36px;
-    max-width: 480px;
-  }
-
-  /* Botones en escritorio - mantener diseño */
-  .header-actions {
-    gap: 8px;
-  }
-
-  .header-actions .btn-group {
-    gap: 6px;
-  }
-
-  .header-actions .separador {
-    height: 30px;
-    margin: 0 6px;
-    opacity: 0.5;
-  }
-
-  .btn-asignar-lotes,
-  .btn-pdf,
-  .btn-borrar-todo,
-  .btn-guardar-produccion,
-  .btn-guardar-top {
-    padding: 8px 16px;
-    font-size: 12px;
-    border-radius: 8px;
-  }
-
-  .btn-asignar-lotes .icono,
-  .btn-pdf .icono,
-  .btn-borrar-todo .icono,
-  .btn-guardar-produccion .icono,
-  .btn-guardar-top .icono {
-    font-size: 14px;
+    font-size: 10px;
   }
 }

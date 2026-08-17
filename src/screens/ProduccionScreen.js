@@ -7,6 +7,7 @@ import { getOperarioPorMaquina } from "../constants/config";
 import { createProduccionHandlers } from "../utils/produccionHandlers";
 import { verificarCargaReciente, verificarCargaPorFolio } from '../services/cargaService';
 import { planificadorService } from '../services/planificadorService';
+import { operarioService } from '../services/operarioService'; // ⭐ IMPORTAR operarioService
 
 // Componentes
 import BusquedaSeccion from "../components/BusquedaSeccion";
@@ -70,6 +71,7 @@ export default function ProduccionScreen() {
     const [progreso, setProgreso] = useState(0);
     const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
     const perfilRef = useRef(null);
+    const [notificacionGuardado, setNotificacionGuardado] = useState(null);
 
     // --- ESTADO PARA CONTADOR DE CARGAS EN LOCALSTORAGE ---
     const [cargasEnLocalStorage, setCargasEnLocalStorage] = useState(() => {
@@ -124,6 +126,24 @@ export default function ProduccionScreen() {
 
     // 🔴🔴🔴 NUEVO: ESTADO PARA OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const [operariosPorMaquina, setOperariosPorMaquina] = useState({});
+    
+    // ⭐⭐⭐ NUEVO: ESTADO PARA OPERARIOS VINÍLICA CON IDs ⭐⭐⭐
+    const [operariosVinilicaCompleto, setOperariosVinilicaCompleto] = useState([]);
+
+    // ⭐ FUNCIÓN PARA CARGAR OPERARIOS VINÍLICA CON IDs
+    const cargarOperariosVinilica = async () => {
+        try {
+            console.log('🔄 Cargando operarios vinílica con IDs...');
+            const vinilica = await operarioService.getVinilica();
+            const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
+            setOperariosVinilicaCompleto(preparadores);
+            console.log('👥 Operarios Vinílica con IDs:', preparadores.map(op => ({ id: op.id, nombre: op.nombre })));
+            return preparadores;
+        } catch (error) {
+            console.error('❌ Error cargando operarios vinílica:', error);
+            return [];
+        }
+    };
 
     // ⭐ FUNCIÓN PARA CARGAR PLANIFICADOR DESDE BD (prioridad)
     const cargarPlanificadorDesdeBD = async () => {
@@ -191,6 +211,11 @@ export default function ProduccionScreen() {
     // ⭐ CARGAR PLANIFICADOR AL INICIAR (prioridad BD)
     useEffect(() => {
         cargarPlanificadorDesdeBD();
+    }, []);
+
+    // ⭐ CARGAR OPERARIOS VINÍLICA AL INICIAR
+    useEffect(() => {
+        cargarOperariosVinilica();
     }, []);
 
     // ⭐ ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
@@ -466,7 +491,7 @@ export default function ProduccionScreen() {
     useEffect(() => {
         const cargarFamilias = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/familias');
+                const response = await fetch('https://pintuplaneacion-backend.onrender.com/api/familias');
                 if (response.ok) {
                     const data = await response.json();
                     setFamilias(data);
@@ -859,35 +884,6 @@ export default function ProduccionScreen() {
                 progreso={progreso}
             />
 
-            {/* ⭐ INDICADOR DE ESTADO DEL PLANIFICADOR */}
-            {datosPlanificador && (
-                <div style={{
-                    position: 'fixed',
-                    top: '70px',
-                    right: '20px',
-                    background: planificadorGuardadoEnBD ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 193, 7, 0.9)',
-                    color: 'white',
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    zIndex: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-                }}>
-                    {planificadorGuardadoEnBD ? '✅' : '📋'}
-                    <span>
-                        {planificadorGuardadoEnBD ? 'Guardado en BD' : 'En cache local'}
-                    </span>
-                    {fechaSincronizacion && (
-                        <span style={{ fontSize: '10px', opacity: 0.8 }}>
-                            {new Date(fechaSincronizacion).toLocaleString()}
-                        </span>
-                    )}
-                </div>
-            )}
-
             <div className="container">
                 {/* NIVEBAR */}
                 <Nivebar
@@ -1114,6 +1110,7 @@ export default function ProduccionScreen() {
                             setMostrarDetalle={setMostrarDetalle}
                             filtroOperario={filtroOperario}
                             onOperariosActualizados={handleOperariosActualizados}
+                            operariosVinilicaCompleto={operariosVinilicaCompleto} // ⭐ NUEVO PROP
                         />
                     ) : (
                         <TableroEsmaltes

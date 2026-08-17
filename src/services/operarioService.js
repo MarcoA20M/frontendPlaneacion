@@ -1,10 +1,12 @@
-// src/services/operarioService.js
+
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api/operarios';
 
-export const operarioService = {
+// ========== CLAVE PARA LÍMITES EN LOCALSTORAGE ==========
+const LIMITES_STORAGE_KEY = 'limites_rondas_operarios';
 
+export const operarioService = {
   // ========== VINÍLICA ==========
   getVinilica: async () => {
     const response = await axios.get(`${API_URL}/vinilica`);
@@ -42,7 +44,66 @@ export const operarioService = {
     });
     return response.data;
   },
+
+  // ========== LÍMITE DE RONDAS (LOCALSTORAGE) ==========
   
+  // Guardar límite de rondas para un operario
+  guardarLimiteRondas: (operarioId, limiteRondas) => {
+    try {
+      const limites = operarioService.obtenerTodosLosLimites();
+      const limiteFinal = Math.max(0, Math.min(6, parseInt(limiteRondas) || 2));
+      limites[operarioId] = {
+        limite: limiteFinal,
+        actualizado: new Date().toISOString()
+      };
+      localStorage.setItem(LIMITES_STORAGE_KEY, JSON.stringify(limites));
+      return limites[operarioId];
+    } catch (error) {
+      console.error('Error guardando límite de rondas:', error);
+      return null;
+    }
+  },
+
+  // Obtener todos los límites guardados
+  obtenerTodosLosLimites: () => {
+    try {
+      const data = localStorage.getItem(LIMITES_STORAGE_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch (error) {
+      console.error('Error obteniendo límites:', error);
+      return {};
+    }
+  },
+
+  // Obtener límite de un operario específico
+  obtenerLimiteRondas: (operarioId) => {
+    const limites = operarioService.obtenerTodosLosLimites();
+    return limites[operarioId]?.limite || 2;
+  },
+
+  // Eliminar límite de un operario
+  eliminarLimiteRondas: (operarioId) => {
+    try {
+      const limites = operarioService.obtenerTodosLosLimites();
+      delete limites[operarioId];
+      localStorage.setItem(LIMITES_STORAGE_KEY, JSON.stringify(limites));
+      return true;
+    } catch (error) {
+      console.error('Error eliminando límite:', error);
+      return false;
+    }
+  },
+
+  // Obtener límites para todos los operarios de una lista
+  obtenerLimitesParaOperarios: (operarioIds) => {
+    const limites = operarioService.obtenerTodosLosLimites();
+    const resultado = {};
+    operarioIds.forEach(id => {
+      resultado[id] = limites[id]?.limite || 2;
+    });
+    return resultado;
+  },
+
   // ========== ESMALTES ==========
   getEsmaltes: async () => {
     const response = await axios.get(`${API_URL}/esmaltes`);
@@ -54,7 +115,6 @@ export const operarioService = {
     return response.data;
   },
   
-  // Obtener TODOS los operarios
   getAll: async () => {
     const response = await axios.get(`${API_URL}`);
     return response.data;
@@ -67,111 +127,21 @@ export const operarioService = {
   },
   
   // ========== VACACIONES ==========
-  /**
-   * Obtener todas las vacaciones
-   */
   getVacaciones: async () => {
-    try {
-      const response = await axios.get(`${API_URL}/vacaciones`);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error obteniendo vacaciones:', error);
-      return [];
-    }
+    const response = await axios.get(`${API_URL}/vacaciones`);
+    return response.data;
   },
 
-  /**
-   * Obtener vacaciones activas (las que están en curso)
-   */
-  getVacacionesActivas: async () => {
-    try {
-      const response = await axios.get(`${API_URL}/vacaciones/activas`);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error obteniendo vacaciones activas:', error);
-      return [];
-    }
+  crearVacacion: async (vacacion) => {
+    const response = await axios.post(`${API_URL}/vacaciones`, vacacion);
+    return response.data;
   },
 
-  /**
-   * Obtener vacaciones de un operario específico
-   */
-  getVacacionesByOperario: async (operarioId) => {
-    try {
-      const response = await axios.get(`${API_URL}/vacaciones/operario/${operarioId}`);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error obteniendo vacaciones del operario:', error);
-      return [];
-    }
-  },
-
-  /**
-   * Crear un nuevo registro de vacaciones
-   */
-  crearVacacion: async (data) => {
-    try {
-      const response = await axios.post(`${API_URL}/vacaciones`, data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error creando vacación:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Actualizar un registro de vacaciones
-   */
-  actualizarVacacion: async (id, data) => {
-    try {
-      const response = await axios.put(`${API_URL}/vacaciones/${id}`, data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error actualizando vacación:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Eliminar un registro de vacaciones (soft delete o hard delete según backend)
-   */
   eliminarVacacion: async (id) => {
-    try {
-      await axios.delete(`${API_URL}/vacaciones/${id}`);
-      return true;
-    } catch (error) {
-      console.error('❌ Error eliminando vacación:', error);
-      throw error;
-    }
+    await axios.delete(`${API_URL}/vacaciones/${id}`);
   },
-
-  /**
-   * Cancelar una vacación (marcar como inactiva)
-   */
-  cancelarVacacion: async (id) => {
-    try {
-      const response = await axios.patch(`${API_URL}/vacaciones/${id}/cancelar`);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error cancelando vacación:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Verificar si un operario está de vacaciones
-   */
-  estaEnVacaciones: async (operarioId) => {
-    try {
-      const response = await axios.get(`${API_URL}/vacaciones/verificar/${operarioId}`);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error verificando vacaciones:', error);
-      return { enVacaciones: false };
-    }
-  },
-
-  // ========== CRUD GENERAL ==========
+  
+  // ========== CRUD ==========
   crear: async (operario) => {
     const response = await axios.post(API_URL, operario);
     return response.data;
@@ -193,3 +163,7 @@ export const operarioService = {
 };
 
 export default operarioService;
+
+
+
+

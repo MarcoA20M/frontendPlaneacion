@@ -1187,3 +1187,94 @@
     font-size: 12px;
     font-weight: bold;
 }
+
+/* ========== LÍMITE DE RONDAS ========== */
+.limite-input {
+    width: 60px;
+    text-align: center;
+    background: #1a1a2e;
+    border: 1px solid rgba(192, 0, 255, 0.3);
+    border-radius: 6px;
+    color: #e0e0e0;
+    padding: 4px 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.limite-input:focus {
+    outline: none;
+    border-color: #c084fc;
+    box-shadow: 0 0 15px rgba(192, 0, 255, 0.2);
+}
+
+.limite-input::-webkit-inner-spin-button {
+    opacity: 1;
+    height: 24px;
+}
+
+/* Estilo para celdas con límite alcanzado */
+.celda-ronda.limite-alcanzado {
+    opacity: 0.6;
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.celda-ronda.limite-alcanzado .draggable {
+    cursor: not-allowed !important;
+}
+
+/* Tooltip de límite */
+.rondas-info {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.rondas-info:hover {
+    transform: scale(1.05);
+}
+
+/* Leyenda de colores para el límite */
+.rondas-info.limite-verde {
+    background: rgba(74, 222, 128, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.rondas-info.limite-amarillo {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.rondas-info.limite-rojo {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    animation: pulse-limit 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-limit {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Indicador de límite en la tabla de operarios */
+.limite-indicador {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: rgba(192, 0, 255, 0.1);
+    border: 1px solid rgba(192, 0, 255, 0.2);
+    color: #c084fc;
+}
+
+.limite-indicador .limite-valor {
+    font-weight: bold;
+    color: #e0e0e0;
+}

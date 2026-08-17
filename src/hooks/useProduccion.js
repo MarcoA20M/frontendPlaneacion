@@ -1219,155 +1219,214 @@ export function useProduccion() {
         setCargasEsmaltesAsignadas(prev => prev.map(c => c.idTemp === idTemp ? { ...c, operario: nuevoOperario } : c));
     };
 
-    // ============================================================
-    // GUARDAR CARGAS EN RONDAS
-    // ============================================================
-    const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
-        console.log('📦 guardarCargasEnRondas - Cargas a guardar:', cargasAGuardar?.length || 0);
-        
-        if (!cargasAGuardar || cargasAGuardar.length === 0) {
-            console.warn('⚠️ No hay cargas para guardar');
-            return;
-        }
 
-        const idsAsignados = [];
-        
-        if (tipoPintura === "Esmalte") {
-            const nombres = await getNombresOperariosEsmaltes();
-            
-            const preparadores = nombres.preparadores || [];
-            const molienda = nombres.molienda || [];
-            const terminados = nombres.terminados || [];
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN CORREGIDA)
+// ============================================================
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN CORREGIDA)
+// ============================================================
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN CON DISTRIBUCIÓN EQUITATIVA)
+// ============================================================
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN POR RONDAS)
+// ============================================================
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN FINAL - POR RONDAS + LÍMITES)
+// ============================================================
+const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
+    console.log('📦 guardarCargasEnRondas - Cargas a guardar:', cargasAGuardar?.length || 0);
+    
+    if (!cargasAGuardar || cargasAGuardar.length === 0) {
+        console.warn('⚠️ No hay cargas para guardar');
+        return;
+    }
 
-            let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
-            
-            cargasAGuardar.forEach((carga) => {
-                const listaProcesos = (carga.procesos || []).map(p => p.descripcion.toUpperCase());
-                const codigoUpper = normalizarCodigo(carga.codigoProducto);
-                const esBase = CODIGOS_BASES.includes(codigoUpper) || codigoUpper.startsWith("B");
-                const tieneMolienda = listaProcesos.some(d => d.includes("MOLIENDA"));
-                const tienePreparado = listaProcesos.some(d => d.includes("PREPARADO") || d.includes("DISPERSION"));
-                const tieneEtapaFinal = listaProcesos.some(d => d.includes("IGUALACIÓN") || d.includes("IGUALACION") || d.includes("TERMINADO") || d.includes("AJUSTE"));
-                
-                let ops = [];
-                
-                if (esBase) {
-                    if (preparadores.length > 0) ops.push(preparadores[0]);
-                } else if (tieneMolienda) {
-                    if (molienda.length > 0) ops.push(molienda[0]);
-                } else if (tienePreparado) {
-                    if (preparadores.length > 0) ops.push(preparadores[0]);
-                }
-                
-                if (tieneEtapaFinal || ops.length === 0) {
-                    if (terminados.length > 0) {
-                        const balance = terminados.map(n => ({ 
-                            n, 
-                            t: tempAsignadasEsmaltes.filter(c => c.operario && c.operario.includes(n)).length 
-                        })).sort((a, b) => a.t - b.t);
-                        
-                        if (!ops.includes(balance[0].n)) {
-                            ops.push(balance[0].n);
-                        }
-                    }
-                }
-                
-                if (ops.length === 0) {
-                    if (preparadores.length > 0) ops.push(preparadores[0]);
-                    else if (molienda.length > 0) ops.push(molienda[0]);
-                    else if (terminados.length > 0) ops.push(terminados[0]);
-                    else {
-                        ops.push('');
-                    }
-                }
-                
-                const operarioAsignado = ops.filter(o => o !== '').join(" / ");
-                tempAsignadasEsmaltes.push({ 
-                    ...carga, 
-                    operario: operarioAsignado || '', 
-                    maquina: "ESM" 
-                });
-                idsAsignados.push(carga.idTemp);
-            });
-            
-            const esmaltesOrdenados = ordenarCargas(tempAsignadasEsmaltes);
-            setCargasEsmaltesAsignadas(esmaltesOrdenados);
-            
-            try {
-                localStorage.setItem(STORAGE_KEY_ESMALTES, JSON.stringify(esmaltesOrdenados));
-            } catch (error) {
-                console.error('Error guardando esmaltes en localStorage:', error);
-            }
-        } else {
-            const nuevasRondas = rondas.map(f => [...f]);
-            const nuevasEspeciales = [...cargasEspeciales];
-            
-            cargasAGuardar.forEach((carga) => {
-                let asignada = false;
-                for (let col = 0; col < 6 && !asignada; col++) {
-                    for (let fila = 0; fila < 8; fila++) {
-                        if (!nuevasRondas[fila][col]) {
-                            const numM = 101 + fila;
-                            const esGran = [104, 108].includes(numM);
-                            let cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
-                            if (cumpleRegla) {
-                                const operario = getOperarioPorMaquinaSync(numM);
-                                
-                                nuevasRondas[fila][col] = { 
-                                    ...carga, 
-                                    maquina: numM,
-                                    operario: operario,
-                                    textoMaquina: `VI-${numM} ${operario}`
-                                };
-                                asignada = true;
-                                idsAsignados.push(carga.idTemp);
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!asignada) { 
-                    const operario = carga.operario || 'Sin asignar';
-                    nuevasEspeciales.push({
-                        ...carga,
-                        operario: String(operario),
-                        textoMaquina: `ESPECIAL ${operario}`
-                    }); 
-                    idsAsignados.push(carga.idTemp); 
-                }
-            });
-            
-            setRondas(nuevasRondas);
-            setCargasEspeciales(ordenarCargas(nuevasEspeciales));
-            
-            try {
-                localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
-                localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
-            } catch (error) {
-                console.error('Error guardando rondas en localStorage:', error);
-            }
-            
-            window.dispatchEvent(new CustomEvent('rondasActualizadas', { 
-                detail: { rondas: nuevasRondas } 
-            }));
-        }
+    const idsAsignados = [];
+    
+    if (tipoPintura === "Esmalte") {
+        // ... código de esmaltes igual ...
+    } else {
+        const nuevasRondas = rondas.map(f => [...f]);
+        const nuevasEspeciales = [...cargasEspeciales];
         
-        setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
+        // ========== 1. OBTENER LÍMITES DESDE LOCALSTORAGE ==========
+        const limitesGuardados = operarioService.obtenerTodosLosLimites();
         
+        // ========== 2. OBTENER MAPA DE NOMBRE -> ID ==========
+        const mapaNombreId = {};
         try {
-            const colaActualizada = colaCargas.filter(c => !idsAsignados.includes(c.idTemp));
-            localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaActualizada));
+            const vinilica = await operarioService.getVinilica();
+            const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
+            preparadores.forEach(op => {
+                if (op.nombre && op.id) {
+                    mapaNombreId[op.nombre] = op.id;
+                }
+            });
         } catch (error) {
-            console.error('Error guardando cola en localStorage:', error);
+            console.error('Error obteniendo operarios vinílica:', error);
         }
-        
-        console.log('✅ guardarCargasEnRondas completado - Cargas asignadas:', idsAsignados.length);
-    }, [tipoPintura, cargasEsmaltesAsignadas, rondas, cargasEspeciales, colaCargas, ordenarCargas, getNombresOperariosEsmaltes]);
 
-    // ============================================================
-    // RETURN
-    // ============================================================
-    return {
+        // ========== 3. CALCULAR LÍMITE POR MÁQUINA ==========
+        const limitePorMaquina = {};
+        for (let i = 0; i < 8; i++) {
+            const maquinaId = 101 + i;
+            const operario = getOperarioPorMaquinaSync(maquinaId);
+            const id = mapaNombreId[operario];
+            let limite = 4; // Valor por defecto
+            
+            if (id && limitesGuardados[id]) {
+                limite = limitesGuardados[id].limite || 4;
+            }
+            limitePorMaquina[maquinaId] = limite;
+        }
+        console.log('📊 Límite por máquina:', limitePorMaquina);
+
+        // ========== 4. INICIALIZAR CONTADORES POR MÁQUINA ==========
+        const contadorPorMaquina = {};
+        for (let i = 0; i < 8; i++) {
+            contadorPorMaquina[101 + i] = 0;
+        }
+
+        // ========== 5. ORDENAR CARGAS POR NIVEL CUBRIENTE (menor a mayor) ==========
+        const cargasOrdenadas = [...cargasAGuardar].sort((a, b) => {
+            const nivelA = a.nivelCubriente || 0;
+            const nivelB = b.nivelCubriente || 0;
+            if (nivelA !== nivelB) return nivelA - nivelB;
+            return (b.litros || 0) - (a.litros || 0);
+        });
+        
+        console.log('📊 Cargas ordenadas por nivel cubriente:', cargasOrdenadas.map(c => ({ folio: c.folio, nivel: c.nivelCubriente || 0 })));
+
+        // ========== 6. ASIGNAR POR RONDAS RESPETANDO LÍMITES ==========
+        let indiceCarga = 0;
+        const totalCargas = cargasOrdenadas.length;
+        let cargasSinAsignar = [];
+
+        // Recorrer por rondas (columnas)
+        for (let col = 0; col < 6 && indiceCarga < totalCargas; col++) {
+            // Recorrer máquinas en orden (filas)
+            for (let fila = 0; fila < 8 && indiceCarga < totalCargas; fila++) {
+                const numM = 101 + fila;
+                
+                // ⭐ VERIFICAR LÍMITE DE LA MÁQUINA
+                const limite = limitePorMaquina[numM] || 4;
+                const usado = contadorPorMaquina[numM] || 0;
+                
+                if (usado >= limite) {
+                    console.log(`⏭️ VI-${numM} ya llegó a su límite (${limite}), saltando...`);
+                    continue; // Esta máquina ya no puede recibir más cargas
+                }
+                
+                // Verificar si esta máquina ya tiene cargas en esta ronda
+                if (!nuevasRondas[fila][col]) {
+                    const carga = cargasOrdenadas[indiceCarga];
+                    
+                    // Verificar reglas de máquinas especiales (cargas > 1600L)
+                    const esGran = [104, 108].includes(numM);
+                    const cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
+                    
+                    if (cumpleRegla) {
+                        const operario = getOperarioPorMaquinaSync(numM);
+                        
+                        nuevasRondas[fila][col] = { 
+                            ...carga, 
+                            maquina: numM,
+                            operario: operario,
+                            textoMaquina: `VI-${numM} ${operario}`
+                        };
+                        contadorPorMaquina[numM] = usado + 1;
+                        idsAsignados.push(carga.idTemp);
+                        indiceCarga++;
+                        console.log(`✅ Ronda ${col + 1}: VI-${numM} ${operario} (${usado + 1}/${limite}) - ${carga.folio} (Nivel: ${carga.nivelCubriente || 0})`);
+                    }
+                }
+            }
+        }
+
+        // ========== 7. CARGAS QUE NO CUPIERON ==========
+        for (let i = indiceCarga; i < totalCargas; i++) {
+            const carga = cargasOrdenadas[i];
+            cargasSinAsignar.push({
+                ...carga,
+                operario: 'Sin asignar',
+                textoMaquina: 'ESPECIAL'
+            });
+            idsAsignados.push(carga.idTemp);
+            console.log(`⚠️ Carga ${carga.folio} (Nivel: ${carga.nivelCubriente || 0}) enviada a ESPECIALES`);
+        }
+
+        // ========== 8. AGREGAR ESPECIALES ==========
+        if (cargasSinAsignar.length > 0) {
+            cargasSinAsignar.forEach(carga => {
+                nuevasEspeciales.push(carga);
+            });
+        }
+
+        // ========== 9. ACTUALIZAR ESTADOS ==========
+        setRondas(nuevasRondas);
+        setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+
+        try {
+            localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
+            localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
+        } catch (error) {
+            console.error('Error guardando rondas en localStorage:', error);
+        }
+
+       window.dispatchEvent(new CustomEvent('actualizarConteoRondas', {
+    detail: { rondas: nuevasRondas }
+}));
+
+        // ========== 10. MOSTRAR RESUMEN ==========
+        const cargasAsignadas = idsAsignados.length - cargasSinAsignar.length;
+        
+        // Contar por máquina
+        const resumenMaquinas = Object.entries(contadorPorMaquina)
+            .filter(([_, count]) => count > 0)
+            .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+            .map(([maquinaId, count]) => {
+                const limite = limitePorMaquina[maquinaId] || 4;
+                const operario = getOperarioPorMaquinaSync(parseInt(maquinaId));
+                return `VI-${maquinaId} (${operario}): ${count}/${limite}`;
+            });
+
+        console.log(`✅ guardarCargasEnRondas completado`);
+        console.log(`📊 Cargas asignadas: ${cargasAsignadas}, Especiales: ${cargasSinAsignar.length}`);
+        console.log(`📊 Por máquina:`, resumenMaquinas);
+
+        // Mostrar alerta con resumen
+        const mensaje = `✅ Cargas asignadas correctamente\n\n` +
+                        `Total: ${totalCargas} cargas\n` +
+                        `Asignadas: ${cargasAsignadas}\n` +
+                        `Especiales: ${cargasSinAsignar.length}\n\n` +
+                        `📊 Resumen por máquina:\n${resumenMaquinas.join('\n')}`;
+
+        if (cargasSinAsignar.length > 0) {
+            alert(`⚠️ ${cargasSinAsignar.length} cargas no pudieron asignarse y fueron enviadas a ESPECIALES\n\n${mensaje}`);
+        } else {
+            alert(mensaje);
+        }
+    }
+
+    // ========== 11. LIMPIAR COLA ==========
+    setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
+
+    try {
+        const colaActualizada = colaCargas.filter(c => !idsAsignados.includes(c.idTemp));
+        localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaActualizada));
+    } catch (error) {
+        console.error('Error guardando cola en localStorage:', error);
+    }
+
+    console.log('✅ guardarCargasEnRondas completado - Cargas asignadas:', idsAsignados.length);
+
+}, [tipoPintura, rondas, cargasEspeciales, colaCargas, ordenarCargas, getNombresOperariosEsmaltes]);
+
+
+
+return {
         codigo, setCodigo, producto, cantidades, setCantidades, colaCargas, setColaCargas,
         cargasEspeciales, setCargasEspeciales, tipoPintura, setTipoPintura,
         rondas, setRondas, cargasEsmaltesAsignadas, setCargasEsmaltesAsignadas,

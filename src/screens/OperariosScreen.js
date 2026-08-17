@@ -51,7 +51,7 @@ export default function OperariosScreen() {
     // Estado para operarios de Esmaltes
     const [otrosOperarios, setOtrosOperarios] = useState([]);
     
-    // 🔴 NUEVO: Envasadores de Esmaltes
+    // Envasadores de Esmaltes
     const [envasadoresEsmaltes, setEnvasadoresEsmaltes] = useState([]);
 
     // Estado para operarios especiales
@@ -103,6 +103,33 @@ export default function OperariosScreen() {
         }
     };
 
+    // ========== GESTIÓN DE LÍMITE DE RONDAS (LOCALSTORAGE) ==========
+    const editarLimiteRondas = (id, nuevoLimite) => {
+        const limite = parseInt(nuevoLimite);
+        if (isNaN(limite) || limite < 0) {
+            mostrarMensaje("❌ El límite debe ser un número positivo", "error");
+            return;
+        }
+        
+        // Máximo 6 rondas (porque son 6 rondas en vinílicas)
+        const limiteFinal = Math.min(limite, 6);
+        
+        // Guardar en localStorage
+        const resultado = operarioService.guardarLimiteRondas(id, limiteFinal);
+        
+        if (resultado) {
+            // Actualizar el estado local
+            setOperariosVinilica(prev => prev.map(op =>
+                op.id === id ? { ...op, limiteRondas: limiteFinal } : op
+            ));
+            
+            const operario = operariosVinilica.find(op => op.id === id);
+            mostrarMensaje(`📊 Límite de ${limiteFinal} rondas para "${operario?.nombre || 'operario'}"`, "success");
+        } else {
+            mostrarMensaje("❌ Error al guardar límite", "error");
+        }
+    };
+
     // ========== CARGAR DATOS DESDE BACKEND ==========
     const cargarDatos = async () => {
         setCargando(true);
@@ -113,12 +140,22 @@ export default function OperariosScreen() {
             const vinilica = await operarioService.getVinilica();
             console.log('✅ Vinílicas cargadas:', vinilica);
             
-            // 🔴 Separar Vinílicas por puesto
+            // Separar Vinílicas por puesto
             const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
             const envasadoresFiltrados = vinilica.filter(op => op.puesto === 'Envasador');
             const igualadoresFiltrados = vinilica.filter(op => op.puesto === 'Igualador' || op.puesto === 'Terminado');
             
-            console.log('✅ Preparadores:', preparadores);
+            // ⭐ CARGAR LÍMITES DESDE LOCALSTORAGE
+            const limitesGuardados = operarioService.obtenerTodosLosLimites();
+            
+            const preparadoresConLimite = preparadores.map(op => ({
+                ...op,
+                limiteRondas: limitesGuardados[op.id]?.limite !== undefined 
+                    ? limitesGuardados[op.id].limite 
+                    : (op.limiteRondas || 2)
+            }));
+            
+            console.log('✅ Preparadores con límites:', preparadoresConLimite);
             console.log('✅ Envasadores:', envasadoresFiltrados);
             console.log('✅ Igualadores:', igualadoresFiltrados);
             
@@ -127,7 +164,7 @@ export default function OperariosScreen() {
             console.log("📦 Configuración recibida:", config);
             
             // ORDENAR LOS OPERARIOS SEGÚN LA CONFIGURACIÓN DE GRUPOS BASE
-            let operariosOrdenados = [...preparadores];
+            let operariosOrdenados = [...preparadoresConLimite];
             
             if (config && config.gruposBase) {
                 const gruposOrden = ["grupo0", "grupo1", "grupo2", "grupo3"];
@@ -135,7 +172,7 @@ export default function OperariosScreen() {
                 
                 if (ordenIds.length > 0) {
                     const operariosMap = new Map();
-                    preparadores.forEach(op => operariosMap.set(op.id, op));
+                    preparadoresConLimite.forEach(op => operariosMap.set(op.id, op));
                     
                     const nuevosOperarios = [];
                     const idsUsados = new Set();
@@ -147,7 +184,7 @@ export default function OperariosScreen() {
                         }
                     });
                     
-                    preparadores.forEach(op => {
+                    preparadoresConLimite.forEach(op => {
                         if (!idsUsados.has(op.id)) {
                             nuevosOperarios.push(op);
                         }
@@ -204,7 +241,7 @@ export default function OperariosScreen() {
                 esmaltes = [];
             }
             
-            // 🔴 NUEVO: Separar envasadores de esmaltes
+            // Separar envasadores de esmaltes
             const envasadoresEsm = esmaltes.filter(op => op.puesto === 'Envasador');
             const operariosEsm = esmaltes.filter(op => op.puesto !== 'Envasador');
             
@@ -439,10 +476,15 @@ export default function OperariosScreen() {
                 nombre: nombre.trim(),
                 puesto: "Preparador",
                 area: "vinilica",
-                activo: true
+                activo: true,
+                limiteRondas: 2 // Límite por defecto
             });
+            
+            // Guardar límite en localStorage
+            operarioService.guardarLimiteRondas(nuevo.id, 2);
+            
             setOperariosVinilica([...operariosVinilica, nuevo]);
-            mostrarMensaje(`✅ "${nombre}" agregado como Preparador`);
+            mostrarMensaje(`✅ "${nombre}" agregado como Preparador (límite: 2 rondas)`);
             await cargarDatos();
         } catch (error) {
             mostrarMensaje("❌ Error al agregar preparador", "error");
@@ -472,6 +514,9 @@ export default function OperariosScreen() {
         const operario = operariosVinilica.find(op => op.id === id);
         if (window.confirm(`¿Eliminar al preparador "${operario.nombre}"?`)) {
             try {
+                // Eliminar límite de localStorage
+                operarioService.eliminarLimiteRondas(id);
+                
                 await operarioService.eliminar(id);
                 const nuevosOperarios = operariosVinilica.filter(op => op.id !== id);
                 setOperariosVinilica(nuevosOperarios);
@@ -861,12 +906,21 @@ export default function OperariosScreen() {
         const nuevasSemanas = semanasRotadas + 1;
         setSemanasRotadas(nuevasSemanas);
         mostrarMensaje(`🔄 Rotación aplicada (Semana ${nuevasSemanas})`);
+        
+        // Disparar evento para actualizar el tablero
+        window.dispatchEvent(new CustomEvent("rotacionActualizada", {
+            detail: { semanas: nuevasSemanas }
+        }));
     };
 
     const resetearRotacion = () => {
         if (window.confirm("¿Resetear la rotación a la configuración inicial?")) {
             setSemanasRotadas(0);
             mostrarMensaje("🔄 Rotación reseteada");
+            
+            window.dispatchEvent(new CustomEvent("rotacionActualizada", {
+                detail: { semanas: 0 }
+            }));
         }
     };
 
@@ -1219,6 +1273,7 @@ export default function OperariosScreen() {
                                         <th style={{ width: '50px' }}>⋮⋮</th>
                                         <th>Nombre (Editable)</th>
                                         <th>Puesto</th>
+                                        <th style={{ width: '130px' }}>🎯 Límite Rondas (0-6)</th>
                                         <th>Estado</th>
                                         <th className="txt-center">Acciones</th>
                                     </tr>
@@ -1253,6 +1308,31 @@ export default function OperariosScreen() {
                                                     )}
                                                 </td>
                                                 <td><span className="op-puesto-tag">Preparador</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" 
+                                                            max="6"
+                                                            className="limite-input"
+                                                            value={op.limiteRondas !== undefined ? op.limiteRondas : 2}
+                                                            onChange={(e) => editarLimiteRondas(op.id, e.target.value)}
+                                                            style={{
+                                                                width: '60px',
+                                                                textAlign: 'center',
+                                                                background: '#1a1a2e',
+                                                                border: '1px solid rgba(192,0,255,0.3)',
+                                                                borderRadius: '6px',
+                                                                color: '#e0e0e0',
+                                                                padding: '4px 8px',
+                                                                fontSize: '14px'
+                                                            }}
+                                                        />
+                                                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                                            / 6
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <button className={`status-badge ${op.activo ? 'active' : 'inactive'}`}
                                                         style={{ fontSize: '12px', padding: '3px 10px' }}>

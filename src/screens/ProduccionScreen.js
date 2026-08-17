@@ -7,6 +7,7 @@ import { getOperarioPorMaquina } from "../constants/config";
 import { createProduccionHandlers } from "../utils/produccionHandlers";
 import { verificarCargaReciente, verificarCargaPorFolio } from '../services/cargaService';
 import { planificadorService } from '../services/planificadorService';
+import { operarioService } from '../services/operarioService'; // ⭐ IMPORTAR operarioService
 
 // Componentes
 import BusquedaSeccion from "../components/BusquedaSeccion";
@@ -72,7 +73,6 @@ export default function ProduccionScreen() {
     const perfilRef = useRef(null);
     const [notificacionGuardado, setNotificacionGuardado] = useState(null);
 
-
     // --- ESTADO PARA CONTADOR DE CARGAS EN LOCALSTORAGE ---
     const [cargasEnLocalStorage, setCargasEnLocalStorage] = useState(() => {
         try {
@@ -126,6 +126,24 @@ export default function ProduccionScreen() {
 
     // 🔴🔴🔴 NUEVO: ESTADO PARA OPERARIOS DE VINÍLICAS 🔴🔴🔴
     const [operariosPorMaquina, setOperariosPorMaquina] = useState({});
+    
+    // ⭐⭐⭐ NUEVO: ESTADO PARA OPERARIOS VINÍLICA CON IDs ⭐⭐⭐
+    const [operariosVinilicaCompleto, setOperariosVinilicaCompleto] = useState([]);
+
+    // ⭐ FUNCIÓN PARA CARGAR OPERARIOS VINÍLICA CON IDs
+    const cargarOperariosVinilica = async () => {
+        try {
+            console.log('🔄 Cargando operarios vinílica con IDs...');
+            const vinilica = await operarioService.getVinilica();
+            const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
+            setOperariosVinilicaCompleto(preparadores);
+            console.log('👥 Operarios Vinílica con IDs:', preparadores.map(op => ({ id: op.id, nombre: op.nombre })));
+            return preparadores;
+        } catch (error) {
+            console.error('❌ Error cargando operarios vinílica:', error);
+            return [];
+        }
+    };
 
     // ⭐ FUNCIÓN PARA CARGAR PLANIFICADOR DESDE BD (prioridad)
     const cargarPlanificadorDesdeBD = async () => {
@@ -193,6 +211,11 @@ export default function ProduccionScreen() {
     // ⭐ CARGAR PLANIFICADOR AL INICIAR (prioridad BD)
     useEffect(() => {
         cargarPlanificadorDesdeBD();
+    }, []);
+
+    // ⭐ CARGAR OPERARIOS VINÍLICA AL INICIAR
+    useEffect(() => {
+        cargarOperariosVinilica();
     }, []);
 
     // ⭐ ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
@@ -861,8 +884,6 @@ export default function ProduccionScreen() {
                 progreso={progreso}
             />
 
-     
-
             <div className="container">
                 {/* NIVEBAR */}
                 <Nivebar
@@ -1089,6 +1110,7 @@ export default function ProduccionScreen() {
                             setMostrarDetalle={setMostrarDetalle}
                             filtroOperario={filtroOperario}
                             onOperariosActualizados={handleOperariosActualizados}
+                            operariosVinilicaCompleto={operariosVinilicaCompleto} // ⭐ NUEVO PROP
                         />
                     ) : (
                         <TableroEsmaltes

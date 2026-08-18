@@ -12,17 +12,29 @@ const TableroEsmaltes = ({
 }) => {
   
   const cargasFiltradas = cargas.filter(c => {
-    const nombreCarga = c.operario || 'Área Esmaltes';
+    // ⭐ EXCLUIR ENVASADORES: Si el operario es un envasador, NO se muestra
+    // Los envasadores se manejan en la sección de Envasadores de Operarios
+    const operario = c.operario || 'Área Esmaltes';
     
-    const pasaNombre = filtroOperario ? nombreCarga.includes(filtroOperario) : true;
+    // Lista de envasadores (puedes obtenerla de una constante o del servicio)
+    const envasadores = ['Sandro', 'Agustín', 'Antonio', 'Ezequiel', 'Alejandro', 'Israel'];
     
+    // Si el operario está en la lista de envasadores, excluirlo
+    if (envasadores.includes(operario)) {
+      return false;
+    }
+    
+    // ⭐ FILTRO POR NOMBRE
+    const pasaNombre = filtroOperario ? operario.includes(filtroOperario) : true;
+    
+    // ⭐ FILTRO POR MODO
     let pasaModo = true;
     if (modoEsmalte === 'DIRECTO') {
-      pasaModo = !nombreCarga.includes('/');
+      pasaModo = !operario.includes('/');
     } else if (modoEsmalte === 'MOLIENDA') {
-      pasaModo = nombreCarga.includes('Germán');
+      pasaModo = operario.toLowerCase().includes('germán');
     } else if (modoEsmalte === 'PREPARADO') {
-      pasaModo = nombreCarga.includes('Aldo');
+      pasaModo = operario.toLowerCase().includes('aldo');
     }
 
     return pasaNombre && pasaModo;

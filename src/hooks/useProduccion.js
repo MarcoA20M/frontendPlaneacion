@@ -208,160 +208,160 @@ export function useProduccion() {
     // ============================================================
     
     /**
-     * Guarda el planificador en la nube (Java Backend)
+     * Guarda el planificador en la nube (Java Backend)------------
      */
-    const guardarPlanificadorEnNube = useCallback(async (datos) => {
-        try {
-            console.log('☁️ Guardando planificador en la nube...');
-            const resultado = await planificadorService.guardarPlanificador(datos);
-            console.log('✅ Planificador guardado en la nube:', resultado);
-            return resultado;
-        } catch (error) {
-            console.error('❌ Error guardando planificador en nube:', error);
-            planificadorService.guardarEnLocal(datos);
-            throw error;
-        }
-    }, []);
-
-    /**
-     * Carga el planificador desde la nube (Java Backend)
-     */
-    const cargarPlanificadorDesdeNube = useCallback(async () => {
-        try {
-            console.log('☁️ Cargando planificador desde la nube...');
-            const datos = await planificadorService.cargarPlanificador();
-            if (datos) {
-                console.log('✅ Planificador cargado desde la nube');
+        const guardarPlanificadorEnNube = useCallback(async (datos) => {
+            try {
+                console.log('☁️ Guardando planificador en la nube...');
+                const resultado = await planificadorService.guardarPlanificador(datos);
+                console.log('✅ Planificador guardado en la nube:', resultado);
+                return resultado;
+            } catch (error) {
+                console.error('❌ Error guardando planificador en nube:', error);
                 planificadorService.guardarEnLocal(datos);
-                return datos;
+                throw error;
             }
-            console.log('ℹ️ No hay planificador en la nube, usando caché local');
-            return planificadorService.obtenerDeLocal();
-        } catch (error) {
-            console.error('❌ Error cargando planificador desde nube:', error);
-            return planificadorService.obtenerDeLocal();
-        }
-    }, []);
+        }, []);
 
-    /**
-     * Elimina el planificador de la nube
-     */
-    const eliminarPlanificadorDeNube = useCallback(async () => {
-        try {
-            const resultado = await planificadorService.eliminarPlanificador();
-            if (resultado) {
-                console.log('✅ Planificador eliminado de la nube');
-                localStorage.removeItem('planificador_data');
-                return true;
+        /**
+         * Carga el planificador desde la nube (Java Backend)
+         */
+        const cargarPlanificadorDesdeNube = useCallback(async () => {
+            try {
+                console.log('☁️ Cargando planificador desde la nube...');
+                const datos = await planificadorService.cargarPlanificador();
+                if (datos) {
+                    console.log('✅ Planificador cargado desde la nube');
+                    planificadorService.guardarEnLocal(datos);
+                    return datos;
+                }
+                console.log('ℹ️ No hay planificador en la nube, usando caché local');
+                return planificadorService.obtenerDeLocal();
+            } catch (error) {
+                console.error('❌ Error cargando planificador desde nube:', error);
+                return planificadorService.obtenerDeLocal();
             }
-            return false;
-        } catch (error) {
-            console.error('❌ Error eliminando planificador de nube:', error);
-            return false;
-        }
-    }, []);
+        }, []);
 
-    /**
-     * Handler para cargar Excel y subir a la nube automáticamente
-     */
-    const handleCargarPlanificador = useCallback(async (file) => {
-        if (!file) return null;
-        
-        try {
-            console.log('📂 1. Procesando Excel con Flask...');
-            const data = await planificadorService.cargarExcelPlanificador(file);
-            console.log('📊 2. Datos de Flask:', data.status, 'Total:', data.total);
-            
-            console.log('☁️ 3. Guardando en Java Backend...');
-            await guardarPlanificadorEnNube(data.data || data);
-            
-            planificadorService.guardarEnLocal(data.data || data);
-            
-            window.dispatchEvent(new CustomEvent('planificadorActualizado', {
-                detail: { datos: data.data || data }
-            }));
-            
-            console.log('✅ Planificador procesado y guardado en la nube');
-            return data.data || data;
-            
-        } catch (error) {
-            console.error('❌ Error en handleCargarPlanificador:', error);
-            throw error;
-        }
-    }, [guardarPlanificadorEnNube]);
+        /**
+         * Elimina el planificador de la nube
+         */
+        const eliminarPlanificadorDeNube = useCallback(async () => {
+            try {
+                const resultado = await planificadorService.eliminarPlanificador();
+                if (resultado) {
+                    console.log('✅ Planificador eliminado de la nube');
+                    localStorage.removeItem('planificador_data');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('❌ Error eliminando planificador de nube:', error);
+                return false;
+            }
+        }, []);
 
-    /**
-     * Sincronizar planificador desde la nube
-     */
-    const sincronizarPlanificador = useCallback(async () => {
-        try {
-            const datos = await cargarPlanificadorDesdeNube();
-            if (datos) {
-                window.dispatchEvent(new CustomEvent('planificadorSincronizado', {
-                    detail: { datos: datos }
+        /**
+         * Handler para cargar Excel y subir a la nube automáticamente
+         */
+        const handleCargarPlanificador = useCallback(async (file) => {
+            if (!file) return null;
+            
+            try {
+                console.log('📂 1. Procesando Excel con Flask...');
+                const data = await planificadorService.cargarExcelPlanificador(file);
+                console.log('📊 2. Datos de Flask:', data.status, 'Total:', data.total);
+                
+                console.log('☁️ 3. Guardando en Java Backend...');
+                await guardarPlanificadorEnNube(data.data || data);
+                
+                planificadorService.guardarEnLocal(data.data || data);
+                
+                window.dispatchEvent(new CustomEvent('planificadorActualizado', {
+                    detail: { datos: data.data || data }
                 }));
-                return datos;
+                
+                console.log('✅ Planificador procesado y guardado en la nube');
+                return data.data || data;
+                
+            } catch (error) {
+                console.error('❌ Error en handleCargarPlanificador:', error);
+                throw error;
             }
-            return null;
-        } catch (error) {
-            console.error('❌ Error en sincronizarPlanificador:', error);
-            return null;
-        }
-    }, [cargarPlanificadorDesdeNube]);
+        }, [guardarPlanificadorEnNube]);
 
-    // ============================================================
-    // AUTO-SINCRONIZACIÓN CADA 30 SEGUNDOS
-    // ============================================================
-    useEffect(() => {
-        if (!sincronizacionActiva) return;
-        
-        const interval = setInterval(() => {
-            if (document.visibilityState === 'visible') {
+        /**
+         * Sincronizar planificador desde la nube
+         */
+        const sincronizarPlanificador = useCallback(async () => {
+            try {
+                const datos = await cargarPlanificadorDesdeNube();
+                if (datos) {
+                    window.dispatchEvent(new CustomEvent('planificadorSincronizado', {
+                        detail: { datos: datos }
+                    }));
+                    return datos;
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ Error en sincronizarPlanificador:', error);
+                return null;
+            }
+        }, [cargarPlanificadorDesdeNube]);
+
+        // ============================================================
+        // AUTO-SINCRONIZACIÓN CADA 30 SEGUNDOS
+        // ============================================================
+        useEffect(() => {
+            if (!sincronizacionActiva) return;
+            
+            const interval = setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    sincronizarPlanificador();
+                }
+            }, 30000);
+            
+            return () => clearInterval(interval);
+        }, [sincronizacionActiva, sincronizarPlanificador]);
+
+        // ============================================================
+        // CARGAR PLANIFICADOR AL INICIAR
+        // ============================================================
+        useEffect(() => {
+            const inicializar = async () => {
+                const datos = await cargarPlanificadorDesdeNube();
+                if (datos) {
+                    console.log('📋 Planificador inicializado desde la nube');
+                }
+            };
+            inicializar();
+        }, [cargarPlanificadorDesdeNube]);
+
+        // ============================================================
+        // ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
+        // ============================================================
+        useEffect(() => {
+            const handleStorageChange = (e) => {
+                if (e.key === 'planificador_data') {
+                    sincronizarPlanificador();
+                }
+            };
+            
+            window.addEventListener('storage', handleStorageChange);
+            return () => window.removeEventListener('storage', handleStorageChange);
+        }, [sincronizarPlanificador]);
+
+        // ============================================================
+        // ESCUCHAR EVENTO DE SINCRONIZACIÓN MANUAL
+        // ============================================================
+        useEffect(() => {
+            const handleSincronizarManual = () => {
                 sincronizarPlanificador();
-            }
-        }, 30000);
-        
-        return () => clearInterval(interval);
-    }, [sincronizacionActiva, sincronizarPlanificador]);
-
-    // ============================================================
-    // CARGAR PLANIFICADOR AL INICIAR
-    // ============================================================
-    useEffect(() => {
-        const inicializar = async () => {
-            const datos = await cargarPlanificadorDesdeNube();
-            if (datos) {
-                console.log('📋 Planificador inicializado desde la nube');
-            }
-        };
-        inicializar();
-    }, [cargarPlanificadorDesdeNube]);
-
-    // ============================================================
-    // ESCUCHAR CAMBIOS EN LOCALSTORAGE DESDE OTRAS PESTAÑAS
-    // ============================================================
-    useEffect(() => {
-        const handleStorageChange = (e) => {
-            if (e.key === 'planificador_data') {
-                sincronizarPlanificador();
-            }
-        };
-        
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, [sincronizarPlanificador]);
-
-    // ============================================================
-    // ESCUCHAR EVENTO DE SINCRONIZACIÓN MANUAL
-    // ============================================================
-    useEffect(() => {
-        const handleSincronizarManual = () => {
-            sincronizarPlanificador();
-        };
-        
-        window.addEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
-        return () => window.removeEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
-    }, [sincronizarPlanificador]);
+            };
+            
+            window.addEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
+            return () => window.removeEventListener('sincronizarPlanificadorManual', handleSincronizarManual);
+        }, [sincronizarPlanificador]);
 
     // ============================================================
     // 🔴 CARGAR OPERARIOS DE ESMALTES DESDE LA API
@@ -1235,6 +1235,9 @@ export function useProduccion() {
 // ============================================================
 // GUARDAR CARGAS EN RONDAS (VERSIÓN FINAL - POR RONDAS + LÍMITES)
 // ============================================================
+// ============================================================
+// GUARDAR CARGAS EN RONDAS (VERSIÓN CORREGIDA - ESMALTES + VINÍLICAS)
+// ============================================================
 const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
     console.log('📦 guardarCargasEnRondas - Cargas a guardar:', cargasAGuardar?.length || 0);
     
@@ -1245,170 +1248,240 @@ const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
 
     const idsAsignados = [];
     
+    // ============================================================
+    // 🔵 ESMALTES - LÓGICA ORIGINAL (SIN CAMBIOS)
+    // ============================================================
     if (tipoPintura === "Esmalte") {
-        // ... código de esmaltes igual ...
-    } else {
-        const nuevasRondas = rondas.map(f => [...f]);
-        const nuevasEspeciales = [...cargasEspeciales];
+        const nombres = await getNombresOperariosEsmaltes();
         
-        // ========== 1. OBTENER LÍMITES DESDE LOCALSTORAGE ==========
-        const limitesGuardados = operarioService.obtenerTodosLosLimites();
-        
-        // ========== 2. OBTENER MAPA DE NOMBRE -> ID ==========
-        const mapaNombreId = {};
-        try {
-            const vinilica = await operarioService.getVinilica();
-            const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
-            preparadores.forEach(op => {
-                if (op.nombre && op.id) {
-                    mapaNombreId[op.nombre] = op.id;
-                }
-            });
-        } catch (error) {
-            console.error('Error obteniendo operarios vinílica:', error);
-        }
+        const preparadores = nombres.preparadores || [];
+        const molienda = nombres.molienda || [];
+        const terminados = nombres.terminados || [];
 
-        // ========== 3. CALCULAR LÍMITE POR MÁQUINA ==========
-        const limitePorMaquina = {};
-        for (let i = 0; i < 8; i++) {
-            const maquinaId = 101 + i;
-            const operario = getOperarioPorMaquinaSync(maquinaId);
-            const id = mapaNombreId[operario];
-            let limite = 4; // Valor por defecto
+        let tempAsignadasEsmaltes = [...cargasEsmaltesAsignadas];
+        
+        cargasAGuardar.forEach((carga) => {
+            const listaProcesos = (carga.procesos || []).map(p => p.descripcion.toUpperCase());
+            const codigoUpper = normalizarCodigo(carga.codigoProducto);
+            const esBase = CODIGOS_BASES.includes(codigoUpper) || codigoUpper.startsWith("B");
+            const tieneMolienda = listaProcesos.some(d => d.includes("MOLIENDA"));
+            const tienePreparado = listaProcesos.some(d => d.includes("PREPARADO") || d.includes("DISPERSION"));
+            const tieneEtapaFinal = listaProcesos.some(d => d.includes("IGUALACIÓN") || d.includes("IGUALACION") || d.includes("TERMINADO") || d.includes("AJUSTE"));
             
-            if (id && limitesGuardados[id]) {
-                limite = limitesGuardados[id].limite || 4;
+            let ops = [];
+            
+            if (esBase) {
+                if (preparadores.length > 0) ops.push(preparadores[0]);
+            } else if (tieneMolienda) {
+                if (molienda.length > 0) ops.push(molienda[0]);
+            } else if (tienePreparado) {
+                if (preparadores.length > 0) ops.push(preparadores[0]);
             }
-            limitePorMaquina[maquinaId] = limite;
-        }
-        console.log('📊 Límite por máquina:', limitePorMaquina);
-
-        // ========== 4. INICIALIZAR CONTADORES POR MÁQUINA ==========
-        const contadorPorMaquina = {};
-        for (let i = 0; i < 8; i++) {
-            contadorPorMaquina[101 + i] = 0;
-        }
-
-        // ========== 5. ORDENAR CARGAS POR NIVEL CUBRIENTE (menor a mayor) ==========
-        const cargasOrdenadas = [...cargasAGuardar].sort((a, b) => {
-            const nivelA = a.nivelCubriente || 0;
-            const nivelB = b.nivelCubriente || 0;
-            if (nivelA !== nivelB) return nivelA - nivelB;
-            return (b.litros || 0) - (a.litros || 0);
-        });
-        
-        console.log('📊 Cargas ordenadas por nivel cubriente:', cargasOrdenadas.map(c => ({ folio: c.folio, nivel: c.nivelCubriente || 0 })));
-
-        // ========== 6. ASIGNAR POR RONDAS RESPETANDO LÍMITES ==========
-        let indiceCarga = 0;
-        const totalCargas = cargasOrdenadas.length;
-        let cargasSinAsignar = [];
-
-        // Recorrer por rondas (columnas)
-        for (let col = 0; col < 6 && indiceCarga < totalCargas; col++) {
-            // Recorrer máquinas en orden (filas)
-            for (let fila = 0; fila < 8 && indiceCarga < totalCargas; fila++) {
-                const numM = 101 + fila;
-                
-                // ⭐ VERIFICAR LÍMITE DE LA MÁQUINA
-                const limite = limitePorMaquina[numM] || 4;
-                const usado = contadorPorMaquina[numM] || 0;
-                
-                if (usado >= limite) {
-                    console.log(`⏭️ VI-${numM} ya llegó a su límite (${limite}), saltando...`);
-                    continue; // Esta máquina ya no puede recibir más cargas
-                }
-                
-                // Verificar si esta máquina ya tiene cargas en esta ronda
-                if (!nuevasRondas[fila][col]) {
-                    const carga = cargasOrdenadas[indiceCarga];
+            
+            if (tieneEtapaFinal || ops.length === 0) {
+                if (terminados.length > 0) {
+                    const balance = terminados.map(n => ({ 
+                        n, 
+                        t: tempAsignadasEsmaltes.filter(c => c.operario && c.operario.includes(n)).length 
+                    })).sort((a, b) => a.t - b.t);
                     
-                    // Verificar reglas de máquinas especiales (cargas > 1600L)
-                    const esGran = [104, 108].includes(numM);
-                    const cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
-                    
-                    if (cumpleRegla) {
-                        const operario = getOperarioPorMaquinaSync(numM);
-                        
-                        nuevasRondas[fila][col] = { 
-                            ...carga, 
-                            maquina: numM,
-                            operario: operario,
-                            textoMaquina: `VI-${numM} ${operario}`
-                        };
-                        contadorPorMaquina[numM] = usado + 1;
-                        idsAsignados.push(carga.idTemp);
-                        indiceCarga++;
-                        console.log(`✅ Ronda ${col + 1}: VI-${numM} ${operario} (${usado + 1}/${limite}) - ${carga.folio} (Nivel: ${carga.nivelCubriente || 0})`);
+                    if (!ops.includes(balance[0].n)) {
+                        ops.push(balance[0].n);
                     }
                 }
             }
-        }
-
-        // ========== 7. CARGAS QUE NO CUPIERON ==========
-        for (let i = indiceCarga; i < totalCargas; i++) {
-            const carga = cargasOrdenadas[i];
-            cargasSinAsignar.push({
-                ...carga,
-                operario: 'Sin asignar',
-                textoMaquina: 'ESPECIAL'
+            
+            if (ops.length === 0) {
+                if (preparadores.length > 0) ops.push(preparadores[0]);
+                else if (molienda.length > 0) ops.push(molienda[0]);
+                else if (terminados.length > 0) ops.push(terminados[0]);
+                else {
+                    ops.push('');
+                }
+            }
+            
+            const operarioAsignado = ops.filter(o => o !== '').join(" / ");
+            tempAsignadasEsmaltes.push({ 
+                ...carga, 
+                operario: operarioAsignado || '', 
+                maquina: "ESM" 
             });
             idsAsignados.push(carga.idTemp);
-            console.log(`⚠️ Carga ${carga.folio} (Nivel: ${carga.nivelCubriente || 0}) enviada a ESPECIALES`);
-        }
-
-        // ========== 8. AGREGAR ESPECIALES ==========
-        if (cargasSinAsignar.length > 0) {
-            cargasSinAsignar.forEach(carga => {
-                nuevasEspeciales.push(carga);
-            });
-        }
-
-        // ========== 9. ACTUALIZAR ESTADOS ==========
-        setRondas(nuevasRondas);
-        setCargasEspeciales(ordenarCargas(nuevasEspeciales));
-
-        try {
-            localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
-            localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
-        } catch (error) {
-            console.error('Error guardando rondas en localStorage:', error);
-        }
-
-       window.dispatchEvent(new CustomEvent('actualizarConteoRondas', {
-    detail: { rondas: nuevasRondas }
-}));
-
-        // ========== 10. MOSTRAR RESUMEN ==========
-        const cargasAsignadas = idsAsignados.length - cargasSinAsignar.length;
+        });
         
-        // Contar por máquina
-        const resumenMaquinas = Object.entries(contadorPorMaquina)
-            .filter(([_, count]) => count > 0)
-            .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-            .map(([maquinaId, count]) => {
-                const limite = limitePorMaquina[maquinaId] || 4;
-                const operario = getOperarioPorMaquinaSync(parseInt(maquinaId));
-                return `VI-${maquinaId} (${operario}): ${count}/${limite}`;
-            });
+        const esmaltesOrdenados = ordenarCargas(tempAsignadasEsmaltes);
+        setCargasEsmaltesAsignadas(esmaltesOrdenados);
+        
+        try {
+            localStorage.setItem(STORAGE_KEY_ESMALTES, JSON.stringify(esmaltesOrdenados));
+        } catch (error) {
+            console.error('Error guardando esmaltes en localStorage:', error);
+        }
+        
+        // Limpiar cola de esmaltes
+        setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
+        
+        try {
+            const colaActualizada = colaCargas.filter(c => !idsAsignados.includes(c.idTemp));
+            localStorage.setItem(STORAGE_KEY_COLA, JSON.stringify(colaActualizada));
+        } catch (error) {
+            console.error('Error guardando cola en localStorage:', error);
+        }
+        
+        console.log('✅ guardarCargasEnRondas completado - Esmaltes asignados:', idsAsignados.length);
+        return;
+    }
+    
+    // ============================================================
+    // 🟢 VINÍLICA - LÓGICA CON LÍMITES POR MÁQUINA Y RONDAS
+    // ============================================================
+    const nuevasRondas = rondas.map(f => [...f]);
+    const nuevasEspeciales = [...cargasEspeciales];
+    
+    // ========== 1. OBTENER LÍMITES DESDE LOCALSTORAGE ==========
+    const limitesGuardados = operarioService.obtenerTodosLosLimites();
+    
+    // ========== 2. OBTENER MAPA DE NOMBRE -> ID ==========
+    const mapaNombreId = {};
+    try {
+        const vinilica = await operarioService.getVinilica();
+        const preparadores = vinilica.filter(op => op.puesto === 'Preparador');
+        preparadores.forEach(op => {
+            if (op.nombre && op.id) {
+                mapaNombreId[op.nombre] = op.id;
+            }
+        });
+    } catch (error) {
+        console.error('Error obteniendo operarios vinílica:', error);
+    }
 
-        console.log(`✅ guardarCargasEnRondas completado`);
-        console.log(`📊 Cargas asignadas: ${cargasAsignadas}, Especiales: ${cargasSinAsignar.length}`);
-        console.log(`📊 Por máquina:`, resumenMaquinas);
+    // ========== 3. CALCULAR LÍMITE POR MÁQUINA ==========
+    const limitePorMaquina = {};
+    for (let i = 0; i < 8; i++) {
+        const maquinaId = 101 + i;
+        const operario = getOperarioPorMaquinaSync(maquinaId);
+        const id = mapaNombreId[operario];
+        let limite = 4; // Valor por defecto
+        
+        if (id && limitesGuardados[id]) {
+            limite = limitesGuardados[id].limite || 4;
+        }
+        limitePorMaquina[maquinaId] = limite;
+    }
+    console.log('📊 Límite por máquina (Vinílica):', limitePorMaquina);
 
-        // Mostrar alerta con resumen
-        const mensaje = `✅ Cargas asignadas correctamente\n\n` +
-                        `Total: ${totalCargas} cargas\n` +
-                        `Asignadas: ${cargasAsignadas}\n` +
-                        `Especiales: ${cargasSinAsignar.length}\n\n` +
-                        `📊 Resumen por máquina:\n${resumenMaquinas.join('\n')}`;
+    // ========== 4. INICIALIZAR CONTADORES POR MÁQUINA ==========
+    const contadorPorMaquina = {};
+    for (let i = 0; i < 8; i++) {
+        contadorPorMaquina[101 + i] = 0;
+    }
 
-        if (cargasSinAsignar.length > 0) {
-            alert(`⚠️ ${cargasSinAsignar.length} cargas no pudieron asignarse y fueron enviadas a ESPECIALES\n\n${mensaje}`);
-        } else {
-            alert(mensaje);
+    // ========== 5. ORDENAR CARGAS POR NIVEL CUBRIENTE (menor a mayor) ==========
+    const cargasOrdenadas = [...cargasAGuardar].sort((a, b) => {
+        const nivelA = a.nivelCubriente || 0;
+        const nivelB = b.nivelCubriente || 0;
+        if (nivelA !== nivelB) return nivelA - nivelB;
+        return (b.litros || 0) - (a.litros || 0);
+    });
+    
+    console.log('📊 Cargas Vinílicas ordenadas por nivel cubriente:', cargasOrdenadas.map(c => ({ folio: c.folio, nivel: c.nivelCubriente || 0 })));
+
+    // ========== 6. ASIGNAR POR RONDAS RESPETANDO LÍMITES ==========
+    let indiceCarga = 0;
+    const totalCargas = cargasOrdenadas.length;
+    let cargasSinAsignar = [];
+
+    // Recorrer por rondas (columnas)
+    for (let col = 0; col < 6 && indiceCarga < totalCargas; col++) {
+        // Recorrer máquinas en orden (filas)
+        for (let fila = 0; fila < 8 && indiceCarga < totalCargas; fila++) {
+            const numM = 101 + fila;
+            
+            // ⭐ VERIFICAR LÍMITE DE LA MÁQUINA
+            const limite = limitePorMaquina[numM] || 4;
+            const usado = contadorPorMaquina[numM] || 0;
+            
+            if (usado >= limite) {
+                console.log(`⏭️ VI-${numM} ya llegó a su límite (${limite}), saltando...`);
+                continue;
+            }
+            
+            // Verificar si esta máquina ya tiene cargas en esta ronda
+            if (!nuevasRondas[fila][col]) {
+                const carga = cargasOrdenadas[indiceCarga];
+                
+                // Verificar reglas de máquinas especiales (cargas > 1600L)
+                const esGran = [104, 108].includes(numM);
+                const cumpleRegla = (carga.litros > 1600) ? (esGran || numM === 107) : (carga.litros > 855) ? !esGran : (!esGran && numM !== 107);
+                
+                if (cumpleRegla) {
+                    const operario = getOperarioPorMaquinaSync(numM);
+                    
+                    nuevasRondas[fila][col] = { 
+                        ...carga, 
+                        maquina: numM,
+                        operario: operario,
+                        textoMaquina: `VI-${numM} ${operario}`
+                    };
+                    contadorPorMaquina[numM] = usado + 1;
+                    idsAsignados.push(carga.idTemp);
+                    indiceCarga++;
+                    console.log(`✅ Ronda ${col + 1}: VI-${numM} ${operario} (${usado + 1}/${limite}) - ${carga.folio} (Nivel: ${carga.nivelCubriente || 0})`);
+                }
+            }
         }
     }
+
+    // ========== 7. CARGAS QUE NO CUPIERON ==========
+    for (let i = indiceCarga; i < totalCargas; i++) {
+        const carga = cargasOrdenadas[i];
+        cargasSinAsignar.push({
+            ...carga,
+            operario: 'Sin asignar',
+            textoMaquina: 'ESPECIAL'
+        });
+        idsAsignados.push(carga.idTemp);
+        console.log(`⚠️ Carga ${carga.folio} (Nivel: ${carga.nivelCubriente || 0}) enviada a ESPECIALES`);
+    }
+
+    // ========== 8. AGREGAR ESPECIALES ==========
+    if (cargasSinAsignar.length > 0) {
+        cargasSinAsignar.forEach(carga => {
+            nuevasEspeciales.push(carga);
+        });
+    }
+
+    // ========== 9. ACTUALIZAR ESTADOS ==========
+    setRondas(nuevasRondas);
+    setCargasEspeciales(ordenarCargas(nuevasEspeciales));
+
+    try {
+        localStorage.setItem(STORAGE_KEY_RONDAS, JSON.stringify(nuevasRondas));
+        localStorage.setItem(STORAGE_KEY_ESPECIALES, JSON.stringify(ordenarCargas(nuevasEspeciales)));
+    } catch (error) {
+        console.error('Error guardando rondas en localStorage:', error);
+    }
+
+    // Disparar evento para actualizar el conteo en el Tablero
+    window.dispatchEvent(new CustomEvent('actualizarConteoRondas', {
+        detail: { rondas: nuevasRondas }
+    }));
+
+    // ========== 10. MOSTRAR RESUMEN ==========
+    const cargasAsignadas = idsAsignados.length - cargasSinAsignar.length;
+    
+    const resumenMaquinas = Object.entries(contadorPorMaquina)
+        .filter(([_, count]) => count > 0)
+        .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+        .map(([maquinaId, count]) => {
+            const limite = limitePorMaquina[maquinaId] || 4;
+            const operario = getOperarioPorMaquinaSync(parseInt(maquinaId));
+            return `VI-${maquinaId} (${operario}): ${count}/${limite}`;
+        });
+
+    console.log(`✅ guardarCargasEnRondas completado (Vinílica)`);
+    console.log(`📊 Cargas asignadas: ${cargasAsignadas}, Especiales: ${cargasSinAsignar.length}`);
+    console.log(`📊 Por máquina:`, resumenMaquinas);
 
     // ========== 11. LIMPIAR COLA ==========
     setColaCargas(prev => prev.filter(c => !idsAsignados.includes(c.idTemp)));
@@ -1420,11 +1493,20 @@ const guardarCargasEnRondas = useCallback(async (cargasAGuardar) => {
         console.error('Error guardando cola en localStorage:', error);
     }
 
-    console.log('✅ guardarCargasEnRondas completado - Cargas asignadas:', idsAsignados.length);
+    // Mostrar alerta con resumen
+    const mensaje = `✅ Cargas asignadas correctamente\n\n` +
+                    `Total: ${totalCargas} cargas\n` +
+                    `Asignadas: ${cargasAsignadas}\n` +
+                    `Especiales: ${cargasSinAsignar.length}\n\n` +
+                    `📊 Resumen por máquina:\n${resumenMaquinas.join('\n')}`;
 
-}, [tipoPintura, rondas, cargasEspeciales, colaCargas, ordenarCargas, getNombresOperariosEsmaltes]);
+    if (cargasSinAsignar.length > 0) {
+        alert(`⚠️ ${cargasSinAsignar.length} cargas no pudieron asignarse y fueron enviadas a ESPECIALES\n\n${mensaje}`);
+    } else {
+        alert(mensaje);
+    }
 
-
+}, [tipoPintura, rondas, cargasEsmaltesAsignadas, cargasEspeciales, colaCargas, ordenarCargas, getNombresOperariosEsmaltes]);
 
 return {
         codigo, setCodigo, producto, cantidades, setCantidades, colaCargas, setColaCargas,

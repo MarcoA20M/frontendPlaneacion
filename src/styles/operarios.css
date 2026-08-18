@@ -2,6 +2,82 @@
    OPERARIOS - SOFT LAVENDER THEME
    TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
    ============================================ */
+/* Sidebar - Estados */
+.op-sidebar {
+    position: relative;
+    transition: all 0.3s ease;
+    width: 280px;
+    min-width: 280px;
+    overflow: hidden;
+}
+
+.op-sidebar.closed {
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.op-sidebar.closed .op-logo,
+.op-sidebar.closed .op-nav,
+.op-sidebar.closed .nav-divider,
+.op-sidebar.closed .sidebar-footer {
+    display: none;
+}
+
+/* Botón toggle en el sidebar */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #7c3aed;
+    color: white;
+    border: 2px solid #1a1a2e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    z-index: 10;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    transform: scale(1.1);
+    background: #6d28d9;
+}
+
+/* Cuando el sidebar está cerrado, el botón se mueve */
+.op-sidebar.closed .sidebar-toggle-btn {
+    right: -12px;
+}
+
+/* Ajuste del contenido principal cuando sidebar está cerrado */
+.op-main-content {
+    flex: 1;
+    transition: all 0.3s ease;
+    padding: 20px;
+}
+
+/* Si el sidebar está cerrado, el contenido ocupa todo */
+.op-sidebar.closed + .op-main-content {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Contenedor principal */
+.op-glass-panel {
+    display: flex;
+    gap: 0;
+    position: relative;
+}
+
+/* El workspace se ajusta */
 
 /* === VARIABLES DE COLORES === */
 :root {
@@ -1188,93 +1264,155 @@
     font-weight: bold;
 }
 
-/* ========== LÍMITE DE RONDAS ========== */
-.limite-input {
-    width: 60px;
-    text-align: center;
-    background: #1a1a2e;
-    border: 1px solid rgba(192, 0, 255, 0.3);
-    border-radius: 6px;
+.op-workspace {
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* En operarios.css */
+.op-title-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.op-title-group > div {
+    flex: 1;
+}
+
+.sidebar-toggle-header-btn {
+    background: transparent;
+    border: none;
     color: #e0e0e0;
-    padding: 4px 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    flex-shrink: 0;
 }
 
-.limite-input:focus {
-    outline: none;
-    border-color: #c084fc;
-    box-shadow: 0 0 15px rgba(192, 0, 255, 0.2);
-}
-
-.limite-input::-webkit-inner-spin-button {
-    opacity: 1;
-    height: 24px;
-}
-
-/* Estilo para celdas con límite alcanzado */
-.celda-ronda.limite-alcanzado {
-    opacity: 0.6;
-    background: rgba(239, 68, 68, 0.05);
-    border-color: rgba(239, 68, 68, 0.2);
-}
-
-.celda-ronda.limite-alcanzado .draggable {
-    cursor: not-allowed !important;
-}
-
-/* Tooltip de límite */
-.rondas-info {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.rondas-info:hover {
+.sidebar-toggle-header-btn:hover {
+    background: rgba(124, 58, 237, 0.2);
     transform: scale(1.05);
 }
 
-/* Leyenda de colores para el límite */
-.rondas-info.limite-verde {
-    background: rgba(74, 222, 128, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(74, 222, 128, 0.2);
+.sidebar-toggle-header-btn:active {
+    transform: scale(0.95);
 }
 
-.rondas-info.limite-amarillo {
-    background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.2);
+/* ⭐ ANIMACIONES */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.rondas-info.limite-rojo {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ff6b6b;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    animation: pulse-limit 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-limit {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-/* Indicador de límite en la tabla de operarios */
-.limite-indicador {
-    display: inline-flex;
+/* ⭐ BOTÓN HAMBURGUESA EN EL HEADER */
+.sidebar-toggle-header-btn {
+    background: transparent;
+    border: none;
+    color: var(--op-nav-btn-color, #aa9aba);
+    font-size: 28px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    padding: 2px 10px;
-    border-radius: 12px;
-    background: rgba(192, 0, 255, 0.1);
-    border: 1px solid rgba(192, 0, 255, 0.2);
-    color: #c084fc;
+    justify-content: center;
+    flex-shrink: 0;
+    touch-action: manipulation;
 }
 
-.limite-indicador .limite-valor {
-    font-weight: bold;
-    color: #e0e0e0;
+.sidebar-toggle-header-btn:hover {
+    background: var(--op-nav-btn-hover-bg, rgba(156, 39, 176, 0.15));
+    color: var(--op-nav-btn-hover-color, #fff);
+    transform: scale(1.05);
+}
+
+.sidebar-toggle-header-btn:active {
+    transform: scale(0.95);
+}
+
+/* ⭐ OVERLAY */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: fadeIn 0.3s ease;
+}
+
+/* ⭐ TÍTULO Y BOTÓN EN EL HEADER */
+.op-title-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.op-title-group > div {
+    flex: 1;
+}
+
+/* ⭐ SIDEBAR - usará las variables CSS que ya tienes */
+.op-sidebar {
+    /* Los estilos ya están en inline styles, 
+       pero esto es por si necesitas override */
+}
+
+/* ⭐ MEDIA QUERIES PARA MÓVILES */
+@media (max-width: 768px) {
+    .op-sidebar {
+        width: 280px;
+        max-width: 85vw;
+        padding: 16px !important;
+    }
+
+    .op-sidebar h2 {
+        font-size: 16px !important;
+    }
+
+    .sidebar-toggle-header-btn {
+        font-size: 24px;
+        padding: 4px 8px;
+    }
+
+    .op-title-group h1 {
+        font-size: 18px !important;
+    }
+
+    .op-title-group p {
+        font-size: 12px !important;
+    }
+}
+
+/* ⭐ PARA PANTALLAS MUY PEQUEÑAS */
+@media (max-width: 480px) {
+    .op-sidebar {
+        width: 260px;
+        max-width: 90vw;
+        padding: 14px !important;
+    }
+
+    .sidebar-toggle-header-btn {
+        font-size: 20px;
+        padding: 2px 6px;
+    }
+
+    .op-title-group h1 {
+        font-size: 16px !important;
+    }
+
+    .op-title-group p {
+        font-size: 11px !important;
+    }
 }

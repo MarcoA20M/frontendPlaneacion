@@ -15,7 +15,7 @@ export default function OperariosScreen() {
     const [cargando, setCargando] = useState(false);
 
     // Estado para sidebar
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Función para toggle del sidebar
     const toggleSidebar = () => {

@@ -2,82 +2,6 @@
    OPERARIOS - SOFT LAVENDER THEME
    TODOS LOS TAMAÑOS Y ESTRUCTURAS ORIGINALES
    ============================================ */
-/* Sidebar - Estados */
-.op-sidebar {
-    position: relative;
-    transition: all 0.3s ease;
-    width: 280px;
-    min-width: 280px;
-    overflow: hidden;
-}
-
-.op-sidebar.closed {
-    width: 0;
-    min-width: 0;
-    padding: 0;
-    margin: 0;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.op-sidebar.closed .op-logo,
-.op-sidebar.closed .op-nav,
-.op-sidebar.closed .nav-divider,
-.op-sidebar.closed .sidebar-footer {
-    display: none;
-}
-
-/* Botón toggle en el sidebar */
-.sidebar-toggle-btn {
-    position: absolute;
-    top: 12px;
-    right: -12px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #7c3aed;
-    color: white;
-    border: 2px solid #1a1a2e;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    z-index: 10;
-    transition: transform 0.3s ease;
-}
-
-.sidebar-toggle-btn:hover {
-    transform: scale(1.1);
-    background: #6d28d9;
-}
-
-/* Cuando el sidebar está cerrado, el botón se mueve */
-.op-sidebar.closed .sidebar-toggle-btn {
-    right: -12px;
-}
-
-/* Ajuste del contenido principal cuando sidebar está cerrado */
-.op-main-content {
-    flex: 1;
-    transition: all 0.3s ease;
-    padding: 20px;
-}
-
-/* Si el sidebar está cerrado, el contenido ocupa todo */
-.op-sidebar.closed + .op-main-content {
-    margin-left: 0;
-    width: 100%;
-}
-
-/* Contenedor principal */
-.op-glass-panel {
-    display: flex;
-    gap: 0;
-    position: relative;
-}
-
-/* El workspace se ajusta */
 
 /* === VARIABLES DE COLORES === */
 :root {
@@ -339,131 +263,6 @@
     backdrop-filter: blur(0px);
     display: flex;
     transition: background 0.3s ease;
-}
-
-/* ============================================
-   SIDEBAR
-   ============================================ */
-
-.op-sidebar {
-    width: 280px;
-    background: var(--op-sidebar-bg);
-    padding: 32px 20px;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--op-sidebar-border);
-    box-shadow: var(--op-sidebar-shadow);
-    transition: all 0.3s ease;
-}
-
-.op-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 48px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--op-logo-border);
-}
-
-.op-dot {
-    width: 10px;
-    height: 10px;
-    background: var(--op-dot-bg);
-    border-radius: 50%;
-    box-shadow: var(--op-dot-shadow);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.2); }
-}
-
-.op-logo h2 {
-    color: var(--op-logo-text);
-    font-size: 16px;
-    letter-spacing: 2px;
-    margin: 0;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.nav-label {
-    color: var(--op-nav-label);
-    font-size: 10px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    padding-left: 12px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    transition: color 0.3s ease;
-}
-
-.op-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex-grow: 1;
-}
-
-.op-nav-btn {
-    background: transparent;
-    border: none;
-    padding: 12px 16px;
-    color: var(--op-nav-btn-color);
-    text-align: left;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-}
-
-.op-nav-btn:hover {
-    background: var(--op-nav-btn-hover-bg);
-    color: var(--op-nav-btn-hover-color);
-    transform: translateX(4px);
-}
-
-.op-nav-btn.active {
-    background: var(--op-nav-btn-active-bg);
-    color: var(--op-nav-btn-active-color);
-    border-left: 2px solid var(--op-nav-btn-active-border);
-}
-
-.nav-icon {
-    font-size: 20px;
-}
-
-.sidebar-footer {
-    padding-top: 24px;
-    border-top: 1px solid var(--op-sidebar-footer-border);
-    margin-top: auto;
-}
-
-.op-btn-exit {
-    width: 100%;
-    background: var(--op-btn-exit-bg);
-    border: 1px solid var(--op-btn-exit-border);
-    color: var(--op-btn-exit-color);
-    padding: 12px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.op-btn-exit:hover {
-    background: var(--op-btn-exit-hover-bg);
-    border-color: var(--op-btn-exit-hover-border);
-    color: var(--op-btn-exit-hover-color);
 }
 
 /* ============================================
@@ -1060,64 +859,9 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   ESTILOS PARA NUEVOS PUESTOS
    ============================================ */
 
-@media (max-width: 1024px) {
-    .op-main-content {
-        padding: 24px;
-    }
-    
-    .op-workspace.with-sidebar {
-        grid-template-columns: 1fr;
-    }
-    
-    .op-sidebar {
-        width: 240px;
-    }
-}
-
-@media (max-width: 768px) {
-    .op-sidebar {
-        width: 70px;
-        padding: 20px 12px;
-    }
-    
-    .op-logo h2,
-    .nav-label,
-    .op-nav-btn span:not(.nav-icon) {
-        display: none;
-    }
-    
-    .op-nav-btn {
-        justify-content: center;
-        padding: 12px;
-    }
-    
-    .op-nav-btn .nav-icon {
-        font-size: 22px;
-    }
-    
-    .op-main-content {
-        padding: 16px;
-    }
-    
-    .op-title-group h1 {
-        font-size: 20px;
-    }
-    
-    .op-card {
-        padding: 16px;
-    }
-    
-    .preview-rotacion-table th,
-    .preview-rotacion-table td {
-        padding: 8px 12px;
-    }
-}
-
-
-/* Estilos para nuevos puestos */
 .op-puesto-tag.envasador {
     background: rgba(0, 200, 255, 0.15);
     color: #00c8ff;
@@ -1130,10 +874,10 @@
     border: 1px solid rgba(255, 150, 0, 0.2);
 }
 
+/* ============================================
+   MODAL DE VACACIONES
+   ============================================ */
 
-/* ========== MODAL DE VACACIONES ========== */
-
-/* Fondo del modal */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1149,7 +893,6 @@
     animation: fadeIn 0.3s ease;
 }
 
-/* Contenido del modal */
 .modal-content {
     background: #1a1a2e;
     border-radius: 16px;
@@ -1163,12 +906,6 @@
     animation: slideUp 0.3s ease;
 }
 
-/* Animaciones */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -1180,7 +917,11 @@
     }
 }
 
-/* Scrollbar personalizado para el modal */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 .modal-content::-webkit-scrollbar {
     width: 6px;
 }
@@ -1199,7 +940,6 @@
     background: rgba(192, 0, 255, 0.5);
 }
 
-/* Badge de vacaciones */
 .vacation-badge {
     background: #ff6b35;
     color: white;
@@ -1216,13 +956,11 @@
     50% { opacity: 0.6; }
 }
 
-/* Fila en vacaciones */
 .en-vacaciones {
     background: rgba(255, 200, 0, 0.05) !important;
     border-left: 3px solid #ffd700;
 }
 
-/* Preview de vacaciones en rotación */
 .vacaciones-preview {
     background: rgba(255, 200, 0, 0.08);
 }
@@ -1231,7 +969,6 @@
     color: #ffd700;
 }
 
-/* Badge de vacaciones en header */
 .vacaciones-badge {
     background: rgba(255, 200, 0, 0.15);
     border: 1px solid rgba(255, 200, 0, 0.3);
@@ -1242,7 +979,6 @@
     margin-left: 8px;
 }
 
-/* Botón de vacaciones en acciones */
 .op-action-btn.vacation {
     background: rgba(255, 200, 0, 0.15);
     border: 1px solid rgba(255, 200, 0, 0.3);
@@ -1257,155 +993,156 @@
     border-color: rgba(255, 200, 0, 0.5);
 }
 
-/* Estado de vacaciones en la tabla de rotación */
 .estado-vacaciones {
     color: #ff6b35;
     font-size: 12px;
     font-weight: bold;
 }
 
-.op-workspace {
-    width: 100%;
-    transition: all 0.3s ease;
+/* ============================================
+   RESPONSIVE - CORREGIDO
+   ============================================ */
+
+/* ⭐ TABLETS Y PANTALLAS MEDIANAS */
+@media (max-width: 1024px) {
+    .op-main-content {
+        padding: 24px;
+    }
+    
+    .op-workspace.with-sidebar {
+        grid-template-columns: 1fr;
+    }
 }
 
-/* En operarios.css */
-.op-title-group {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.op-title-group > div {
-    flex: 1;
-}
-
-.sidebar-toggle-header-btn {
-    background: transparent;
-    border: none;
-    color: #e0e0e0;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 2px;
-    flex-shrink: 0;
-}
-
-.sidebar-toggle-header-btn:hover {
-    background: rgba(124, 58, 237, 0.2);
-    transform: scale(1.05);
-}
-
-.sidebar-toggle-header-btn:active {
-    transform: scale(0.95);
-}
-
-/* ⭐ ANIMACIONES */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* ⭐ BOTÓN HAMBURGUESA EN EL HEADER */
-.sidebar-toggle-header-btn {
-    background: transparent;
-    border: none;
-    color: var(--op-nav-btn-color, #aa9aba);
-    font-size: 28px;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    touch-action: manipulation;
-}
-
-.sidebar-toggle-header-btn:hover {
-    background: var(--op-nav-btn-hover-bg, rgba(156, 39, 176, 0.15));
-    color: var(--op-nav-btn-hover-color, #fff);
-    transform: scale(1.05);
-}
-
-.sidebar-toggle-header-btn:active {
-    transform: scale(0.95);
-}
-
-/* ⭐ OVERLAY */
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 999;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    animation: fadeIn 0.3s ease;
-}
-
-/* ⭐ TÍTULO Y BOTÓN EN EL HEADER */
-.op-title-group {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.op-title-group > div {
-    flex: 1;
-}
-
-/* ⭐ SIDEBAR - usará las variables CSS que ya tienes */
-.op-sidebar {
-    /* Los estilos ya están en inline styles, 
-       pero esto es por si necesitas override */
-}
-
-/* ⭐ MEDIA QUERIES PARA MÓVILES */
+/* ⭐ MÓVILES - SIDEBAR OCULTO CON HAMBURGUESA */
 @media (max-width: 768px) {
-    .op-sidebar {
-        width: 280px;
-        max-width: 85vw;
-        padding: 16px !important;
-    }
-
-    .op-sidebar h2 {
-        font-size: 16px !important;
-    }
-
-    .sidebar-toggle-header-btn {
-        font-size: 24px;
-        padding: 4px 8px;
+    .op-main-content {
+        padding: 16px;
+        margin-left: 0 !important;
+        width: 100% !important;
     }
 
     .op-title-group h1 {
-        font-size: 18px !important;
+        font-size: 20px !important;
     }
 
     .op-title-group p {
         font-size: 12px !important;
     }
-}
 
-/* ⭐ PARA PANTALLAS MUY PEQUEÑAS */
-@media (max-width: 480px) {
-    .op-sidebar {
-        width: 260px;
-        max-width: 90vw;
-        padding: 14px !important;
+    .op-title-group {
+        gap: 8px;
     }
 
-    .sidebar-toggle-header-btn {
-        font-size: 20px;
-        padding: 2px 6px;
+    .op-card {
+        padding: 16px;
+    }
+
+    .op-card-title {
+        font-size: 11px;
+    }
+
+    .preview-rotacion-table th,
+    .preview-rotacion-table td {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .op-table th,
+    .op-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .op-table {
+        font-size: 12px;
+    }
+
+    .op-input-edit {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .op-add-operario {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .op-add-operario input {
+        font-size: 12px;
+        padding: 8px 12px;
+        min-width: 120px;
+    }
+
+    .op-add-operario button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .op-select-custom {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .count-badge {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+
+    .op-machine-item {
+        padding: 12px;
+    }
+
+    .op-machine-item label {
+        font-size: 10px;
+    }
+
+    .rotacion-buttons {
+        flex-wrap: wrap;
+    }
+
+    .btn-rotar,
+    .btn-reset {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .preview-rotacion-title h4 {
+        font-size: 11px;
+    }
+
+    .preview-rotacion-title span {
+        font-size: 16px;
+    }
+
+    .semanas-rotadas-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+    }
+
+    .especiales-card {
+        margin-top: 16px;
+    }
+
+    .operario-activo {
+        font-size: 12px;
+    }
+
+    .info-box2 {
+        font-size: 11px;
+        padding: 10px;
+    }
+
+    .op-nav-sub-btn {
+        font-size: 12px;
+        padding: 8px 12px 8px 20px;
+    }
+}
+
+/* ⭐ PANTALLAS MUY PEQUEÑAS (< 480px) */
+@media (max-width: 480px) {
+    .op-main-content {
+        padding: 12px;
     }
 
     .op-title-group h1 {
@@ -1415,4 +1152,113 @@
     .op-title-group p {
         font-size: 11px !important;
     }
+
+    .op-card {
+        padding: 12px;
+    }
+
+    .op-table th,
+    .op-table td {
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+
+    .op-input-edit {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .op-add-operario input {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .op-add-operario button {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .op-select-custom {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .preview-rotacion-table th,
+    .preview-rotacion-table td {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .btn-rotar,
+    .btn-reset {
+        font-size: 10px;
+        padding: 5px 10px;
+    }
+
+    .op-machine-item {
+        padding: 10px;
+    }
+
+    .card-header-flex {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .op-card-title {
+        font-size: 10px;
+    }
+
+    .count-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+    }
+
+    .op-nav-sub-btn {
+        font-size: 11px;
+        padding: 6px 10px 6px 16px;
+    }
 }
+
+/* ⭐ TABLETS (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .op-main-content {
+        padding: 24px 32px;
+    }
+
+    .op-title-group h1 {
+        font-size: 24px;
+    }
+
+    .op-workspace.with-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+/* ============================================
+   SIDEBAR OVERLAY - ESTILOS COMPLETOS   <--- ELIMINA ESTA SECCIÓN COMPLETA
+   ============================================ */
+
+/* ⭐ SIDEBAR OVERLAY - ESTILOS PRINCIPALES */
+.op-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    max-width: 85vw;
+    background: var(--op-sidebar-bg, linear-gradient(180deg, #140926 0%, #1a0f2e 100%));
+    border-right: 1px solid var(--op-sidebar-border, rgba(156, 39, 176, 0.2));
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    box-shadow: none;
+}
+

@@ -235,7 +235,6 @@
 /* ============================================
    RESET GLOBAL
    ============================================ */
-
 * {
     margin: 0;
     padding: 0;
@@ -245,7 +244,6 @@
 /* ============================================
    CONTENEDOR PRINCIPAL
    ============================================ */
-
 .op-screen-container {
     height: 100vh;
     width: 100vw;
@@ -268,7 +266,6 @@
 /* ============================================
    MAIN CONTENT
    ============================================ */
-
 .op-main-content {
     flex-grow: 1;
     padding: 32px 48px;
@@ -322,7 +319,6 @@
 /* ============================================
    WORKSPACE GRID
    ============================================ */
-
 .op-workspace {
     display: grid;
     grid-template-columns: 1fr;
@@ -337,7 +333,6 @@
 /* ============================================
    CARDS MODERNAS
    ============================================ */
-
 .op-card {
     background: var(--op-card-bg);
     backdrop-filter: blur(12px);
@@ -382,7 +377,6 @@
 /* ============================================
    TABLA MODERNA
    ============================================ */
-
 .op-table-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -447,7 +441,6 @@
 /* ============================================
    FORMULARIOS DE AGREGAR
    ============================================ */
-
 .op-add-operario {
     display: flex;
     gap: 12px;
@@ -496,7 +489,6 @@
 /* ============================================
    VISTA PREVIA DE ROTACIÓN
    ============================================ */
-
 .preview-rotacion-section {
     margin-top: 24px;
     padding-top: 20px;
@@ -569,7 +561,6 @@
 /* ============================================
    MAQUINARIA PANEL
    ============================================ */
-
 .card-desc {
     color: var(--op-card-desc);
     font-size: 13px;
@@ -657,7 +648,6 @@
 /* ============================================
    BOTONES DE ROTACIÓN
    ============================================ */
-
 .rotacion-buttons {
     display: flex;
     gap: 10px;
@@ -711,7 +701,6 @@
 /* ============================================
    TOAST NOTIFICATIONS
    ============================================ */
-
 .op-toast {
     position: fixed;
     top: 24px;
@@ -745,7 +734,6 @@
 /* ============================================
    BOTONES DE ACCIÓN
    ============================================ */
-
 .op-action-btn.delete {
     background: var(--op-action-delete-bg);
     border: none;
@@ -766,7 +754,6 @@
 /* ============================================
    ESTILOS PARA OPERARIOS ESPECIALES
    ============================================ */
-
 .especiales-card {
     margin-top: 24px;
     border: 1px solid var(--op-especiales-border);
@@ -816,7 +803,6 @@
 /* ============================================
    SUBMENÚ DE VINÍLICAS
    ============================================ */
-
 .op-nav-sub-btn {
     width: 100%;
     background: transparent;
@@ -861,7 +847,6 @@
 /* ============================================
    ESTILOS PARA NUEVOS PUESTOS
    ============================================ */
-
 .op-puesto-tag.envasador {
     background: rgba(0, 200, 255, 0.15);
     color: #00c8ff;
@@ -877,7 +862,6 @@
 /* ============================================
    MODAL DE VACACIONES
    ============================================ */
-
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1017,132 +1001,9 @@
 /* ⭐ MÓVILES - SIDEBAR OCULTO CON HAMBURGUESA */
 @media (max-width: 768px) {
     .op-main-content {
-        padding: 16px;
+        padding: 10px;
         margin-left: 0 !important;
         width: 100% !important;
-    }
-
-    .op-title-group h1 {
-        font-size: 20px !important;
-    }
-
-    .op-title-group p {
-        font-size: 12px !important;
-    }
-
-    .op-title-group {
-        gap: 8px;
-    }
-
-    .op-card {
-        padding: 16px;
-    }
-
-    .op-card-title {
-        font-size: 11px;
-    }
-
-    .preview-rotacion-table th,
-    .preview-rotacion-table td {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-
-    .op-table th,
-    .op-table td {
-        padding: 8px 6px;
-        font-size: 12px;
-    }
-
-    .op-table {
-        font-size: 12px;
-    }
-
-    .op-input-edit {
-        font-size: 12px;
-        padding: 6px 10px;
-    }
-
-    .op-add-operario {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .op-add-operario input {
-        font-size: 12px;
-        padding: 8px 12px;
-        min-width: 120px;
-    }
-
-    .op-add-operario button {
-        font-size: 12px;
-        padding: 8px 16px;
-    }
-
-    .op-select-custom {
-        font-size: 12px;
-        padding: 8px 12px;
-    }
-
-    .count-badge {
-        font-size: 10px;
-        padding: 2px 10px;
-    }
-
-    .op-machine-item {
-        padding: 12px;
-    }
-
-    .op-machine-item label {
-        font-size: 10px;
-    }
-
-    .rotacion-buttons {
-        flex-wrap: wrap;
-    }
-
-    .btn-rotar,
-    .btn-reset {
-        font-size: 11px;
-        padding: 6px 12px;
-    }
-
-    .preview-rotacion-title h4 {
-        font-size: 11px;
-    }
-
-    .preview-rotacion-title span {
-        font-size: 16px;
-    }
-
-    .semanas-rotadas-badge {
-        font-size: 10px;
-        padding: 2px 8px;
-    }
-
-    .especiales-card {
-        margin-top: 16px;
-    }
-
-    .operario-activo {
-        font-size: 12px;
-    }
-
-    .info-box2 {
-        font-size: 11px;
-        padding: 10px;
-    }
-
-    .op-nav-sub-btn {
-        font-size: 12px;
-        padding: 8px 12px 8px 20px;
-    }
-}
-
-/* ⭐ PANTALLAS MUY PEQUEÑAS (< 480px) */
-@media (max-width: 480px) {
-    .op-main-content {
-        padding: 12px;
     }
 
     .op-title-group h1 {
@@ -1150,115 +1011,463 @@
     }
 
     .op-title-group p {
-        font-size: 11px !important;
+        font-size: 10px !important;
+    }
+
+    .op-title-group {
+        gap: 4px;
     }
 
     .op-card {
-        padding: 12px;
-    }
-
-    .op-table th,
-    .op-table td {
-        padding: 6px 4px;
-        font-size: 11px;
-    }
-
-    .op-input-edit {
-        font-size: 11px;
-        padding: 4px 8px;
-    }
-
-    .op-add-operario input {
-        font-size: 11px;
-        padding: 6px 10px;
-    }
-
-    .op-add-operario button {
-        font-size: 11px;
-        padding: 6px 12px;
-    }
-
-    .op-select-custom {
-        font-size: 11px;
-        padding: 6px 10px;
-    }
-
-    .preview-rotacion-table th,
-    .preview-rotacion-table td {
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-
-    .btn-rotar,
-    .btn-reset {
-        font-size: 10px;
-        padding: 5px 10px;
-    }
-
-    .op-machine-item {
-        padding: 10px;
+        padding: 10px !important;
+        border-radius: 12px !important;
     }
 
     .card-header-flex {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 4px !important;
+        margin-bottom: 6px !important;
     }
 
     .op-card-title {
-        font-size: 10px;
+        font-size: 8px !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .drag-hint {
+        font-size: 6px !important;
+        display: inline-block !important;
+        margin-left: 2px !important;
+        opacity: 0.6;
+    }
+
+    .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px !important;
+        align-items: center;
     }
 
     .count-badge {
-        font-size: 9px;
-        padding: 2px 8px;
+        font-size: 6px !important;
+        padding: 1px 5px !important;
+        border-radius: 8px !important;
     }
 
-    .op-nav-sub-btn {
-        font-size: 11px;
-        padding: 6px 10px 6px 16px;
+    .vacaciones-badge {
+        font-size: 6px !important;
+        padding: 1px 5px !important;
+        margin-left: 0 !important;
+        border-radius: 8px !important;
+    }
+
+    /* ⭐ TABLA - MUY COMPACTA */
+    .op-table-wrapper {
+        overflow: visible;
+    }
+
+    .op-table {
+        font-size: 7px !important;
+        min-width: auto !important;
+        width: 100%;
+    }
+
+    .op-table th {
+        font-size: 5.5px !important;
+        padding: 2px 2px !important;
+        letter-spacing: 0.3px !important;
+        text-transform: uppercase;
+        white-space: nowrap;
+        font-weight: 700;
+    }
+
+    .op-table td {
+        padding: 2px 2px !important;
+        font-size: 6.5px !important;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.2;
+    }
+
+    .op-table .drag-handle {
+        font-size: 8px !important;
+        width: 14px !important;
+        padding: 1px !important;
+        text-align: center !important;
+    }
+
+    .op-input-edit {
+        font-size: 6px !important;
+        padding: 1px 2px !important;
+        min-width: 25px !important;
+        max-width: 45px !important;
+        border-radius: 3px !important;
+        height: 15px !important;
+    }
+
+    .limite-input {
+        width: 18px !important;
+        font-size: 6px !important;
+        padding: 1px 1px !important;
+        border-radius: 3px !important;
+        height: 13px !important;
+    }
+
+    .limite-input + span {
+        font-size: 5.5px !important;
+        margin-left: 1px !important;
+    }
+
+    .op-puesto-tag {
+        font-size: 5.5px !important;
+        padding: 1px 3px !important;
+        border-radius: 3px !important;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        font-size: 5px !important;
+        padding: 0px 3px !important;
+        border-radius: 6px !important;
+        white-space: nowrap;
+    }
+
+    .op-action-btn {
+        font-size: 8px !important;
+        padding: 1px 2px !important;
+        border-radius: 3px !important;
+    }
+
+    .op-action-btn.vacation {
+        font-size: 8px !important;
+        padding: 1px 2px !important;
+    }
+
+    .op-action-btn.delete {
+        font-size: 8px !important;
+        padding: 1px 2px !important;
+    }
+
+    .vacation-badge {
+        font-size: 5px !important;
+        padding: 0px 3px !important;
+        border-radius: 4px !important;
+    }
+
+    /* ⭐ FORMULARIO DE AGREGAR */
+    .op-add-operario {
+        flex-wrap: wrap;
+        gap: 3px !important;
+        padding-top: 6px !important;
+        margin-top: 6px !important;
+    }
+
+    .op-add-operario input {
+        font-size: 7px !important;
+        padding: 2px 5px !important;
+        min-width: 50px !important;
+        flex: 1;
+        border-radius: 4px !important;
+        height: 20px !important;
+    }
+
+    .op-add-operario button {
+        font-size: 7px !important;
+        padding: 2px 6px !important;
+        white-space: nowrap;
+        border-radius: 4px !important;
+        height: 20px !important;
+    }
+
+    /* ⭐ VISTA PREVIA DE ROTACIÓN */
+    .preview-rotacion-section {
+        margin-top: 6px !important;
+        padding-top: 6px !important;
+    }
+
+    .preview-rotacion-title {
+        gap: 3px !important;
+        margin-bottom: 4px !important;
+        flex-wrap: wrap;
+    }
+
+    .preview-rotacion-title h4 {
+        font-size: 7px !important;
+        letter-spacing: 0.3px !important;
+        margin: 0 !important;
+    }
+
+    .preview-rotacion-title span {
+        font-size: 8px !important;
+    }
+
+    .semanas-rotadas-badge {
+        font-size: 6px !important;
+        padding: 1px 4px !important;
+    }
+
+    .preview-rotacion-table {
+        font-size: 6px !important;
+        border-radius: 4px !important;
+    }
+
+    .preview-rotacion-table th {
+        font-size: 5.5px !important;
+        padding: 2px 3px !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .preview-rotacion-table td {
+        font-size: 6px !important;
+        padding: 2px 3px !important;
+    }
+
+    .preview-rotacion-table td.next-week {
+        font-size: 6px !important;
+    }
+
+    /* ⭐ CONFIGURACIÓN BASE */
+    .op-machine-item {
+        padding: 3px 6px !important;
+        margin-bottom: 3px !important;
+        border-radius: 4px !important;
+    }
+
+    .machine-label-group {
+        gap: 2px !important;
+        font-size: 6px !important;
+        margin-bottom: 2px !important;
+        flex-wrap: wrap;
+    }
+
+    .machine-id {
+        font-size: 5px !important;
+        padding: 1px 3px !important;
+        border-radius: 2px !important;
+    }
+
+    .op-machine-item label {
+        font-size: 6px !important;
+        letter-spacing: 0.2px !important;
+    }
+
+    .orden-indicador {
+        font-size: 5px !important;
+        opacity: 0.5;
+    }
+
+    .op-select-custom {
+        font-size: 6px !important;
+        padding: 1px 3px !important;
+        border-radius: 3px !important;
+        height: 18px !important;
+    }
+
+    .rotacion-buttons {
+        gap: 2px !important;
+        flex-wrap: wrap;
+    }
+
+    .btn-rotar,
+    .btn-reset {
+        font-size: 6px !important;
+        padding: 2px 5px !important;
+        border-radius: 3px !important;
+        height: 18px !important;
+    }
+
+    .card-desc {
+        font-size: 6.5px !important;
+        margin-bottom: 4px !important;
+        opacity: 0.6;
+    }
+
+    .info-box2 {
+        font-size: 6px !important;
+        padding: 4px !important;
+        border-radius: 4px !important;
+    }
+
+    .op-card.machinery-card {
+        margin-top: 0 !important;
+        font-size: 6px !important;
+        right: 0 !important;
+    }
+
+    .operario-activo {
+        font-size: 7px !important;
+        padding: 1px 4px !important;
+    }
+}
+
+/* ⭐ PANTALLAS MUY PEQUEÑAS (hasta 480px) */
+@media (max-width: 480px) {
+    .op-main-content {
+        padding: 6px !important;
+    }
+
+    .op-title-group h1 {
+        font-size: 13px !important;
+    }
+
+    .op-title-group p {
+        font-size: 8px !important;
+    }
+
+    .op-card {
+        padding: 6px !important;
+        border-radius: 8px !important;
+    }
+
+    .op-card-title {
+        font-size: 7px !important;
+    }
+
+    .drag-hint {
+        font-size: 5px !important;
+    }
+
+    .count-badge {
+        font-size: 5px !important;
+        padding: 1px 3px !important;
+    }
+
+    .vacaciones-badge {
+        font-size: 5px !important;
+        padding: 1px 3px !important;
+    }
+
+    .op-table th {
+        font-size: 4.5px !important;
+        padding: 1.5px 1px !important;
+    }
+
+    .op-table td {
+        font-size: 5.5px !important;
+        padding: 1.5px 1px !important;
+    }
+
+    .op-input-edit {
+        font-size: 5px !important;
+        padding: 1px 1.5px !important;
+        min-width: 20px !important;
+        max-width: 35px !important;
+        height: 12px !important;
+    }
+
+    .limite-input {
+        width: 14px !important;
+        font-size: 5px !important;
+        padding: 0px 1px !important;
+        height: 11px !important;
+    }
+
+    .limite-input + span {
+        font-size: 4.5px !important;
+    }
+
+    .op-puesto-tag {
+        font-size: 4.5px !important;
+        padding: 0px 2px !important;
+    }
+
+    .status-badge {
+        font-size: 4px !important;
+        padding: 0px 2px !important;
+        border-radius: 4px !important;
+    }
+
+    .op-action-btn {
+        font-size: 6px !important;
+        padding: 1px 2px !important;
+    }
+
+    .op-add-operario input {
+        font-size: 6px !important;
+        padding: 2px 3px !important;
+        min-width: 40px !important;
+        height: 16px !important;
+    }
+
+    .op-add-operario button {
+        font-size: 6px !important;
+        padding: 2px 4px !important;
+        height: 16px !important;
+    }
+
+    .preview-rotacion-table th,
+    .preview-rotacion-table td {
+        font-size: 5px !important;
+        padding: 2px 2px !important;
+    }
+
+    .btn-rotar,
+    .btn-reset {
+        font-size: 5.5px !important;
+        padding: 1px 3px !important;
+        height: 14px !important;
+    }
+
+    .op-machine-item {
+        padding: 2px 4px !important;
+    }
+
+    .machine-label-group {
+        font-size: 5px !important;
+    }
+
+    .op-select-custom {
+        font-size: 5px !important;
+        padding: 1px 2px !important;
+        height: 14px !important;
+    }
+
+    .op-card.machinery-card {
+        font-size: 5px !important;
     }
 }
 
 /* ⭐ TABLETS (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
     .op-main-content {
-        padding: 24px 32px;
+        padding: 20px 24px;
     }
 
     .op-title-group h1 {
         font-size: 24px;
     }
 
-    .op-workspace.with-sidebar {
-        grid-template-columns: 1fr;
+    .op-title-group p {
+        font-size: 13px;
+    }
+
+    .op-card {
+        padding: 18px;
+    }
+
+    .op-table th,
+    .op-table td {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+
+    .op-input-edit {
+        font-size: 12px;
+        padding: 4px 6px;
+    }
+
+    .op-card-title {
+        font-size: 11px;
+    }
+
+    .count-badge {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+
+    .btn-rotar,
+    .btn-reset {
+        font-size: 11px;
+        padding: 6px 12px;
     }
 }
-
-
-
-/* ============================================
-   SIDEBAR OVERLAY - ESTILOS COMPLETOS   <--- ELIMINA ESTA SECCIÓN COMPLETA
-   ============================================ */
-
-/* ⭐ SIDEBAR OVERLAY - ESTILOS PRINCIPALES */
-.op-sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 280px;
-    max-width: 85vw;
-    background: var(--op-sidebar-bg, linear-gradient(180deg, #140926 0%, #1a0f2e 100%));
-    border-right: 1px solid var(--op-sidebar-border, rgba(156, 39, 176, 0.2));
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    box-shadow: none;
-}
-
